@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: subst.tcl,v 1.2 2002/08/15 13:13:30 coldstore Exp $
+# RCS: @(#) $Id: subst.tcl,v 1.3 2003/06/26 17:47:28 welch Exp $
 
 package provide httpd::subst 1.0
 
@@ -173,7 +173,7 @@ proc Doc_application/x-tcl-auth {path suffix sock} {
 
     set data(proto) GET
 
-    Doc_application/x-tcl-subst
+    Doc_application/x-tcl-subst $path $suffix $sock
 }
 
 # Doc_application/x-tcl-subst --
