@@ -6,7 +6,10 @@
 
 [html::h2 {Temporary Application Links}]
 
-[html::minorList {{Report A Bug} report.tml}]
+[html::minorList {
+    {Report A Bug} report.tml
+    {List All Bugs} bug-list.tml
+}]
 
 [html::h2 {Support Libraries}]
 
