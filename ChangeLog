@@ -1,3 +1,13 @@
+2002-08-18  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch)
+        * Applied patches for virtual hosting fixes from Don Porter
+          that allow virtual hosts to share an interpreter, which is
+          useful if they are just name aliases for each other.
+        * Applied patches from Dave Weldon that fix references to
+          scriptics.com in the online docs.
+        * Fixes to DIST and Makefile.boot to get the bundled distribution
+          to start working.
+
 2002-08-03  Brent Welch <welch@panasas.com>
         * Added support for If-Modified-Since header and the
           304 Not Modified return code (contributed by Brian Meagher)

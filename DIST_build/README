@@ -5,14 +5,14 @@ If you already have tcl 8.3 installed, then you can probably
 run the Tcl Web Server directly from this distribtuion without
 doing any installation steps:
 
-cd tclhttpd3.3/bin
+cd tclhttpd3.4/bin
 tclsh8.3 httpd.tcl -port 8001 -debug 1
 
 If you get complaints about missing the Standard Tcl Library,
 then you can install just that by running the install.sh script
 in the tcllib1.0 directory.
 
-If you want a clean install of everything, including a Tcl 8.3.2
+If you want a clean install of everything, including a Tcl 8.3.4
 that has thread enabled, then use the Makefile in the top-level directory.
 This will compile things under the build directory, segregating
 by platform into different subdirectories.

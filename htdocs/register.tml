@@ -1,6 +1,6 @@
 [mypage::header "Tcl Web Server Registration"]
 
-<form action="http://www.scriptics.com/mail/forminfo" method="POST">
+<form action="http://www.tcl.tk/mail/forminfo" method="POST">
 <input type="hidden" name="product" value="WebServer">
 <input type="hidden" name="version" value="$Httpd(server)">
 <input type="hidden" name="sendto" value="welch@acm.org">
@@ -33,9 +33,9 @@ For more general comments, please send email to
 <a href=mailto:welch@acm.org>welch@acm.org</a>.
 There is also a mailing list for users of the Tcl Web Server.
 You can join this list by
-sending email to 
-[html::mailto tcl-httpd-request@scriptics.com subscribe].
-Send mail to the list at [html::mailto tcl-httpd@scriptics.com]
+visiting
+<a href="http://lists.sourceforge.net/mailman/listinfo/tclhttpd-users">http://lists.sourceforge.net/mailman/listinfo/tclhttpd-users</a>.
+Send mail to the list at [html::mailto tclhttpd-users@lists.sourceforge.net]
 <p>
 [html::submit Register]
 <br>

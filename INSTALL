@@ -33,7 +33,7 @@ stop the server.
 2. Install Tcl Standard Library
 
 If approach #1 doesn't work because you don't have the Standard Tcl Library,
-then either fetch it from ftp://ftp.scriptics.com/pub/tcl/tcllib
+then either fetch it from ftp://www.tcl.tk/pub/tcl/tcllib
 or use the one that comes with the "bundled TclHttpd" distribution.
 Grab the highest version number one you can find in:
 

@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.69 2002/08/04 06:03:35 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.69.2.1 2002/08/18 22:54:17 welch Exp $
 
 package provide httpd 1.6
 
@@ -222,30 +222,37 @@ proc Httpd_ServerShutdown {} {
 }
 
 proc Httpd_VirtualHost {host file} {
+    return [Httpd_VirtualHosts [list $host] $file]
+}
+
+proc Httpd_VirtualHosts {hostNames file} {
     variable virtual
-    set host [string tolower $host]
-    if {[info exists virtual($host)]} {
-	error "Virtual host $host already exists"
+
+    foreach host $hostNames {
+        set host [string tolower $host]
+        if {[info exists virtual($host)]} {
+	    error "Virtual host $host already exists"
+        }
     }
-    set virtual($host) [interp create]
+    set slave [interp create]
 
     # Transfer the scalar global variables
     foreach var {::v ::auto_path} {
-	$virtual($host) eval [list set $var [set $var]]
+	$slave eval [list set $var [set $var]]
     }
     # Transfer the array global variables
     foreach arr {::Config ::Httpd} {
-	$virtual($host) eval [list array set $arr [array get $arr]]
+	$slave eval [list array set $arr [array get $arr]]
     }
-    $virtual(host) eval [list array set ::Httpd [list name $host]]
+    $slave eval [list array set ::Httpd [list name $host]]
     # Load the packages
-    $virtual($host) eval package require httpd [package provide httpd]
+    $slave eval package require httpd [package provide httpd]
     foreach pkg {version utils counter config} {
-	$virtual($host) eval \
+	$slave eval \
 		package require httpd::$pkg [package provide httpd::$pkg]
     }
-    $virtual($host) eval [list array set Config [list config $file host $host]]
-    $virtual($host) eval {
+    $slave eval [list array set Config [list config $file host $host]]
+    $slave eval {
 	config::init $Config(config) Config
 	namespace import config::cget
 
@@ -271,6 +278,11 @@ proc Httpd_VirtualHost {host file} {
 	Log_SetFile		[cget LogFile]$Config(port)_
 	Log_FlushMinutes	[cget LogFlushMinutes]
 	Log_Flush
+    }
+
+    foreach host $hostNames {
+        set host [string tolower $host]
+	set virtual($host) $slave
     }
 
 }

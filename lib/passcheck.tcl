@@ -12,7 +12,7 @@ namespace eval passcheck { }
 # 
 # 
 # Provides password checking against various systems.
-# Useful with TCLHTTPD server, available from http://www.scriptics.com
+# Useful with TCLHTTPD server, available from http://www.tcl.tk/
 #
 # The purpose is to avoid maintaining duplicate password tables
 # for tclhttpd, and re-use instead existing systems available in your local net.
