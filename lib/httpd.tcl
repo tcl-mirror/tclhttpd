@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.81 2003/10/27 01:10:51 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.82 2003/12/28 03:52:36 coldstore Exp $
 
 package provide httpd 1.6
 
@@ -1127,7 +1127,7 @@ proc HttpdDoCallback {sock {errmsg {}}} {
 #	sock	handle on the connection
 #	args	a list of header value ...
 
-proc Http_AddHeaders {sock args} {
+proc Httpd_AddHeaders {sock args} {
     upvar #0 Httpd$sock data
 
     eval lappend data(headers) $args
@@ -1141,7 +1141,7 @@ proc Http_AddHeaders {sock args} {
 #	sock	handle on the connection
 #	pattern	glob pattern to match agains cookies.
 
-proc Http_RemoveHeaders {sock {pattern *}} {
+proc Httpd_RemoveHeaders {sock {pattern *}} {
     upvar #0 Httpd$sock data
     if {[info exists data(headers)] && $data(headers) != {}} {
         set tmp {}
@@ -1162,9 +1162,9 @@ proc Http_RemoveHeaders {sock {pattern *}} {
 # Arguments:
 #	sock	handle on the connection
 
-proc Http_NoCache {sock} {
-    Http_RemoveHeaders $sock Cache-Control
-    Http_AddHeaders $sock Cache-Control no-cache
+proc Httpd_NoCache {sock} {
+    Httpd_RemoveHeaders $sock Cache-Control
+    Httpd_AddHeaders $sock Cache-Control no-cache
 }
 
 # Httpd_Refresh
@@ -1176,12 +1176,12 @@ proc Http_NoCache {sock} {
 #	time	time in seconds before refresh
 #	url	optional: url to refresh to
 
-proc Http_Refresh {sock time {url ""}} {
-    Http_RemoveHeaders $sock Cache-Control
+proc Httpd_Refresh {sock time {url ""}} {
+    Httpd_RemoveHeaders $sock Cache-Control
     if {$url == ""} {
-	Http_AddHeaders $sock Refresh $time
+	Httpd_AddHeaders $sock Refresh $time
     } else {
-	Http_AddHeaders $sock Refresh ${time}\;url=${url}
+	Httpd_AddHeaders $sock Refresh ${time}\;url=${url}
     }
 }
 
