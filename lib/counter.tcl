@@ -15,7 +15,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: counter.tcl,v 1.13 2000/10/03 03:51:45 welch Exp $
+# RCS: @(#) $Id: counter.tcl,v 1.14 2000/10/20 17:51:26 welch Exp $
 
 # Layer ourselves on top of the Standard Tcl Library counter package.
 
@@ -24,7 +24,6 @@ package provide httpd::counter 2.0
 
 proc Counter_Init {{secsPerMinute 60}} {
     global counter
-    global counterTags
     if {[info exists counter]} {
 	unset counter
     }
@@ -37,13 +36,11 @@ proc Counter_Init {{secsPerMinute 60}} {
 
     # urlhits is the number of requests serviced.
 
-    set counterTags(urlhits) 1
     counter::init urlhits -timehist $secsPerMinute
 
     # This start/stop timer is used for connection service times.
     # The linear histogram has buckets of 5 msec.
 
-    set counterTags(serviceTime) 1
     counter::init serviceTime -hist 0.005
 
     # This log-scale histogram multiplies the seconds time by
@@ -59,7 +56,6 @@ proc Counter_Init {{secsPerMinute 60}} {
 
     foreach g {domainHit hit notfound error} {
 	counter::init $g -group $g
-	set counterTags($g) 1
     }
 
     # These are simple counters about each kind of connection event
@@ -67,7 +63,6 @@ proc Counter_Init {{secsPerMinute 60}} {
     foreach c {accepts sockets connections urlreply keepalive connclose 
 		http1.0 http1.1} {
 	counter::init $c
-	set counterTags($c) 1
     }
     Httpd_RegisterShutdown Counter_CheckPoint
 }
@@ -88,8 +83,7 @@ proc Counter_CheckPoint {} {
 }
 
 proc Count {what {delta 1}} {
-    global counterTags
-    if {![info exist counterTags($what)]} {
+    if {![counter::exists $what]} {
 	counter::init $what
     }
     counter::count $what $delta

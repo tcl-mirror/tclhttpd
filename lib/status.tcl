@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.23 2000/10/03 03:51:45 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.24 2000/10/20 17:51:26 welch Exp $
 
 package provide httpd::status 1.0
 
@@ -477,13 +477,16 @@ proc StatusTable {} {
 	    Status	"Status"
 	    } {
 	if {[counter::exists $c]} {
-	    append html "<tr><td>$label</td><td>[counter::get $c -total]</td>\n"
-	    set hit 1
-	    set resetDate [counter::get $c -resetDate]
-	    if {[string length $resetDate]} {
-		append html "<td>[clock format $resetDate -format "%B %d, %Y"]</td>"
+	    set t [counter::get $c -total]
+	    if {$t > 0} {
+		append html "<tr><td>$label</td><td>$t</td>\n"
+		set hit 1
+		set resetDate [counter::get $c -resetDate]
+		if {[string length $resetDate]} {
+		    append html "<td>[clock format $resetDate -format "%B %d, %Y"]</td>"
+		}
+		append html </tr>\n
 	    }
-	    append html </tr>\n
 	}
     }
     if {!$hit} {

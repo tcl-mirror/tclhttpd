@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.65 2000/10/18 23:30:11 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.66 2000/10/20 17:51:26 welch Exp $
 
 package provide httpd 1.5
 
@@ -198,7 +198,6 @@ proc Httpd_Server {{port 80} {name {}} {ipaddr {}}} {
     if {[catch $cmd Httpd(listen)]} {
         return -code error "$Httpd(name):$port $Httpd(listen)\ncmd=$cmd"
     }
-    Counter_Reset accepts
 }
 
 # Httpd_SecureServer --
@@ -247,7 +246,6 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
     if {[catch $cmd Httpd(https_listen)]} {
         return -code error "$Httpd(name):$port $Httpd(https_listen)\ncmd=$cmd"
     }
-    Counter_Reset accepts
 }
 
 # Httpd_Shutdown --
