@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: template.tcl,v 1.13 2004/06/12 04:48:48 coldstore Exp $
+# RCS: @(#) $Id: template.tcl,v 1.14 2004/06/13 09:50:13 coldstore Exp $
 
 package provide httpd::template 1.0
 
@@ -394,6 +394,7 @@ proc TemplateCheck {sock template htmlfile} {
 #	data(contentType) contains the mime type of generated content.
 
 proc Template_Try {sock path prefix suffix} {
+    upvar #0 Httpd$sock data
     global Template
 
     if {!$Template(checkTemplates)} {
