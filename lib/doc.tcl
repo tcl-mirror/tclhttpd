@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.57 2004/09/05 05:10:13 coldstore Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.58 2004/10/22 08:32:56 coldstore Exp $
 
 package require uri
 
@@ -455,7 +455,7 @@ proc Doc_Handle {prefix path suffix sock} {
     # otherwise we leave it Cgi to try to satisfy the request
 
     # Look for a fresh template which generates the desired path
-    if {[Template_Try $sock $path $prefix $suffix]} {
+    if {[Template_Try $sock $path $suffix]} {
 	# template has handled the request
 	return 1
     }

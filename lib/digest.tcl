@@ -26,7 +26,6 @@ if {[catch {package require Random}]} {
 } else {
     # use http://mini.net/tcl/random
     # cvs -d:pserver:anonymous@cvs.tclsoap.sourceforge.net:/cvsroot/tclsoap co Random
-
     # generate a random seed
     if {[catch {
 	# try for hardware support
@@ -36,11 +35,11 @@ if {[catch {package require Random}]} {
     }]} {
 	set seed [clock clicks]
     }
-    ::isaac::isaac seed $seed	;# seed random
+    ::random::isaac seed $seed	;# seed random
 
     # get an integer secret
     proc DigestRand {} {
-	return [::isaac::isaac integer]
+	return [::random::isaac integer]
     }
 }
 set DigestSecret [DigestRand]
