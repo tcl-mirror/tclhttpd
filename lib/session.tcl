@@ -40,7 +40,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.13 2004/09/05 05:10:14 coldstore Exp $
+# RCS: @(#) $Id: session.tcl,v 1.14 2004/09/16 04:54:46 coldstore Exp $
 
 package provide httpd::session 1.0
 
@@ -171,8 +171,8 @@ proc SessionTypeAliases {interp id type} {
 
     interp alias $interp session {} Session_Session $id
     interp alias $interp sequence {} Session_Sequence $id
-    interp alias $interp group {} Session_Variable $id group
-    interp alias $interp value {} Session_Value $id
+    interp alias $interp group {} Session_Value $id group
+    interp alias $interp value {} Session_Variable $id
 
     return $id
 }
@@ -311,8 +311,8 @@ proc Session_Save {id} {
     puts $fd [array get session]
 
     # add Self Vars
-    set vars {}
-    set arrays {}
+    set vars ""
+    set arrays ""
     foreach sv [interp eval $session(interp) info vars] {
 	switch -regexp -- $sv {
 	    tcl_* -
@@ -322,17 +322,17 @@ proc Session_Save {id} {
 	    arg[cv] -
 	    auto_* {}
 	    default {
-		if {[array exists $sv]} {
-		    lappend arrays $sv [interp eval $session(interp) array get $sv]
+		if {[interp eval $session(interp) array exists $sv]} {
+		    append arrays "array set $sv [list [interp eval $session(interp) array get $sv]]" \n
 		} else {
-		    lappend vars $sv [interp eval $session(interp) set $sv]
+		    append vars "set $sv [list [interp eval $session(interp) set $sv]]" \n
 		}
 	    }
 	}
     }
     puts $fd $vars
     puts $fd $arrays
-	
+
     close $fd
 }
 
@@ -377,18 +377,16 @@ proc Session_Match {querylist {type {}} {error_name error} {isSafe 1}} {
 	if {[file exists $sfile]} {
 	    # open a session save file, read state
 	    set fd [open $sfile r]
-	    foreach {type isSafe sarray vars arrays} [split [read $fd] \n] break
+	    set type [gets $fd]
+	    set isSafe [gets $fd]
+	    set sarray [gets $fd]
+	    set script [read $fd]
 	    close $fd
 
 	    # create the interpreter
 	    Session_CreateWithID $type $id $isSafe
 	    array set session $sarray	;# set session vars
-	    foreach {var val} $vars {
-		interp eval $session(interp) [list set $var $val]
-	    }
-	    foreach {var val} $arrays {
-		interp eval $session(interp) [list array set $var $val]
-	    }
+	    interp eval $session(interp) $script
 	} else {
 	    set error "Session: Invalid session id."
 	    return {}
