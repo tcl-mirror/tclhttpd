@@ -2,13 +2,13 @@
 #
 # Create a super distribution of TclHttpd, Tcl, Tcllib, and Thread
 
-HTTPD_VERSION=3.0.3
-HTTPD_TAG=rel-3-0-3
-WIN_VERSION=303
+HTTPD_VERSION=3.0.4
+HTTPD_TAG=rel-3-0-4
+WIN_VERSION=304
 DISTDIR=/home/welch/dist
 SUPER_DIR=${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist
 
-TCL_VERSION=8.3.1
+TCL_VERSION=8.3.2
 TCL_DIST=/home/hobbs/dist/tcl${TCL_VERSION}.tar.gz
 
 TCLLIB_VERSION=0.5

@@ -4,12 +4,12 @@
 
 # These are the packages
 
-TCL_VERSION=8.3.1
+TCL_VERSION=8.3.2
 TCL = tcl$(TCL_VERSION)
 TK = tk$(TCL_VERSION)
 THREAD = thread2.0
 TCLLIB = tcllib0.5
-HTTPD = tclhttpd3.0.3
+HTTPD = tclhttpd3.0.4
 
 # Edit MODULES if you don't want to build something.
 

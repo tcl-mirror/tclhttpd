@@ -1,3 +1,13 @@
+2000-07-18  Brent Welch <welch@scriptics.com>
+
+	* lib/httpd.tcl - Fixed cleanup call to Httpd_GetPostDataAsync
+	* lib/doc.tcl - fixed ~ file name attack on Doc_AddRoot domains
+	* lib/imagemap.tcl - fixed bug caused by unbraced expression
+	* lib/safecgio.tcl - fixed unterminated quote bug.
+	* lib/version.tcl - bumped version to 3.0.4
+	* bin/httpd.tcl - bumped version to 3.0.4
+	* bin/httpdthread.tcl - Added /addroot url to test Doc_AddRoot
+
 2000-06-09  Brent Welch <welch@scriptics.com>
 
 	* Released 3.0.3 - added top-level Makefile for building

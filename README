@@ -4,8 +4,10 @@ Brent is now at Ajuba Solutions, previously known as Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 3.0.3
-Last Modified: Wed May 31 09:53:48 PDT 2000
+Version: 3.0.4
+Last Modified: Wed Jul 19 10:56:14 PDT 2000
+
+QUICK START
 
 It requires Tcl 8.3 and the new Standard Tcl Library.
 This uses the cmdline, base64, ncgi, and html
@@ -38,6 +40,10 @@ and use its configure, make, and make install scripts.
 For a complete set of command line options, do
 httpd.tcl -help
 This lets you set basic parameters like port number and server name.
+
+VERSION SUMMARY
+
+Version 3.0.4 fixes yet-another bug with Doc_AddRoot.
 
 Version 3.0.3 fixes another bug with Doc_AddRoot, and fixes the
 bundled distribution so you can use the Thread extension again.
@@ -77,6 +83,8 @@ You'll need to arrange to have the Tnm*.so library on the
 auto_path for your shell.  I have found that 2.1.5 works
 with 8.0a2, but not with 8.0b1 because Tcl_GetFile has gone.
 
+MAILING LISTS
+
 There is a mailing list for users of the Tcl web server.
 Send a message containing the word "subscribe" to
 tcl-httpd-request@scriptics.com
@@ -89,6 +97,8 @@ tcl-httpd@scriptics.com
 
 Bugs and comments to the mailing list, or to <welch@acm.org>
 Put "httpd" in the subject of the mail so I can sort it automatically.
+
+WWW
 
 The current URL for the distribution can be found in
 ftp://ftp.scriptics.com/pub/tcl/httpd/
