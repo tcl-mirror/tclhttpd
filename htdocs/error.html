@@ -17,7 +17,7 @@ The server encountered an internal error when handling your page.
 [Version]
 <p>
 <form action=/mail/bugreport method=post>
-<input type=hidden name=errorInfo value="[protect_text [Doc_ErrorInfo]">
+<input type=hidden name=errorInfo value="[protect_text [Doc_ErrorInfo]]">
 <input type=hidden name=env value="[protect_text [array get env]]">
 <input type=hidden name=email value=[Doc_Webmaster]>
 <input type=submit value="Submit auto bug report to [Doc_Webmaster]">
@@ -25,7 +25,7 @@ The server encountered an internal error when handling your page.
 <p>
 <p>
 <form action=/debug/errorInfo method=post>
-<input type=hidden name=errorInfo value="[protect_text [Doc_ErrorInfo]">
+<input type=hidden name=errorInfo value="[protect_text [Doc_ErrorInfo]]">
 <input type=hidden name=env value="[protect_text [array get env]]">
 <input type=hidden name=title value="Error Info">
 <input type=submit value="See the error info">
