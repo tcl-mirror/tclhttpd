@@ -1,5 +1,5 @@
 # mail.tcl
-# Crude mail support that only works on systems with /usr/lib/sendmail
+# mail support using tcllib's smtp and mime packages
 #
 # The /mail URL is registered as a direct url that maps to procedures
 # in this file that begin with Mail.
@@ -9,14 +9,78 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: mail.tcl,v 1.11 2000/08/02 07:06:53 welch Exp $
+# RCS: @(#) $Id: mail.tcl,v 1.12 2004/05/06 09:35:07 coldstore Exp $
 
 package provide httpd::mail 1.0
 
-foreach f {/usr/lib/sendmail /usr/sbin/sendmail} {
-    if {[file exists $f]} {
-	set Mail(program) $f
-	break
+# If we have no configured mail server, we can't send mail
+if {![info exists Config(MailServer)] || ($Config(MailServer) == {})} {
+    return
+}
+
+package require smtp
+package require mime
+
+# Mail_Send
+#	Send email to recipients using tcllib's smtp client.
+#
+# Arguments:
+#	recipients	list of email addresses to which to send the mail
+#	subject	subject line for email
+#	from	email address of email sender
+#	type	mime type of body ("text/plain" for normal email)
+#	body	the body of the email
+#
+# Results:
+#	return the tcllib smtp client's return, {} if successful else:
+#	A list indicating which recipients were unacceptable to the SMTP server.
+#	Each element of the list is another list, containing the address,
+#	an SMTP error code, and a textual diagnostic.
+#	
+# Side Effects:
+#	Email is sent to each of the recipients
+
+proc Mail_Send {recipients subject from type body} {
+    global Mail
+
+    set token [mime::initialize -canonical $type -string $body]
+    mime::setheader $token Subject $subject
+
+    set result [smtp::sendmessage $token \
+		    -recipients $recipients \
+		    -originator $from \
+		    -servers $::Config(MailServer)]
+    mime::finalize $token
+    return $result
+}
+
+# Mail_Result
+#	convert tcllib smtp server result to a table suitable for display
+
+proc Mail_Result {mail_err} {
+    set html ""
+    if {$result != {}} {
+	set html <table>
+	foreach el $result {
+	    append html <tr>
+	    foreach {addr errcode diagnostic} $el {
+		append html <th> [protect_text $addr] </th>
+		append html <td> [protect_text $errcode] </td>
+		append html <td> [protect_text $diagnostic] </td>
+	    }
+	    append html </tr>
+	}
+	append html </table>
+    }
+    return $html
+}
+
+proc MailSend {recipients subject from type body} {
+    set result [Mail_Send $recipients $subject $from $type $body]
+    if {$result == ""} {
+	set html "<b>Thank You!</b><br>Mailed report to <b>[protect_text $recipients]</b>"
+    } else {
+	return [Mail_Result $result]
     }
 }
 
@@ -46,8 +110,10 @@ proc Mail/bugreport {email errorInfo args} {
 	}
     }
     append html "</pre>"
-
-    MailInner $email "$Httpd(name):$Httpd(port) error" "" text/html $html
+    if {$email == ""} {
+	set email [Httpd_Webmaster]
+    }
+    MailSend $email "$Httpd(name):$Httpd(port) error" "" text/html $html
 }
 
 # If your form action is /mail/forminfo, then this procedure
@@ -69,7 +135,7 @@ proc Mail/forminfo {sendto subject href label args} {
 	    set from $value
 	}
     }
-    set html [MailInner $sendto $subject $from text/plain $message]
+    set html [MailSend $sendto $subject $from text/plain $message]
     if {[string length $href]} {
 	if {[string length $label] == 0} {
 	    set label Back
@@ -100,33 +166,5 @@ proc Mail/formdata {email subject args} {
     foreach {name value} $args {
 	append message "$name: $value\n"
     }
-    MailInner $email $subject {} text/plain $message
+    MailSend $email $subject {} text/plain $message
 }
-
-proc MailInner {sendto subject from type body} {
-    global tcl_platform Mail
-    set headers  \
-"To: $sendto
-Subject: $subject
-Mime-Version: 1.0
-Content-Type: $type"
-    if {[string length $from]} {
-	append headers "\nFrom: $from"
-    }
-
-    set message "$headers\n\n$body"
-
-    if {[info exists Mail(program)]} {
-	if {[catch {
-	    exec $Mail(program) $sendto << $message
-	} err]} {
-	    Log "" MailError $err
-	} else {
-	    return "<font size=+1><b>Thank You!</font></b><p>Mailed report to <b>$sendto</b>"
-	}
-    } else {
-	Log "" NoMailProgram
-	return "Unable to send mail"
-    }
-}
-
