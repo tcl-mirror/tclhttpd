@@ -1,5 +1,10 @@
 2000-09-25  Brent Welch <welch@ajubasolutions.com>
 
+	* lib/httpd.tcl: Added data(code) back into support logging.
+	* lib/logstd.tcl: Added LogStandardPrint.
+
+2000-09-25  Brent Welch <welch@ajubasolutions.com>
+
 	* bin/httpd.tcl: Changed Log_SetFile call so we append the port
 	to the log file name given in the .rc file.
 	* bin/tclhttpd.rc: Removed use of config port in log file name.
