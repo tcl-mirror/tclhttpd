@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.44 2002/12/03 07:20:30 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.45 2003/04/04 04:50:57 coldstore Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -132,6 +132,7 @@ set Config(docRoot) [file join [file dirname $Config(home)] htdocs]
 set Config(library) [file join [file dirname $Config(home)] htdocs/libtml]
 set Config(main) [file join $Config(home) httpdthread.tcl]
 set Config(debug) 0
+set Config(compat) 3.3
 
 # The configuration bootstrap goes like this:
 # 1) Look on the command line for a -config rcfile name argument
@@ -182,7 +183,8 @@ array set Config [cmdline::getoptions argv [list \
         [list secs.arg          [cget secsPerMinute] {Seconds per "minute" for time-based histograms}] \
         [list threads.arg      [cget threads]      {Number of worker threads (zero for non-threaded)}] \
         [list library.arg      [cget library]      {Directory list where custom packages and auto loads are}] \
-	[list debug.arg	       0	        {If true, start interactive command loop}] \
+        [list debug.arg	       0	        {If true, start interactive command loop}] \
+        [list compat.arg       3.3	        {version compatibility to maintain}] \
     ] \
     "usage: httpd.tcl options:"]
 
@@ -195,6 +197,14 @@ if {$Config(debug)} {
     if {[catch {package require httpd::stdin}]} {
 	puts "No command loop available"
 	set Config(debug) 0
+    }
+}
+
+if {$Config(compat)} {
+    if {[catch {package require httpd::compat}]} {
+	puts stderr "tclhttpd$Config(compat) compatibility mode failed."
+    } else {
+	puts stderr "tclhttpd$Config(compat) compatibility mode enabled."
     }
 }
 
