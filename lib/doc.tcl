@@ -50,6 +50,16 @@ proc Doc_IndexFile {pat} {
 # Set the suffix for templates
 set Doc(tmlSuffix) .tml
 
+# Define a pattern of files names to exclude in DocFallback
+
+proc Doc_ExcludePat {patlist} {
+    global Doc
+    set Doc(excludePat) $patlist
+}
+if ![info exists Doc(excludePat)] {
+    set Doc(excludePat) {*.bak *.swp}
+}
+
 # Allow or disable automatic template checking
 
 proc Doc_CheckTemplates {{how 1}} {
@@ -201,11 +211,15 @@ proc DocDomain {directory sock suffix} {
 
 proc DocFallback {path suffix cookie sock} {
     set root [file root $path]
+    if {[string match */ $root]} {
+	# Input is something like /a/b/.xyz
+	return 0
+    }
     set ok {}
     set accept [DocAccept $sock]
     foreach choice [glob -nocomplain $root.*] {
 	set type [Mtype $choice]
-	if [DocMatch $accept $type] {
+	if {[DocMatch $accept $type] && ![DocExclude $choice]} {
 	    lappend ok $choice
 	}
     }
@@ -219,15 +233,25 @@ proc DocFallback {path suffix cookie sock} {
 	# processed and cached as the .html file.
 	global Doc
 	if {[string compare $Doc(tmlSuffix) [file extension $npath]] == 0} {
-	    # VICIOUS HACK
+	    # More HACKs
 	    if ![Auth_Verify $sock $cookie] {
 		return 1	;# appropriate response already generated
 	    }
 	    Doc_text/html [file root $npath].html $suffix $sock
 	    return 1
 	}
-	# Bypass Url_Handle so this fallback is not cached.
-	DocHandle $npath $suffix $cookie $sock
+	# Redirect so we don't propagate spelling errors like john.osterhoot
+	set new [file extension $npath]
+	set old [file extension $suffix]
+	if {[string length $old] == 0} { 
+	    append suffix $new
+	} else {
+	    regsub $old\$ $suffix $new suffix
+	}
+
+	# This next statement only works if the domain prefix is /
+	Httpd_RedirectSelf /$suffix $sock
+
 	return 1
     }
 }
@@ -250,6 +274,20 @@ proc DocMatch {accept type} {
     }
     return 0
 }
+
+# This is used to filter out files like "foo.bak"  and foo~
+# from the DocFallback failover code
+
+proc DocExclude {name} {
+    global Doc
+    foreach pat $Doc(excludePat) {
+	if {[string match $pat $name]} {
+	    return 1
+	}
+    }
+    return 0
+}
+
 # Choose based first on the order of things in the Accept type list,
 # then on the newest file that matches a given accept pattern.
 
@@ -363,6 +401,9 @@ proc Doc_Error { sock ei } {
     if [info exists data(url)] {
 	Url_UnCache $sock
 	Incr Doc(error,$data(url))
+	set Doc(errorUrl) $data(url)
+    } else {
+	set Doc(errorUrl) ""
     }
     set Doc(errorInfo) $ei	;# For subst
     DocSubstSystemFile $sock error 500 [protect_text $ei]
@@ -544,9 +585,14 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     set dynamic [interp eval $Doc(templateInterp) {uplevel #0 {set page(dynamic)}}]
 
     if {!$dynamic} {
-	set out [open $htmlfile w]
-	puts -nonewline $out $html
-	close $out
+	catch {file delete -force $htmlfile}
+	if {[catch {open  $htmlfile w} out]} {
+	    set dynamic 1
+	    Log $sock "Template" "no write permission"
+	} else {
+	    puts -nonewline $out $html
+	    close $out
+	}
     }
     return $html
 }
@@ -581,21 +627,16 @@ proc DocCheckTemplate {template htmlfile} {
 # Subst a file in an interpreter context
 
 proc DocSubst {path {interp {}}} {
-    if [catch {
-	set in [open $path]
-	if {[string length $interp] == 0} {
-	    uplevel #0 [list subst [read $in]]
-	} else {
-	    interp eval $interp [list subst [read $in]]
-	}
-    } result] {
-	global errorInfo errorCode
-	set ei $errorInfo
-	set ec $errorCode
-	catch {close $in}
-	return -code error -errorinfo $ei -errorcode $ec $result
-    }
+
+    set in [open $path]
+    set script [read $in]
     close $in
+
+    if {[string length $interp] == 0} {
+	set result [uplevel #0 [list subst $script]]
+    } else {
+	set result [interp eval $interp [list subst $script]]
+    }
     return $result
 }
 
