@@ -1,3 +1,8 @@
+2004-05-01 Colin McCormack <colin@chinix.com>
+	* lib/session.tcl: added a facility to destroy a session cookie.
+	Added type name to session cookie name
+	* lib/cookie.tcl: added ability to expunge cookies from client.
+
 2004-04-29 Colin McCormack <colin@chinix.com>
 	* lib/stdin.tcl: removed history proc which interferes with 
 	some third party console packages to no legitimate purpose.
