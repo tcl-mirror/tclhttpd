@@ -4,8 +4,8 @@ Brent is now at Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 3.0.0
-Last Modified: Mon Apr 24 18:37:43 PDT 2000
+Version: 3.0.1
+Last Modified: Fri May 12 22:16:40 PDT 2000
 
 It requires Tcl 8.0 or higher and the new Standard Tcl Library
 which really puts you up to Tcl 8.3.  This uses the
@@ -24,6 +24,9 @@ Windows and Macintosh:
 For a complete set of command line options, do
 httpd.tcl -help
 This lets you set basic parameters like port number and server name.
+
+Version 3.0.1 has minor bug fixes and (hopefully) some improvements
+in the bundled distribution.
 
 Version 3.0.0 has three major changes:
 * Use of Standard Tcl Library modules.  The server looks around for the

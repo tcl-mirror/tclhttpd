@@ -1,6 +1,7 @@
 TclHttpd Change Log
 
 Information about the latest release is appended to the end
+See also the ChangeLog file for detailed changes.
 
 ------------
 This file was started after the 2.0.1 release.
@@ -546,3 +547,6 @@ lib/status.tcl	Display the time that a counter was reset.
 
 ----------------- released 2.3.6 January 19, 2000 ------------------
 
+OK, the detailed change log is now in the ChangeLog file.
+Please see the WHATSNEW file for information about important
+changes in the 3.0 releases.

@@ -1,3 +1,8 @@
+2000-05-12  Brent Welch <welch@scriptics.com>
+
+	* Various additions to installation documentation
+	* Created 3.0.1 distribution
+
 2000-05-10  Brent Welch <welch@scriptics.com>
 
 	* bin/httpd.tcl: Moved development script library to
