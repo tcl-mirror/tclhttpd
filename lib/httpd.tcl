@@ -1,4 +1,4 @@
-# httpd.tcl
+# httpd.tcl --
 #
 # HTTP 1.0 protocol stack, plus connection keep-alive and 1.1 subset.
 # This accepts connections and calls out to Url_Dispatch once a request
@@ -14,6 +14,7 @@
 # For async operation, such as long-lasting server-side operations use
 # Httpd_Suspend.
 #
+# Copyright
 # Matt Newman (c) 1999 Novadigm Inc.
 # Stephen Uhler / Brent Welch (c) 1997 Sun Microsystems
 # See the file "license.terms" for information on usage and redistribution
@@ -65,8 +66,8 @@ array set Httpd_EnvMap {
 }
 
 # Httpd_Init
-# Initialize the httpd module.  Call this early.
-# Httpd is a global array containing the global server state
+#	Initialize the httpd module.  Call this early.
+#	Httpd is a global array containing the global server state
 # bufsize:	Chunk size for copies
 # fcopy:	True if fcopy is being used.
 # initialized:	True after server started.
@@ -81,6 +82,12 @@ array set Httpd_EnvMap {
 # timeout2:	Time before the server kills an in-progress transaction.  (msecs)
 # version:	The version number.
 # maxused:	Max number of transactions per socket (keep alive)
+#
+# Arguments:
+#	none
+#
+# Results:
+#	none
 
 proc Httpd_Init {} {
     global Httpd
@@ -344,26 +351,34 @@ proc HttpdRead {sock} {
 	1,start	{
 	    if {[regexp {^([^ ]+) +([^?]+)\??([^ ]*) +HTTP/(1.[01])} \
 		    $line x data(proto) data(url) data(query) data(version)]} {
+		
+		# data(uri) is the complete URI
 
-		# Strip leading http://server.
-		# We check and discard proxy requests here, too.
-
-		if {[regexp {^https?://([^/:]+)} $data(url) x xserv]} {
-		    set myname [lindex $data(self) 1]
-		    if {[string compare \
-			    [string tolower $xserv] \
-			    [string tolower $myname]] != 0} {
-			Httpd_Error $sock 400 $line
-			return
-		    }
-		    regsub {^https?://([^/]+)} $data(url) {} data(url)
-		}
-		set data(state) mime
-		set data(line) $line
 		set data(uri) $data(url)
 		if {[string length $data(query)]} {
 		    append data(uri) ?$data(query)
 		}
+
+		# Strip leading http://server and look for the proxy case.
+
+		if {[regexp {^https?://([^/:]+)(:([0-9]+))?(.*)$} $data(url) \
+			x xserv y xport urlstub]} {
+		    set myname [lindex $data(self) 1]
+		    set myport [lindex $data(self) 2]
+		    if {([string compare \
+			    [string tolower $xserv] \
+			    [string tolower $myname]] != 0) ||
+			    ($myport != $xport)} {
+			set data(host) $xserv
+			set data(port) $xport
+		    }
+		    # Strip it out if it is for us (i.e., redundant)
+		    # This makes it easier for doc handlers to
+		    # look at the "url"
+		    set data(url) $urlstub
+		}
+		set data(state) mime
+		set data(line) $line
 		CountHist urlhits
 		# Limit the time allowed to serve this request
 		catch {after cancel $data(cancel)}
@@ -431,7 +446,18 @@ proc HttpdRead {sock} {
 	    if {[info exist data(count)]} {
 		Url_PostHook $sock $data(count)
 	    }
-	    Url_Dispatch $sock
+
+	    # Do a different dispatch for proxies.  By default, no proxy.
+
+	    if {[info exist data(host)]} {
+		if {[catch {
+		    Proxy_Dispatch $sock
+		} err]} {
+		    Httpd_Error $sock 400 "No proxy support\n$err"
+		}
+	    } else {
+		Url_Dispatch $sock
+	    }
 	}
 	-1,* {
 	    if {[fblocked $sock]} {

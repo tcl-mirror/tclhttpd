@@ -642,12 +642,14 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     interp eval $interp [list uplevel #0 \
 	[list array set env [array get pass]]]
 
-    # Duplicate this in the "cgienv" array.
+    if {0} {
+	# Duplicate this in the "cgienv" array.
 
-    interp eval $interp [list uplevel #0 \
-	{catch {unset cgienv}}]
-    interp eval $interp [list uplevel #0 \
-	[list array set cgienv [array get pass]]]
+	interp eval $interp [list uplevel #0 \
+	    {catch {unset cgienv}}]
+	interp eval $interp [list uplevel #0 \
+	    [list array set cgienv [array get pass]]]
+    }
 
     # Check query data
     # steve: 5/8/98: Add multipart document upload handling
@@ -659,17 +661,37 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	set data(query) {}
     }
     if {[info exist data(query)]} {
-	set queryType application/x-www-urlencoded
-	set qualifiers {}
-	catch {
-	    foreach {major minor qualifiers} [Url_DecodeMIMEField $data(mime,content-type)] break
-	    set queryType $major/$minor
+	if {![info exist data(mime,content-type)]} {
+	    set type application/x-www-urlencoded
+	} else {
+	    set type $data(mime,content-type)
 	}
-	set querylist [Url_DecodeQuery $data(query) -type $queryType -qualifiers $qualifiers]
 
-	interp eval $interp [list uplevel #0 [list set page(realquery) $data(query)]]
-	interp eval $interp [list uplevel #0 [list set page(querytype) $queryType]]
-	interp eval $interp [list uplevel #0 [list set page(query) $querylist]]
+	# Initialize the Standard Tcl Library ncgi package so its
+	# ncgi::value can be used to get the data.  This replaces
+	# the old Url_DecodeQuery interface.
+
+	# TODO - us Url backdoor to read the query data here.
+
+	interp eval $interp [list ncgi::reset $data(query) $type]
+	interp eval $interp [list ncgi::parse]
+
+	# For compatibility with older versions of TclHttpd
+	# This is a bit hideous because it reaches inside ::ncgi
+	# to avoid parsing the data twice.
+
+	interp eval $interp [list uplevel #0 {
+	    set page(query) {}
+	    foreach n $ncgi::varlist {
+		foreach v $ncgi::value($n) {
+		    lappend page(query) $n $v
+		}
+	    }
+	}]
+
+    } else {
+	interp eval $interp [list ncgi::reset ""]
+	interp eval $interp [list uplevel #0 [list set page(query) {}]]
     }
 
     # Source the .tml files from the root downward.

@@ -177,3 +177,17 @@ proc Debug/dbg {{host sage} {port 5000}} {
 	return "Already connected to tclPro at $debug_init"
     }
 }
+
+proc Debug/showproc {proc} {
+    global Debug/showproc
+    set Debug/showproc text/plain
+
+    set alist ""
+    foreach arg [info args $proc] {
+        if {[info default $proc $arg default]} {
+            set arg [list $arg $default]
+        }
+        lappend alist $arg
+    }
+    return [list proc $proc $alist [info body $proc]]
+}

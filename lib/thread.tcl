@@ -1,7 +1,7 @@
 # threadmgr.tcl
 #	Wrappers around basic thread commands
 
-#	"Thread" is the core Tcl package
+#	"Thread" is the C-based Tcl extension
 #	"threadmgr" is the TclHttpd thread manager
 
 package provide threadmgr 1.0
@@ -9,12 +9,6 @@ package provide threadmgr 1.0
 # The "Thread" package is implemented by a C extension.
 # We let the main .rc script do the appropriate package
 # require, and then fall back to the testthread command if necessary.
-
-if {[catch {package require Thread}]} {
-    if {[info commands testthread] == "testthread"} {
-	proc thread args {eval testthread $args}
-    }
-}
 
 # Default is no threading until Thread_Init is called
 
@@ -34,6 +28,7 @@ if {![info exist Thread(enable)]} {
 
 proc Thread_Init {{max 4}} {
     global Thread
+    package require Thread 2.0
     set Thread(maxthreads) $max	;# Number of threads we can create
     set Thread(threadlist) {}	;# List of threads we have created
     set Thread(freelist) {}	;# List of available threads
@@ -67,10 +62,11 @@ proc Thread_Enabled {} {
 #	a list
 
 proc Thread_List {} {
-	global Thread
-	if {$Thread(enable)} {
-        return [thread names]
-	}
+    global Thread
+    if {$Thread(enable)} {
+        return [thread::names]
+    }
+    return ""
 }
 
 
@@ -89,7 +85,7 @@ proc Thread_Start {} {
     global auto_path
     set id [Thread_Create] 
     Thread_Send $id \
-	{puts stderr "Thread [thread id] starting."}
+	{puts stderr "Thread  starting."}
 
     # Set up auto_loading
 
@@ -111,7 +107,7 @@ proc Thread_Start {} {
     Thread_Send $id \
 	[list source $Config(main)]
     Thread_Send $id \
-	{puts stderr "Init done for thread [thread id]"}
+	{puts stderr "Init done for thread "}
     
     return $id
 }
@@ -148,14 +144,12 @@ proc Thread_Dispatch {sock cmd} {
 
 		lappend Thread(queue) [list $sock $cmd]
 		Count threadqueue
-puts stderr "Queued request $sock"
 		return
 	    }
 	}
 	set id [lindex $Thread(freelist) 0]
 	set Thread(freelist) [lrange $Thread(freelist) 1 end]
-	set data(master_thread) [thread id]
-#puts stderr "Dispatch $sock to thread $id"
+	set data(master_thread) [Thread_Id]
 	
 	# Until we can pass sockets, read the post data here
 
@@ -211,13 +205,13 @@ proc Thread_Invoke {sock datalist cmd} {
 proc Thread_Respond {sock cmd} {
     upvar #0 Httpd$sock data
     if {[info exist data(master_thread)] && 
-	    $data(master_thread) != [thread id]} {
+	    $data(master_thread) != [Thread_Id]} {
 
 	# Pass request back to the master thread
 	# This includes a copy of the Httpd state (e.g., cookies)
 
 	Thread_SendAsync $data(master_thread) [list Thread_Unwind \
-		[thread id] $sock [array get data] $cmd]
+		 [Thread_Id] $sock [array get data] $cmd]
 	return 1
     } else {
 	return 0
@@ -263,11 +257,9 @@ proc Thread_Free {id} {
     if {[llength $Thread(queue)] > 0} {
 	set state [lindex $Thread(queue) 0]
 	set Thread(queue) [lrange $Thread(queue) 1 end]
-#puts stderr "Thread_Free $id dispatching to $state"
-	set data(master_thread) [thread id]
 	set sock [lindex $state 0]
 	set cmd [lindex $state 1]
-	upvar #0 Thread$sock data
+	upvar #0 Httpd$sock data
 	Thread_SendAsync $id [list Thread_Invoke $sock [array get data] $cmd]
     } else {
 	lappend Thread(freelist) $id
@@ -286,9 +278,9 @@ proc Thread_Free {id} {
 proc Thread_Create {{script {}}} {
     Count threads
     if {[string length $script]} {
-	return [thread create $script]
+	return [thread::create $script]
     } else {
-	return [thread create]
+	return [thread::create]
     }
 }
 
@@ -303,8 +295,7 @@ proc Thread_Create {{script {}}} {
 #	The results of the script
 
 proc Thread_Send {id script} {
-    if {[catch {thread send $id $script} result]} {
-puts stderr "Send Failed $result"
+    if {[catch {thread::send $id $script} result]} {
 	return -code error $result
     } else {
 	return $result
@@ -322,8 +313,7 @@ puts stderr "Send Failed $result"
 #	The results of the script
 
 proc Thread_SendAsync {id script} {
-    if {[catch {thread send -async $id $script} result]} {
-puts stderr "Send Failed $result"
+    if {[catch {thread::send -async $id $script} result]} {
 	return -code error $result
     } else {
 	return $result
@@ -331,7 +321,7 @@ puts stderr "Send Failed $result"
 }
 
 # Thread_Id --
-#	thread id
+#	thread::id
 #
 # Arguments:
 #	none
@@ -340,7 +330,7 @@ puts stderr "Send Failed $result"
 #	The thread ID
 
 proc Thread_Id {} {
-    thread id
+    thread::id
 }
 
 # Thread_IsFree --

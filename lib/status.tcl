@@ -12,15 +12,20 @@
 #
 package provide status 1.1
 
-proc Status_Url {dir} {
+proc Status_Url {dir {imgdir /images}} {
+    global _status
+    set _status(dir) $dir
+    set _status(images) $imgdir
     Direct_Url $dir Status
 }
 
 proc Status/hello {args} {return hello}
 
 proc Status/threads {args} {
-    set html "<h2>Thread List</h2>\n"
+    append html "<h2>Thread List</h2>\n"
+    append html [StatusMenu]\n
     append html [Thread_List] 
+    return $html
 }
 
 proc StatusSortForm {action label {pattern *} {sort number}} {
@@ -38,15 +43,17 @@ proc StatusSortForm {action label {pattern *} {sort number}} {
 }
 
 proc StatusMenu {} {
+    global _status
     set sep ""
     set html "<p>\n"
-    foreach {url label} {
-	/status/	Status
-	/status/doc	"Doc hits"
-	/status/notfound	"Doc misses"
-	/status/threads	"Threads"
-	/status/after	"After Queue"
-    } {
+    foreach {url label} [list \
+	$_status(dir)/	"Graphical Status" \
+	$_status(dir)/text	"Text Status" \
+	$_status(dir)/doc	"Doc hits" \
+	$_status(dir)/notfound	"Doc misses" \
+	$_status(dir)/threads	"Threads" \
+	$_status(dir)/size	"Memory Size" \
+    ] {
 	append html "$sep<a href=$url>$label</a>\n"
 	set sep " | "
     }
@@ -55,10 +62,11 @@ proc StatusMenu {} {
 }
 
 proc Status/doc {{pattern *} {sort number}} {
+    global _status
     set result ""
     append result "<h1>Document Hits</h1>\n"
     append result [StatusMenu]
-    append result [StatusSortForm /status/doc "Hit Count" $pattern $sort]
+    append result [StatusSortForm $_status(dir)/doc "Hit Count" $pattern $sort]
     append result [StatusPrintHits $pattern $sort]
 }
 proc StatusPrintHits {aname {pattern *} {sort number}} {
@@ -111,15 +119,15 @@ proc StatusSortName {a b} {
 }
 
 proc Status/notfound {{pattern *} {sort number}} {
-    global Doc Referer
+    global Doc Referer _status
     set result ""
     append result "<h1>Documents Not Found</h1>\n"
     append result [StatusMenu]
-    append result [StatusSortForm /status/notfound "Hit Count" $pattern $sort]
+    append result [StatusSortForm $_status(dir)/notfound "Hit Count" $pattern $sort]
     append result [StatusPrintNotFound $pattern $sort]
 }
 proc StatusPrintNotFound {{pattern *} {sort number}} {
-    global Doc Referer
+    global Doc Referer _status
     append result <pre>\n
     append result [format "%6s %s\n" Miss Url]
     set list {}
@@ -134,7 +142,7 @@ proc StatusPrintNotFound {{pattern *} {sort number}} {
     }
     foreach k $newlist {
 	set url [lindex $k 1]
-	append result [format "%6d <a href=/admin/redirect?old=%s>%s</a>\n" \
+	append result [format "%6d <a href=%s>%s</a>\n" \
 	    [lindex $k 0] [lindex $k 1] [lindex $k 1]]
 	if {[info exists Referer($url)]} {
 	    set i 0
@@ -146,7 +154,7 @@ proc StatusPrintNotFound {{pattern *} {sort number}} {
 	}
     }
     append result </pre>\n
-#    append result "<a href=/status/notfound/reset>Reset counters</a>"
+#    append result "<a href=$_status(dir)/notfound/reset>Reset counters</a>"
     return $result
 }
 proc Status/notfound/reset {args} {
@@ -158,7 +166,11 @@ proc Status/notfound/reset {args} {
     return "<h1>Reset Notfound Counters</h1>"
 }
 proc Status/size {args} {
-    return [Status/datasize][Status/codesize]
+    append html "<h1>Memory Size</h1>\n"
+    append html [StatusMenu]\n
+    append html [Status/datasize]\n
+    append html [Status/codesize]\n
+    return $html
 }
 proc Status/datasize {args} {
     set ng 0
@@ -177,7 +189,7 @@ proc Status/datasize {args} {
 	    incr nv
 	}
     }
-    return "<h1>Data Size</h1>\n\
+    return "<h2>Data Size</h2>\n\
 		Num Globals $ng<br>\n\
 		Num Values $nv<br>\n\
 		Data Bytes $size"
@@ -191,7 +203,7 @@ proc Status/codesize {args} {
 			    [string length [info args $g]] +
 			    [string length [info body $g]]}]
     }
-    return "<h1>Code Size</h1>\n\
+    return "<h2>Code Size</h2>\n\
 		Num Procs $np<br>\n\
 		Code Bytes $size"
 }
@@ -233,7 +245,7 @@ proc StatusMainTable {} {
     append html "<p>[StatusTable counter counter_reset]<p>\n"
 
     # Per thread stats
-    if {$Thread(enable)} {
+    if {[Thread_Enabled]} {
         set self [Thread_Id]
 	foreach id [lsort -integer [Thread_List]] {
 	    if {$id == $self} {
@@ -315,7 +327,8 @@ proc StatusTable {aname {reset_name {}}} {
 }
 
 proc StatusTclPower {{align left}} {
-    set html "<img src=/images/pwrdLogo150.gif align=$align width=97 height=150>\n"
+    global _status
+    set html "<img src=$_status(images)/pwrdLogo150.gif align=$align width=97 height=150>\n"
 }
 
 proc Status/all {args} {
@@ -325,7 +338,7 @@ proc Status/all {args} {
     append html [StatusMenu]
     append html [StatusTclPower left]
     append html [StatusMainTable]
-    append html "<p>The following bar charts are created with a table of horizontal rules that may not display correctly on your browser.<br><a href=/status/text>Text only view.</a>\n"
+    append html "<br><a href=/status/text>Text only view.</a>\n"
     catch {
 	append html [StatusMinuteHist CntMinuteurlhits "Per Minute Url Hits" $counter(basetime)]
 	append html [StatusMinuteHist CntHoururlhits "Per Hour Url Hits" $counter(hour,1) hour]
@@ -334,13 +347,13 @@ proc Status/all {args} {
     return $html
 }
 proc Status/text {args} {
-    global CntMinuteurlhits CntHoururlhits CntDayurlhits counter
+    global CntMinuteurlhits CntHoururlhits CntDayurlhits counter _status
     set html "<title>Tcl HTTPD Status</title>\n"
     append html "<body><h1>Tcl HTTPD Status</h1>\n"
     append html [StatusMenu]
     append html [StatusTclPower left]
     append html [StatusMainTable]
-    append html "<p><a href=/status/all>Bar Chart View.</a>"
+    append html "<p><a href=$_status(dir)/all>Bar Chart View.</a>"
     append html [StatusTimeText CntMinuteurlhits "Per Minute Url Hits" Min Hits $counter(basetime)]
     if [info exists CntHoururlhits] {
 	append html [StatusTimeText CntHoururlhits "Per Hour Url Hits" Hour Hits $counter(hour,1)]
@@ -366,7 +379,7 @@ proc Version {} {
 }
 
 proc StatusMinuteHist {array title time {unit minute}} {
-    global counter
+    global counter _status
     upvar #0 $array data
     if {! [info exists data]} {
 	return ""
@@ -412,10 +425,10 @@ proc StatusMinuteHist {array title time {unit minute}} {
 	}
 	set height [expr {$percent * $base / 100}]
 	if {$marker} {
-	    append result "<td valign=bottom><img src=/images/Red.gif height=$height width=$width XYZ></td>\n"
+	    append result "<td valign=bottom><img src=$_status(images)/Red.gif height=$height width=$width XYZ></td>\n"
 #	    append result "<td valign=bottom><hr size=$height width=$width></td>\n"
 	} else {
-	    append result "<td valign=bottom><img src=/images/Blue.gif  height=$height width=$width ABC></td>\n"
+	    append result "<td valign=bottom><img src=$_status(images)/Blue.gif  height=$height width=$width ABC></td>\n"
 #	    append result "<td valign=bottom><hr NOSHADE size=$height width=$width></td>\n"
 	}
     }
