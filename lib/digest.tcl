@@ -12,9 +12,10 @@
 # Licensed on terms identical to tclhttpd's license.
 
 package require base64
-package require httpd::md5hex
 
 package provide httpd::digest 1.0
+package require httpd::md5hex
+package require httpd::auth
 
 # generate private key
 if {[catch {package require Random}]} {
@@ -35,7 +36,7 @@ if {[catch {package require Random}]} {
     }]} {
 	set seed [clock clicks]
     }
-    expr {isaac_srand($seed)}	;# seed random
+    ::isaac::isaac seed $seed	;# seed random
 
     # get an integer secret
     proc DigestRand {} {
@@ -45,7 +46,7 @@ if {[catch {package require Random}]} {
 set DigestSecret [DigestRand]
 
 proc Digest_Passwd {username realm passwd} {
-    return [md5hex "$username:$realm:$passwd"]
+    return [string tolower [md5hex "$username:$realm:$passwd"]]
 }
 
 # calculate a digest key for a given session
@@ -61,12 +62,13 @@ proc DigestA1 {sock} {
 	    set digest(A1) [md5hex $userstuff]
 	}
 	md5-sess {
-	    set digest(A1) [md5hex "[md5hex $userstuff]:$data(digest,nonce):$data(digest,cnonce)"]
+	    set digest(A1) [md5hex "[string tolower [md5hex $userstuff]]:$data(digest,nonce):$data(digest,cnonce)"]
 	}
 	default {
 	    error "unknown algorithm: $data(digest,algorithm)"
 	}
     }
+    set digest(A1) [string tolower $digest(A1)]
     return $digest(A1)
 }
 
@@ -77,13 +79,13 @@ proc DigestA2 {sock} {
     regexp {[^?]+} $uri uri
     if {[info exists data(proto)]} {
 	#Stderr "A2: op:$data(proto) uri:$data(digest,uri)"
-	set result [md5hex "[string toupper $data(proto)]:$data(digest,uri)"]
+	set result [string tolower [md5hex "[string toupper $data(proto)]:$data(digest,uri)"]]
 	# nb: we don't offer auth-int
     } else {
 	#Stderr "A2: uri:$data(digest,uri)"
-	set result [md5hex "GET:$data(digest,uri)"]
+	set result [string tolower [md5hex "GET:$data(digest,uri)"]]
     }
-    return $result
+    return [string tolower $result]
 }
 
 # generate a nonce
@@ -92,7 +94,7 @@ proc DigestNonce {} {
 
     global DigestSecret
     set time [clock clicks]
-    return [md5hex ${time}:${DigestSecret}]
+    return [string tolower [md5hex ${time}:${DigestSecret}]]
 }
 
 # calculate the digest value for a given operation and session
@@ -111,7 +113,7 @@ proc DigestDigest {sock} {
     } else {
 	set result [md5hex "$digest(A1):$data(digest,nonce):$digest(A2)"]
     }
-    return $result
+    return [string tolower $result]
 }
 
 # handle the client's Digest
@@ -240,7 +242,7 @@ proc Digest_Challenge {sock realm user} {
 	# initialise the digest state
 	global DigestSecret
 	set digest(nonce) $nonce
-	set digest(opaque) [md5hex "[clock clicks]${DigestSecret}"]
+	set digest(opaque) [string tolower [md5hex "[clock clicks]${DigestSecret}"]]
 	#set digest(opaque) 5ccc069c403ebaf9f0171e9517f40e41	;# test
 	set digest(nc) 0
 	#set digest(stale) 0
