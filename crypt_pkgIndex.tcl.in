@@ -8,4 +8,4 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded crypt 2.3.6 [list load [file join $dir @RELPATH@ @crypt_LIB_FILE@]]
+package ifneeded crypt @CRYPT_VERSION@ [list load [file join $dir @RELPATH@ @crypt_LIB_FILE@]]

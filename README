@@ -4,24 +4,20 @@ Brent is now at Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 2.3.6
-Last update: Wed Jan 19 10:00:58 PST 2000
+Version: 3.0.0
+Last Modified: Wed Apr 19 14:35:36 PDT 2000
 
-It requires Tcl7.5 and Tk4.1, or higher.
-It works with the latest 8.2 (and 8.3beta) release.
-The following releases are recommended:
-Tcl 7.6p2, Tcl 8.0.5, Tcl 8.2.3
-
-[The "opt" package in the main bin/httpd.tcl script is not
-supported in Tcl 7.5 or 7.6.  It is only used for parsing the command
-line options - just remove that code from bin/httpd.tcl if necessary.]
+It requires Tcl 8.0 or higher and the new Standard Tcl Library
+which really puts you up to Tcl 8.3.  This uses the
+cmdline, base64, ncgi, and html
+modules of the Standard Tcl Library.
 
 The Web server runs under either tclsh or wish.
 With wish you get a simple GUI that shows some counters.
 
 For a quick test that runs a server on port 8015, do
 UNIX:
-	tclsh bin/httpd.tcl -debug
+	tclsh bin/httpd.tcl -debug 1
 Windows:
 	Run wish or tclsh and source bin/httpd.tcl
 Macintosh:
@@ -32,6 +28,17 @@ Macintosh:
 For a complete set of command line options, do
 httpd.tcl -help
 This lets you set basic parameters like port number and server name.
+
+Version 3.0.0 has three major changes:
+* Use of Standard Tcl Library modules.  The server looks around for the
+tcllib distribution and automatically uses it.  One goal of this conversion
+is to eliminate the use of the page global array and replace that with
+calls to the ncgi module.
+* Support for threads.  If you configure and build Tclsh with --enable-threads
+and you have the Thread extension available, the the server can 
+use threads to service requests.
+* Support for SSL.  If you have the "tls" extension installed, then you can
+start an SSL server by giving the -https_port command line argument.
 
 Version 2.3.6 is the last in the 2.3 series.  It has a few minor
 bug fixes.  The next release, 3.0, will support threading using

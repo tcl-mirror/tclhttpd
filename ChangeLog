@@ -1,4 +1,18 @@
+2000-04-20  Brent Welch <welch@scriptics.com>
+	* configure.in, Makefile.in: Fixes so that crypt and limit can have
+	a different version number (1.0) than TclHttpd
+	PARTS LIST ALERT.  This affects the libcrypt.1.0.so, liblimit.1.0.so
+	and the directories lib/crypt1.0 and lib/limit1.0
+	* pkgIndex.tcl.in: Removed incorrect hardwired version number.
+	* bin/httpd.tcl: Added Httpd_Name and Httpd_Protocol to go with the
+	existing Httpd_Port that return the server name, protocol (http or
+	https), and the port associated with a particular connection.
+	* htdocs/forms: General clean up of the CGI forms here.  Added
+	multipart file uploading test.
+
 2000-04-19  Brent Welch <welch@scriptics.com>
+	* bin/httpd.tcl: Fixed call to tcl_findLibrary
+	* bin/tclhttpd.rc: Change SSL parameters a bit.
 	* lib/doc.tcl: restored old page(querytype) variable for compatibility
 
 2000-04-18  Sandeep Tamhankar <sandeep@scriptics.com>

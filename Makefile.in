@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.11 2000/04/19 03:04:04 sandeep Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.12 2000/04/20 23:48:55 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -113,8 +113,8 @@ DESTDIR =
 
 pkgdatadir = $(datadir)/@PACKAGE@@VERSION@
 pkglibdir = $(prefix)/lib/@PACKAGE@@VERSION@
-altpkg1libdir = $(libdir)/@ALTPACKAGE1@@VERSION@
-altpkg2libdir = $(libdir)/@ALTPACKAGE2@@VERSION@
+cryptlibdir = $(libdir)/@CRYPT_PACKAGE@@CRYPT_VERSION@
+limitlibdir = $(libdir)/@LIMIT_PACKAGE@@LIMIT_VERSION@
 pkgincludedir = $(includedir)/@PACKAGE@@VERSION@
 SERVER_ROOT = @SERVER_ROOT@
 htdocsdir = $(SERVER_ROOT)/htdocs
@@ -307,7 +307,7 @@ install-htdocs:
 install-doc:
 
 installdirs:
-	$(mkinstalldirs) $(pkglibdir) $(altpkg1libdir) $(prefix)/bin $(htdocsdir)
+	$(mkinstalldirs) $(pkglibdir) $(cryptlibdir) $(prefix)/bin $(htdocsdir)
 
 clean:  
 	-test -z "$(BINARIES)" || rm -f $(BINARIES)
@@ -320,6 +320,7 @@ distclean: clean
 	-rm -f Makefile $(CONFIG_CLEAN_FILES)
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 	-rm -f config.status
+	-rm -f limit_pkgIndex.tcl crypt_pkgIndex.tcl
 
 #========================================================================
 # Install binary object libraries.  On Windows this includes both .dll and
@@ -357,10 +358,10 @@ install-lib-binaries: installdirs
 	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
 	  else :; fi; \
 	done
-	$(INSTALL_SCRIPT) crypt_pkgIndex.tcl $(altpkg1libdir)/pkgIndex.tcl
+	$(INSTALL_SCRIPT) crypt_pkgIndex.tcl $(cryptlibdir)/pkgIndex.tcl
 	if test "$(BUILD_LIMIT)" = "1" ; then \
-	    $(mkinstalldirs) $(altpkg2libdir) ; \
-	    $(INSTALL_SCRIPT) limit_pkgIndex.tcl $(altpkg2libdir)/pkgIndex.tcl;\
+	    $(mkinstalldirs) $(limitlibdir) ; \
+	    $(INSTALL_SCRIPT) limit_pkgIndex.tcl $(limitlibdir)/pkgIndex.tcl;\
 	fi
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
@@ -375,6 +376,7 @@ dist:
 	$(TCLSH_PROG) $(srcdir)/bin/CopyDist $(srcdir) $(DEST)
 	(cd $(DISTDIR); tar cf - ./tclhttpd$(VERSION) | gzip > tclhttpd$(VERSION).tar.gz)
 	(cd $(DISTDIR) ; zip -9 -r -o  tclhttpd$(WIN_VERSION).zip  tclhttpd$(VERSION))
+
 .PHONY: all binaries clean depend distclean doc install installdirs \
 libraries test
 
