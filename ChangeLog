@@ -6,7 +6,8 @@
 	version-appropriate alias 'md5hex', this should be future proof
 	(and past-proof), since it adapts the interface explicitly.
 	Recommend using md5hex explicitly.
-
+	* debian/: updated debian package version ahead of 3.5.1 release
+	
 2004-05-18 Brent Welch <welch@panasas.com>
         * README
         * VERSION
