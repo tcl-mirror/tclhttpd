@@ -8,7 +8,7 @@ package ifneeded httpd 1.6 "
 	source \[file join [list $dir] httpd.tcl\]
 	package ifneeded httpd::admin 1.0 \[list source \[file join [list $dir] admin.tcl\]\]
 	package ifneeded httpd::auth 2.0 \[list source \[file join [list $dir] auth.tcl\]\]
-	package ifneeded httpd::cgi 1.0 \[list source \[file join [list $dir] cgi.tcl\]\]
+	package ifneeded httpd::cgi 1.1 \[list source \[file join [list $dir] cgi.tcl\]\]
 	package ifneeded httpd::config 1.0 \[list source \[file join [list $dir] config.tcl\]\]
 	package ifneeded httpd::counter 2.0 \[list source \[file join [list $dir] counter.tcl\]\]
 	package ifneeded httpd::debug 1.0 \[list source \[file join [list $dir] debug.tcl\]\]

@@ -5,9 +5,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cgi.tcl,v 1.25.6.1 2002/08/27 05:00:53 welch Exp $
+# RCS: @(#) $Id: cgi.tcl,v 1.25.6.2 2002/08/27 05:20:41 welch Exp $
 
-package provide httpd::cgi 1.0
+package provide httpd::cgi 1.1
 
 # Cgi parameters
 # timeout	Seconds before pipe to CGI program is closed

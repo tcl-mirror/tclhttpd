@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.40.2.2 2002/08/27 05:15:29 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.40.2.3 2002/08/27 05:20:41 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -63,7 +63,7 @@ set home [file join [pwd] $home]
 # 2. Standalone install - look for $home/../lib/tclhttpd $home/tcllib
 # 3. Tcl package install - look for $tcl_library/../tclhttpd
 
-set v 3.4
+set v 3.4.1
 
 if {[file exist [file join $home ../lib/httpd.tcl]]} {
     # Cases 1 and 2
