@@ -1,3 +1,9 @@
+2003-9-27  Brent Welch <welch@panasas.com>
+        * lib/httpd.tcl: HTML armour default error output
+        * htdocs/admin htdocs/debug htdocs/status:
+        added access control .htaccess to direct domains
+        to remove some vulnerabilities
+
 2003-9-24  Brent Welch <welch@panasas.com>
         * lib/dirlist.tcl: Security fix to prevent you from listing
         the contents of directories you are not supposed to. It is
