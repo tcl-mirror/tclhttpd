@@ -1,3 +1,20 @@
+2000-09-01  Brent Welch <welch@ajubasolutions.com>
+
+	* lib/doc.tcl:
+	Fixed handling of Url encoding in file names.  In particular,
+	the dirlist.tcl module does urlencoding so - gets encoded,
+	and the DocDomain procedure wasn't handling it.
+	* lib/version.tcl:
+	Nudged up the date stamp to distinquish from the TclPro
+	release as I'm too lazy to change the version number.
+	I've nudged the tclhttpd-3-1-0 tag as well.
+
+	Released TclHttpd 3.1.0
+
+2000-08-30  Brent Welch <welch@ajubasolutions.com>
+
+	Released TclPro 1.4.1
+
 2000-08-28  Brent Welch <welch@scriptics.com>
 	* lib/url.tcl:
 	Added Url_PrefixExists to see if a prefix has been added with
