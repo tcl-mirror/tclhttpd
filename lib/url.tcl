@@ -19,7 +19,7 @@
 #
 # SCCS: @(#) url.tcl 1.7 97/08/20 11:50:13
 
-package provide httpd::url 1.1
+package provide httpd::url 1.2
 
 # This pattern cannot occur inside a URL path component
 # On windows we disallow : to avoid drive-letter attacks
@@ -487,6 +487,53 @@ proc Url_DecodeQuery {query args} {
 	Url_ReadPost $Url(sock) query
     }
     eval {Url_DecodeQueryOnly $query} $args
+}
+
+# Url_QuerySetup --
+#
+#	Grab any query data and pass it to the ncgi:: module.
+#
+# Arguments:
+# 	sock	The socket back to the client.
+#
+# Results:
+#	None
+#
+# Side effects:
+#	ncgi::reset, ncgi::parse, ncgi::urlstup
+
+proc Url_QuerySetup {sock} {
+    upvar #0 Httpd$sock data
+
+    set valuelist {}
+
+    # search for comma separeted pair of numbers
+    # as generated from server side map
+    #      e.g 190,202
+    # Bjorn Ruff.
+
+    if { [regexp {^([0-9]+),([0-9]+)$} $data(query) match x y]} {
+	set data(query) x=$x&y=$y
+    }
+
+    # Honor content type of the query data
+    # Some browsers leave junk Content-Type lines in
+    # non-post requests as a side effect of keep alive.
+
+    if {[info exist data(mime,content-type)] &&
+	    ("$data(proto)" != "GET")} {
+	set type $data(mime,content-type)
+    } else {
+	set type application/x-www-urlencoded
+    }
+
+    # Grab POST data, if any, and initialize the ncgi:: interface
+
+    Url_ReadPost $sock data(query)
+    ncgi::reset $data(query) $type
+    ncgi::parse
+    ncgi::urlStub $data(url)
+    return
 }
 
 proc Url_ReadPost {sock varname} {

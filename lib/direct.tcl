@@ -8,9 +8,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.11 2000/09/29 20:47:32 lfb Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.12 2000/10/04 19:55:53 welch Exp $
 
-package provide httpd::direct 1.0
+package provide httpd::direct 1.1
 
 # Direct_Url
 #	Define a subtree of the URL hierarchy that is implemented by
@@ -63,16 +63,12 @@ proc DirectDomain {prefix sock suffix} {
 
     # Prepare an argument data from the query data.
 
-    DirectParseQueryData $sock
-    set cmd [DirectMarshallArguments $prefix $suffix]
+    Url_QuerySetup $sock
+    set cmd [Direct_MarshallArguments $prefix $suffix]
     if {$cmd == ""} {
 	Doc_NotFound $sock
 	return
     }
-
-    # "Cache hit" is a misnomer, but this is how things are counted
-
-    Count cachehit,$Direct($prefix)$suffix
 
     # Eval the command.  Errors can be used to trigger redirects.
 
@@ -87,55 +83,7 @@ proc DirectDomain {prefix sock suffix} {
     DirectRespond $sock $code $result $type
 }
 
-# DirectParseQueryData --
-#
-#	Turn the query data into a key/value list.
-#
-# Arguments:
-# 	sock	The socket back to the client.
-#
-# Results:
-#	Returns a key/value list of query data names and their values.
-#
-# Side effects:
-#	None.
-
-proc DirectParseQueryData {sock} {
-    upvar #0 Httpd$sock data
-
-    set valuelist {}
-    if [info exists data(query)] {
-	# search for comma separeted pair of numbers
-	# as generated from server side map
-	#      e.g 190,202
-	# Bjorn Ruff.
-
-	if { [regexp {^([0-9]+),([0-9]+)$} $data(query) match x y]} {
-	    set data(query) x=$x&y=$y
-	}
-
-	# Honor content type of the query data
-	# Some browsers leave junk Content-Type lines in
-	# non-post requests as a side effect of keep alive.
-
-	if {[info exist data(mime,content-type)] &&
-		("$data(proto)" != "GET")} {
-	    set type $data(mime,content-type)
-	} else {
-	    set type application/x-www-urlencoded
-	}
-
-	# Grab POST data, if any, and initialize the ncgi:: interface
-
-	Url_ReadPost $sock data(query)
-	ncgi::reset $data(query) $type
-	ncgi::parse
-	ncgi::urlStub $data(url)
-    }
-    return
-}
-
-# DirectMarshallArguments --
+# Direct_MarshallArguments --
 #
 #	Use the url prefix, suffix, and cgi values (set with the
 #	ncgi package) to create a Tcl command line to invoke.
@@ -152,7 +100,7 @@ proc DirectParseQueryData {sock} {
 #	If the prefix and suffix do not map to a Tcl procedure,
 #	returns empty string.
 
-proc DirectMarshallArguments {prefix suffix} {
+proc Direct_MarshallArguments {prefix suffix} {
     global Direct
 
     set cmd $prefix$suffix
