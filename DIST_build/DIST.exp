@@ -1,7 +1,7 @@
 # Expect script to drive DIST, and handle the CVS password prompting.
 
-set v 3.4.3
-set vv 343
+set v 3.5.0
+set vv 350
 
 stty -echo
 send_user "CVS Password: "

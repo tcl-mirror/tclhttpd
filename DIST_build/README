@@ -1,29 +1,29 @@
 This is a bundled distribution of TclHttpd, Tcl, the
 Standard Tcl Library, and the Thread extension.
 
-If you already have tcl 8.3 installed, then you can probably
+If you already have tcl 8.4 or 8.3 installed, then you can probably
 run the Tcl Web Server directly from this distribtuion without
 doing any installation steps:
 
-cd tclhttpd3.4/bin
+cd tclhttpd3.5/bin
 tclsh8.3 httpd.tcl -port 8001 -debug 1
 
 If you get complaints about missing the Standard Tcl Library,
 then you can install just that by running the install.sh script
-in the tcllib1.0 directory.
+in the tcllib1.4 directory.
 
-If you want a clean install of everything, including a Tcl 8.3.4
+If you want a clean install of everything, including a Tcl 8.4.5
 that has thread enabled, then use the Makefile in the top-level directory.
 This will compile things under the build directory, segregating
 by platform into different subdirectories.
 
 More Docs
 There are a few more README-like files you should read:
-tclhttpd3.4/INSTALL
-tclhttpd3.4/README
-tclhttpd3.4/WHATSNEW
-tclhttpd3.4/ChangeLog
-tclhttpd3.4/certs/README.ssl
+tclhttpd3.5/INSTALL
+tclhttpd3.5/README
+tclhttpd3.5/WHATSNEW
+tclhttpd3.5/ChangeLog
+tclhttpd3.5/certs/README.ssl
 
 Information about TclHttpd is at
 
@@ -45,8 +45,3 @@ ftp://tclhttpd.sourceforge.net/projects/tclhttpd/
 Brent Welch <welch@panasas.com>
 	or  <welch@acm.org>		(this should work always)
 
-SSL Note:
-
-Tcl 8.3.1 and the TLS 1.3 extension (not included here) have
-some bugs.  You should use Tcl 8.3.2 (or higher) and TLS 1.4.1
-for stable SSL performance.

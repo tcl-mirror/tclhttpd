@@ -1,3 +1,15 @@
+2004-1-13 Brent Welch <welch@panasas.com>
+        * README
+        * VERSION
+        * configure.in
+        * DIST_build/DIST
+        * DIST_build/DIST.exp
+        * DIST_build/Makefile.boot
+        * DIST_build/README
+        * lib/version.tcl
+        * bin/httpd.tcl
+        Version updates in preparation for a 3.5.0 release
+
 2003-11-04 Colin McCormack <colin@field.medicine.adelaide.edu.au>
        * preparing Debian package for tclhttpd
        * fixed innocuous bug causing noise on loading libtml under

@@ -4,12 +4,12 @@ Brent is now at Panasas, Inc.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 3.4.3
+Version: 3.5.0
 Last Modified: Mon Oct 28 21:58:12 PST 2002
 
 QUICK START
 
-It requires Tcl 8.3 (or higher) and the new Standard Tcl Library.
+It requires Tcl 8.3 (or higher) and the Standard Tcl Library.
 This uses the cmdline, base64, ncgi, html, and counter
 modules of the Standard Tcl Library. If you must, you
 can probably get by with Tcl 8.0 or later if you install
@@ -22,14 +22,14 @@ For a quick test that runs a server on port 8015, do
 UNIX:
 
 1) Test preconditions
-	tclsh8.3
+	tclsh8.4 or tclsh8.3
 	package require tcllib
 
 2) If you can do the above, then you should be able to run the
 server directly from this distribution directory without bothering
 to configure, make, and install it.
 
-	tclsh8.3 bin/httpd.tcl -debug 1
+	tclsh8.4 bin/httpd.tcl -debug 1
 Windows and Macintosh:
 	Run wish or tclsh and source bin/httpd.tcl
 
@@ -42,6 +42,9 @@ httpd.tcl -help
 This lets you set basic parameters like port number and server name.
 
 VERSION SUMMARY
+
+Version 3.5 has various bug fixes, improvements to the docs, and
+some sample applications.
 
 Version 3.4.3  fixes loading code from the custom code directory,
 which broke in 3.4.2

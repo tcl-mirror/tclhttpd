@@ -1,5 +1,5 @@
-package provide httpd::version 3.4
+package provide httpd::version 3.5
 proc Httpd_Version {} {
     global Httpd
-    set Httpd(version)	"3.4.3 October 29, 2002"
+    set Httpd(version)	"3.5.0 January 13, 2004"
 }
