@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: imagemap.tcl,v 1.3 2000/08/02 07:06:52 welch Exp $
+# RCS: @(#) $Id: imagemap.tcl,v 1.4 2000/08/25 23:21:00 welch Exp $
 
 package provide httpd::ismaptcl 1.0
 
@@ -46,7 +46,7 @@ proc MapPointInPoly {tx ty pgonArray} {
                 } else {
                         incr crossings [expr {$pgon($lastvert,X) - ($y - $ty) *
 			    ($pgon(0,X) - $pgon($lastvert,X)) /
-			    ($p - $y)) >= $tx}]
+			    ($p - $y) >= $tx}]
                 }
         }
 
