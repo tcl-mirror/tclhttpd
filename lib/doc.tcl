@@ -20,7 +20,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.43 2001/07/09 23:05:19 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.44 2002/08/04 06:03:35 welch Exp $
 
 package provide httpd::doc 1.1
 
@@ -34,21 +34,27 @@ package require uri
 #	real 	Optional.  The name of the file system directory
 #		containing the root of the URL tree.  If this is empty,
 #		then the current document root is returned instead.
+#	args	"real" followed by "args" for Url_PrefixInstall.
+#		"real" is the name of the file system directory
+#		containing the root of the URL tree.  If no args are given,
+#		then the current document root is returned instead.
 #
 # Results:
-#	The name of the directory of the document root.
+#	If querying, returns the name of the directory of the document root.
+#	Otherwise returns nothing.
 #
 # Side Effects:
 #	Sets the document root.
 
-proc Doc_Root {{real {}}} {
+proc Doc_Root {args} {
     global Doc
-    if {[string length $real] > 0} {
+    if {[llength $args] > 0} {
+        set real [lindex $args 0]
 	set Doc(root) $real
-	Doc_AddRoot / $real
-    } else {
-	return $Doc(root)
+	eval [list Doc_AddRoot / $real] [lrange $args 1 end]
+        return
     }
+    return $Doc(root)
 }
 
 # Doc_AddRoot
@@ -57,9 +63,7 @@ proc Doc_Root {{real {}}} {
 # Arguments:
 #	virtual		The URL prefix of the document tree to add.
 #	directory	The file system directory containing the doc tree.
-#	inThread	If true, the domain is registered to run in a thread.
-#			(The server may have threading turned off, but
-#			you can still ask for it without error.)
+#	args		Same as args for Url_PrefixInstall
 #
 # Results:
 #	None
@@ -67,10 +71,11 @@ proc Doc_Root {{real {}}} {
 # Side Effects:
 #	Sets up a document URL domain and the document-based access hook.
 
-proc Doc_AddRoot {virtual directory {inThread 1}} {
+proc Doc_AddRoot {virtual directory args} {
     Doc_RegisterRoot $virtual $directory
-    Url_PrefixInstall $virtual [list DocDomain $virtual $directory] $inThread
+    eval [list Url_PrefixInstall $virtual [list DocDomain $virtual $directory]] $args
     Url_AccessInstall DocAccessHook
+    return
 }
 
 # Doc_RegisterRoot
@@ -95,6 +100,80 @@ proc Doc_RegisterRoot {virtual directory} {
 		"Doc_RegisterRoot will not change an existing url to directory mapping"
     }
     set Doc(root,$virtual) $directory
+}
+
+# Doc_Include
+#
+#	Read the contents of the file and substitute them at the stack level
+#	at which this procedure was called.  Relative paths will be joined
+#	with the directory at the top of the include stack in global variable
+#	page(includeStack).
+#
+# Arguments:
+#	filename	The relatvie path of the file to read.
+#
+# Results:
+#	Returns the substituted contents of the file.
+#
+# Side Effects:
+#	None.
+
+proc Doc_Include {filename} {
+    global page
+
+    # Use the path at the top of the include stack.
+    set oldIncludeStack $page(includeStack)
+    set path [file join [lindex $oldIncludeStack 0] $filename]
+
+    # Read the data from the file.
+    ::set f [open $path]
+    ::set data [read -nonewline $f]
+    close $f
+
+    # Call subst on the data in the stack frame above this one.
+
+    # To support nested includes, we use a uniquely named
+    # variable to store incremental results.
+    ::set resultVar "__result_[expr rand()]"
+
+    # Create the script to eval in the stack frame above this one.
+    ::set script "append $resultVar \[subst \{$data\}\]"
+
+    # Create a temporary variable in the stack frame above this one,
+    # and use it to store the incremental resutls of the multiple loop
+    # iterations.  Remove the temporary variable when we're done so there's
+    # no trace of this loop left in that stack frame.
+    upvar $resultVar tmp
+    ::set tmp ""
+
+    # Including of doc templates can be nested.
+    # Push the directory of the file we are subst'ing onto the include stack.
+    # Perform the substitution, and the pop that dir from the stack.
+    set page(includeStack) [linsert $oldIncludeStack 0 [file dirname $path]]
+    uplevel $script
+    set page(includeStack) $oldIncludeStack
+
+    ::set result $tmp
+    unset tmp
+    return $result
+}
+
+# Doc_Include --
+#
+#	Define the index file for a directory
+#
+# Arguments:
+#	pat	A glob pattern for index files in a directory.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the index file glob pattern.
+
+proc Doc_IndexFile {pat} {
+    global Doc
+    set Doc(indexpat) $pat
 }
 
 # Doc_IndexFile --
@@ -194,6 +273,28 @@ if {![info exists Doc(templateInterp)]} {
     set Doc(templateInterp) {}
 }
 
+# Doc_TemplateScope --
+#
+# When processing templates in the current interpreter, decide whether to
+# use the global or local scope (that of DocSubst) to process templates.
+#
+# Arguments:
+#	scope	0 means global and non-zero means local.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the scope for all Doc domain templates.
+
+proc Doc_TemplateScope {scope} {
+    global Doc
+    set Doc(templateScope) $scope
+}
+if {![info exists Doc(templateScope)]} {
+    set Doc(templateScope) 0
+}
+
 # Doc_TemplateLibrary --
 #
 # Define the auto_load library for template support
@@ -216,6 +317,35 @@ proc Doc_TemplateLibrary {dir} {
     } else {
 	lappendOnce auto_path $dir
     }
+}
+
+# Doc_SubstInstall
+#
+#	Install a subst hook.  Each installed hook will be performed over the
+#	substituted template.
+#
+# Arguments
+#	proc	This is a command prefix that is invoked with one additional
+#		arguments to process:
+#			text	The text to process.
+#		The subst hook returns the HTML that will be returned by the server.
+#
+# Results:
+#	None
+#
+# Side Effects
+#	Save the subst hook.
+
+proc Doc_SubstInstall {proc} {
+    global Doc
+    if {[lsearch $Doc(substHooks) $proc] < 0} {
+	lappend Doc(substHooks) $proc
+    }
+    return
+}
+
+if {![info exist Doc(substHooks)]} {
+    set Doc(substHooks) {}
 }
 
 # Doc_PublicHtml --
@@ -741,7 +871,8 @@ proc DocHandle {prefix path suffix sock} {
 # DocDirectory --
 #
 #	Handle a directory.  Look for the index file, falling back to
-#	the Directory Listing module, if necessary.
+#	the Directory Listing module, if necessary.  If the Directory
+#	Listing is hidden, then give the not-found page.
 #
 # Arguments:
 #	prefix	The URL domain prefix.
@@ -779,7 +910,11 @@ proc DocDirectory {prefix path suffix sock} {
 	}
 	return [DocHandle $prefix $newest $suffix $sock]
     }
-
+    if {[Dir_ListingIsHidden]} {
+        # Direcotry listings are hidden, so give the not-found page.
+        return [Doc_NotFound $sock]
+    }
+    # Listings are not hidden, so show it.
     Httpd_ReturnData $sock text/html [DirList $path $data(url)]
 }
 
@@ -1006,11 +1141,18 @@ proc Doc_text/html {path suffix sock} {
 	if {[file exists $template] && [DocCheckTemplate $sock $template $path]} {
 
 	    # Do the subst and cache the result in the .html file
-
 	    set html [DocTemplate $sock $template $path $suffix dynamic \
 		    $Doc(templateInterp)]
 	    if {$dynamic} {
-		return [Httpd_ReturnData $sock text/html $html]
+
+                # If the content type was set, use it.  Otherwise, use the default.
+                if {[info exists data(contentType)]} {
+                    set ctype $data(contentType)
+                } else {
+                    set ctype "text/html"
+                }
+
+		return [Httpd_ReturnData $sock $ctype $html]
 	    }
 	}
     }
@@ -1109,6 +1251,7 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     interp eval $interp [list uplevel #0 [list array set page [list \
 	url		$data(url)	\
 	template 	$template	\
+	includeStack 	[list [file dirname $template]]	\
 	filename	$filename	\
 	root		$root		\
 	dynamic		$dynamic	\
@@ -1188,7 +1331,7 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     foreach libfile [DocGetTemplates $sock $template] {
 	if {[file exists $libfile]} {
 	    interp eval $interp [list uplevel #0 [list source $libfile]]
-	}
+        }
     }
 
     # Process the template itself
@@ -1253,7 +1396,6 @@ proc Doc_Dynamic {} {
 #
 # Arguments:
 #	cookie	The name of the cookie (the key)
-
 
 proc Doc_Cookie {cookie} {
     global env
@@ -1415,9 +1557,28 @@ proc DocCheckTemplate {sock template htmlfile} {
 }
 
 
+# DocSubstCleanScope --
+#
+# Substitute the data in this clean (no vars set) scope.
+#
+# Arguments:
+#	_html_data	The data to substitute.
+#
+# Results:
+#	The subst'ed data.
+#
+# Side Effects:
+#	None
+
+proc DocSubstCleanScope {_html_data} {
+    return [subst $_html_data]
+}
+
 # DocSubst --
 #
-# Subst a file in an interpreter context
+# Subst a file in an interpreter context.  If no interp is given, use the
+# current interp.  If using the current interp, use the scope
+# variable to decide whether to use the global or current scope.
 #
 # Arguments:
 #	path	The file pathname of the template.
@@ -1430,15 +1591,29 @@ proc DocCheckTemplate {sock template htmlfile} {
 #	None
 
 proc DocSubst {path {interp {}}} {
+    global Doc
 
     set in [open $path]
     set script [read $in]
     close $in
 
     if {[string length $interp] == 0} {
-	set result [uplevel #0 [list subst $script]]
+        # Substitution occurs in the current interp.
+        if {$Doc(templateScope) == 0} {
+            # Substitution occurs at the global level.
+            set result [uplevel #0 [list subst $script]]
+        } else {
+            # Substitution occurs at a clean level, one-off from global.
+            set result [uplevel [list DocSubstCleanScope $script]]
+        }
     } else {
+        # Substitution occurs in the given interp.
 	set result [interp eval $interp [list subst $script]]
+    }
+
+    # Perform the post-processing of the output, as installed via Doc_SubstInstall.
+    foreach hook $Doc(substHooks) {
+        set result [$hook $result]
     }
     return $result
 }
@@ -1466,7 +1641,8 @@ proc Doc_Subst {sock path {interp {}}} {
 
 # DocGetTemplates --
 #	
-#	Return a list of .tml files that need to be sourced for a template
+#	Return a list of unique .tml files that need to be sourced for a
+#	template.
 #
 # Arguments:
 #	sock		The client connection
@@ -1518,7 +1694,11 @@ proc DocGetTemplates {sock template} {
     }
     foreach dir [concat [list {}] $extra] {
 	set path [file join $path $dir]
-	lappend tmls [file join $path $Doc(tmlExt)]
+        set file [file join $path $Doc(tmlExt)]
+        # Don't add duplicates to the list.
+        if {[lsearch $tmls $file] == -1} {
+            lappend tmls $file
+        }
     }
 
     return $tmls

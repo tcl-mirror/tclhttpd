@@ -21,9 +21,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.68 2001/07/12 01:12:21 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.69 2002/08/04 06:03:35 welch Exp $
 
-package provide httpd 1.5
+package provide httpd 1.6
 
 # initialize all the global data
 
@@ -35,6 +35,7 @@ array set Httpd_Errors {
     200 {Data follows}
     204 {No Content}
     302 {Found}
+    304 {Not Modified}
     400 {Bad Request}
     401 {Authorization Required}
     403 {Permission denied}
@@ -200,6 +201,80 @@ proc Httpd_Server {{port 80} {name {}} {ipaddr {}}} {
     }
 }
 
+# Httpd_ServerShutdown --
+#
+#	Close the server's HTTP socket.
+#
+# Arguments:
+#	none
+#
+# Results:
+#	Returns "" if the socket was successfully closed, otherwise an error string.
+#
+# Side Effects:
+#	Close the server's HTTP listening socket.
+
+proc Httpd_ServerShutdown {} {
+    global Httpd
+    Log {} ShutdownSocket
+    catch {close $Httpd(listen)} err
+    return $err
+}
+
+proc Httpd_VirtualHost {host file} {
+    variable virtual
+    set host [string tolower $host]
+    if {[info exists virtual($host)]} {
+	error "Virtual host $host already exists"
+    }
+    set virtual($host) [interp create]
+
+    # Transfer the scalar global variables
+    foreach var {::v ::auto_path} {
+	$virtual($host) eval [list set $var [set $var]]
+    }
+    # Transfer the array global variables
+    foreach arr {::Config ::Httpd} {
+	$virtual($host) eval [list array set $arr [array get $arr]]
+    }
+    $virtual(host) eval [list array set ::Httpd [list name $host]]
+    # Load the packages
+    $virtual($host) eval package require httpd [package provide httpd]
+    foreach pkg {version utils counter config} {
+	$virtual($host) eval \
+		package require httpd::$pkg [package provide httpd::$pkg]
+    }
+    $virtual($host) eval [list array set Config [list config $file host $host]]
+    $virtual($host) eval {
+	config::init $Config(config) Config
+	namespace import config::cget
+
+	# This replaces the command line processing
+	array set Config [array get config::Config]
+
+	if {[string length $Config(library)] &&
+		[lsearch -exact $auto_path $Config(library)] == -1} {
+	    lappend auto_path $Config(library)
+	}
+	Httpd_Init
+
+	if {$Config(threads) > 0} {
+	    package require Thread		;# C extension
+	    package require httpd::threadmgr	;# Tcl layer on top
+	    Thread_Init $Config(threads)
+	} else {
+	    # Stub out Thread_Respond so threadmgr isn't required
+	    proc Thread_Respond {args} {return 0}
+	    proc Thread_Enabled {} {return 0}
+	}
+	source $Config(main)
+	Log_SetFile		[cget LogFile]$Config(port)_
+	Log_FlushMinutes	[cget LogFlushMinutes]
+	Log_Flush
+    }
+
+}
+
 # Httpd_SecureServer --
 #
 #	Like Httpd_Server, but with additional setup for SSL.
@@ -248,6 +323,26 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
     }
 }
 
+# Httpd_SecureServerShutdown --
+#
+#	Close the server's secure socket.
+#
+# Arguments:
+#	none
+#
+# Results:
+#	Returns "" if the socket was successfully closed, otherwise an error string.
+#
+# Side Effects:
+#	Close the server's HTTPS listening socket.
+
+proc Httpd_SecureServerShutdown {} {
+    global Httpd
+    Log {} ShutdownSecureSocket
+    catch {close $Httpd(https_listen)} err
+    return $err
+}
+
 # Httpd_Shutdown --
 #
 #	Kill the server gracefully
@@ -264,7 +359,11 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
 
 proc Httpd_Shutdown {} {
     global Httpd
+    variable virtual
     set ok 1
+    foreach host [array names virtual] {
+	$virtual($host) eval Httpd_Shutdown
+    }
     foreach handler $Httpd(shutdown) {
 	if {[catch {eval $handler} err]} {
 	    Log "" "Shutdown: $handler" $err
@@ -272,8 +371,8 @@ proc Httpd_Shutdown {} {
 	}
     }
     Log {} Shutdown
-    catch {close $Httpd(listen)}
-    catch {close $Httpd(https_listen)}
+    Httpd_ServerShutdown
+    Httpd_SecureServerShutdown
     return $ok
 }
 
@@ -564,6 +663,27 @@ proc HttpdRead {sock} {
 	    } else {
 		Httpd_Error $sock 400 $line
 	    }
+	    # Check for virtual host
+	    variable virtual
+	    if {[string compare host $key]} {return}
+	    set host [lindex [split [string tolower $value] :] 0]
+	    if {[catch {set virtual($host)} i]} {return}
+
+	    # Transfer $sock to interp $i
+	    fileevent $sock readable {}
+	    interp transfer {} $sock $i
+	    set data(self) [list [Httpd_Protocol $sock] \
+		    $host [Httpd_Port $sock]]
+	    if {[info exists data(cancel)]} {
+		after cancel $data(cancel)
+		unset data(cancel)
+	    }
+	    $i eval [list array set Httpd$sock [array get data]]
+	    unset data
+	    $i eval [list fileevent $sock readable [list HttpdRead $sock]]
+	    set tmp [$i eval [list \
+		    after {$Httpd(timeout2)} [list HttpdCancel $sock]]]
+	    $i eval [list array set Httpd$sock [list cancel $tmp]]
 	}
 	0,mime	{
 	    if {$data(proto) == "POST"} {
@@ -1032,6 +1152,29 @@ proc HttpdErrorString { code } {
     }
 }
 
+# Httpd_RemoveCookies
+#	Remove previously set cookies from the reply.
+#	Any cookies that match the glob pattern are removed.
+#	This is useful for expiring a cookie that was previously set.
+#
+# Arguments:
+#	sock	handle on the connection
+#	pattern	glob pattern to match agains cookies.
+
+proc Httpd_RemoveCookies {sock pattern} {
+    upvar #0 Httpd$sock data
+    if {[info exists data(set-cookie)] && $data(set-cookie) != {}} {
+        set tmp {}
+        foreach c $data(set-cookie) {
+            if {![string match $pattern $c]} {
+                lappend tmp $c
+            }
+        }
+        set data(set-cookie) $tmp
+    }
+    return
+}
+
 # Httpd_SetCookie
 #	Define a cookie to be used in a reply
 #	Call this before using Httpd_ReturnFile or
@@ -1040,8 +1183,11 @@ proc HttpdErrorString { code } {
 # Arguments:
 #	sock	handle on the connection
 #	cookie	Set-Cookie line
+#	modify	(optional) If true, overwrite any preexisting
+#		cookie that matches.  This way you can change
+#		the expiration time.
 
-proc Httpd_SetCookie {sock cookie} {
+proc Httpd_SetCookie {sock cookie {modify 0}} {
     upvar #0 Httpd$sock data
     lappend data(set-cookie) $cookie
 }
@@ -1085,6 +1231,13 @@ proc Httpd_ReturnFile {sock type path {offset 0}} {
     }
 
     Count urlreply
+    if {[info exists data(mime,if-modified-since)]} {
+        # No need for complicated date comparison, if they're identical then 304.
+	if {$data(mime,if-modified-since) == [HttpdDate [file mtime $path]]} {
+            Httpd_NotModified $sock
+            return
+        }
+    } 
     set data(file_size) [file size $path]
 
     # Some files have a duality, when the client sees X bytes but the
@@ -1213,9 +1366,6 @@ proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
 #	See Httpd_SockClose
 
 proc HttpdCopyDone {in sock close bytes {error {}}} {
-    if {[string length $error] == 0} {
-	set error Close	;# Normal close, which triggers log message
-    }
     Httpd_SockClose $sock $close $error
 }
 
@@ -1344,6 +1494,39 @@ proc Httpd_Redirect {newurl sock} {
     HttpdSetCookie $sock
     puts $sock "Location: $newurl"
     puts $sock "URI: $newurl"
+    puts $sock ""
+
+    # The -nonewline is important here to work properly with
+    # keep-alive connections
+
+    puts -nonewline $sock $message
+    Httpd_SockClose $sock $close
+}
+
+# Httpd_NotModified --
+#
+# Generate a Not Modified reply (code 304)
+#
+# Arguments:
+#	sock	Socket connection
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Generates an HTTP reply
+
+proc Httpd_NotModified {sock} {
+    upvar #0 Httpd$sock data
+
+    if {[Thread_Respond $sock \
+	    [list Httpd_NotModified $sock]]} {
+	return
+    }
+
+    set message [HttpdErrorString 304]
+    set close 1
+    HttpdRespondHeader $sock text/html $close [string length $message] 304
     puts $sock ""
 
     # The -nonewline is important here to work properly with

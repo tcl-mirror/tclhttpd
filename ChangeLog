@@ -1,16 +1,109 @@
+2002-08-03  Brent Welch <welch@panasas.com>
+        * Added support for If-Modified-Since header and the
+          304 Not Modified return code (contributed by Brian Meagher)
+        * Applied the VirtualHost patch from Don Porter.
+        * Folded in all the changes by Melissa
+        * Changed the version number to 3.4 and updated various README's etc.
+
+2002-06-25  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/upload.tcl: Fixed bug that caused the socket never to be
+	closed if you try to upload a dirname ending with / (Netscape
+	allows this).
+	
+2002-03-29  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/httpd.tcl: Added a function to remove previously set cookies
+	that match a given pattern: Httpd_RemoveCookies.
+	
+2002-02-12  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/upload.tcl: Fixed "extra trailing newline" bug for large
+	files where blocking causes the UploadReadFile to be called more
+	than once.
+
 2002-02-02  Acacio Cruz <acacio.cruz@eur.autodesk.com>
 	* added config/ module
 	* regenerated configure script
 	* created contrib directory
 	* added cookie example to contrib/cookies
 
+2002-01-15  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/doc.tcl: Doc_Root and Doc_AddRoot now take optional callback
+	and readpost values.
+
+2001-12-23  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/upload.tcl: Fixed bug that caused all uploaded files to have
+	an extra trailing newline.
+
+2001-12-21  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/pkgIndex.tcl: Added the upload package to the index file.
+
 2001-12-18  Brent Welch <welch@panasas.com>
 	* bin/counter.tcl: Fixed initialization of the "errors" counter.
+
+2001-12-04  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/httpd.tcl: Added the individual Httpd_ServerShutdown and
+	Httpd_SecureServerShutdown procedures so sockets can be closed
+	separately.
 
 2001-11-30  Brent Welch <welch@panasas.com>
 	* bin/url.tcl: Minor cleanup of error message in Url_PrefixInstall.
 	* lib/upload.tcl: Fixed things so files are always uploaded in binary
 	* custom/hello.tcl: Fixed buglet in /hello/there
+
+2001-11-01  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/mime.types: Added the .core extension to the list of
+	octet-stream types.
+
+2001-10-09  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/doc.tcl: The Doc_text function gathers the content type from
+	the data array after substituting the document but before calling
+	the Httpd_ReturnData proc--this enhancement only applies to dynamic
+	docs.
+
+2001-09-24  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/thread.tcl: The master thread now has a function
+	Thread_ReapAll to remove all existing threads.  Busy threads are
+	marked for deletion and removed when they call Thread_Free.
+
+2001-09-18  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/thread.tcl: Slave threads now unset the data array after
+	passing the URL result to the main thread.
+
+2001-09-17  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/doc.tcl: Check whether directory listings are hidden before
+	showing them.  If hidden, then show the not-found page.
+	* lib/doc.tcl: Added substitution hook to allow post-processing after
+	each page is substituted.
+	* lib/doc.tcl: DocGetTemplates now returns a unique list of .tml files.
+	* lib/dirlist.tcl: Added an API to hide directory listings.
+	
+2001-08-31  Melissa Chawla <mchawla@panasas.com>
+
+	* lib/thread.tcl: Added Thread_Dispatch_General and
+ 	Thread_Invoke_General procedures.  Now you can eval scripts that
+ 	are not related to a socket in the threads managed by this module.
+  	Items on the thread queue that are 1-element are assumed to be
+ 	scripts with no socket.
+	
+2001-08-23  Melissa Chawla <mchawla@panasas.com>
+	* lib/doc.tcl: Added Doc_TemplateScope procedure.  Now you can
+ 	decide whether templates are subst'ed at the global or local (to
+ 	DocSubst proc) level.
+	
+2001-08-21  Melissa Chawla <mchawla@panasas.com>
+	* lib/thread.tcl: Added Thread_IsMaster and Thread_MasterEval
+	procedures.
 
 2001-07-11  Brent Welch <welch@panasas.com>
 	* bin/httpdthread.tcl: Catch around package require html

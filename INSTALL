@@ -6,8 +6,8 @@ without any installation at all.  That is the first option we explore.
 1. No Install Approach
 
 Try using the server without installing anything.
-The preconditions for this are that you have Tcl 8.3 and the
-Tcl Standard Library installed.  Test that by running tclsh8.3
+The preconditions for this are that you have Tcl 8.3 (or higher)
+and the Tcl Standard Library installed.  Test that by running tclsh8.3
 and attempting to
 	package require tcllib
 
@@ -37,7 +37,7 @@ then either fetch it from ftp://ftp.scriptics.com/pub/tcl/tcllib
 or use the one that comes with the "bundled TclHttpd" distribution.
 Grab the highest version number one you can find in:
 
-	ftp://ftp.scriptics.com/pub/tcl/tcllib
+	ftp://www.tcl.tk/pub/tcl/tcllib
 
 It contains a Tcl or SH script that copies its files into peer directories
 of your Tcl script library.  For example, if your Tcl library is in
@@ -96,13 +96,14 @@ of installation directory.  In particular, if you want to use the
 threading features in Tcl Httpd you need to recompile Tcl to enable
 threading.
 
-NOTE - THREADING IS NOT REQUIRED.  I've run Tcl Httpd for years without
-threads and it has served millions of URL requests on www.scriptics.com.
-Tcl has a wonderful event-driven I/O system so you can have a sophisticated
-server without threading.  However, if one of your requests blocks, then
-the whole server blocks.  Without threads, you are forced to put your
-blocking operations into CGI scripts so that the external CGI process
-blocks.  The server continues to service requests until the pipe connected
+NOTE - THREADING IS NOT REQUIRED.  I've run Tcl Httpd for years
+without threads and it has served millions of URL requests on
+www.scriptics.com (and now www.tcl.tk) Tcl has a wonderful event-driven
+I/O system so you can have a sophisticated server without threading.
+However, if one of your requests blocks, then the whole server
+blocks.  Without threads, you are forced to put your blocking
+operations into CGI scripts so that the external CGI process blocks.
+The server continues to service requests until the pipe connected
 to the CGI process produces data.
 
 ----------------------------------------------------------------------------

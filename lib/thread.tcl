@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: thread.tcl,v 1.11 2001/07/09 23:05:19 welch Exp $
+# RCS: @(#) $Id: thread.tcl,v 1.12 2002/08/04 06:03:35 welch Exp $
 
 package provide httpd::threadmgr 1.0
 
@@ -38,8 +38,23 @@ proc Thread_Init {{max 4}} {
     set Thread(maxthreads) $max	;# Number of threads we can create
     set Thread(threadlist) {}	;# List of threads we have created
     set Thread(freelist) {}	;# List of available threads
-    set Thread(queue) {}	;# List of sockets for queued requests
+    set Thread(deletelist) {}	;# List of running threads to delete when done
+    set Thread(queue) {}	;# List of queued requests, ?socket? cmd
     set Thread(enable) 1
+}
+
+# Thread_IsMaster
+#
+#	Find out if this thread is the master.
+#
+# Arguments
+#	none
+#
+# Results
+#	Returns true iff this thread is the master.
+
+proc Thread_IsMaster {} {
+    return [expr {![info exists ::Thread_MasterId]}]
 }
 
 # Thread_Enabled
@@ -113,14 +128,18 @@ proc Thread_Start {} {
 	[list array set Httpd [array get Httpd]]
     Thread_Send $id \
 	[list array set Config [array get Config]]
-    Thread_Send $id \
-	[list source $Config(main)]
-    
+
+    # Let the new thread know its master's Id.  Only slave threads have
+    # the "Thread_MasterId" global varaible set.
+    Thread_Send $id [list set Thread_MasterId [Thread_Id]]
+
+    Thread_Send $id [list source $Config(main)]
+
     return $id
 }
 
 # Thread_Dispatch --
-#	This dispatches the command to a worker thread.
+#	This dispatches the HTTP request to a worker thread.
 #	That thread should use Thread_Respond or raise an error
 #	to complete the request.
 #
@@ -170,9 +189,48 @@ proc Thread_Dispatch {sock cmd} {
     }
 }
 
+# Thread_Dispatch_General --
+#	This dispatches the command to a worker thread.
+#	That thread should use Thread_Respond_General or raise an error
+#	to complete the request.
+#
+# Arguments:
+#	cmd	Command to invoke in a worker
+#
+# Side Effects:
+#	Allocate a thread or queue the command/sock for later execution
+
+proc Thread_Dispatch_General {cmd} {
+    global Thread Url
+    if {!$Thread(enable) || $Thread(maxthreads) == 0} {
+	eval $cmd
+    } else {
+	if {[llength $Thread(freelist)] == 0} {
+	    if {[llength $Thread(threadlist)] < $Thread(maxthreads)} {
+
+		# Add a thread to the free pool
+
+		set id [Thread_Start]
+		lappend Thread(threadlist) $id
+		lappend Thread(freelist) $id
+	    } else {
+		
+		# Queue the request until a thread is available
+
+		lappend Thread(queue) [list $cmd]
+		Count threadqueue
+		return
+	    }
+	}
+	set id [lindex $Thread(freelist) 0]
+	set Thread(freelist) [lrange $Thread(freelist) 1 end]
+	
+	Thread_SendAsync $id [list Thread_Invoke_General $cmd]
+    }
+}
 
 # Thread_Invoke --
-#	This is invoked in a worker thread to handle a request
+#	This is invoked in a worker thread to handle an HTTP request.
 #
 # Arguments:
 #	sock	The name of the socket connection.  Probably is not
@@ -190,6 +248,11 @@ proc Thread_Invoke {sock datalist cmd} {
     }
     Count urlhits
     array set data $datalist
+
+    # Make sure the thread knows which socket it's currently processing.
+    # This is needed for redirects from within doc templates.
+    set ::Httpd(currentSocket) $sock
+
     if {[catch $cmd result]} {
 	global errorInfo errorCode
 	Count errors
@@ -197,6 +260,28 @@ proc Thread_Invoke {sock datalist cmd} {
     } else {
 	return $result
     }
+}
+
+# Thread_Invoke_General --
+#	This is invoked in a worker thread to handle general eval request.
+#
+# Arguments:
+#	cmd	Tcl command to eval in this thread
+#
+# Results:
+#	None
+
+proc Thread_Invoke_General {cmd} {
+    if {[catch $cmd result]} {
+	global errorInfo errorCode
+	Count errors
+
+        # An error occurred, so log it.
+        Log {} bgerror "Error with code $errorCode in thread [Thread_Id]:\n$errorInfo"
+    }
+    
+    Thread_MasterEvalAsync [list Thread_Free [Thread_Id]]
+    return
 }
 
 # Thread_Respond --
@@ -219,6 +304,10 @@ proc Thread_Respond {sock cmd} {
 
 	Thread_SendAsync $data(master_thread) [list Thread_Unwind \
 		 [Thread_Id] $sock [array get data] $cmd]
+
+        # The next iteration of the thread should not have access to
+        # past connection data.
+	unset data
 	return 1
     } else {
 	return 0
@@ -227,7 +316,7 @@ proc Thread_Respond {sock cmd} {
 }
 
 # Thread_Unwind --
-#	Invoke a response handler for a thread
+#	Invoke a response handler for a thread that handled an HTTP request.
 #	This cleans up the connection in the main thread.
 #
 # Arguments:
@@ -256,19 +345,29 @@ proc Thread_Unwind {id sock datalist cmd} {
 #	id	The ID of the worker thread.
 #
 # Side Effects:
-#	Put the thread on the freelist, or perhaps handle
+#	Reap the thread, put it on the freelist, or perhaps handle
 #	a queued request.
 
 proc Thread_Free {id} {
     global Thread
-    if {[llength $Thread(queue)] > 0} {
+
+    if {[ldelete Thread(deletelist) $id]} {
+        # This thread was marked for deletion, so tell it to exit.
+        Thread_SendAsync $t thread::exit
+        ldelete Thread(threadlist) $id
+    } elseif {[llength $Thread(queue)] > 0} {
 	set state [lindex $Thread(queue) 0]
 	set Thread(queue) [lrange $Thread(queue) 1 end]
-	set sock [lindex $state 0]
-	set cmd [lindex $state 1]
-	upvar #0 Httpd$sock data
-	set data(master_thread) [Thread_Id]
-	Thread_SendAsync $id [list Thread_Invoke $sock [array get data] $cmd]
+        if {[llength $state] == 1} {
+            # No socket was given, so just eval the command in the thread.
+            set cmd [lindex $state 0]
+            Thread_SendAsync $id [list Thread_Invoke_General $cmd]
+        } else {
+            set sock [lindex $state 0]
+            set cmd [lindex $state 1]
+            upvar #0 Httpd$sock data
+            Thread_SendAsync $id [list Thread_Invoke $sock [array get data] $cmd]
+        }
     } else {
 	lappend Thread(freelist) $id
     }
@@ -310,6 +409,24 @@ proc Thread_Send {id script} {
     }
 }
 
+# Thread_MasterEval
+#
+#	Evaluate the given script synchronously in the master thread.
+#
+# Arguments
+#	script	The script to evaluate.
+#
+# Results
+#	Returns the result of evaluating the script in the master.
+
+proc Thread_MasterEval {script} {
+    if {[info exists ::Thread_MasterId]} {
+        return [Thread_Send $::Thread_MasterId $script]
+    } else {
+        return [eval $script]
+    }
+}
+
 # Thread_SendAsync --
 #	thread send -async
 #
@@ -325,6 +442,25 @@ proc Thread_SendAsync {id script} {
 	return -code error $result
     } else {
 	return $result
+    }
+}
+
+# Thread_MasterEvalAsync
+#
+#	Evaluate the given script asynchronously in the master thread.
+#
+# Arguments
+#	script	The script to evaluate.
+#
+# Results
+#	none.
+
+proc Thread_MasterEvalAsync {script} {
+    if {[info exists ::Thread_MasterId]} {
+        return [Thread_SendAsync $::Thread_MasterId $script]
+    } else {
+        after 0 [list eval $script]
+        return
     }
 }
 
@@ -352,6 +488,70 @@ proc Thread_Id {} {
 
 proc Thread_IsFree {id} {
     global Thread
-    return [expr {[lsearch $Thread(freelist) $id] >= 0}]
+    return [expr {[lsearch $Thread(freelist) $id] <= 0}]
+}
+
+# Thread_ReapAll --
+#	The master thread should reap all free threads and mark all busy
+#	threads for deletion upon completion of their task.
+#
+# Arguments:
+#	None.
+#
+# Results:
+#	None.
+
+proc Thread_ReapAll {} {
+    if {![Thread_IsMaster]} {
+        # This proc should only be called by the master thread.
+        return
+    }
+
+    global Thread
+    set Thread(deletelist) {}
+
+    foreach id $Thread(threadlist) {
+        if {[lsearch $Thread(freelist) $id] != -1} {
+            # Free threads are told to exit and removed from the freelist.
+            Thread_SendAsync $id thread::exit
+        } else {
+            # Busy threads are marked for deletion upon completion of their task.
+            lappend Thread(deletelist) $id
+        }
+    }
+
+    set Thread(threadlist) $Thread(deletelist)
+    set Thread(freelist) {}
+    return
+}
+
+# Thread_SendAll --
+#	The master thread serially sends this script to all free threads,
+#	including itself.
+#
+# Arguments:
+#	cmd	The script to send to all threads.
+#
+# Results:
+#	Returns the list of alternating thread id and result, or {} if
+#	this thread is not the master.
+
+proc Thread_SendAll {cmd} {
+    if {![Thread_IsMaster]} {
+        # This proc should only be called by the master thread.
+        return {}
+    }
+
+    global Thread
+    foreach id $Thread(threadlist) {
+        if {[lsearch $Thread(freelist) $id] != -1} {
+            # Send the same script to all free threads.
+            lappend result $id [Thread_Send $id $cmd]
+        }
+    }
+    # Also eval the script in this thread.
+    catch {eval $cmd} res
+    lappend result [thread::id] $res
+    return $result
 }
 

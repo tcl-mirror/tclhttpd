@@ -53,6 +53,10 @@ proc Url_Dispatch {sock} {
 
 	# INLINE VERSION OF Url_PrefixMatch
 
+	# Collapse multiple // to avoid tricks like //cgi-bin that fail
+	# to match the /cgi-bin prefix
+	regsub -all /+ $url / url
+
 	if {![regexp ^($Url(prefixset))(.*) $url x prefix suffix] ||
 		([string length $suffix] && ![string match /* $suffix])} {
 
@@ -190,6 +194,10 @@ proc Url_PrefixMatch {url prefixVar suffixVar} {
     # in the / domain.
 
     # IF YOU CHANGE THIS  - FIX in-line CODE IN URL_DISPATCH
+
+    # Collapse multiple // to avoid tricks like //cgi-bin that fail
+    # to match the /cgi-bin prefix
+    regsub -all /+ $url / url
 
     if {![info exist Url(prefixset)] ||
 	    ![regexp ^($Url(prefixset))(.*) $url x prefix suffix] ||
@@ -373,8 +381,8 @@ proc Url_PrefixInstall {prefix command args} {
 		    set readpost $v
 		}
 		default {
-		    return -code error "Unknown option $n.
-			    Must be -thread or -callback"
+		    return -code error "Unknown option $n.\
+                        Must be -thread, -callback, or -readpost"
 		}
 	    }
 	}

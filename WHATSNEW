@@ -1,5 +1,20 @@
 What's new in TclHttpd
 
+3.4
+
+The upload domain has seen many fixes as a result of actually using it.
+Similarly, the Thread package has been updated to include some features
+added when we embedded TclHttpd into a threaded management server.
+The Doc module had some features added to template substitution
+and directory listing.  You can control the scope at which a template
+is subst'ed, and you and turn directory listings off.  There is also
+simple support for the If-Modified-Since header.  See the ChangeLog
+for details.
+
+There is now a Virtual Host mechanism.  You can load additional
+configuration files for different servers, and they are processed
+in different Tcl interpreters within your main server application.
+
 3.3
 
 This adds a file upload domain handler. (upload.tcl)

@@ -20,7 +20,7 @@ application/x-mswrite		wri
 application/x-msschedule	scd
 application/news-message-id                    
 application/news-transmission      
-application/octet-stream       bin  exe gz Z zip          
+application/octet-stream       bin core exe tgz gz Z zip          
 application/octet-stream       sun4 i86pc
 application/oda                oda
 application/pdf                pdf
@@ -96,6 +96,7 @@ text/richtext                  rtx
 text/tab-separated-values      tsv             
 text/x-setext                  etx             
 text/xml		       xml
+text/css                       css
 video/mpeg                     mpeg mpg mpe    
 video/quicktime                qt mov          
 video/x-msvideo                avi             

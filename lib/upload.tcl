@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.5 2001/12/01 17:20:20 welch Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.6 2002/08/04 06:03:35 welch Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -157,7 +157,8 @@ proc UploadReadHeader {sock} {
     # line-ending mode is in the uploaded file.
 
     while {[gets $sock line] >= 0} {
-	if {[string length $line] == 0} {
+        # Check for an empty or white-space only line.
+	if {[string length [string trim $line]] == 0} {
 
 	    # End of headers.  We should have seen a name header
 	    # that is now in formName.  Keep a list of those, and 
@@ -195,13 +196,25 @@ proc UploadReadHeader {sock} {
 			}
 			"filename" {
 			    # Open the upload file
+
+                            # If the uploade file is empty string,
+                            # then use a temporary name--this request
+                            # will fail later.  Netscape allows you
+                            # to upload dirnames like /a/b/, which
+                            # end up as empty string here.
+                            if {$v == ""} {
+                                set v "directory"
+                            }
+
 			    # I'm a bit suprised that "file tail"
 			    # when run on a Unix box will not deal
 			    # with c:\a\b\c.txt correctly...
 			    regsub -all {\\} $v / v
 			    set tail [file tail $v]
 			    set path [file join $upload(dir) $tail]
-			    set upload(fd) [open $path w]
+                            set upload(fd) [open $path w]
+			    set upload(lastLineExists) 0
+
 			    # always do binary transfers
 			    fconfigure $upload(fd) -trans binary
 			    set upload(file,$upload(formName)) $path
@@ -213,6 +226,7 @@ proc UploadReadHeader {sock} {
 	    }
 	}
     }
+
     if {[fblocked $sock]} {
 	return
     }
@@ -236,12 +250,15 @@ proc UploadReadPart {sock} {
 		fileevent $sock readable [list UploadReadHeader $sock]
 	    }
 	} else {
-	    append upload(data,$upload(formName)) $line
+            # Trim the string to remove carriage returns.
+	    append upload(data,$upload(formName)) [string trim $line]
 	}
     }
 }
 
 # Read a content part and copy it to a file.
+# Because the server is non-blocking, this may be called multiple times to
+# process a file.
 
 proc UploadReadFile {sock} {
     upvar #0 Upload$sock upload
@@ -249,8 +266,14 @@ proc UploadReadFile {sock} {
 	UploadDone $sock
 	return
     }
+
     while {[gets $sock line] >= 0} {
 	if {[regexp ^--$upload(boundary)(--)? $line x end]} {
+            if {$upload(lastLineExists)} {
+                # At least 1 line was read.  Write the last line to the
+                # file without the trailing newline character.
+                puts -nonewline $upload(fd) [string range $upload(lastLine) 0 end-1]
+            }
 	    close $upload(fd)
 	    unset upload(fd)
 	    if {$end == "--"} {
@@ -262,13 +285,21 @@ proc UploadReadFile {sock} {
 	    }
 	    return
 	} else {
-	    puts $upload(fd) $line
+            # Delay the writing of each line to make sure we don't add an
+            # extra trailing newline to the last line.
+            if {$upload(lastLineExists)} {
+                puts $upload(fd) $upload(lastLine)
+            } else {
+                set upload(lastLineExists) 1
+            }
+            set upload(lastLine) $line
 	}
     }
 }
 
 proc UploadDone {sock} {
     upvar #0 Upload$sock upload
+
     catch {
 	# The first argument is a list of file names that were uploaded
 	# The second argument is a name-value list of the other data

@@ -5,12 +5,12 @@ as Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 3.3.1
-Last Modified: Wed Oct 18 11:06:30 PDT 2000
+Version: 3.4
+Last Modified: Sat Aug  3 22:28:24 PDT 2002
 
 QUICK START
 
-It requires Tcl 8.3 and the new Standard Tcl Library.
+It requires Tcl 8.3 (or higher) and the new Standard Tcl Library.
 This uses the cmdline, base64, ncgi, html, and counter
 modules of the Standard Tcl Library. If you must, you
 can probably get by with Tcl 8.0 or later if you install
@@ -24,7 +24,7 @@ UNIX:
 
 1) Test preconditions
 	tclsh8.3
-	package require tcllib 0.8
+	package require tcllib
 
 2) If you can do the above, then you should be able to run the
 server directly from this distribution directory without bothering
@@ -43,6 +43,11 @@ httpd.tcl -help
 This lets you set basic parameters like port number and server name.
 
 VERSION SUMMARY
+
+Version 3.4 has several updates to the Doc, Upload, and Thread modules
+done by Melissa Chawla of Panasas. Please see the ChangeLog for details.
+There is also a small modification to support If-Modified-Since optimization
+in Httpd_ReturnFile contributed by Brian Meagher.
 
 Version 3.3.1 was just a cleanup of the installation files and
 configure scripts. (acruz)
@@ -107,15 +112,15 @@ with 8.0a2, but not with 8.0b1 because Tcl_GetFile has gone.
 
 MAILING LISTS
 
-There is a mailing list for users of the Tcl web server.
-Send a message containing the word "subscribe" to
-tcl-httpd-request@scriptics.com
-or, if that is dead, send email to
+There is a mailing list for users of the Tcl web server at
+SourceForge as part of the tclhttpd project.  Please sign
+up via the web site at www.sourceforge.net/projects/tclhttpd.
+If that is dead, send email to
 welch@acm.org
 to find out the current location of the mailing list
 
 Send messages for the list to
-tcl-httpd@scriptics.com
+tclhttpd-users@lists.sourceforge.net
 
 Bugs and comments to the mailing list, or to <welch@acm.org>
 Put "httpd" in the subject of the mail so I can sort it automatically.
@@ -123,19 +128,17 @@ Put "httpd" in the subject of the mail so I can sort it automatically.
 WWW
 
 The current URL for the distribution can be found in
-ftp://ftp.scriptics.com/pub/tcl/httpd/
+ftp://www.tcl.tk/pub/tcl/httpd/
 
 There is documentation at
 http://www.beedub.com/tclhttpd/
-http://www.scriptics.com/tclhttpd/
-
-There is a netCVS repository on cvs.scriptics.com.
-For details, please see http://www.scriptics.com/products/tcltk/netcvs.html
+http://www.tcl.tk/tclhttpd/
 
 SourceForge
 
-I have just created a "tclhttpd" project at
-http://sourceforge.net/projects/tclhttpd/
-that will become the CVS home for TclHttpd.  See also
+There is a netCVS repository on SourceForge
+For details, please see http://www.sourceforge.net/projects/tclhttpd
+
+See also
 http://tclhttpd.sourceforge.net/
 ftp://tclhttpd.sourceforge.net/pub/tclhttpd

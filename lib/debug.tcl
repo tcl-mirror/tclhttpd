@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.13 2001/03/13 06:17:51 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.14 2002/08/04 06:03:35 welch Exp $
 
 package provide httpd::debug 1.0
 
@@ -301,12 +301,13 @@ proc Debug/errorInfo {title errorInfo {env {no environment}}} {
 proc Debug/dbg {host port} {
     global debug_init Httpd
 
-    # In case application-direct parameter bindings are broken...
+    # In case application-direct parameter bindings are broken,
+    # use the local host and default prodebug port.
     if {$host == ""} {
-	set host sage
+	set host [info hostname]
     }
     if {$port == ""} {
-	set port 5000
+	set port 2576
     }
 
     if {![info exist debug_init]} {

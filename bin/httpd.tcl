@@ -38,11 +38,12 @@
 #
 # Copyright (c) 1997 Sun Microsystems, Inc.
 # Copyright (c) 1998-2000 Scriptics Corporation
+# Copyright (c) 2001-2002 Panasas
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.39 2002/02/07 01:02:50 acacio Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.40 2002/08/04 06:03:35 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -62,7 +63,7 @@ set home [file join [pwd] $home]
 # 2. Standalone install - look for $home/../lib/tclhttpd $home/tcllib
 # 3. Tcl package install - look for $tcl_library/../tclhttpd
 
-set v 3.3
+set v 3.4
 
 if {[file exist [file join $home ../lib/httpd.tcl]]} {
     # Cases 1 and 2
@@ -145,7 +146,7 @@ if {$ix >= 0} {
     set Config(config) [file join $Config(home) tclhttpd.rc]
 }
 
-package require httpd 1.5
+package require httpd 1.6
 package require httpd::version		;# For Version proc
 package require httpd::utils		;# For Stderr
 package require httpd::counter		;# For Count
@@ -164,6 +165,7 @@ namespace import config::cget
 
 package require cmdline
 array set Config [cmdline::getoptions argv [list \
+        [list virtual.arg      [cget virtual]      {Virtual host config list}] \
         [list config.arg       [cget config]       {Configuration File}] \
         [list main.arg         [cget main]         {Per-Thread Tcl script}] \
         [list docRoot.arg      [cget docRoot]      {Root directory for documents}] \
@@ -203,7 +205,6 @@ Httpd_Init
 #Counter_Init $Config(secs)
 
 # Open the listening sockets
-
 Httpd_Server $Config(port) $Config(host) $Config(ipaddr)
 append startup "httpd started on port $Config(port)\n"
 
@@ -290,6 +291,10 @@ if {$Config(threads) > 0} {
 ##################################
 # Main application initialization
 ##################################
+
+foreach {host file} $Config(virtual) {
+    Httpd_VirtualHost $host $file
+}
 
 if {[catch {source $Config(main)} message]} then {
     global errorInfo
