@@ -1,3 +1,7 @@
+2004-09-05 Colin McCormack <colin@sharedtech.dyndns.org>
+	* lib/*.tcl, lib/MakeIndex: added explicit package requires
+	to each component for each required component.
+
 2004-08-23 Colin McCormack <colin@sharedtech.dyndns.org>
 	* lib/digest.tcl: force md5 calculations to be lower case hex
 	As the spec requires.
