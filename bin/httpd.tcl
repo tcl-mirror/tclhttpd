@@ -42,7 +42,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.30 2000/09/20 20:40:54 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.31 2000/09/22 05:39:04 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -173,6 +173,7 @@ array set Config [cmdline::getoptions argv [list \
         [list webmaster.arg    [cget webmaster]    {E-mail address for errors}] \
         [list uid.arg          [cget uid]          {User Id that server runs under}] \
         [list gid.arg          [cget gid]          {Group Id for caching templates}] \
+        [list secs.arg          [cget secsPerMinute] {Seconds per "minute" for time-based histograms}] \
         [list threads.arg      [cget threads]      {Number of worker threads (zero for non-threaded)}] \
         [list library.arg      [cget library]      {Directory list where custom packages and auto loads are}] \
 	[list debug.arg	       0	        {If true, start interactive command loop}] \
@@ -196,6 +197,7 @@ if {$Config(debug)} {
 ###################
 
 Httpd_Init
+Counter_Init $Config(secs)
 
 # Open the listening sockets
 

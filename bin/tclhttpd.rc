@@ -96,6 +96,12 @@ Config https_ipaddr	{}
 
 Config webmaster	webmaster@[info hostname]
 
+# secsPerMinute - The seconds-per-minute value used when creating the
+# time-based histograms on the /status page.  This should
+# be between 1 and 60, inclusive.
+
+Config secsPerMinute	60
+
 # threads - the maximum number of worker threads to create.
 # If 0, then no threads are ever used.
 
