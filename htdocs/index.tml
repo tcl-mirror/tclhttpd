@@ -15,7 +15,7 @@ platform for web application development."]
 <p>
 The Tcl-Httpd is a pure Tcl implementation of a Web server (HTTP/1.0).
 It runs as a Tcl script on top of
-<a href=http://dev.scriptics.com/software/tcltk/>Tcl 8.3</a>.
+<a href=http://www.tcl.tk/software/tcltk/>Tcl 8.3</a>.
 <p>
 <small>
 If you install the Standard Tcl Library with your Tcl 8.0 or later release you can probably
@@ -46,7 +46,7 @@ The server is distributed under a <a href=license.terms>copyright</a> that allow
 
 [mypage::README_links]
 
-<a href=http://www.scriptics.com/tclhttpd/>The main TclHttpd Information Page</a>.
+<a href=http://www.tcl.tk/software/tclhttpd/>The main TclHttpd Information Page</a>.
 <p>
 A <a href=book/TCLHTTPD.html>Tcl Httpd Book Chapter</a> from the
 3rd Edition of
@@ -61,8 +61,8 @@ in the reference pages.  The source code is the truth!
 Please <a href=register.html>Register Your Software</a> so
 we can see how widely used the server is.
 <p>
-The <a href=mailto:tcl-httpd@scriptics.com>tcl-httpd@scriptics.com</a> mailing list,
-for which there is an <a href=http://dev.scriptics.com/lists/tcl-httpd>archive</a>.
+The <a href="mailto:tclhttpd-users@lists.sourceforge.net">tclhttpd-users@lists.sourceforge.net</a> mailing list,
+for which there is an <a href=http://www.tcl.tk/lists/tcl-httpd>archive</a>.
 
 <h2>Control/Status Pages</h2>
 <ul>

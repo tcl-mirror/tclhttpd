@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.6 2002/08/04 06:03:35 welch Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.7 2002/08/19 05:14:39 welch Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -262,6 +262,15 @@ proc UploadReadPart {sock} {
 
 proc UploadReadFile {sock} {
     upvar #0 Upload$sock upload
+
+    # Maximum size of the buffer, in characters, before we schedule
+    # another read and update other waiting tasks.  Increasing this
+    # number will probably make uploads a little faster at the expense
+    # of some responsiveness on the part of other clients attempting
+    # to connect to the server.
+    set maxbuffersize 1000
+    set buffersize 0
+
     if {[eof $sock]} {
 	UploadDone $sock
 	return
@@ -274,6 +283,7 @@ proc UploadReadFile {sock} {
                 # file without the trailing newline character.
                 puts -nonewline $upload(fd) [string range $upload(lastLine) 0 end-1]
             }
+	    set buffersize 0
 	    close $upload(fd)
 	    unset upload(fd)
 	    if {$end == "--"} {
@@ -293,6 +303,13 @@ proc UploadReadFile {sock} {
                 set upload(lastLineExists) 1
             }
             set upload(lastLine) $line
+	}
+	incr buffersize [string bytelength $line]
+	if { $buffersize > $maxbuffersize } {
+	    set buffersize 0
+	    fileevent $sock readable [list CsvUploadReadFile $sock]
+	    update idletasks
+	    break
 	}
     }
 }

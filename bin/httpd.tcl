@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.40 2002/08/04 06:03:35 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.41 2002/08/19 05:15:21 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -292,8 +292,8 @@ if {$Config(threads) > 0} {
 # Main application initialization
 ##################################
 
-foreach {host file} $Config(virtual) {
-    Httpd_VirtualHost $host $file
+foreach {hostNames file} $Config(virtual) {
+    Httpd_VirtualHosts $hostNames $file
 }
 
 if {[catch {source $Config(main)} message]} then {

@@ -1,0 +1,35 @@
+# Expect script to drive DIST, and handle the CVS password prompting.
+
+foreach f [glob -nocomplain ~/scratch/* ~/dist/tclhttpd3.4* ~/dist/tclhttpd34* ~/tmp/tclhttpd3.4-dist] {
+  puts "Removing $f"
+  file delete -force $f
+}
+
+stty -echo
+send_user "CVS Password: "
+expect_user {
+    -re "(.*)\n" { set Password $expect_out(1,string) }
+    timeout { return -code error "You must enter a password!"}
+}
+stty echo
+send_user \n
+
+set timeout 1000
+spawn sh DIST
+expect {
+  password: {
+    stty -echo
+    after 200   ;# necessary to avoid echoing password
+    send $Password\r
+    stty echo 
+    exp_continue
+  }
+}
+
+puts "Unzipping package into ~/tmp"
+cd ~/tmp
+exec gunzip < ~/dist/tclhttpd3.4-dist.tar.gz | tar xf -
+cd tclhttpd3.4-dist
+set timeout 0
+spawn make 
+interact

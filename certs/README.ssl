@@ -12,9 +12,8 @@ Next comes the "TLS" Tcl extension, which uses the crypto library.  You can get
 this from the Scriptics CVS repository, or from its home at
 	http://www.sensus.org/tcl/
 NOTE: You really do need the version from our CVS repository.  There is
-a snapshot of this at ftp://ftp.scriptics.com/pub/tcl/httpd/tls1.3.cvs.tar.gz
-As of this writing, the most stable SSL configuration is to use the
-latest TLS from CVS and the "core-8-3-1-branch" CVS branch of Tcl 8.3
+a snapshot of this at ftp://ftp.tcl.tk/pub/tcl/httpd/
+As of this writing, the stable version of TLS is version 1.4.1
 
 Finally you need keys and certificates for your server.  OpenSSL comes with
 a command-line utility called "openssl" that you can use to generate keys

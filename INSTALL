@@ -33,7 +33,7 @@ stop the server.
 2. Install Tcl Standard Library
 
 If approach #1 doesn't work because you don't have the Standard Tcl Library,
-then either fetch it from ftp://ftp.scriptics.com/pub/tcl/tcllib
+then either fetch it from ftp://www.tcl.tk/pub/tcl/tcllib
 or use the one that comes with the "bundled TclHttpd" distribution.
 Grab the highest version number one you can find in:
 
@@ -42,7 +42,7 @@ Grab the highest version number one you can find in:
 It contains a Tcl or SH script that copies its files into peer directories
 of your Tcl script library.  For example, if your Tcl library is in
 /usr/local/tcl/tcl8.3, then it will create a directory named something like
-/usr/local/tcl/tcllib0.8.  Once these are in place, you should be able to
+/usr/local/tcl/tcllib1.3.  Once these are in place, you should be able to
 "package require tcllib" from your Tcl shell.
 
 WARNING: The Tcl package mechanism doesn't deal correctly with multiple
@@ -87,14 +87,17 @@ Tcl is in a central location that you do not own, you might have
 to hand-edit bin/httpd.tcl to get the auto_path right.  Or, simply
 compile and install Tcl yourself in a locate you control.
 
-4. Use the CONFIG and MAKE scripts in the bundled distrubtion.
+4. Use the Makefile in the bundled distrubtion.
 
 The bundled distribution includes Tcl, Tcl Httpd, the Thread extension,
-and the Standard Tcl Library.  Its "build" directory contains a CONFIG
-and MAKE script that you can modify to match your platform and choice
-of installation directory.  In particular, if you want to use the
-threading features in Tcl Httpd you need to recompile Tcl to enable
-threading.
+and the Standard Tcl Library.  It contains a toplevel Makefile that
+will attempt to compile and install all the packages in the bundle.
+By default it installs into a subdirectory (install), so you may want
+to edit the Makefile to change the PREFIX value.  There is also a
+PLATFORM variable there that defaults to Linux, but you can see
+settings for other platforms.
+
+The bundled build creates a Tcl interpreter with threading support.
 
 NOTE - THREADING IS NOT REQUIRED.  I've run Tcl Httpd for years
 without threads and it has served millions of URL requests on

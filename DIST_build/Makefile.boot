@@ -7,15 +7,16 @@
 TCL_VERSION=8.3.4
 TCL = tcl$(TCL_VERSION)
 TK = tk$(TCL_VERSION)
-THREAD = thread2.2
-TCLLIB = tcllib1.0
+THREAD = thread2.4
+TCLLIB = tcllib-1.3
 HTTPD = tclhttpd3.4
 
 # Edit MODULES if you don't want to build something.
 
-MODULES = $(TCL) $(THREAD) $(TCLLIB) $(HTTPD)
+MODULES = $(THREAD) $(TCLLIB) $(HTTPD)
+ALL_MODULES = $(TCL) $(MODULES)
 
-all: config make install
+all: config make-tcl make-modules install
 
 # PREFIX - this defines the root of the installation directory
 # EXEC_PREFIX - typically a sub-directory of PREFIX used to
@@ -32,8 +33,8 @@ ARCH=unix
 
 # Change PLATFORM so your builds and binaries are in a platform-specific dir.
 
-PLATFORM=solaris-sparc
-#PLATFORM=linux-ix86
+#PLATFORM=solaris-sparc
+PLATFORM=linux-ix86
 #PLATFORM=win32-ix86
 #PLATFORM=irix-mips
 #PLATFORM=hpux-parisc
@@ -47,7 +48,24 @@ CONFIG_FLAGS = --enable-gcc --enable-threads
 # the `pwd` that is used in the definition of PREFIX and EXEC_PREFIX
 # before the various chdir's done in the rule.
 
-config: build/$(PLATFORM)
+config: build/$(PLATFORM) config-tcl config-modules
+
+config-tcl:
+	@echo "$(TCL) configure"
+	-pwd=`pwd`; \
+	prefix=$(PREFIX) ; \
+	exec_prefix=$(EXEC_PREFIX) ; \
+        i=$(TCL) ; \
+        mkdir $$pwd/build/$(PLATFORM)/$$i ; \
+        cd $$pwd/build/$(PLATFORM)/$$i ; \
+        path=$$pwd/$$i/$(ARCH)/configure ; \
+        echo "Configuring in build/$(PLATFORM)/$$i" ; \
+        sh $$path --prefix=$$prefix \
+            --exec-prefix=$$exec_prefix \
+            $(CONFIG_FLAGS) \
+            --with-tcl=$$pwd/build/$(PLATFORM)/$(TCL); \
+
+config-modules:
 	@echo "Running configure prefix=$(PREFIX)"
 	-pwd=`pwd`; \
 	prefix=$(PREFIX) ; \
@@ -56,17 +74,54 @@ config: build/$(PLATFORM)
 	    echo "" ; \
 	    mkdir $$pwd/build/$(PLATFORM)/$$i ; \
 	    cd $$pwd/build/$(PLATFORM)/$$i ; \
-	    if test -f $$pwd/$$i/$(ARCH)/configure ; then \
-		path=$$pwd/$$i/$(ARCH)/configure ; \
-	    else \
-		path=$$pwd/$$i/configure ; \
-	    fi; \
+            path=$$pwd/$$i/configure ; \
 	    if test -f $$path ; then \
 		echo "Configuring in build/$(PLATFORM)/$$i" ; \
 		sh $$path --prefix=$$prefix \
 		    --exec-prefix=$$exec_prefix \
 		    $(CONFIG_FLAGS) \
-		    --with-tcl=$$pwd/build/$(PLATFORM)/$(TCL); \
+		    --with-tcl=$$pwd/build/$(PLATFORM)/$(TCL) \
+		    --with-tcl-include=$$pwd/$(TCL)/generic; \
+	    else \
+		echo "Skipping configure in $$i" ; \
+	    fi ; \
+	    echo "" ; \
+	done;
+
+config: build/$(PLATFORM) config-tcl config-modules
+
+config-tcl:
+	@echo "$(TCL) configure"
+	-pwd=`pwd`; \
+	prefix=$(PREFIX) ; \
+	exec_prefix=$(EXEC_PREFIX) ; \
+        i=$(TCL) ; \
+        mkdir $$pwd/build/$(PLATFORM)/$$i ; \
+        cd $$pwd/build/$(PLATFORM)/$$i ; \
+        path=$$pwd/$$i/$(ARCH)/configure ; \
+        echo "Configuring in build/$(PLATFORM)/$$i" ; \
+        sh $$path --prefix=$$prefix \
+            --exec-prefix=$$exec_prefix \
+            $(CONFIG_FLAGS) \
+            --with-tcl=$$pwd/build/$(PLATFORM)/$(TCL); \
+
+config-modules:
+	@echo "Running configure prefix=$(PREFIX)"
+	-pwd=`pwd`; \
+	prefix=$(PREFIX) ; \
+	exec_prefix=$(EXEC_PREFIX) ; \
+	for i in $(MODULES) ; do \
+	    echo "" ; \
+	    mkdir $$pwd/build/$(PLATFORM)/$$i ; \
+	    cd $$pwd/build/$(PLATFORM)/$$i ; \
+            path=$$pwd/$$i/configure ; \
+	    if test -f $$path ; then \
+		echo "Configuring in build/$(PLATFORM)/$$i" ; \
+		sh $$path --prefix=$$prefix \
+		    --exec-prefix=$$exec_prefix \
+		    $(CONFIG_FLAGS) \
+		    --with-tcl=$$pwd/build/$(PLATFORM)/$(TCL) \
+		    --with-tcl-include=$$pwd/$(TCL)/generic; \
 	    else \
 		echo "Skipping configure in $$i" ; \
 	    fi ; \
@@ -79,7 +134,20 @@ build:
 build/$(PLATFORM):  build
 	mkdir build/$(PLATFORM)
 
-make:
+# We have to make and install Tcl first so that the extensions
+# can properly find the stubs library.  We also redefine TCLSH_PROG
+# to use the installed version so various utilities in tcllib work
+# when the make is done there.
+
+make-tcl:
+	-pwd=`pwd`; \
+	prefix=$(PREFIX) ; \
+        echo "Make in $$pwd/build/$(PLATFORM)/$(TCL)" ; \
+        cd $$pwd/build/$(PLATFORM)/$(TCL) ; \
+        make ; \
+        make install
+
+make-modules:
 	-pwd=`pwd`; \
 	prefix=$(PREFIX) ; \
 	for i in $(MODULES) ; do \
@@ -88,7 +156,7 @@ make:
 		echo "Make in $$pwd/build/$(PLATFORM)/$$i" ; \
 		cd $$pwd/build/$(PLATFORM)/$$i ; \
 		echo "" ; \
-		make ; \
+		make TCLSH_PROG=$$pwd/install/$(PLATFORM)/bin/tclsh8.3 ; \
 	    else \
 		echo "Skipping Make for $$i" ; \
 	    fi; \

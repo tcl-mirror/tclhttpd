@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: thread.tcl,v 1.12 2002/08/04 06:03:35 welch Exp $
+# RCS: @(#) $Id: thread.tcl,v 1.13 2002/08/19 05:14:39 welch Exp $
 
 package provide httpd::threadmgr 1.0
 
@@ -366,6 +366,7 @@ proc Thread_Free {id} {
             set sock [lindex $state 0]
             set cmd [lindex $state 1]
             upvar #0 Httpd$sock data
+            set data(master_thread) [Thread_Id]
             Thread_SendAsync $id [list Thread_Invoke $sock [array get data] $cmd]
         }
     } else {
