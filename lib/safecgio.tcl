@@ -161,7 +161,7 @@ proc SafeCGI_Cleanup {interp} {
 # 		string is the output data
 
 proc SafeCGI_Puts {interp max args} {
-    if {[string match "-nonewline" [lindex $args 0]} {
+    if {[string match "-nonewline" [lindex $args 0]]} {
 	set flag -nonewline
 	set args [lrange $args 1 end]
     } else {
