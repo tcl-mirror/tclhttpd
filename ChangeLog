@@ -1,3 +1,24 @@
+2004-03-22  Brent Welch <welch@panasas.com>
+        * lib/debug.tcl: Added DebugSetRandomPassword and have the
+        debug domain compute a random password when it starts up.
+        * htdocs/debug/.tclaccess: added to use the random debug password
+        * htdocs/status/.tclaccess: added to use the random debug password
+        * lib/redirect.tcl: fixed typo in a comment
+        * bin/tclhttpd.rc: adjusted CompressProg config to be an absolute
+        pathname.  It looks for /bin/gzip, /usr/bin/gzip, and
+        /usr/local/bin/gzip before just picking "gzip".
+        * htdocs/cgi-bin/*.cgi: tweaked #! line so it searchs for
+        tclsh among these version:
+          /usr/bin/tclsh
+          /usr/local/bin/tclsh8.4
+          /usr/local/bin/tclsh8.3
+          /usr/bin/tclsh8.4
+          tclsh
+        * htdocs/index.tml: reorganized the main page
+        * htcocs/learn: added various introductory pages
+        * htdocs/register.tml: added disclaimer, because this form
+        still doesn't work, lacking a good emailer-capable system 
+
 2004-03-23  Colin McCormack <colin@chinix.com>
 	* htdocs/access, htdocs/htaccess: updated /htaccess and
 	documentation
