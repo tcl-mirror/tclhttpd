@@ -268,10 +268,16 @@ proc HttpdAccept {self sock ipaddr port} {
     set data(ipaddr) $ipaddr
     if {[Httpd_Protocol $sock] == "https"} {
 	set data(ssl) 1
+	
+	# At this point the socket is in blocking mode, so
+	# tls::handshake will block until the SSL setup is complete.
+	# It seems possible to set up a fileevent that calls
+	# tls::handshake until it return 1, then switches the
+	# fileevent to HttpdRead.
+
 	set result [catch {tls::handshake $sock} err]
 	if {$result == 1} {
-		# following puts is temporary for debugging
-		puts stderr "HttpdAccept \{$self\} $sock $ipaddr $port $err"
+		Log $sock "HttpdAcceptHandshake" "\{$self\} $sock $ipaddr $port $err"
 		Httpd_SockClose $sock 1 "$err"
 		return
 	}
