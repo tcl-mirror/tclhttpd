@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.16 2002/08/31 07:30:43 welch Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.17 2003/03/28 08:03:56 coldstore Exp $
 
 package provide httpd::direct 1.1
 
@@ -213,7 +213,7 @@ proc DirectRespond {sock code result {type text/html}} {
     # Save any return cookies which have been set.
     # This works with the Doc_SetCookie procedure that populates
     # the global cookie array.
-    Cookie_Save
+    Cookie_Save $sock
 
     Httpd_ReturnData $sock $type $result
     return ""
