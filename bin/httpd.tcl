@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.54 2004/05/19 04:36:37 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.55 2004/05/19 05:44:28 welch Exp $
 #
 # \
 exec tclsh "$0" ${1+"$@"}
@@ -86,8 +86,10 @@ set auto_path [concat [list $Config(lib)] $auto_path]
 
 # Search around for the Standard Tcl Library
 # We used to require "tcllib", but that now causes complaints
+# Tcllib 1.6 has inconsistencies with md5 1.4.3 and 2.0.0,
+# and requiring 1.0 cures later conflicts with 2.0
 
-if {![catch {package require counter}]} {
+if {![catch {package require md5 1}]} {
     # Already available in environment
 } elseif {[file exist [file join $home ../tcllib]]} {
     lappend auto_path [file join $home ../tcllib]

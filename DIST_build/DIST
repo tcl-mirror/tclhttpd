@@ -102,7 +102,7 @@ sed -e s/@HTTPD_VERSION@/$HTTPD_VERSION/ \
 
 # Copy select tcllib man pages into the htdocs tree
 
-TCLLIB_MODULES="./base64 ./cmdline ./counter ./doctools ./fileutil ./html ./md5 ./md5crypt ./ncgi ./textutil ./uri"
+TCLLIB_MODULES="./base64 ./cmdline ./counter ./doctools ./fileutil ./html ./md5 ./md5crypt ./ncgi ./mime ./textutil ./uri"
 for f in ${TCLLIB_MODULES}; do
   cp ${SUPER_DIR}/tcllib-${TCLLIB_VERSION}/modules/$f/$f.man \
         ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}/htdocs/man

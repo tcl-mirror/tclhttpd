@@ -12,6 +12,11 @@
         (3.5.0 remained unreleased)
 
 2004-05-18 Brent Welch <welch@panasas.com>
+        * bin/http.tcl: Added 'package require md5 1' to startup
+        because of conflicts internal to Tcllib 1.6 between
+        md5 1.4.3 and md5 2.0.0.
+
+2004-05-18 Brent Welch <welch@panasas.com>
         * lib/mail.tcl: fixed startup so it works with a
         vanilla server.
 
