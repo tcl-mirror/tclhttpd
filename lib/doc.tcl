@@ -379,12 +379,11 @@ proc DocDirectory {path suffix cookie sock} {
 }
 
 proc DocLatest {files} {
-    set mtime 0
     set newest {}
     foreach file $files {
 	if {[file readable $file]} {
 	    set m [file mtime $file]
-	    if {$m > $mtime} {
+	    if {![info exist mtime] || ($m > $mtime)} {
 		set mtime $m
 		set newest $file
 	    }
@@ -755,7 +754,7 @@ proc DocCheckTemplate {template htmlfile} {
     if {[file exists $htmlfile]} {
 	set mtime [file mtime $htmlfile]
     } else {
-	set mtime 0
+	return 1
     }
 
     # Look for .tml library files down the hierarchy.
