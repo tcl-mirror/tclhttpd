@@ -301,19 +301,36 @@ Quick release to fix a number of quirks in the new 2.1.6 startup configuration
 
 ----------------- released 2.1.7 December 7, 1998 ------------------
 
+auth.tcl	Added Auth_VerifyCallback to make it easier to add
+	new authorization schemes.
+
 base64.tcl	Removed harmless extra ]
 
 cgi.tcl		Added env(REQUEST_URI)
+
+debug.tcl	Added env argument to /debug/errorInfo form handler
+		Removed lint found by procheck
+
+direct.tcl	Added Cgi_SetEnv call so application direct handlers
+		have the standard environment.
 
 dirlist.tcl	Added sorting by size.  (Modified contributed patch.)
 
 doc.tcl		Added Doc_Dynamic for use in .tml pages.  This sets
 		page(dynamic) to 1 so the html cache file is not generated.
 
-		Added page(set-cookie), which a page can set to be
-		a valid Set-Cookie: value for the response.
+		Added Doc_Cookie and Doc_SetCookie, which a page can
+		use to query and set a cookie value, respectively.
 
-httpd.tcl	Fix broken call to Log in Httpd_Shutdown
+		Added Doc_IsLinkToSelf to see if a given URL corresponds
+		to the current page.
+
+		Fixed template processing to work in "non root"
+		file systems (things added with Doc_AddRoot)
+
+		Removed lint found by procheck
+
+lib/httpd.tcl	Fix broken call to Log in Httpd_Shutdown
 
 		Moved Httpd(library) definition into this file, away
 		from bin/httpd.tcl
@@ -326,9 +343,31 @@ httpd.tcl	Fix broken call to Log in Httpd_Shutdown
 		Fixed bug in HTTP/1.1 handling with Expect: header
 		and the Continue response.
 
+		Added some procedure header comments.
+
 log.tcl		Made it possible to not log anything if you never call
 		Log_SetFile.  You can still call Log and Log_Flush.
 
+mail.tcl	Added env array to /mail/bugreport form handler
+
+snmp.tcl	Removed lint
+
 srvui.tcl	Fixed WM_DELLETE_WINDOW typo
 
+url.tcl		Removed lint.
+		Added guard against bogus Content-Types for post data
 
+utils.tcl	Fixed lassign to work with no input values.
+
+bin/crypt.tcl	Added this little expect script that uses the crypt.so
+		library to encrypt passwords.  You still need to
+		update your htaccess password files by hand.
+
+bin/httpd.tcl	Removed Httpd(library) definition, added Config(lib)
+		instead.
+
+htdocs/guestbook	Added simple guestbook example.
+
+.htaccess, .tclaccess	Oops, added all these missing files to the distribution.
+
+----------------- released 2.2 June 18, 1999 ------------------
