@@ -33,12 +33,19 @@ proc DirList {dir urlpath} {
 	set what Folder
 	set lwhat folder
     }
-    if {[string compare $sort "number"] == 0} {
-	set numcheck checked
-	set namecheck ""
-    } else {
-	set numcheck ""
-	set namecheck checked
+    set namecheck ""
+    set sizecheck ""
+    set numcheck ""
+    switch -- $sort {
+        number {
+	    set numcheck checked
+	}
+	size {
+	    set sizecheck checked
+	}
+	default {
+	    set namecheck checked
+	}
     }
     set listing "<HTML>
 <HEAD>
@@ -50,16 +57,14 @@ proc DirList {dir urlpath} {
 <form action=$urlpath>
 Pattern <input type=text name=pattern value=$pattern><br>
 Sort by Modify Date <input type=radio name=sort value=number $numcheck>
-or Name <input type=radio name=sort value=name $namecheck><br>
+or Name <input type=radio name=sort value=name $namecheck>
+or Size <input type=radio name=sort value=size $sizecheck><br>
 <input type=submit name=submit value='Again'><p>
 <PRE>
 "
 
     set path [file split $dir]
-    if {[catch {lsort -dict [glob -nocomplain -- [file join $dir $pattern]]} list]} {
-	set list [lsort -command DirlistCompare \
-	    [glob -nocomplain -- [file join $dir $pattern]]]
-    }
+    set list [glob -nocomplain -- [file join $dir $pattern]]
     if {[llength $path] > 1} {
 	append listing \
 	    "<A HREF=\"..\">Up to parent $lwhat</A>\n"
@@ -72,20 +77,39 @@ or Name <input type=radio name=sort value=name $namecheck><br>
 	    setmax max [string length [file tail $entry]]
 	}
 	incr max [string length </a>]
-	if {[string compare $sort "number"] == 0} {
-	    set mlist {}
-	    foreach entry $list {
-		lappend mlist [list $entry [file mtime $entry]]
+
+	# Resort the list into list2
+
+	switch -- $sort {
+	    number {
+		set mlist {}
+		foreach entry $list {
+		    lappend mlist [list $entry [file mtime $entry]]
+		}
+		if {[catch {lsort -decreasing -integer -index 1 $mlist} list2]} {
+		    set list2 [lsort -command DateCompare $mlist]
+		}
 	    }
-	    if {[catch {lsort -decreasing -integer -index 1 $mlist} list2]} {
-		set list2 [lsort -command DateCompare $mlist]
+	    size {
+		set slist {}
+		foreach entry $list {
+		    lappend slist [list $entry [file size $entry]]
+		}
+		if {[catch {lsort -decreasing -integer -index 1 $slist} list2]} {
+		    set list2 [lsort -command SizeCompare $slist]
+		}
 	    }
-	    set list {}
-	    foreach entry $list2 {
-		lappend list [lindex $entry 0]
+	    default {
+		if {[catch {lsort -dict $list} list2]} {
+		    set list2 [lsort -command DirlistCompare $list]
+		}
 	    }
 	}
-	foreach entry $list {
+
+	# Loop through list2, which may have an extra sorting file we ignore
+
+	foreach entry $list2 {
+	    set entry [lindex $entry 0]
 	    file lstat $entry lst
 	    switch $lst(type) {
 		file {
@@ -141,4 +165,13 @@ proc DateCompare {a b} {
     }
 }
  
-
+proc SizeCompare {a b} {
+    set aa [lindex $a 1]
+    set bb [lindex $b 1]
+    set res [string compare $aa $bb]
+    if { $res != 0 } {
+	return $res
+    } else {
+	return [string compare $a $b]
+    }
+}
