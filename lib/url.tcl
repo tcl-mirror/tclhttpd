@@ -410,7 +410,9 @@ proc Url_PostHook {sock length} {
 proc Url_DecodeQuery {query args} {
     global Url
 
-    Url_ReadPost $Url(sock) query
+    if {[info exist Url(sock)]} {
+	Url_ReadPost $Url(sock) query
+    }
     eval {Url_DecodeQueryOnly $query} $args
 }
 
