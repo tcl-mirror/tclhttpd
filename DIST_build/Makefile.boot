@@ -9,7 +9,7 @@ TCL = tcl$(TCL_VERSION)
 TK = tk$(TCL_VERSION)
 THREAD = thread2.2
 TCLLIB = tcllib0.8
-HTTPD = tclhttpd3.2.1
+HTTPD = tclhttpd3.3
 
 # Edit MODULES if you don't want to build something.
 

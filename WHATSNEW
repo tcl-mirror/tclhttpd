@@ -1,5 +1,22 @@
 What's new in TclHttpd
 
+3.3
+
+This adds a file upload domain handler. (upload.tcl)
+Use Upload_Url to register the domain.  It takes a number
+of arguments that are described in the lib/upload.tcl script.
+A minimal call would be 
+
+Upload_Url /upload /tmp/upload UploadTest
+
+This will map the /upload URL to the upload domain.
+If you post forms that contain <input type=file> elements to /upload, 
+the files will be saved into /tmp/upload.  After they are saved,
+the UploadTest procedure will be called.  It gets two arguments:
+a list of form names and values, and a list of file names and 
+content types.  See the UploadTest procedure in upload.tcl for
+an example.
+
 3.2
 
 This adds a custom code directory that makes it easier to drop in

@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.3 2001/02/01 07:15:00 welch Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.4 2001/02/16 21:08:58 welch Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -294,30 +294,4 @@ proc UploadTest {flist vlist} {
     append html "<h2>Data List</h2>\n"
     append html [html::tableFromList $vlist]\n
     return $html
-}
-if {0} {
-    # Set up the environment a-la CGI.
-
-    Cgi_SetEnv $sock $prefix$suffix
-
-    # Prepare an argument data from the query data.
-
-    Url_QuerySetup $sock
-    set cmd [Direct_MarshallArguments $prefix $suffix]
-    if {$cmd == ""} {
-	Doc_NotFound $sock
-	return
-    }
-
-    # Eval the command.  Errors can be used to trigger redirects.
-
-    set code [catch $cmd result]
-
-    set type text/html
-    upvar #0 $prefix$suffix aType
-    if {[info exist aType]} {
-	set type $aType
-    }
-
-    DirectRespond $sock $code $result $type
 }

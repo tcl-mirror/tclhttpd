@@ -42,7 +42,7 @@ Grab the highest version number one you can find in:
 It contains a Tcl or SH script that copies its files into peer directories
 of your Tcl script library.  For example, if your Tcl library is in
 /usr/local/tcl/tcl8.3, then it will create a directory named something like
-/usr/local/tcl/tcllib0.7.  Once these are in place, you should be able to
+/usr/local/tcl/tcllib0.8.  Once these are in place, you should be able to
 "package require tcllib" from your Tcl shell.
 
 WARNING: The Tcl package mechanism doesn't deal correctly with multiple

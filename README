@@ -4,7 +4,7 @@ Brent is now at Ajuba Solutions, previously known as Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 3.2
+Version: 3.3
 Last Modified: Wed Oct 18 11:06:30 PDT 2000
 
 QUICK START
@@ -23,7 +23,7 @@ UNIX:
 
 1) Test preconditions
 	tclsh8.3
-	package require tcllib 0.7
+	package require tcllib 0.8
 
 2) If you can do the above, then you should be able to run the
 server directly from this distribution directory without bothering
@@ -42,6 +42,9 @@ httpd.tcl -help
 This lets you set basic parameters like port number and server name.
 
 VERSION SUMMARY
+
+Version 3.3 fixes more bugs in CGI handling and
+adds a simple file upload domain handler.
 
 Version 3.2.1 fixes bugs in CGI handling related to the changes
 in 3.2 in the way POST data is handled.  
