@@ -1,3 +1,12 @@
+2000-07-26  Brent Welch <welch@scriptics.com>
+
+	* lib/cgi.tcl - Fixed use of "2> /dev/stdout", which can
+	fail if you start tclhttpd under an xterm (which is a fine
+	/dev/stdout), but later exit the xterm.  Previously that
+	broke all CGI scripts.  The open error is now trapped, and
+	it falls back to the old "|& cat" way of doing things.
+	[BUG 5870]
+
 2000-07-24  Brent Welch <welch@scriptics.com>
 
 	* lib/httpd.tcl - Fixed case where a normal post happens to
