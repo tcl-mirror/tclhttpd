@@ -57,7 +57,7 @@ proc Doc_ExcludePat {patlist} {
     global Doc
     set Doc(excludePat) $patlist
 }
-if ![info exists Doc(excludePat)] {
+if {![info exists Doc(excludePat)]} {
     set Doc(excludePat) {*.bak *.swp}
 }
 
@@ -67,7 +67,7 @@ proc Doc_CheckTemplates {{how 1}} {
     global Doc
     set Doc(checkTemplates) $how
 }
-if ![info exists Doc(checkTemplates)] {
+if {![info exists Doc(checkTemplates)]} {
     set Doc(checkTemplates) 0
 }
 
@@ -80,7 +80,7 @@ proc Doc_TemplateInterp {interp} {
     }
     set Doc(templateInterp) $interp
 }
-if ![info exists Doc(templateInterp)] {
+if {![info exists Doc(templateInterp)]} {
     set Doc(templateInterp) {}
 }
 
@@ -121,7 +121,7 @@ proc Doc_ErrorPage { virtual } {
 proc Doc_Webmaster {{email {}}} {
     global Doc
     if {[string length $email] == 0} {
-	if ![info exists Doc(webmaster)] {
+	if {![info exists Doc(webmaster)]} {
 	    set Doc(webmaster) webmaster
 	}
 	return $Doc(webmaster)
@@ -135,19 +135,19 @@ proc Doc_Webmaster {{email {}}} {
 
 proc Doc_Virtual {sock curfile virtual} {
     global Doc
-    if [regexp ^~ $virtual] {
+    if {[regexp ^~ $virtual]} {
 	# This is UNIX-specific, so we don't need file joins
-	if ![info exists Doc(homedir)] {
+	if {![info exists Doc(homedir)]} {
 	    return {}	;# Not allowed
 	}
 	set list [split $virtual /]
 	set user [lindex $list 0]
-	if [catch {glob $user} homedir] {
+	if {[catch {glob $user} homedir]} {
 	    return {}	;# No such user
 	}
 	return $homedir/$Doc(homedir)/[join [lrange $list 1 end] /]
     }
-    if [regexp ^/ $virtual] {
+    if {[regexp ^/ $virtual]} {
 	set list [lrange [split $virtual /] 1 end]
 	return [eval {file join $Doc(root)} $list]
     }
@@ -169,7 +169,7 @@ proc DocDomain {directory sock suffix} {
 
     # Make sure the path doesn't sneak out via ..
 
-    if [catch {Url_PathCheck $suffix} pathlist] {
+    if {[catch {Url_PathCheck $suffix} pathlist]} {
 	Doc_NotFound $sock
 	return
     }
@@ -178,7 +178,7 @@ proc DocDomain {directory sock suffix} {
 
     if {[regexp ^~ $pathlist] && [info exists Doc(homedir)]} {
 	set user [lindex $pathlist 0]
-	if [catch {glob $user} homedir] {
+	if {[catch {glob $user} homedir]} {
 	    Doc_NotFound $sock
 	    return	;# No such user
 	}
@@ -193,7 +193,7 @@ proc DocDomain {directory sock suffix} {
     # Handle existing files
 
     set path [eval {file join $directory} $pathlist]
-    if [file exists $path] {
+    if {[file exists $path]} {
 	Incr Doc(hit,$data(url))
 	Url_Handle [list DocHandle $path $suffix $cookie] $sock
 	return
@@ -201,7 +201,7 @@ proc DocDomain {directory sock suffix} {
 
     # Try to find an alternate.
 
-    if ![DocFallback $path $suffix $cookie $sock] {
+    if {![DocFallback $path $suffix $cookie $sock]} {
 	# Couldn't find anything.
 	# check for cgi script in the middle of the path
 	Cgi_Domain $directory $sock $suffix
@@ -236,7 +236,7 @@ proc DocFallback {path suffix cookie sock} {
 	global Doc
 	if {[string compare $Doc(tmlSuffix) [file extension $npath]] == 0} {
 	    # More HACKs
-	    if ![Auth_Verify $sock $cookie] {
+	    if {![Auth_Verify $sock $cookie]} {
 		return 1	;# appropriate response already generated
 	    }
 	    Doc_text/html [file root $npath].html $suffix $sock
@@ -305,7 +305,7 @@ proc DocChoose {accept choices} {
 	    }
 	}
 	set result [DocLatest $hits]
-	if [string length $result] {
+	if {[string length $result]} {
 	    return $result
 	}
     }
@@ -316,10 +316,10 @@ proc DocChoose {accept choices} {
 
 proc DocHandle {path suffix cookie sock} {
     upvar #0 Httpd$sock data
-    if ![Auth_Verify $sock $cookie] {
+    if {![Auth_Verify $sock $cookie]} {
 	return	;# appropriate response already generated
     }
-    if [file isdirectory $path] {
+    if {[file isdirectory $path]} {
 	if {[string length $data(url)] && ![regexp /$ $data(url)]} {
 	    # Insist on the trailing slash
 	    Httpd_RedirectDir $sock
@@ -339,7 +339,7 @@ proc DocHandle {path suffix cookie sock} {
 	# the file's name changed.
 
 	Url_UnCache $sock
-	if ![DocFallback $path $suffix $cookie $sock] {
+	if {![DocFallback $path $suffix $cookie $sock]} {
 	    Doc_NotFound $sock
 	}
     }
@@ -353,7 +353,7 @@ proc DocDirectory {path suffix cookie sock} {
     global Doc
     set npath [file join $path $Doc(indexpat)]
     set newest [DocLatest [glob -nocomplain $npath]]
-    if [string length $newest] {
+    if {[string length $newest]} {
 	if {[string compare $Doc(tmlSuffix) [file extension $newest]] == 0} {
 	    foreach try [list [file root $newest].html [file root $newest].htm] {
 		if {[file exists $try]} {
@@ -374,7 +374,7 @@ proc DocLatest {files} {
     set mtime 0
     set newest {}
     foreach file $files {
-	if [file readable $file] {
+	if {[file readable $file]} {
 	    set m [file mtime $file]
 	    if {$m > $mtime} {
 		set mtime $m
@@ -388,7 +388,7 @@ proc DocLatest {files} {
 proc Doc_NotFound { sock } {
     global Doc Referer
     upvar #0 Httpd$sock data
-    if [info exists data(url)] {
+    if {[info exists data(url)]} {
 	Url_UnCache $sock
 	Incr Doc(notfound,$data(url))
 	set Doc(url,notfound) $data(url)	;# For subst
@@ -403,7 +403,7 @@ proc Doc_NotFound { sock } {
 proc Doc_Error { sock ei } {
     global Doc
     upvar #0 Httpd$sock data
-    if [info exists data(url)] {
+    if {[info exists data(url)]} {
 	Url_UnCache $sock
 	Incr Doc(error,$data(url))
 	set Doc(errorUrl) $data(url)
@@ -416,16 +416,16 @@ proc Doc_Error { sock ei } {
 
 proc DocSubstSystemFile {sock key code {extra {}} {interp {}}} {
     global Doc
-    if ![info exists Doc(page,$key)] {
+    if {![info exists Doc(page,$key)]} {
 	set path [Doc_Virtual {} {} /$key.html]
-	if [file exists $path] {
+	if {[file exists $path]} {
 	    set Doc(page,$key) $path
 	}
     }
     if {![info exists Doc(page,$key)] || 
 	    [catch {Httpd_ReturnData $sock text/html \
 			[DocSubst $Doc(page,$key) $interp] $code} err]} {
-	if [info exists err] {
+	if {[info exists err]} {
 	    Log $sock DocSubstSystemFile $err
 	}
 	Httpd_Error $sock $code $extra
@@ -436,7 +436,7 @@ proc DocSubstSystemFile {sock key code {extra {}} {interp {}}} {
 
 proc Doc_application/x-imagemap {path suffix sock} {
     upvar #0 Httpd$sock data
-    if ![info exists data(query)] {
+    if {![info exists data(query)]} {
 	Httpd_ReturnData $sock text/plain "[parray Httpd$sock]"
 	return
     }
@@ -484,8 +484,9 @@ proc Doc_text/html {path suffix sock} {
 	set template [file root $path]$Doc(tmlSuffix)
 	if {[file exists $template] && [DocCheckTemplate $template $path]} {
 	    # Do the subst and cache the result in the .html file
-	    set html [DocTemplate $sock $template $path $suffix dynamic $Doc(templateInterp)]
-	    if ($dynamic) {
+	    set html [DocTemplate $sock $template $path $suffix dynamic \
+		    $Doc(templateInterp)]
+	    if {$dynamic} {
 		return [Httpd_ReturnData $sock text/html $html]
 	    }
 	}
@@ -499,7 +500,7 @@ proc Doc_text/html {path suffix sock} {
 proc Doc_application/x-tcl-auth {path suffix sock} {
     upvar #0 Httpd$sock data
 
-    if ![info exists data(session)] {
+    if {![info exists data(session)]} {
 	Httpd_RequestAuth $sock Basic "Random Password"
 	return
     }
@@ -642,6 +643,27 @@ proc Doc_Dynamic {} {
     global page
     set page(dynamic) 1
     return "<!-- DynamicOnly -->\n"
+}
+
+# Doc_Cookie
+#
+#	Return a cookie value, if present, else ""
+#
+# Arguments:
+#	cookie	The name of the cookie (the key)
+
+
+proc Doc_Cookie {cookie} {
+    global env
+    if {[info exist env(HTTP_COOKIE)]} {
+	foreach pair [split $env(HTTP_COOKIE) \;] {
+	    lassign [split [string trim $pair] =] key value
+	    if {[string compare $cookie $key] == 0} {
+		return $value
+	    }
+	}
+    }
+    return ""
 }
 
 # Doc_IsLinkToSelf
