@@ -21,6 +21,15 @@ can't find package limit
 Running with default file descriptor limit
 httpd started on port 8001
 
+The last message is the one you want to see.  It tells you the
+server is running on that port.  You can ignore the message about
+the limit extension (and crypt).  These extensions are optional
+and the server works fine without them.
+
+If you use wish8.3 instead of tclsh8.3 you get a small Tk window that
+displays some information.  There is also a big QUIT button that will
+stop the server.
+
 2. Install Tcl Standard Library
 
 If approach #1 doesn't work because you don't have the Standard Tcl Library,
@@ -39,6 +48,11 @@ of your Tcl script library.  For example, if your Tcl library is in
 Now go try approach #1 again.
 
 3. Configure and Make Install
+
+The configure and Makefile.in files are used to create a tailored
+Makefile for your system.  You use the Makefile to
+compile the optional extensions and to install Tcl Httpd into a 
+central location.
 
 Try this:
 
@@ -60,8 +74,8 @@ configure --prefix=/home/yourname/test --enable-gcc \
 In other words, specify the Tcl *build* directory so the binary extensions
 can be compiled in a compatible way.  You might be able to get around this
 by ignoring any errors from configure and doing "make -k install" to
-ignore errors about the crypt and limit extentions.  These are optional
-extensions and you can use Tcl Httpd just fine without them.
+ignore errors about the crypt and limit extentions.  The server starts
+up and runs with or without these optional extensions.
 
 4. Use the CONFIG and MAKE scripts in the bundled distrubtion.
 

@@ -1,11 +1,11 @@
 This HTTPD is written in Tcl and Tk.
 Written by Stephen Uhler and Brent Welch of Sun Microsystems Laboratory.
-Brent is now at Scriptics Corporation.
+Brent is now at Ajuba Solutions, previously known as Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 3.0.2
-Last Modified: Thu May 18 22:57:51 PDT 2000
+Version: 3.0.3
+Last Modified: Wed May 31 09:53:48 PDT 2000
 
 It requires Tcl 8.3 and the new Standard Tcl Library.
 This uses the cmdline, base64, ncgi, and html
@@ -38,6 +38,9 @@ and use its configure, make, and make install scripts.
 For a complete set of command line options, do
 httpd.tcl -help
 This lets you set basic parameters like port number and server name.
+
+Version 3.0.3 fixes another bug with Doc_AddRoot, and fixes the
+bundled distribution so you can use the Thread extension again.
 
 Version 3.0.2 fixes a serious SECURITY BUG that let 3.0.0 and 3.0.1 
 serve up any old file on your system.  That bug was not present in earlier

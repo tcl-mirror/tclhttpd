@@ -1,3 +1,16 @@
+2000-06-09  Brent Welch <welch@scriptics.com>
+
+	* Released 3.0.3 - added top-level Makefile for building
+	the bundled distribution.
+
+2000-05-31  Brent Welch <welch@scriptics.com>
+
+	* lib/doc.tcl: Fixed file join bugs with extra leading '/' in
+	the URL suffix. This bug caused a SECURITY_BUG if you used
+	Doc_AddRoot to add file systems into your URL tree.
+	(If you have just a single root defined by Doc_Root there is
+	no security problem in 3.0.2)
+
 2000-05-30  Dan Kuchler <kuchler@scriptics.com>
 
         * lib/mtype.tcl: Changed the file extension array to use case
