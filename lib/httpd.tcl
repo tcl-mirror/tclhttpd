@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.78 2003/10/11 06:50:00 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.79 2003/10/26 23:53:10 coldstore Exp $
 
 package provide httpd 1.6
 
@@ -94,6 +94,8 @@ array set Httpd_EnvMap {
 # count		Content-Length
 # set-cookie	List of Set-Cookie headers to stick into the response
 #		Use Httpd_SetCookie to append to this.
+# headers		List of http headers to stick into the response
+#		Use Httpd_AddHeaders to append to this.
 
 # prefix	(Set by Url_Dispatch to be the URL domain prefix)
 # suffix	(Set by Url_Dispatch to be the URL domain suffix)
@@ -1116,6 +1118,43 @@ proc HttpdDoCallback {sock {errmsg {}}} {
     CountStop serviceTime $sock
 }
 
+# Httpd_AddHeaders
+#	Add http headers to be used in a reply
+#	Call this before using Httpd_ReturnFile or
+#	Httpd_ReturnData
+#
+# Arguments:
+#	sock	handle on the connection
+#	args	a list of header value ...
+
+proc Http_AddHeaders {sock args} {
+    upvar #0 Httpd$sock data
+
+    eval lappend data(headers) $args
+}
+
+# Httpd_RemoveHeaders
+#	Remove previously set headers from the reply.
+#	Any headers that match the glob pattern are removed.
+#
+# Arguments:
+#	sock	handle on the connection
+#	pattern	glob pattern to match agains cookies.
+
+proc Http_RemoveHeaders {sock {pattern *}} {
+    upvar #0 Httpd$sock data
+    if {[info exists data(headers)] && $data(headers) != {}} {
+        set tmp {}
+        foreach {header value} $data(headers) {
+            if {![string match $pattern $header]} {
+                lappend tmp $header $value
+            }
+        }
+        set data(headers) $tmp
+    }
+    return
+}
+
 # HttpdRespondHeader --
 #
 #	Utility routine for outputting response headers for normal data Does
@@ -1150,6 +1189,15 @@ proc HttpdRespondHeader {sock type close size {code 200}} {
     if {[string length $size]} {
 	append reply "Content-Length: $size" \n
     }
+
+    if {[info exists data(headers)]} {
+	foreach {header value} $data(headers) {
+	    catch {
+		append reply "[string trimright $header :]: " $value \n
+	    }
+	}
+    }
+    Stderr '$reply'
     puts -nonewline $sock $reply
 }
 
