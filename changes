@@ -242,3 +242,59 @@ doc.tcl, url.tcl
 
 ---- 2.1.4 released, sources put up on netCVS ---
 ---- see http://www.scriptics.com/software/netcvs.html ----
+
+(This may not be entirely accurate.  2.1.4 had a short life and
+some features in 2.1.5 may be earlier in this file.)
+
+cgi.tcl
+	Refined the windows CGI support.  You can define shells to
+	handle files with different extensions.  So you can now handle
+	Perl CGI scripts :-/
+doc.tcl, url.tcl
+	Refined Steve Ball's parser for multipart/form-data
+
+----------------- released 2.1.5 October 6, 1998 ------------------
+
+Added command line arguments to httpd, including -port.  Try
+	httpd -help
+For a complete list of options.  Feature contributed by Gerald Lester.
+
+The global variables used by the startup script are now collected into
+the Config array.
+
+Added configuration file, the default is tclhttpd.rc.  This has most
+of the package requires and the various calls to initialization procs.
+You can specify alternate config with the -config command line argument.
+
+The startup sequence now adds $Httpd(library)/Binaries/$tcl_platform(os)
+and $Httpd(library)/Binaries/$tcl_platform(os)/$tcl_platform(osVersion)
+to the auto_path so you have a good place to put those .so files (DLLs).
+You can also add to the auto_path with the -library command line argument.
+
+auth.tcl
+	Fixed to handle (i.e., ignore) extra password fields
+
+dirlist.tcl
+	Fixed to handle URL tree's added with Doc_AddRoot
+	Cleaned up the display of they hypertext links.
+
+doc.tcl
+	Fixes to handle document domains that are not the root domain.
+	Fixes to DocTemplate to avoid using Doc(templateInterp), which
+		was already passes as the paramter value.
+
+mail.tcl
+	Changed Mail/forminfo to Base64_Encode values that get an
+	explosion of backslashes when using the list command.  Instead
+	of a "Data" command you get a "Data64" command in the mail message.
+
+session.tcl
+	Added "isSafe" parameter to Session creation.
+
+url.tcl
+	Tweaked Url_DecodeQuery_application/x-www-urlencoded to ensure there
+	are evenly matched name-value list pairs even in the face of
+	mal-formed query data.
+----------------- released 2.1.6 December 6, 1998 ------------------
+
+

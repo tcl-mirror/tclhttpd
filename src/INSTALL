@@ -1,5 +1,17 @@
+There are two ways you can organise the .so files that you
+compile from these sources
+
+1)
 Copy the compiled .so files from the Linux or Solaris
-directories into the lib directory, then recreate
+directories into the lib (or lib/Binaries) directory, then recreate
 your pkgIndex.tcl file by running tclsh in that directory
 and doing
 pkg_mkIndex . *.tcl *.so
+
+2) Create a platform-specific directory that matches your
+os and osVersion underneath the lib directory, for example:
+	mkdir ../lib/SunOS/5.5.1
+	cp Solaris/* ../lib/SunOS/5.5.1
+This works because the httpd script adds this to your auto_path
+$Httpd(library)/Binaries/$tcl_platform(os)
+$Httpd(library)/Binaries/$tcl_platform(os)/$tcl_platform(osVersion)

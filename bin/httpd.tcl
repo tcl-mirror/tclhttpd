@@ -74,7 +74,7 @@ package require opt
     if {[string length $library]} {
 	lappend auto_path $library
     }
-    foreach var {docRoot port host ipaddr webmaster uid gid debug} {
+    foreach var {docRoot port host ipaddr webmaster uid gid debug limit} {
 	set Config($var) [set $var]
     }
     set Config(file) $config 

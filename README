@@ -5,28 +5,33 @@ See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 Version: 2.1.6
-Last update: Sun Nov  8 16:42:48 PST 1998
+Last update: Sun Dec  6 16:42:48 PST 1998
 
 It requires Tcl7.5 and Tk4.1, or higher.
 It works with the latest 8.0 release.
 I'd avoid 8.0b1 because fcopy doesn't handle errors right.
-Tcl 8.0p2 or 8.0.3 is the best release to use with TclHttpd.
+Tcl 8.0p2 or later (e.g., 8.0.4) is the best release to use with TclHttpd.
 
 This runs under either tclsh or wish.
 With wish you get a simple GUI that shows some counters.
 
 For a quick test that runs a server on port 8015, do
 UNIX:
-	tclsh bin/httpd -debug
+	tclsh bin/httpd.tcl -debug
 Windows:
-	Run wish or tclsh and source the bin/win95.tcl script
+	Run wish or tclsh and source bin/httpd.tcl
 Macintosh:
 	You'll need to edit httpd and tune the file names because I
 	haven't gotten around to this yet. Then source the file from
 	the source menu.  Send me a copy of your tuned script, please.
 
-In general you'll need to edit bin/httpd (make a copy...) to
-set the parameters in the QUICK START or CONFIGURATION area.
+For a complete set of command line options, do
+httpd.tcl -help
+This lets you set basic parameters like port number and server name.
+
+Version 2.1.6 introduces a configuration file, tclhttpd.rc
+You can edit this to tune the set of modules used by the server,
+or to hardwire the port, etc.
 
 If you have Scotty installed, then you can try out the SNMP demo.
 You'll need to arrange to have the Tnm*.so library on the
