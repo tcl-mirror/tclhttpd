@@ -187,6 +187,7 @@ proc Status/codesize {args} {
 }
 proc StatusMainTable {} {
     global Httpd Doc counter status tcl_patchLevel tcl_platform
+    global counter_reset
     set html "<H1>$Httpd(name):$Httpd(port)</h1>\n"
     append html "<H2>Server Info</h2>"
     append html "<table border=0>"
@@ -206,9 +207,10 @@ proc StatusMainTable {} {
 
     append html </table>
 
-    append html "<br><br><br><h3>Counters</h3>\n"
+    append html "<br><br><br>\n"
     append html "<table border>\n"
 
+    append html "<tr><th>Counter</th><th>N</th><th>Reset Date</th></tr>\n"
     foreach {c label} {
 	    urlhits "URL Requests"
 	    urlreply "URL Replies"
@@ -225,13 +227,13 @@ proc StatusMainTable {} {
 	    errors	"Errors"
 	    Status	"Status"
 	    } {
-	    set close ""
-	if [info exists counter($c)] {
+	set close ""
+	if {[info exists counter($c)]} {
 	    append html "<tr><td>$label</td><td>$counter($c)</td>\n"
 	    set close "</tr>\n"
 	}
-	if [info exists counter_reset($c)] {
-	    append html "<td>[clock format $counter_reset($c) -format "%M %d, %Y"]</td></tr>\n"
+	if {[info exists counter_reset($c)]} {
+	    append html "<td>[clock format $counter_reset($c) -format "%B %d, %Y"]</td></tr>\n"
 	}
 	append html $close
     }
@@ -250,7 +252,7 @@ proc Status/all {args} {
     append html [StatusMenu]
     append html [StatusTclPower left]
     append html [StatusMainTable]
-    append html "<p>The following bar charts are created with a table of horizontal rules that may not display correctly on your browser.<br><a href=/status/text>Text only view.</a>\n"
+    append html "<p><a href=/status/text>Text only view.</a>\n"
     catch {
 	append html [StatusMinuteHist CntMinuteurlhits "Per Minute Url Hits" $counter(basetime)]
 	append html [StatusMinuteHist CntHoururlhits "Per Hour Url Hits" $counter(hour,1) hour]

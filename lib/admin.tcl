@@ -76,12 +76,17 @@ proc Admin/redirect {old new} {
 
 proc Admin/reset/counter {name} {
     
+if {0} {
     # Ugh - get the socket handle in the DirectDomain procedure
     upvar 1 sock sock
   
+    # Need a way to register administrator passwords
+    # For now we just allow this to happen.
+
     if {![AuthVerifyBasic $sock $admin(authfile)]} {
 	return "Password Check Failed"
     }
-
+}
     Counter_Reset $name
+    return "Reset Counter $name"
 }

@@ -135,7 +135,6 @@ proc Httpd_Server {{port 80} {name {}} {ipaddr {}}} {
     if {[catch $cmd Httpd(listen)]} {
 	return -code error "$Httpd(name):$port $Httpd(listen)"
     }
-    Counter_Reset accepts
 }
 
 # Kill the server gracefully
