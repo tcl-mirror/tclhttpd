@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc_error.tcl,v 1.3 2003/10/27 13:57:56 coldstore Exp $
+# RCS: @(#) $Id: doc_error.tcl,v 1.4 2003/11/04 01:50:59 coldstore Exp $
 
 package provide httpd::doc_error 1.0
 
@@ -32,7 +32,7 @@ package require httpd::subst
 
 proc Doc_NotFoundPage { virtual } {
     global Doc
-    set Doc(notfound) [Doc_Virtual {} {} $virtual]
+    set Doc(page,notfound) [Doc_Virtual {} {} $virtual]
 }
 
 # Doc_ErrorPage --
@@ -51,7 +51,7 @@ proc Doc_NotFoundPage { virtual } {
 
 proc Doc_ErrorPage { virtual } {
     global Doc
-    set Doc(error) [Doc_Virtual {} {} $virtual]
+    set Doc(page,error) [Doc_Virtual {} {} $virtual]
 }
 
 # Doc_NotFound --
