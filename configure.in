@@ -33,10 +33,13 @@ VERSION=${MAJOR_VERSION}.${MINOR_VERSION}${PATCHLEVEL}
 NODOT_VERSION=${MAJOR_VERSION}${MINOR_VERSION}
 WIN_VERSION=`echo ${VERSION} | sed -e 's/\.//g'`
 
+SERVER_ROOT='$(prefix)/$(PACKAGE)'
+
 AC_SUBST(PACKAGE)
 AC_SUBST(ALTPACKAGE1)
 AC_SUBST(VERSION)
 AC_SUBST(WIN_VERSION)
+AC_SUBST(SERVER_ROOT)
 
 #--------------------------------------------------------------------
 # We put this here so that you can compile with -DVERSION="1.2" to
