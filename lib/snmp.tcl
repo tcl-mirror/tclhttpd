@@ -10,7 +10,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: snmp.tcl,v 1.4 2000/10/02 16:58:54 welch Exp $
+# RCS: @(#) $Id: snmp.tcl,v 1.5 2002/08/15 13:13:30 coldstore Exp $
 
 package provide httpd::snmp 1.0
 
@@ -51,7 +51,7 @@ proc Doc_application/x-tcl-snmp {path suffix sock} {
     # the page as ordinary html if the session has ended.
 
     if {$result} {
-	Doc_Subst $sock $path interp$session
+	Subst_ReturnFile $sock $path interp$session
     } else {
 	Httpd_ReturnFile $sock text/html $path
     }

@@ -4,7 +4,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: utils.tcl,v 1.6 2000/09/06 21:45:44 welch Exp $
+# RCS: @(#) $Id: utils.tcl,v 1.7 2002/08/15 13:13:30 coldstore Exp $
 
 package provide httpd::utils 1.0
 
@@ -448,3 +448,32 @@ proc boolean value {
     }
     return $value
 }
+
+
+# file_latest --
+#
+#	Return the newest file from the list.
+#
+# Arguments:
+#	files	A list of filenames.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	The name of the newest file.
+
+proc file_latest {files} {
+    set newest {}
+    foreach file $files {
+	if {[file readable $file]} {
+	    set m [file mtime $file]
+	    if {![info exist mtime] || ($m > $mtime)} {
+		set mtime $m
+		set newest $file
+	    }
+	}
+    }
+    return $newest
+}
+

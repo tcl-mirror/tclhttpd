@@ -6,7 +6,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: mtype.tcl,v 1.4 2000/08/02 07:06:53 welch Exp $
+# RCS: @(#) $Id: mtype.tcl,v 1.5 2002/08/15 13:13:30 coldstore Exp $
 
 package provide httpd::mtype 1.0
 
@@ -63,5 +63,53 @@ proc Mtype_ReadTypes {file} {
 	}
     }
     close $in
+}
+
+# Mtype_Accept --
+#
+#	This returns the Accept specification from the HTTP headers.
+#	These are a list of MIME types that the browser favors.
+#
+# Arguments:
+#	sock	The socket connection
+#
+# Results:
+#	The Accept header, or a default.
+#
+# Side Effects:
+#	None
+
+proc Mtype_Accept {sock} {
+    upvar #0 Httpd$sock data
+    if {![info exist data(mime,accept)]} {
+	return */*
+    } else {
+	return $data(mime,accept)
+    }
+}
+
+# Mtype_Match --
+#
+# 	This compares a document type with the Accept values.
+#
+# Arguments:
+#	accept	The results of Mtype_Accept
+#	type	A MIME Content-Type.
+#
+# Results:
+#	1	If the content-type matches the accept spec, 0 otherwise.
+#
+# Side Effects:
+#	None
+
+proc Mtype_Match {accept type} {
+    foreach t [split $accept ,] {
+	regsub {;.*} $t {} t	;# Nuke quality parameters
+	set t [string trim [string tolower $t]]
+	if {[string match $t $type]} {
+	    return 1
+	}
+    }
+    return 0
 }
 

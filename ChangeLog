@@ -1,3 +1,6 @@
+2002-08-15 Colin McCormack <colin@chinix.com>
+	* split doc.tcl into many smaller source files
+
 2002-08-03  Brent Welch <welch@panasas.com>
         * Added support for If-Modified-Since header and the
           304 Not Modified return code (contributed by Brian Meagher)

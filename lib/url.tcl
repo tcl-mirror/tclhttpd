@@ -271,7 +271,7 @@ proc Url_Unwind {sock ei ec} {
 	    File_Reset
 	} 
 	default {
-	    Doc_Error $sock $ei
+	    Error_Error $sock $ei
 	}
     }
 }
@@ -826,15 +826,21 @@ proc Url_Encode {string} {
     return [subst $string]
 }
  
-# Register a new location for a URL
-# These are here for compatibility.
-# They have moved to the redirect module
+# Url_IsLinkToSelf
+#	Compare the link to the URL of the current page.
+#	If they seem to be the same thing, return 1
+#
+# Arguments:
+#	url	The URL to compare with.
+#
+# Results:
+#	1 if the input URL seems to be equivalent to the page's URL.
+#
+# Side Effects:
+#	None
 
-proc Url_Redirect {url location} {
-    Redirect_Url $url $location
+proc Url_IsLinkToSelf {url} {
+    global page
+    return [expr {[string compare $url $page(url)] == 0}]
 }
-proc Url_RedirectSelf {url location} {
-    # Cannot make the "self" computation until we have
-    # a socket and know the protocol and server name for sure
-    Redirect_UrlSelf $url $location
-}
+

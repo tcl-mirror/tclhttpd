@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.14 2000/10/10 05:58:31 welch Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.15 2002/08/15 13:13:30 coldstore Exp $
 
 package provide httpd::direct 1.1
 
@@ -65,7 +65,7 @@ proc DirectDomain {prefix sock suffix} {
     Url_QuerySetup $sock
     set cmd [Direct_MarshallArguments $prefix $suffix]
     if {$cmd == ""} {
-	Doc_NotFound $sock
+	Error_NotFound $sock
 	return
     }
 
@@ -194,17 +194,10 @@ proc DirectRespond {sock code result {type text/html}} {
 
     # See if a content type has been registered for the URL.
 
-    # See if any cookies have been set.
+    # Save any return cookies which have been set.
     # This works with the Doc_SetCookie procedure that populates
-    # the global page array.
-
-    global page
-    if {[info exist page(set-cookie)]} {
-	foreach c $page(set-cookie) {
-	    Httpd_SetCookie $sock $c
-	}
-	unset page(set-cookie)
-    }
+    # the global cookie array.
+    Cookie_Save
 
     Httpd_ReturnData $sock $type $result
     return ""

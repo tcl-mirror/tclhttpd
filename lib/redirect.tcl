@@ -8,9 +8,49 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: redirect.tcl,v 1.3 2000/08/02 07:06:54 welch Exp $
+# RCS: @(#) $Id: redirect.tcl,v 1.4 2002/08/15 13:13:30 coldstore Exp $
 
 package provide httpd::redirect 1.0
+
+# Redirect_To --
+#
+# Trigger a page redirect
+#
+# Arguments:
+#	newurl	The new URL
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Raises a special error that is caught by Url_Unwind
+
+proc Redirect_To {newurl} {
+    return -code error \
+	    -errorcode  [list HTTPD_REDIRECT $newurl] \
+	    "Redirect to $newurl"
+}
+
+# Redirect_Self --
+#
+#	Like Redirect_To, but to a URL that is relative to this server.
+#
+# Arguments:
+#	newurl	Server-relative URL
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	See Redirect_To
+
+proc Redirect_Self {newurl} {
+    set thispage [ncgi::urlStub]
+    set thisurl [Httpd_SelfUrl $thispage]
+    set newurl [uri::resolve $thisurl $newurl]
+    Redirect_To $newurl
+}
+
 
 # Redirect_Init
 #
