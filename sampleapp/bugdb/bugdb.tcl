@@ -1,9 +1,30 @@
+# bugdb.tcl.tcl --
+#
+#    Procedures to support the bug database sample application.
+
 package require Mk4tcl
 package provide bugdb 1.0
 
 namespace eval bugdb {
     namespace export *
 }
+
+# bugdb::insert --
+#
+#    Insert a new bug report into a Metakit database.
+#
+# Arguments:
+#    Application	Application name
+#    OS			OS where bug occurs
+#    Priority		Level of impact of the bug
+#    Assigned		Email address of the assignee
+#    Summary		A short summary of the problem
+#    Description	More in-depth information regarding the problem
+#
+# Results:
+#    0 if database insert was successful
+#    1 if database insert failed
+#
 
 proc bugdb::insert {Application OS Priority Assigned Summary Description} {
     # set date
@@ -23,6 +44,17 @@ proc bugdb::insert {Application OS Priority Assigned Summary Description} {
 
     return $result
 }
+
+# bugdb::bug-list --
+#
+#    Return a list of bugs from the Metakit database.
+#
+# Arguments:
+#    None
+#
+# Results:
+#    Results variable which is a list of bug information
+#
 
 proc bugdb::bug-list {} {
 
@@ -49,6 +81,26 @@ proc bugdb::bug-list {} {
 
     return $results
 }
+
+# bugdb::bug-details --
+#
+#    Returns the details of a single bug database entry
+#
+# Arguments:
+#    bug		The bug ID in the Metakit database
+#    Application	Result variable returned by upvar
+#    OS			Result variable returned by upvar
+#    Priority		Result variable returned by upvar
+#    Assigned		Result variable returned by upvar
+#    Summary		Result variable returned by upvar
+#    Description	Result variable returned by upvar
+#    Date		Result variable returned by upvar
+#    Status		Result variable returned by upvar
+#    Updated		Result variable returned by upvar
+#
+# Results:
+#    See results returned above.
+#
 
 proc bugdb::bug-details {bug Application OS Priority Assigned \
 Summary Description Date Status Updated} {
@@ -84,6 +136,24 @@ Summary Description Date Status Updated} {
     return
 }
 
+# bugdb::update --
+#
+#    Update an existing bug in the Metakit database.
+#
+# Arguments:
+#    Bug		Bug ID in the Metakit database
+#    Status		The bugs updated status
+#    Application	Application name
+#    OS			OS where bug occurs
+#    Priority		Level of impact of the bug
+#    Assigned		Email address of the assignee
+#    Summary		A short summary of the problem
+#    Description	More in-depth information regarding the problem
+#
+# Results:
+#    None
+#
+
 proc bugdb::update {Bug Status Application OS Priority Assigned Summary Description} {
     # set date for last updated field
     set date_updated [clock format [clock seconds] ]
@@ -101,6 +171,18 @@ proc bugdb::update {Bug Status Application OS Priority Assigned Summary Descript
 
     return
 }
+
+# bugdb::special-chars --
+#
+#    Substitute characters that can break HTML with appropriate
+#    character entities.
+#
+# Arguments:
+#    value		String potentially containing characters to replace
+#
+# Results:
+#    String with bad characters replaced by character entities
+#
 
 proc bugdb::special-chars {value} {
     # Substitute for characters that break the HTML
