@@ -13,9 +13,13 @@ Assigned Summary Description Date Status]
     }]
 </p>
 
-<h2>$Summary</h2>
 
 <form action="bug-detail-update.tml" method="post">
+
+<h2>
+    $Summary
+    <input type="hidden" name="bug" value="[ncgi::value bug]" />
+</h2>
 
 <p>
     <label for="date" class="text">Date Entered:</label>
