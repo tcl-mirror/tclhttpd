@@ -4,7 +4,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: utils.tcl,v 1.8 2004/01/28 23:16:13 coldstore Exp $
+# RCS: @(#) $Id: utils.tcl,v 1.9 2004/02/28 02:12:41 coldstore Exp $
 
 package provide httpd::utils 1.0
 
@@ -601,3 +601,7 @@ if {[package vcompare [package provide Tcl] 8.4] < 0} {
 	}
     }
 }
+
+# see http://mini.net/tcl/lambda
+proc K {a b} {set a}
+proc lambda {argl body} {K [info level 0] [proc [info level 0] $argl $body]}

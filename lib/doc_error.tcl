@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc_error.tcl,v 1.5 2004/02/25 04:28:48 coldstore Exp $
+# RCS: @(#) $Id: doc_error.tcl,v 1.6 2004/02/28 02:12:41 coldstore Exp $
 
 package provide httpd::doc_error 1.0
 
@@ -79,9 +79,7 @@ proc Doc_NotFound { sock } {
 
 	lappendOnce Referer($data(url)) $data(mime,referer)
     }
-    if {![info exists data(notfound_hook)] || [catch {data(notfound_hook) $sock}]} {
-	DocSubstSystemFile $sock notfound 404 [protect_text $Doc(url,notfound)]
-    }
+    DocSubstSystemFile $sock notfound 404 [protect_text $Doc(url,notfound)]
 }
 
 # Doc_Error --
@@ -107,7 +105,7 @@ proc Doc_Error { sock ei } {
 	set Doc(errorInfo) $ei	;# For subst
 	CountName $Doc(errorUrl) errors
     }
-    if {![info exists data(error_hook)] || [catch {data(error_hook) $sock}]} {
+    if {![info exists data(error_hook)] || [catch {$data(error_hook) $sock}]} {
 	DocSubstSystemFile $sock error 500 [protect_text $ei]
     }
 }
