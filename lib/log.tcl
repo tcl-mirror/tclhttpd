@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: log.tcl,v 1.9 2000/09/25 22:48:22 welch Exp $
+# RCS: @(#) $Id: log.tcl,v 1.10 2000/09/29 22:53:12 welch Exp $
 
 package provide httpd::log 1.1
 package require httpd::logstd 1.0
@@ -209,19 +209,19 @@ proc Log_SetFile {{basename {}}} {
 
     catch {file mkdir [file dirname $Log(log_file)]}
     if {[catch {set Log(log_fd) [open $Log(log_file) a]} err]} {
-	 Verbose $err
+	 Stderr $err
     }
 
     if {[info exists lastlog]} {
 	# compress log files as we go
 	if {[catch {exec $Log(compressProg) $lastlog &} err]} {
-	    Verbose $err
+	    Stderr $err
 	}
     }
 
     catch {close $Log(error_fd)}
     if {[catch {set Log(error_fd) [open $Log(log)error a]} err]} {
-	Verbose $err
+	Stderr $err
     }
 
     # This debug log gets reset daily
@@ -234,7 +234,7 @@ proc Log_SetFile {{basename {}}} {
     if {[info exist Log(debug_log)] && $Log(debug_log)} {
 	set Log(debug_file) $Log(log)debug
 	if {[catch {set Log(debug_fd) [open $Log(debug_file) w]} err]} {
-	    Verbose $err
+	    Stderr $err
 	}
     }
 }

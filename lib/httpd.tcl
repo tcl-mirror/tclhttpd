@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.60 2000/09/27 19:35:26 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.61 2000/09/29 22:53:12 welch Exp $
 
 package provide httpd 1.5
 
@@ -1691,6 +1691,33 @@ proc HttpdCloseFinal {sock {errmsg {}}} {
     }
     HttpdDoCallback $sock $errmsg
     unset data
+}
+
+# Httpd_RequestComplete --
+#
+#	Detect if a request has been sent.  The holder of a socket
+#	might need to know of the URL request was completed with
+#	one of the return-data commands, or is still lingering open.
+#
+# Arguments:
+#	sock	Socket connection
+#
+# Results:
+#	1 if the request was completed, 0 otherwise.
+#
+# Side Effects:
+#	None.
+
+proc Httpd_RequestComplete {sock} {
+    upvar #0 Httpd$sock data
+    if {![info exist data(state)] || $data(state) == "start"} {
+	
+	# The connection was closed or reset in a keep-alive situation.
+
+	return 1
+    } else {
+	return 0
+    }
 }
 
 # server specific version of bgerror - indent to hide from indexer

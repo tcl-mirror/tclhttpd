@@ -20,7 +20,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.40 2000/09/28 06:58:05 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.41 2000/09/29 22:53:12 welch Exp $
 
 package provide httpd::doc 1.1
 
@@ -986,7 +986,7 @@ proc Doc_text/html {path suffix sock} {
 	# See if the .html cached result is up-to-date
     
 	set template [file root $path]$Doc(tmlExt)
-	if {[file exists $template] && [DocCheckTemplate $template $path]} {
+	if {[file exists $template] && [DocCheckTemplate $sock $template $path]} {
 
 	    # Do the subst and cache the result in the .html file
 
@@ -1071,17 +1071,15 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     upvar $dynamicVar dynamic
     global Doc
 
-    # Look for .tml library files down the hierarchy.
+    # Compute a relative path back to the root.
 
-    set rlen [llength [file split $Doc(root)]]
-    set dirs [lrange [file split [file dirname $template]] $rlen end]
-
-    # Populate the global "page" array with state about this page
-
+    set dirs [lreplace [split [string trimleft $data(url) /] /] end end]
     set root ""
     foreach d $dirs {
 	append root ../
     }
+
+    # Populate the global "page" array with state about this page
     if {[string length $htmlfile]} {
 	set filename $htmlfile
 	set dynamic 0
@@ -1170,10 +1168,7 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 
     # Source the .tml files from the root downward.
 
-    set path $Doc(root)
-    foreach dir [concat [list {}] $dirs] {
-	set path [file join $path $dir]
-	set libfile [file join $path $Doc(tmlExt)]
+    foreach libfile [DocGetTemplates $sock $template] {
 	if {[file exists $libfile]} {
 	    interp eval $interp [list uplevel #0 [list source $libfile]]
 	}
@@ -1358,6 +1353,7 @@ proc Doc_RedirectSelf {newurl} {
 # Check modify times on all templates that affect a page
 #
 # Arguments:
+#	sock		The client connection
 #	template	The file pathname of the template.
 #	htmlfile	The file pathname of the cached .html file.
 #
@@ -1368,7 +1364,7 @@ proc Doc_RedirectSelf {newurl} {
 # Side Effects:
 #	None
 
-proc DocCheckTemplate {template htmlfile} {
+proc DocCheckTemplate {sock template htmlfile} {
     global Doc
 
     if {[file exists $htmlfile]} {
@@ -1381,11 +1377,8 @@ proc DocCheckTemplate {template htmlfile} {
 
     set rlen [llength [file split $Doc(root)]]
     set dirs [lrange [file split [file dirname $template]] $rlen end]
-
-    set path $Doc(root)
-    foreach dir [concat [list {}] $dirs] {
-	set path [file join $path $dir]
-	set libfile [file join $path $Doc(tmlExt)]
+	
+    foreach libfile [DocGetTemplates $sock $template] {
 	if {[file exists $libfile] && ([file mtime $libfile] > $mtime)} {
 	    return 1
 	}
@@ -1440,4 +1433,65 @@ proc DocSubst {path {interp {}}} {
 
 proc Doc_Subst {sock path {interp {}}} {
     Httpd_ReturnData $sock text/html [DocSubst $path $interp]
+}
+
+
+# DocGetTemplates --
+#	
+#	Return a list of .tml files that need to be sourced for a template
+#
+# Arguments:
+#	sock		The client connection
+#	template	The template file pathname.
+#
+# Results:
+#	A list of .tml file names.
+#
+# Side Effects:
+#	None.
+
+proc DocGetTemplates {sock template} {
+    global Doc
+    upvar #0 Httpd$sock data
+
+    # Start at the Doc_AddRoot point
+
+    if {[info exist Doc(root,$data(prefix))]} {
+	set root $Doc(root,$data(prefix))
+
+	# always source the .tml in the rootdir
+	set tmls [list [file join $Doc(root) $Doc(tmlExt)]]
+    } else {
+	set root $Doc(root,/)
+	set tmls {}
+    }
+
+    set tmpldirs [file split [file dirname $template]]
+    if {[string match ${root}* $template]} {
+
+	# Normal case of pathname under domain prefix
+
+	set path $root
+	set extra [lrange $tmpldirs [llength [file split $root]] end]
+
+    } elseif {[set hindex [lsearch -exact $tmpldirs $Doc(homedir)]] >= 0} {
+	
+	# "public_html" is in the template name, so we have been warped
+	# to a user's URL tree.
+
+	set path [eval file join [lrange $tmpldirs 0 $hindex]]
+	incr hindex
+	set extra [lrange $tmpldirs $hindex end]
+    } else {
+	# Don't know where we are - just use the one in the current directory
+
+	set path [file dirname $template] 
+	set extra {}
+    }
+    foreach dir [concat [list {}] $extra] {
+	set path [file join $path $dir]
+	lappend tmls [file join $path $Doc(tmlExt)]
+    }
+
+    return $tmls
 }

@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.11 2000/09/27 19:35:26 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.12 2000/09/29 22:53:12 welch Exp $
 
 package provide httpd::debug 1.0
 
@@ -134,7 +134,7 @@ proc DebugValue {aname} {
 	# Be careful about declared but undefined procedures
 	# that used to blow the recursion stack here...
 
-	set list [uplevel #0 [lsort [list info vars $aname]]]
+	set list [lsort [uplevel #0 [list info vars $aname]]]
 	if {[llength $list] == 1 &&
 		[string compare [lindex $list 0] $aname] == 0} {
 	    append html "<pre># $aname undefined</pre>"

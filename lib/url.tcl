@@ -74,7 +74,16 @@ proc Url_Dispatch {sock} {
 	foreach hook $Url(accessHooks) {
 	    switch -- [eval $hook [list $sock $url]] {
 		ok	{ break }
-		denied	{ return }
+		denied	{
+		    # A URL implementation should have generated the
+		    # appropriate response, such as a 403, to request
+		    # a retry. But, if it hasn't, we generate a default.
+
+		    if {![Httpd_RequestComplete $sock]} {
+			Httpd_Error $sock 403
+		    }
+		    return
+		}
 		skip	{ continue }
 	    }
 	}
