@@ -101,6 +101,10 @@ proc Url_Dispatch {sock} {
 	    Httpd_CompletionCallback $sock $Url(callback,$prefix)
 	}
 
+	if {[info exist Url(filter,$prefix)]} {
+	    Httpd_Filter $sock $Url(filter,$prefix)
+	}
+
 	# Pre-read the post data, if the domain wants that
 
 	if {$Url(readpost,$prefix) && $data(count) > 0} {
@@ -358,6 +362,8 @@ if {![info exist Url(accessHooks)]} {
 #			with or without error, timeout, etc.
 #		-readpost boolean
 #			To indicate we should pre-read POST data.
+#		-filter cmd
+#			A command filter to be run on dynamic content
 
 proc Url_PrefixInstall {prefix command args} {
     global Url
@@ -411,9 +417,12 @@ proc Url_PrefixInstall {prefix command args} {
 		-readpost {
 		    set readpost $v
 		}
+		-filter {
+		    set Url(filter,$prefix) $v
+		}
 		default {
 		    return -code error "Unknown option $n.\
-                        Must be -thread, -callback, or -readpost"
+                        Must be -thread, -callback, -filter or -readpost"
 		}
 	    }
 	}
@@ -454,6 +463,9 @@ proc Url_PrefixRemove {prefix} {
     }
     if {[info exist Url(callback,$prefix)]} {
 	unset Url(callback,$prefix)
+    }
+    if {[info exist Url(filter,$prefix)]} {
+	unset Url(filter,$prefix)
     }
 }
 
