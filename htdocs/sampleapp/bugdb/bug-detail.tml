@@ -5,7 +5,7 @@
 [html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database &gt; Bug Details}]
 
 [bugdb::bug-details [ncgi::value bug] Application OS Priority \
-Assigned Summary Description Date Status]
+Assigned Summary Description Date Status Updated]
 
 <p>
     [html::foreach {title ref} $my_navigation {
@@ -24,6 +24,11 @@ Assigned Summary Description Date Status]
 <p>
     <label for="date" class="text">Date Entered:</label>
     <span id="date">$Date</span>
+</p>
+
+<p>
+    <label for="date" class="text">Last Updated:</label>
+    <span id="date">&nbsp;$Updated</span>
 </p>
 
 <p>
