@@ -331,7 +331,6 @@ proc HttpdRead {sock} {
 	Url_PostHook $sock $data(count)
 	Url_Dispatch $sock
     } else {
-	Httpd_Log $sock Error "Broken connection reading POST data"
 	Httpd_SockClose $sock 1 "broken connection during post data"
     }
 }
