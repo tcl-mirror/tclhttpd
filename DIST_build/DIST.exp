@@ -1,6 +1,6 @@
 # Expect script to drive DIST, and handle the CVS password prompting.
 
-foreach f [glob ~/scratch/* ~/dist/tclhttpd3.4* ~/dist/tclhttpd34* ~/tmp/tclhttpd3.4-dist] {
+foreach f [glob -nocomplain ~/scratch/* ~/dist/tclhttpd3.4* ~/dist/tclhttpd34* ~/tmp/tclhttpd3.4-dist] {
   puts "Removing $f"
   file delete -force $f
 }
@@ -32,4 +32,4 @@ exec gunzip < ~/dist/tclhttpd3.4-dist.tar.gz | tar xf -
 cd tclhttpd3.4-dist
 set timeout 0
 spawn make 
-expect eof
+interact
