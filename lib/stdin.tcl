@@ -5,12 +5,13 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: stdin.tcl,v 1.2 2000/08/02 07:06:54 welch Exp $
+# RCS: @(#) $Id: stdin.tcl,v 1.3 2004/04/30 02:21:46 coldstore Exp $
 
 # The following is an event-driven command loop for testing with tclsh
 # with command history:
 #	!<pattern> run 1st command matching pattern
 #	!<pattern>/xxx/yyy/ as above, but substitute yyy for xxx
+# Nb: history doesn't work, too many changes to the tcl api to track.
 
 package provide httpd::stdin 1.1
 
@@ -64,11 +65,6 @@ proc Stdin_Start {{prompt "% "}} {
     fileevent stdin readable [list StdinRead $prompt]
     vwait Stdin(wait)
 }
-
-proc history {{count 100}} {
-    global Stdin
-    puts stderr [join [lrange $Stdin(history) 0 $count] \n]
-}	
 
 if {[info procs bgerror] == ""} {
     proc bgerror {args} {
