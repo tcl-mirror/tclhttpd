@@ -1,3 +1,9 @@
+2000-05-13  Brent Welch <welch@scriptics.com>
+
+	* lib/include.tcl: Changed Html_ExtractParam to html::extractParam so the
+	server-side examples work.
+	* htdocs/*: Various clean up of the sample URL tree for the 3.0.1 release.
+
 2000-05-12  Brent Welch <welch@scriptics.com>
 
 	* Various additions to installation documentation
