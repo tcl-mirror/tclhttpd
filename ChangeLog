@@ -1,3 +1,20 @@
+2000-03-22  Brent Welch  <welch@scriptics.com>
+	
+	* lib/doc.tcl  Created DocAccessHook and moved authentication
+	checking out of DocDomain and into DocAccessHook.  Also did
+	cleanup so that Doc_Virtual would work if you used Doc_AddRoot
+	to splice in other directory trees into the URL tree.  The
+	nice side effect of DocAccessHook is that you can create
+	a file system structure to parallel application-direct URLs,
+	(e.g., /debug and /status) and put .htaccess or .tclaccess
+	files in them to control access to the built in URLs.
+	* lib/url.tcl  Simplified Url_Dispatch by removing the
+	UrlCache array.  Also added Url_PrefixMatch
+	* lib/auth.tcl  Define env(REMOTE_USER) and env(AUTH_TYPE) in the
+	case that .tclaccess files are used to check Basic Authentication.
+	* REMOVED lib/base64.tcl in favor of the Standard Tcl Library
+	base64 package. (You can find it in deprecated/base64.tcl)
+
 2000-03-18  Brent Welch  <welch@scriptics.com>
 
 	* lib/url.tcl	Added Url_AccessInstall and changed Url_Dispatch
