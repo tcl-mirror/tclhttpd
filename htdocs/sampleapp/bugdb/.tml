@@ -36,3 +36,9 @@ set my_navigation {
     {Report A Bug} report.tml
     {List All Bugs} bug-list.tml
 }
+
+# SMTP server
+
+set my_smtp_server {
+    192.168.100.50
+}

@@ -4,6 +4,12 @@
 
 [html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database &gt; Report A Bug}]
 
+<p>
+    [html::foreach {title ref} $my_navigation {
+        <a href="$ref">$title</a> |
+    }]
+</p>
+
 [html::if {[bugdb::insert [ncgi::value Application] [ncgi::value OS] \
            [ncgi::value Priority] [ncgi::value Assigned] \
 	   [ncgi::value Summary] [ncgi::value Description] ] == 0} {

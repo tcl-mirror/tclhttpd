@@ -46,6 +46,9 @@
             <option>$option</option>
 	}]
     </select>
+
+    <input type="checkbox" name="email" id="email" checked="checked" />
+    <label for="email">Send Email</label>
 </p>
 
 <p>
