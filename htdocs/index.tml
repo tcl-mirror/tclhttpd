@@ -2,8 +2,14 @@
 platform for web application development."]
 [html::keywords Tcl TclHttpd Tcl/Tk "Tcl Web Server" "Web Server"]
 [html::author "Brent Welch"]
-[mypage::header "Tcl-Httpd Home Page"]
+[mypage::header "TclHttpd Home Page"]
 [Doc_Dynamic]
+
+<!-- Two Column Format -->
+<table border=0 cellpadding=4>
+<tr><td valign=top>
+<!-- Left Column -->
+
 [clock format [clock seconds] -format "%B %d, %Y %H:%M:%S"]
 
 [if {[Url_PrefixExists /tclpro]} {
@@ -13,13 +19,12 @@ platform for web application development."]
 	</table>"
 }]
 <p>
-The Tcl-Httpd is a pure Tcl implementation of a Web server (HTTP/1.0).
+The TclHttpd is a pure Tcl implementation of a Web server.
 It runs as a Tcl script on top of
-<a href=http://www.tcl.tk/software/tcltk/>Tcl $tcl_version</a>.
-<p>
-<small>
-If you install the Standard Tcl Library with your Tcl 8.0 or later release you can probably
-get by, and if you grab a 2.3.* version of TclHttpd you can run with Tcl 7.5 or later.</small>
+<a href=http://www.tcl.tk/software/tcltk/>Tcl</a>.
+This server is running Tcl $tcl_patchLevel.
+There is more <a href=version_history.html>TclHttpd version information</a>
+about using other versions of Tcl and the Standard Tcl Library (tcllib).
 <p>
 
 While this server works fine as a stand alone web server, the
@@ -33,16 +38,21 @@ server. Once the core interface between the web server and the hosting
 application is defined, it is possible to manage the web server, upload
 Safe-Tcl control scripts, download logging information, and otherwise
 debug the Tcl part of the application without restarting the hosting
-application. 
+application.
 <p>
-The <a HREF="http://www.tcl.tk/software/tclhttpd/server.html">white
-paper</a> presents a case for an embedded web server from more of a
-business angle. These pages document the technical specifications of
-the server.
-<p>
-The server is distributed under a <a href=license.terms>copyright</a> that allows free use.
+[html::if {[file exists [file join $Doc(root) license.terms]]} {
+  The server is distributed under a <a href=license.terms>copyright</a> that allows free use.
+}]
 
-<h2>See Also</h2>
+<p>
+Please <a href=register.html>Register Your Software</a> so
+we can see how widely used the server is.
+<p>
+The <a href="mailto:tclhttpd-users@lists.sourceforge.net">tclhttpd-users@lists.sourceforge.net</a> mailing list is the best source of current
+information about TclHttpd.
+There is an <a href=http://www.tcl.tk/lists/tcl-httpd>archive</a>.
+
+<h4>Related Articles</h4>
 
 [mypage::README_links]
 
@@ -59,22 +69,42 @@ The book chapter is more coherent, but may lack some details presented
 in the reference pages.  The source code is the truth!
 <p>
 <a href=man/>Low level tclhttpd manual pages</a> contains some detailed server documentation.
+You need the doctools package available to your
+server to view the .man pages.
 <p>
-Please <a href=register.html>Register Your Software</a> so
-we can see how widely used the server is.
-<p>
-The <a href="mailto:tclhttpd-users@lists.sourceforge.net">tclhttpd-users@lists.sourceforge.net</a> mailing list,
-for which there is an <a href=http://www.tcl.tk/lists/tcl-httpd>archive</a>.
+The <a HREF="http://www.tcl.tk/software/tclhttpd/server.html">white
+paper</a> presents a case for an embedded web server from more of a
+business angle.
 
-<h2>Control/Status Pages</h2>
+<!-- End Left Column -->
+</td><td valign=top>
+<!-- Right Column -->
+
+<h4>Control/Status Pages</h4>
 <ul>
-<li><a HREF="/status/">Server statistics</a> 
+<li><a HREF="/status/">Server statistics</a>. 
+Home hits: [counter::get hit -hist /]
 <li><a HREF="hacks.html">Control panel</a> 
 </ul>
-<h2>Test Pages</h2>
+<h4>Learn TclHttpd</h4>
+<ul>
+<li>
+[if {[info commands "::learn::links"] == "::learn::links"} {
+  set _ [::learn::links \n<li>]
+} else {
+  set _ "<a href=/learn/>Learn</a>"
+}]
+</ul>
+
+<h4>Sample GuestBook</h4>
+<ul>
+<li><a href="guestbook/guestbook.cgi">View Guest Book</a>
+<li><a href="guestbook/newguest.html">Update Guest Book</a>
+</ul>
+
+<h4>Test Pages</h4>
 <ul>
 <li><a HREF="include.shtml">Server includes</a> 
-<li><a HREF="snmp/">Snmp Integration</a>.  You need Scotty installed for this.
 <li><a HREF="templates/">Templates with inline Tcl</a>.  The simple look-and-feel for these
 pages is implemented in the htdocs/libtml/mypage.tcl file.
 <li><a HREF="access/">Access control schemes</a>. 
@@ -88,10 +118,10 @@ pages is implemented in the htdocs/libtml/mypage.tcl file.
 <li><a HREF="images">A directory listing page</a>
 </ul>
 
-<h2>Sample GuestBook</h2>
-<ul>
-<li><a href="guestbook/guestbook.cgi">View Guest Book</a>
-<li><a href="guestbook/newguest.html">Update Guest Book</a>
-</ul>
+<!-- End Right Column -->
+</td></tr>
+<!-- End Two Column Format -->
+</table>
+
 
 [mypage::footer]
