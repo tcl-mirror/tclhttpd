@@ -25,6 +25,12 @@ Here is a choice among item:<select name="choice" size="5">
 <option value="five value">five
 </select>
 <p>
+A selection that lets you choose more than one thing.
+<select name=multi multiple>
+<option value="foo+bar">foo bar
+<option value=red>red
+</select>
+<p>
 Decide what to do with this form: <input type=reset name=Reset><input type="submit" name="Submit"><!--></form>
 
 

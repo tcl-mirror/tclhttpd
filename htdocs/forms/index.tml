@@ -1,9 +1,14 @@
 [mypage::header "CGI Examples"]
+<h3>Normal cases</h3>
 <ul>
 <li><a href=form1.html>Sample form posted to test.cgi</a>
+<li><a href=file.html>File upload form</a>
 <li><a href=posttest.html>Form with mixed POST/GET</a>
 <li><a href=../cgi-bin/env.cgi/extra/path?query=data&x=y>CGI that dumps the environment</a>
 <li><a href=../cgi-bin/big.cgi>CGI that returns a large image</a>
+</ul>
+<h3>Error cases</h3>
+<ul>
 <li><a href=../cgi-bin/err1.cgi>CGI that generates no output and hangs</a>
 For versions of Tcl before 8.2.3, 
 this hangs the server (!) because Tcl tries wait for the child
