@@ -1,7 +1,10 @@
 # tcl script to copy the TclHttpd source tree
 
 proc CopyTree {src dst} {
-    foreach f [glob -nocomplain [file join $src *] [file join $src .tml]] {
+    foreach f [glob -nocomplain [file join $src *] \
+		[file join $src .tml] \
+		[file join $src .htaccess] \
+		[file join $src .tclaccess]] {
 	if {[regexp {(CVS|SCCS|.*\.orig|.*\.old)$} $f]} {
 	    puts "skipping $f"
 	    continue
