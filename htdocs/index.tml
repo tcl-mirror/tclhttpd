@@ -6,6 +6,12 @@ platform for web application development."]
 [Doc_Dynamic]
 [clock format [clock seconds] -format "%B %d, %Y %H:%M:%S"]
 
+[if {[file exists [file join [Doc_Root] tclpro]]} {
+    set _ "<table align=right border=1>
+	<tr><td><img src=/images/TclPro200.gif></td></tr>
+	<tr><td><a href=/tclpro>TclPro Documentation</a></td></tr>
+	</table>"
+}]
 <p>
 The Tcl-Httpd is a pure Tcl implementation of a Web server (HTTP/1.0).
 It runs as a Tcl script on top of
