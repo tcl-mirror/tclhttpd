@@ -1,4 +1,8 @@
 2004-04-29 Colin McCormack <colin@chinix.com>
+	* lib/stdin.tcl: removed history proc which interferes with 
+	some third party console packages to no legitimate purpose.
+
+2004-04-29 Colin McCormack <colin@chinix.com>
 	* lib/template.tcl: allow non-dynamic templates to control
 	content type of returned file.
 	* lib/httpd.tcl: fixed sf error '[925210] bad message length in Httpd_Error'
