@@ -486,9 +486,9 @@ proc Url_DecodeQuery_multipart/form-data {query qualifiers} {
     # Filter query into a list
     # Protect Tcl special characters
     # regsub -all {([\\{}])} $query {\\\\\\1} query
-    regsub -all {(\\)} $query {\\\\\\1} query
-    regsub -all {({)}  $query {\\\\\\2} query
-    regsub -all {(})}  $query {\\\\\\3} query
+    regsub -all {(\\)}  $query {\\\\\\001} query
+    regsub -all {(\{)}  $query {\\\\\\002} query
+    regsub -all {(\})}  $query {\\\\\\003} query
     regsub -all -- "(\r?\n?--)?$options(boundary)\r?\n?" $query "\} \{" data
     set data [subst -nocommands -novariables "\{$data\}"]
 
@@ -503,9 +503,9 @@ proc Url_DecodeQuery_multipart/form-data {query qualifiers} {
 	set elementData {}
 	# Protect Tcl special characters
 	# regsub -all {([\\{}])} $element {\\\\\\1} element
-    regsub -all {(\\)} $element {\\\\\\1} element
-    regsub -all {({)}  $element {\\\\\\2} element
-    regsub -all {(})}  $element {\\\\\\3} element
+	regsub -all {(\\)}  $element {\\\\\\001} element
+	regsub -all {(\{)}  $element {\\\\\\002} element
+	regsub -all {(\})}  $element {\\\\\\003} element
 	regsub \r?\n\r?\n $element "\} \{" element
 
 	foreach {headers elementData} [subst -nocommands -novariables "\{$element\}"] break
@@ -562,8 +562,8 @@ proc Url_DecodeQuery_multipart/form-data {query qualifiers} {
 	}
 	# restore Tcl special characters
 	regsub -all {(\\\001\001)} $elementData {\\} elementData
-	regsub -all {(\\\001\002)} $elementData {\{} elementData
-	regsub -all {(\\\001\003)} $elementData {\}} elementData
+	regsub -all {(\\\001\002)} $elementData "{" elementData
+	regsub -all {(\\\001\003)} $elementData "}" elementData
 	lappend result $parameterName [list $headerList $elementData]
     }
 
