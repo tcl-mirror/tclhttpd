@@ -1,12 +1,6 @@
-[mypage::header "TclHttpd Tech Notes"]
-<p>
-This page has a collection of useful Tech Notes that have
-been contributed by users.
-
-[KBinit]
-
-[KB "How to shutdown embedded TclHttpd" {
-[John Buckman of Lyris Technology writes:]
+[mypage::header "Embedding TclHttpd"]
+<h2>How to shutdown embedded TclHttpd</h2>
+<i>John Buckman of Lyris Technology</i>
 <p>
 Here is our scenario: we link Tcl into our multithreaded application, and 
 one thread launches Tcl and runs TclHttpd.  This works great, but when our 
@@ -26,8 +20,5 @@ of it is semaphore protected and thread safe (beautiful, clean source code,
 by the way) so I assume that this is the proper way to do it since it 
 appears from looking at the Tcl code that it was made for this sort of thing.
 
-}]
-
-[KBgen "Tech Notes"]
 
 [mypage::footer]

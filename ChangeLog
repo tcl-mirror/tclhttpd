@@ -1,3 +1,9 @@
+2004-04-17 Brent Welch <welch@panasas.com>
+        * Various doc updates.
+        Created htdocs/man/index.tml
+        renamed manual/reference.tml -> manual/intro.tml
+        renamed manual/technotes.tml -> manual/embedding.tml
+
 2004-04-15 Colin McCormack <colin@chinix.com>
 	* lib/upload.tcl: handle redirect and suspend from upload
 	domain

@@ -83,7 +83,7 @@ Home hits: [counter::get hit -hist /]
 <li>
 <a href=man/>Manual pages</a>. (requires doctools package)
 <li>
-<a href=manual/reference.html>Server Reference Page</a>. (somewhat out of date)
+<a href=manual/intro.html>Programming overview</a>.
 <li>
 <a HREF="templates/">Templates with inline Tcl</a>.
 <li>
@@ -103,9 +103,6 @@ Home hits: [counter::get hit -hist /]
 <li><a HREF="include.shtml">Server includes</a> 
 <li><a HREF="forms/">CGI</a>  You probably need to install the Standard Tcl Library for this.
 <li><a HREF="map/">Imagemaps</a> 
-[if {[file exists [file join [Doc_Root] java]]} {
-    set _ "<li><a HREF=\"java/ServerDemo.html\">Java applet</a> You need to run Netscape 2.0 for this ancient applet to work :-)\n"
-}]
 <li><a HREF="/xyzzy">Sample missing page</a>
 <li><a HREF="/debug/raise?message=This+page+raises+errors!">A page that raises an error</a>
 <li><a HREF="images">A directory listing page</a>

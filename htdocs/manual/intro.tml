@@ -1,14 +1,15 @@
-[mypage::header "Tcl Server Reference"]
+[mypage::header "Tcl Server Programming Intro"]
 
 <p>
 <h2>
-<a NAME="basic">Basic Configuration</a></h2>
+<a NAME="basic">Introduction</a></h2>
 <p>
-The main Tcl script consists of <code>package require</code> commands
-and module-specific initialization commands. The sample main script
-is <code>bin/httpd</code> in the distribution. The things you may want
-to change are inbetween the CONFIGURATION and END CONFIGURATION lines
-in the script. 
+This is an old page that describes some of the
+the most commonly used APIs in the server.
+You should also look at the <a href=/learn/>Learn</a> section
+that has several more specific write-ups and the
+<a href=/man/>manual pages</a> for more complete documentation
+on each module.
 
 <h3>Document Root</h3>
 <p>
@@ -173,14 +174,6 @@ the connection.
 <p>
 Example handlers include <code>Doc_application/x-cgi</code>, <code>Doc_application/x-imagemap</code>,
 <code>Doc_application/x-tcl-subst</code>, and <code>Doc_application/x-server-include</code>.
-
-
-<h2>Safe-Tcl in an external process</h2>
-<p>
-This is currently broken, and safesrv.tcl and safecgio.tcl need to
-be updated to the new server core. Instead of putting the Safe-Tcl
-processing in another file, it is done in a the main process using
-the "Subst" approach described below. 
 
 <h2><a NAME="subst">HTML+Tcl Templates</a></h2>
 <p>

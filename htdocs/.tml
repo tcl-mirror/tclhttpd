@@ -29,8 +29,7 @@ mypage::contents {
     "CGI Tests"		/forms/
     "Templates"		/templates/
     "Access Control"	/access/
-    Register		/register.html
-    "Reference Manual"	/manual/reference.html
+    "Reference Manual"	/man/
 }
 
 # These are the default colors and fonts for various HTML objects
