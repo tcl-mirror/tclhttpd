@@ -15,12 +15,12 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: counter.tcl,v 1.7 2000/09/20 20:41:38 welch Exp $
+# RCS: @(#) $Id: counter.tcl,v 1.8 2000/09/22 05:39:28 welch Exp $
 
 package provide httpd::counter 2.0
 package require stats 1.0
 
-proc Counter_Init {} {
+proc Counter_Init {{secsPerMinute 60}} {
     global counter
     global counterTags
     if {[info exists counter]} {
@@ -36,7 +36,7 @@ proc Counter_Init {} {
     # urlhits is the number of requests serviced.
 
     set counterTags(urlhits) 1
-    stats::countInit urlhits -timehist 4
+    stats::countInit urlhits -timehist secsPerMinute
 
     # This start/stop timer is used for connection service times.
     # The bucket size is 5 millisecond

@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.17 2000/09/20 00:49:47 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.18 2000/09/22 05:39:29 welch Exp $
 
 package provide httpd::status 1.0
 
@@ -496,7 +496,7 @@ proc StatusTclPower {{align left}} {
 #	Returns HTML.
 
 proc Status/all {args} {
-    global _status
+    global _status page
     set html "<html><head><title>Tcl HTTPD Status</title></head>\n"
     append html "<body><h1>Tcl HTTPD Status</h1>\n"
     append html [StatusMenu]
@@ -505,17 +505,18 @@ proc Status/all {args} {
     append html "<br><a href=/status/text>Text only view.</a>\n"
 
     append html [stats::histHtmlDisplay serviceTime \
-	    -title "Service Time" -unit seconds -max 100 \
+	    -title "Service Time" -unit seconds \
+	    -width 1 -skip 10 -min 0 -max 200 \
 	    -images $_status(images)]
 
     append html [stats::histHtmlDisplay urlhits \
-	    -title "Per Minute Url Hits" -unit minutes \
+	    -title "Url Hits" -unit minutes \
 	    -images $_status(images)]
     append html [stats::histHtmlDisplay urlhits \
-	    -title "Hourly Url Hits" -unit hours \
+	    -title "Url Hits" -unit hours \
 	    -images $_status(images)]
     append html [stats::histHtmlDisplay urlhits \
-	    -title "Daily Url Hits" -unit days \
+	    -title "Url Hits" -unit days \
 	    -images $_status(images)]
     return $html
 }

@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.55 2000/09/20 01:04:47 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.56 2000/09/22 05:39:28 welch Exp $
 
 package provide httpd 1.5
 
@@ -156,11 +156,6 @@ proc Httpd_Init {} {
     }
     Httpd_Version
     append Httpd(server) $Httpd(version)
-
-    # TODO - move these OUT of this file and into the main startup code
-
-    Counter_Init
-
 }
 
 # Httpd_Server --
@@ -1085,7 +1080,7 @@ proc Httpd_ReturnFile {sock type path {offset 0}} {
 #	Send the data down the socket
 
 proc Httpd_ReturnData {sock type content {code 200} {close 0}} {
-    global Httpd Httpd_Errors
+    global Httpd
     upvar #0 Httpd$sock data
 
     if {[Thread_Respond $sock \
@@ -1126,7 +1121,7 @@ proc Httpd_ReturnData {sock type content {code 200} {close 0}} {
 #	Send the data down the socket
 
 proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
-    global Httpd Httpd_Errors
+    global Httpd 
     upvar #0 Httpd$sock data
 
     if {[Thread_Respond $sock \
@@ -1283,7 +1278,7 @@ set HttpdRedirectFormat {
 
 proc Httpd_Redirect {newurl sock} {
     upvar #0 Httpd$sock data
-    global Httpd Httpd_Errors HttpdRedirectFormat
+    global Httpd HttpdRedirectFormat
 
     if {[Thread_Respond $sock \
 	    [list Httpd_Redirect $newurl $sock]]} {
@@ -1518,7 +1513,7 @@ set HttpdAuthorizationFormat {
 
 proc Httpd_RequestAuth {sock type realm} {
     upvar #0 Httpd$sock data
-    global Httpd Httpd_Errors HttpdAuthorizationFormat
+    global Httpd HttpdAuthorizationFormat
 
     if {[Thread_Respond $sock \
 	    [list Httpd_RequestAuth $sock $type $realm]]} {
