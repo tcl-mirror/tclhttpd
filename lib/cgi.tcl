@@ -357,14 +357,9 @@ proc CgiCopy {fd sock} {
     # Normal one-thread case - set up to copy data from pipe to socket
 
     fconfigure $sock -translation binary
-    if {$Httpd(fcopy)} {
-	fileevent $sock readable {}
-	fileevent $fd readable {}
-	fcopy $fd $sock -command [list CgiClose $fd $sock]
-    } else {
-	fconfigure $sock -blocking 0
-	copychannel $fd $sock
-    }
+    fileevent $sock readable {}
+    fileevent $fd readable {}
+    fcopy $fd $sock -command [list CgiClose $fd $sock]
 }
 
 proc CgiCopyDirect {sock block} {
