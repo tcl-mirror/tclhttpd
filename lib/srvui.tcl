@@ -24,11 +24,18 @@ proc SrvUI_Init {title} {
     message .msg -text $msgText -aspect 1000
     grid .msg -columnspan 2 -sticky news
 
+    foreach {url label} {
+	    / "Home Page"
+	    } {
+	label .l$url -text $label
+	label .n$url -textvariable counterhit($url) -width 0
+	grid .l$url .n$url -sticky w
+	grid configure .n$url -sticky e
+    }
     foreach {counter label} {
 	    urlhits "URL Requests"
 	    urlreply "URL Replies"
 	    cgihits "CGI Hits"
-	    tclhits "Tcl Safe-CGIO Hits"
 	    maphits "Image Map Hits"
 	    errors	"Errors"
 	    } {

@@ -1130,7 +1130,7 @@ proc Httpd_SockClose {sock closeit {message Close}} {
 	catch {close $data(infile)}
     }
     if {$closeit} {
-	if {$data(count) > 0} {
+	if {[info exists data(count)] && $data(count) > 0} {
 
 	    # There is unread POST data.  To ensure that the client
 	    # can read our reply properly, we must read this data.

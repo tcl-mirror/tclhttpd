@@ -39,7 +39,8 @@ proc StatusSortForm {action label {pattern *} {sort number}} {
     append result "<form action=$action>"
     append result "Pattern <input type=text name=pattern value=$pattern><br>"
     append result "Sort by $label <input type=radio name=sort value=number $numcheck> or Name <input type=radio name=sort value=name $namecheck><br>"
-    append result "<input type=submit name=submit value=\"Again\"><p>"
+    append result "<input type=submit name=submit value=\"Again\">"
+    append result "</form>"
 }
 
 proc StatusMenu {} {
@@ -71,7 +72,7 @@ proc Status/doc {{pattern *} {sort number}} {
     append result [StatusPrintHits $pattern $sort]
 }
 proc StatusPrintHits {aname {pattern *} {sort number}} {
-    append result [StatusPrintArray hits * $sort Hits Url]
+    append result [StatusPrintArray hit * $sort Hits Url]
 }
 proc StatusPrintArray {aname pattern sort col1 col2} {
     upvar #0 counter$aname a
@@ -279,9 +280,22 @@ proc StatusThreadUpdate {self master} {
 proc StatusTable {aname {reset_name {}}} {
     upvar #0 $aname counter
     upvar #0 $reset_name counter_reset
+    global counterhit
     append html "<table border>\n"
 
     set hit 0
+    foreach {c label} {
+	    / "Home Page Hits"
+	    } {
+	if [info exists counterhit($c)] {
+	    append html "<tr><td>$label</td><td>$counterhit($c)</td>\n"
+	    set hit 1
+	    if {[info exist counter_reset($c)]} {
+		append html "<td>[clock format $counter_reset($c) -format "%B %d, %Y"]</td>"
+	    }
+	    append html </tr>\n
+	}
+    }
     foreach {c label} {
 	    urlhits "URL Requests"
 	    Url_Dispatch "URL Dispatch"
@@ -289,7 +303,6 @@ proc StatusTable {aname {reset_name {}}} {
 	    UrlEval "Direct Dispatch"
 	    UrlCacheHit "UrlCache eval"
 	    urlreply "URL Replies"
-	    cachehit,/ "Home Page Hits"
 	    accepts "Total Connections"
 	    keepalive "KeepAlive Requests"
 	    http1.0 "OneShot Connections"
