@@ -8,17 +8,19 @@
 # We pre-declare any non-simple counters (e.g., the time-based
 # histogram for urlhits, and the interval-histogram for service times)
 # and everything else defaults to a basic counter.  Once things
-# are declared, the stats::count function counts things for us.
+# are declared, the counter::count function counts things for us.
 #
 # Brent Welch (c) 1997 Sun Microsystems
 # Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: counter.tcl,v 1.12 2000/10/02 16:58:53 welch Exp $
+# RCS: @(#) $Id: counter.tcl,v 1.13 2000/10/03 03:51:45 welch Exp $
 
+# Layer ourselves on top of the Standard Tcl Library counter package.
+
+package require counter 2.0
 package provide httpd::counter 2.0
-package require stats 1.0
 
 proc Counter_Init {{secsPerMinute 60}} {
     global counter
@@ -29,25 +31,25 @@ proc Counter_Init {{secsPerMinute 60}} {
     set counter(starttime) [clock seconds]
     
     # The Count procedure will be self-initializing because
-    # the stats::count module is not.  The knownTags list is
+    # the counter::count module is not.  The knownTags list is
     # searched to determine if we need to initialize the counter.
     # Predefine well known counters here.
 
     # urlhits is the number of requests serviced.
 
     set counterTags(urlhits) 1
-    stats::countInit urlhits -timehist $secsPerMinute
+    counter::init urlhits -timehist $secsPerMinute
 
     # This start/stop timer is used for connection service times.
     # The linear histogram has buckets of 5 msec.
 
     set counterTags(serviceTime) 1
-    stats::countInit serviceTime -hist 0.005
+    counter::init serviceTime -hist 0.005
 
     # This log-scale histogram multiplies the seconds time by
     # 1000 to get milliseconds, and then plots the log of that.
     # The log-base histgram isn't useful
-    #stats::countInit serviceTime -histlog 10
+    #counter::init serviceTime -histlog 10
 
     # These group counters are used for per-page hit, notfound, and error
     # statistics.  If you auto-gen unique URLS, these are a memory leak
@@ -56,7 +58,7 @@ proc Counter_Init {{secsPerMinute 60}} {
     #	status::countInit hit -simple
 
     foreach g {domainHit hit notfound error} {
-	stats::countInit $g -group $g
+	counter::init $g -group $g
 	set counterTags($g) 1
     }
 
@@ -64,7 +66,7 @@ proc Counter_Init {{secsPerMinute 60}} {
 
     foreach c {accepts sockets connections urlreply keepalive connclose 
 		http1.0 http1.1} {
-	stats::countInit $c
+	counter::init $c
 	set counterTags($c) 1
     }
     Httpd_RegisterShutdown Counter_CheckPoint
@@ -77,9 +79,9 @@ proc Counter_CheckPoint {} {
 	catch {file rename -force $path $path.old}
 	if {![catch {open $path w} out]} {
 	    puts $out \n[parray counter]
-	    puts $out \n[parray [stats::countGet urlhits -histVar]]
-	    puts $out \n[parray [stats::countGet urlhits -histHourVar]]
-	    puts $out \n[parray [stats::countGet urlhits -histDayVar]]
+	    puts $out \n[parray [counter::get urlhits -histVar]]
+	    puts $out \n[parray [counter::get urlhits -histHourVar]]
+	    puts $out \n[parray [counter::get urlhits -histDayVar]]
 	    close $out
 	}
     }
@@ -88,36 +90,36 @@ proc Counter_CheckPoint {} {
 proc Count {what {delta 1}} {
     global counterTags
     if {![info exist counterTags($what)]} {
-	stats::countInit $what
+	counter::init $what
     }
-    stats::count $what $delta
+    counter::count $what $delta
 }
 
 proc CountName {instance tag} {
-    stats::count $tag 1 $instance
+    counter::count $tag 1 $instance
 }
 
 proc Counter_Reset {what args} {
-    eval {stats::countReset $what} $args
+    eval {counter::reset $what} $args
 }
 
 proc CountHist {what {delta 1}} {
-    stats::count $what $delta
+    counter::count $what $delta
 }
 
 proc CountStart {what instance} {
-    stats::countStart $what $instance
+    counter::start $what $instance
 }
 proc CountStop {what instance} {
-    stats::countStop $what $instance
-#    stats::countStop $what $instance CountMsec
+    counter::stop $what $instance
+#    counter::stop $what $instance CountMsec
 }
 proc CountMsec {x} {
     return [expr {$x * 1000}]
 }
 proc CountVarName {what} {
-    return [stats::countGet $what -totalVar]
+    return [counter::get $what -totalVar]
 }
 proc Counter_StartTime {} {
-    return $stats::startTime
+    return $counter::startTime
 }

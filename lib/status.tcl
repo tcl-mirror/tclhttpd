@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.22 2000/10/02 16:58:54 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.23 2000/10/03 03:51:45 welch Exp $
 
 package provide httpd::status 1.0
 
@@ -107,7 +107,7 @@ proc Status/doc {{pattern *} {sort number}} {
     append result "<h1>Document Hits</h1>\n"
     append result [StatusMenu]
     append result [StatusSortForm $_status(dir)/doc "Hit Count" $pattern $sort]
-    append result [StatusPrintArray [stats::countGet hit -histVar] * $sort Hits Url]
+    append result [StatusPrintArray [counter::get hit -histVar] * $sort Hits Url]
 }
 
 # Status/domain --
@@ -128,7 +128,7 @@ proc Status/domain {{pattern *} {sort number}} {
     append result "<h1>Domain Hits</h1>\n"
     append result [StatusMenu]
     append result [StatusSortForm $_status(dir)/domain "Hit Count" $pattern $sort]
-    append result [StatusPrintArray [stats::countGet domainHit -histVar] * $sort Hits Domain]
+    append result [StatusPrintArray [counter::get domainHit -histVar] * $sort Hits Domain]
 }
 
 proc StatusPrintArray {aname pattern sort col1 col2} {
@@ -201,7 +201,7 @@ proc Status/notfound {{pattern *} {sort number}} {
 
 proc StatusPrintNotFound {{pattern *} {sort number}} {
     global Doc Referer _status
-    upvar #0 [stats::countGet notfound -histVar] histogram
+    upvar #0 [counter::get notfound -histVar] histogram
     append result <pre>\n
     append result [format "%6s %s\n" Miss Url]
     set list {}
@@ -241,7 +241,7 @@ proc StatusPrintNotFound {{pattern *} {sort number}} {
 
 proc Status/notfound/reset {args} {
     global Referer
-    stats::countReset notfound
+    counter::reset notfound
     catch {unset Referer}
     return "<h1>Reset Notfound Counters</h1>"
 }
@@ -447,7 +447,7 @@ proc StatusTable {} {
     foreach {c label} {
 	    / "Home Page Hits"
 	    } {
-	set N [stats::countGet hit -hist $c]
+	set N [counter::get hit -hist $c]
 	if {$N > 0} {
 	    append html "<tr><td>$label</td><td>$N</td>\n"
 	    set hit 1
@@ -476,10 +476,10 @@ proc StatusTable {} {
 	    errors	"Errors"
 	    Status	"Status"
 	    } {
-	if {[stats::countExists $c]} {
-	    append html "<tr><td>$label</td><td>[stats::countGet $c -total]</td>\n"
+	if {[counter::exists $c]} {
+	    append html "<tr><td>$label</td><td>[counter::get $c -total]</td>\n"
 	    set hit 1
-	    set resetDate [stats::countGet $c -resetDate]
+	    set resetDate [counter::get $c -resetDate]
 	    if {[string length $resetDate]} {
 		append html "<td>[clock format $resetDate -format "%B %d, %Y"]</td>"
 	    }
@@ -487,9 +487,9 @@ proc StatusTable {} {
 	}
     }
     if {!$hit} {
-	foreach c [stats::countGet "" -allTagNames] {
-	    append html "<tr><td>$name</td><td>[stats::countGet $c -total]</td>\n"
-	    set resetDate [stats::countGet $c -resetDate]
+	foreach c [counter::get "" -allTagNames] {
+	    append html "<tr><td>$name</td><td>[counter::get $c -total]</td>\n"
+	    set resetDate [counter::get $c -resetDate]
 	    if {[string length $resetDate]} {
 		append html "<td>[clock format $resetDate -format "%B %d, %Y"]</td>"
 	    }
@@ -526,20 +526,20 @@ proc Status/all {args} {
     append html "<br><a href=/status/text>Text only view.</a>\n"
 
     append html "<p>\n<table border=0 cellpadding=0 cellspacing=0>\n"
-    append html [stats::histHtmlDisplayRow serviceTime \
+    append html [counter::histHtmlDisplayRow serviceTime \
 	    -title "Service Time" -unit seconds \
 	    -width 1 -skip 10 -min 0 -max 400 \
 	    -images $_status(images)]
 
-    append html [stats::histHtmlDisplayRow urlhits \
+    append html [counter::histHtmlDisplayRow urlhits \
 	    -title "Url Hits" -unit minutes \
 	    -min 0 -max 60 \
 	    -images $_status(images)]
-    append html [stats::histHtmlDisplayRow urlhits \
+    append html [counter::histHtmlDisplayRow urlhits \
 	    -title "Url Hits" -unit hours \
 	    -min 0 -max 24 \
 	    -images $_status(images)]
-    append html [stats::histHtmlDisplayRow urlhits \
+    append html [counter::histHtmlDisplayRow urlhits \
 	    -title "Url Hits" -unit days \
 	    -images $_status(images)]
     
@@ -566,15 +566,15 @@ proc Status/text {args} {
     append html [StatusMainTable]
     append html "<p><a href=$_status(dir)/all>Bar Chart View.</a>"
     catch {
-	append html [stats::histHtmlDisplay serviceTime \
+	append html [counter::histHtmlDisplay serviceTime \
 		-title "Service Time" -unit seconds -max 100 -text 1]
     }
     catch {
-	append html [stats::histHtmlDisplay hits \
+	append html [counter::histHtmlDisplay hits \
 		-title "Per Minute Url Hits" -unit minutes -text 1]
-	append html [stats::histHtmlDisplay hits \
+	append html [counter::histHtmlDisplay hits \
 		-title "Hourly Url Hits" -unit hours -text 1]
-	append html [stats::histHtmlDisplay hits \
+	append html [counter::histHtmlDisplay hits \
 		-title "Daily Url Hits" -unit days -text 1]
     }
     return $html
@@ -719,7 +719,7 @@ proc Doc_application/x-tcl-status {path suffix sock} {
 
 if {0} {
     proc StatusPrintHits {aname {pattern *} {sort number}} {
-	append result [StatusPrintArray [stats::countGet hit -histVar] *\
+	append result [StatusPrintArray [counter::get hit -histVar] *\
 		$sort Hits Url]
     }
 }
