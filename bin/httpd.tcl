@@ -278,8 +278,12 @@ if {[info exists tk_version]} {
 }
 Stderr $startup
 if {$Config(debug)} {
-    Stdin_Start "httpd % "
-    Httpd_Shutdown
+    if {[info commands "console"] == "console"} {
+	console show
+    } else {
+	Stdin_Start "httpd % "
+	Httpd_Shutdown
+    }
 } else {
     vwait forever
 }
