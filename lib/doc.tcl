@@ -839,7 +839,10 @@ proc Doc_Redirect {newurl} {
 }
 
 proc Doc_RedirectSelf {newurl} {
-    Doc_Redirect [Httpd_SelfUrl $newurl]
+    set thispage [ncgi::urlStub]
+    set thisurl [Httpd_SelfUrl $thispage]
+    set newurl [html::resolveUrl $thisurl $newurl]
+    Doc_Redirect $newurl
 }
 
 # Check modify times on all templates that affect a page
