@@ -18,9 +18,16 @@
 # what is in this configuration file.
 
 # docRoot - the name of the file system directory containing
-# the root of your document tree.
+# the root of your document tree.  This is conditional so you
+# can run from the source distribution or after doing "make install"
 
-Config docRoot		[file join [Config home] ../htdocs]
+foreach d [list \
+	[file join [Config home] ../htdocs] \
+	[file join [Config home] ../tclhttpd/htdocs]] {
+    if {[file isdirectory $d]} {
+	Config docRoot $d
+    }
+}
 
 # uid - the server executes as the following user ID.
 # If you have TclX available, these can be user names.
@@ -76,7 +83,7 @@ Config webmaster	webmaster@[info hostname]
 # library - additional directory to add to the auto_path
 # If you add custom code to the server, put it in this directory.
 
-Config library		{}
+Config library		[file join [Config docRoot] libtml]
 
 # threads - the maximum number of worker threads to create.
 # If 0, then no threads are ever used.

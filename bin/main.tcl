@@ -69,7 +69,7 @@ Doc_IndexFile		index.{tml,html,shtml,thtml,htm,subst}
 Doc_PublicHtml		public_html
 Cgi_Directory		/cgi-bin
 Mtype_ReadTypes 	[file join $Config(lib) mime.types]
-Status_Url		/status
+Status_Url		/status /images
 Debug_Url		/debug
 Mail_Url		/mail
 Admin_Url		/admin

@@ -57,7 +57,7 @@ set home [file join [pwd] $home]
 # Auto-detect the configuration
 # 1. Development - look for $home/../lib and $home/../../tcllib/modules
 # 2. Standalone install - look for $home/../lib $home/tcllib
-# 3. Tcl package install - look for $tcl_library/../tclhttpd3.0 
+# 3. Tcl package install - look for $tcl_library/../tclhttpd3.0.0
 
 if {[file exist [file join $home ../lib/httpd.tcl]]} {
     # Cases 1 and 2
