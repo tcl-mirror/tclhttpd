@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.26 2002/08/15 13:13:30 coldstore Exp $
+# RCS: @(#) $Id: status.tcl,v 1.27 2004/04/29 01:46:26 coldstore Exp $
 
 package provide httpd::status 1.0
 
@@ -590,11 +590,11 @@ proc Status/text {args} {
 		-title "Service Time" -unit seconds -max 100 -text 1]
     }
     catch {
-	append html [counter::histHtmlDisplay hits \
+	append html [counter::histHtmlDisplay urlhits \
 		-title "Per Minute Url Hits" -unit minutes -text 1]
-	append html [counter::histHtmlDisplay hits \
+	append html [counter::histHtmlDisplay urlhits \
 		-title "Hourly Url Hits" -unit hours -text 1]
-	append html [counter::histHtmlDisplay hits \
+	append html [counter::histHtmlDisplay urlhits \
 		-title "Daily Url Hits" -unit days -text 1]
     }
     return $html
