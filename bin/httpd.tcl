@@ -17,6 +17,7 @@
 #
 #
 # Copyright (c) 1997 Sun Microsystems, Inc.
+# Copyright (c) 1998 Scriptics Corporation
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
