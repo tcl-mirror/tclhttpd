@@ -20,7 +20,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.36 2000/08/02 07:06:52 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.37 2000/09/02 00:40:45 welch Exp $
 
 package provide httpd::doc 1.0
 
@@ -243,6 +243,11 @@ proc DocDomain {virtual directory sock suffix} {
     upvar #0 Httpd$sock data
 
     set pathlist $data(pathlist)
+
+    # Suffix may have URL encoded things in it - this has a already
+    # been decoded into pathlist
+
+    set suffix [join $pathlist /]
 
     # Check for personal home pages
 
