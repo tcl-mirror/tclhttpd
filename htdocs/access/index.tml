@@ -1,0 +1,35 @@
+[mypage::header "Access Control Schemes"]
+<ul>
+<li><a href=auth/>Apache-style .htaccess</a> This depends on /usr/local/htaccess/passwd
+and /usr/local/htaccess/group.  It will allow access to anyone in the "webmaster" group.
+Since you probably don't have these files, you cannot get in.
+The passwd file has this format:
+<pre>
+username: encrypted_password
+postit:XosCXE6SpAem2
+</pre>
+The group file has this format:
+<pre>
+groupname: member, member2, member3
+webmaster: postit
+</pre>
+
+<li><a href=bydir/>Apache-style .htaccess</a> This also depends on /usr/local/htaccess/passwd
+and /usr/local/htaccess/group.  It allows members of the tcl97 group.
+
+<li><a href=bytcl/>.tclaccess</a>  This uses a .tclaccess file in the directory that
+specifies a Tcl procedure to run to check the password.  Try "tclhttpd" and "I love Tcl",
+then check out <a href=/debug/showproc?proc=MyPasswordChecker>MyPasswordChecker</a> to
+see how easy this can be.
+
+<li><a href=noawe/>Deny access to a host</a>  This is another .htaccess example that
+denies access to noawe.sun.com.
+
+<li><a href=null/>Funky auto-login mechanism</a>  This uses the AuthNullCallback procedure that
+forces you to try to login twice, and then remembers that password until the server restarts.
+I'm not sure how useful this really is.
+
+<li><a href=null/>More AuthNullCallback</a>  Another example from an ancient demo.
+</ul>
+
+[mypage::footer]
