@@ -1,0 +1,14 @@
+mkdir /home/welch/scratch
+cd /home/welch/scratch
+
+cvs -d /home/cvs checkout tclhttpd
+mv tclhttpd tclhttpd3.0.0
+
+cvs -d /home/cvs checkout thread
+mv thread thread2.0
+
+cd tclhttpd3.0.0/DIST_build
+
+make superdist DISTDIR=/home/welch/dist \
+	TCL_DIST=/home/hobbs/dist/tcl8.3.1.tar.gz \
+	TCLLIB_DIST=/home/welch/cvs/tcllib/tcllib0.4.tar.gz

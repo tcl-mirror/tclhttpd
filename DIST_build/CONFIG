@@ -1,0 +1,1 @@
+sh ../configure --enable-gcc --with-tcl=/home/welch/cvs/tcl8.3/unix/solaris
