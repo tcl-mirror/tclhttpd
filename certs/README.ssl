@@ -32,9 +32,44 @@ Once you get the signed certificate back, edit the tclhttpd.rc file so they
 accurately record the location of your keyfile and certificate.  The server should
 then be able to listen for SSL connections on the https port.
 
-You can also bootstrap yourself into your own CA by generating a key and certificate
-as above (but call them cakey.pem and cacert.pem).  Now self-sign the cacert.pem
-to create a Certificate Authority certificate.  This lets you sign your own
-certificate requests to make valid certificates, but browsers will prompt users
-to validate the key when they visit your site.
+You can also bootstrap yourself into your own CA by following the steps
+outlined below.  This lets you sign your own certificate requests to
+make valid certificates, but browsers will prompt users to validate the
+key when they visit your site.
+
+You'll need the "openssl" command line utility that's
+built when you build openssl.
+
+0. Edit the sample "openssl.cnf" file that's distributed with
+   openssl, replacing the dummy company names, etc.  Copy
+   it to an empty directory and run openssl from there.
+
+1. generate a private key for your test CA
+   openssl genrsa -out key1.pem
+2. build a certificate request
+   openssl req -x509 -nodes -out ca.pem -key key1.pem -new
+
+You've now got a CA certificate "ca.pem".
+It's "self-signed".
+Its private key is "key1.pem".
+
+We'll now make a server cert and we'll use the CA cert
+we just made to sign it.
+
+3. generate a private key for your server
+   opensl genrsa -out key2.pem
+4. build a cert request
+  openssl req -x509 -nodes -out s.pem -key key2.pem -new
+5. build the server certificate
+  openssl ca -keyfile key1.pem -cert ca.pem -in s.pem
+6. rename the output, which is something like "01.pem"
+  back to "s.pem" (it's OK to clobber the s.pem you made earlier)
+
+You've now got a server certificate "s.pem".
+Its private key is key2.pem.
+It's signed by your own CA.
+
+You can make any number of certs by repeating steps
+three through six again with different file names.
+
 
