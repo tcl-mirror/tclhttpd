@@ -2,29 +2,32 @@
 #
 # Create a super distribution of TclHttpd, Tcl, Tcllib, and Thread
 
-HTTPD_VERSION=3.0.2
-WIN_VERSION=302
+HTTPD_VERSION=3.0.3
+HTTPD_TAG=rel-3-0-3
+WIN_VERSION=303
 DISTDIR=/home/welch/dist
 SUPER_DIR=${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist
 
 TCL_VERSION=8.3.1
 TCL_DIST=/home/hobbs/dist/tcl${TCL_VERSION}.tar.gz
 
-TCLLIB_VERSION=0.4
+TCLLIB_VERSION=0.5
 TCLLIB_DIST=/home/welch/cvs/tcllib/tcllib${TCLLIB_VERSION}.tar.gz
 
 THREAD_VERSION=2.0
+THREAD_WIN_VERSION=20
+THREAD_TAG=rel-2-0
 
 SCRATCH=/home/welch/scratch
 mkdir ${SCRATCH}
 cd ${SCRATCH}
 
 rm -rf ${SCRATCH}/tclhttpd${HTTPD_VERSION}
-cvs -d /home/cvs checkout tclhttpd
+cvs -d /home/cvs checkout -r ${HTTPD_TAG} tclhttpd 
 mv tclhttpd tclhttpd${HTTPD_VERSION}
 
 rm -rf ${SCRATCH}/thread${THREAD_VERSION}
-cvs -d /home/cvs checkout thread
+cvs -d /home/cvs checkout -r ${THREAD_TAG} thread
 mv thread thread${THREAD_VERSION}
 
 cd tclhttpd${HTTPD_VERSION}
@@ -37,10 +40,13 @@ cd ..
 tar cf - ./tclhttpd${HTTPD_VERSION} | gzip > ${DISTDIR}/tclhttpd${HTTPD_VERSION}.tar.gz
 zip -9 -r -o  ${DISTDIR}/tclhttpd${WIN_VERSION}.zip  tclhttpd${HTTPD_VERSION}
 
+tar cf - ./thread${THREAD_VERSION} | gzip > ${DISTDIR}/thread${THREAD_VERSION}.tar.gz
+zip -9 -r -o  ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip thread${THREAD_VERSION}
+
 cd tclhttpd${HTTPD_VERSION}/DIST_build
 
-sh ../configure --enable-gcc --with-tcl=/home/welch/cvs/tcl8.3/unix/solaris \
-	--prefix=/usr/local 
+#sh ../configure --enable-gcc --with-tcl=/home/welch/cvs/tcl8.3/unix/solaris \
+#	--prefix=/usr/local 
 
 SRCDIR=..
 
@@ -55,10 +61,10 @@ gunzip < ${TCL_DIST} | (cd ${SUPER_DIR} ; tar xf -)
 gunzip < ${TCLLIB_DIST} | (cd ${SUPER_DIR} ; tar xf -)
 
 mkdir ${SUPER_DIR}/build
-cp CONFIG MAKE ${SUPER_DIR}/build
+########cp CONFIG MAKE ${SUPER_DIR}/build
 
 cp README ${SUPER_DIR}
+cp Makefile.boot ${SUPER_DIR}/Makefile
 
 (cd ${DISTDIR}; tar cf - ./tclhttpd${HTTPD_VERSION}-dist | gzip > tclhttpd${HTTPD_VERSION}-dist.tar.gz)
 (cd ${DISTDIR} ; zip -9 -r -o  tclhttpd${WIN_VERSION}dist.zip  tclhttpd${HTTPD_VERSION}-dist)
-	

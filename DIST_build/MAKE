@@ -4,7 +4,7 @@
 
 PWD=`pwd`
 PLATFORM=linux
-HTTPD_VERSION=3.0.1
+HTTPD_VERSION=3.0.3
 PREFIX=/home/welch/install
 
 (cd ../tcl8.3.1/unix/${PLATFORM} ; make ; make install)
@@ -13,6 +13,6 @@ PREFIX=/home/welch/install
 
 ( cd ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM} ; make ; make install)
 
-( cd ../tcllib0.4 ; ./install.sh ${PREFIX} )
+( cd ../tcllib0.5 ; ./install.sh ${PREFIX} )
 
 

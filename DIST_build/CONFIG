@@ -3,9 +3,9 @@
 # Edit this to run configure on all the modules with the
 # appropriate PLATFORM and PREFIX for your site
 
-HTTPD_VERSION=3.0.2
+HTTPD_VERSION=3.0.3
 TCL_VERSION=8.3.1
-TCLLIB_VERSION=0.4
+TCLLIB_VERSION=0.5
 THREAD_VERSION=2.0
 
 PWD=`pwd`
