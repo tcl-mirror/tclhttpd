@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc_error.tcl,v 1.1 2003/04/04 04:03:57 coldstore Exp $
+# RCS: @(#) $Id: doc_error.tcl,v 1.2 2003/04/04 04:51:53 coldstore Exp $
 
 package provide httpd::doc_error 1.0
 
@@ -138,4 +138,38 @@ proc DocSubstSystemFile {sock key code {extra {}} {interp {}}} {
 	}
 	Httpd_Error $sock $code $extra
     }
+}
+
+# Doc_ErrorInfo --
+#
+#@c Return the error information raised by this page
+#
+# Arguments:
+#
+# Results:
+#@r	$Doc(errorInfo)
+#
+# Side Effects:
+#@e	None
+
+proc Doc_ErrorInfo {} {
+    global Doc
+    return $Doc(errorInfo)
+}
+
+# Doc_UrlNotFound --
+#
+#@c Return the url which was not found (in notfound handler)
+#
+# Arguments:
+#
+# Results:
+#@r	$Doc(url,notfound)
+#
+# Side Effects:
+#@e	None
+
+proc Doc_UrlNotFound {} {
+    global Doc
+    return $Doc(url,notfound)
 }
