@@ -39,5 +39,4 @@ package ifneeded httpd 1.5 "
 	package ifneeded httpd::url 1.1 \[list source \[file join [list $dir] url.tcl\]\]
 	package ifneeded httpd::utils 1.0 \[list source \[file join [list $dir] utils.tcl\]\]
 	package ifneeded httpd::version 3.2.0 \[list source \[file join [list $dir] version.tcl\]\]
-	package ifneeded stats 1.0 \[list source \[file join [list $dir] stats.tcl\]\]
 "
