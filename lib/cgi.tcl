@@ -31,7 +31,7 @@ if {"$tcl_platform(platform)" == "windows"} {
 
     # On windows we hard-code the interpreters for various script types
 
-    regsub wish [info nameofexecutable] tclsh Cgi(tclsh) ;# For .tcl
+    regsub -nocase wish [info nameofexecutable] tclsh Cgi(tclsh) ;# For .tcl
     set Cgi(perl) "perl.exe"			;# For .pl
     set Cgi(cgiexe) $Cgi(tclsh)			;# For .cgi
 
