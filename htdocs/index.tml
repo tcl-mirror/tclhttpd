@@ -1,15 +1,9 @@
-<!Doctype HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
-<Html>
-<Head>
-<Title>Tcl-Httpd Home Page</Title>
-<!-- Author: bwelch -->
-<META HTTP-Equiv=Editor Content="SunLabs WebTk 1.0 DEVELOPMENT">
-</Head>
-<Body>
+[html::description "TclHttpd, the Tcl Web Server, is an extensible
+platform for web application development."]
+[html::keywords Tcl TclHttpd Tcl/Tk "Tcl Web Server" "Web Server"]
+[html::author "Brent Welch"]
+[mypage::header "Tcl-Httpd Home Page"]
 
-
-
-<h1>Tcl-Httpd Home Page</h1>
 <p>
 The Tcl-Httpd is a pure Tcl implementation of a Web server (HTTP/1.0).
 It runs as a Tcl script on top of <a href=http://www.scriptics.com/software/download.html>Tcl 7.5 or later</a> releases.
@@ -70,7 +64,4 @@ the opportunity to join the
 <li><a HREF="java/ServerDemo.html">Java applet</a> 
 </ul>
 
-
-</Body>
-</Html>
-
+[mypage::footer]

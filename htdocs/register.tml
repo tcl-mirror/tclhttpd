@@ -1,0 +1,44 @@
+[mypage::header "Tcl Web Server Registration"]
+
+<form action="http://www.scriptics.com/mail/forminfo" method="POST">
+<input type="hidden" name="product" value="WebServer">
+<input type="hidden" name="sendto" value="welch@acm.org">
+<input type="hidden" name="subject" value="Register WebServer">
+
+Please
+register your use of the Tcl Web Server. Your registration
+is very important. 
+<p>
+If you are unable to post the registration form, an informal
+note to [html::mailto welch@acm.org "Register WebServer"] would be appreciated.
+
+<p>
+<h2>User Registration</h2>
+<table>
+[html::textinputrow "Name" name]
+[html::textinputrow "Email" emailaddr]
+<tr>[html::cell colspan=2 [html::checkset noemail {} {
+    1 "<b>Do not</b> contact me about new releases"
+}]]</tr>
+[html::textinputrow "Title" title]
+[html::textinputrow "Company" company]
+</table>
+<p>How do you plan to use the server?<br>
+<textarea name="why" cols=60 rows=4>
+</textarea>
+<p>
+
+For more general comments, please send email to
+<a href=mailto:welch@acm.org>welch@acm.org</a>.
+There is also a mailing list for users of the Tcl Web Server.
+You can join this list by
+sending email to 
+[html::mailto tcl-httpd-request@scriptics.com subscribe].
+Send mail to the list at [html::mailto tcl-httpd@scriptics.com]
+<p>
+[html::submit Register]
+<br>
+</form>
+
+
+[mypage::footer]

@@ -1,0 +1,30 @@
+[mypage::header "Tcl Server Info"]
+
+<h3>Status</h3>
+[StatusMenu]
+
+<h3>Debugging</h3>
+<p>
+This server has the interesting ability to reload parts of its implementation
+dynamically. This lets you add features and fix bugs without ever
+restarting.
+<p>
+<form action=/debug/source method=post>
+<input type="submit" name="submit" value="Reload Source"><input type="text" name="source">
+</form>
+<p>
+<form action=/debug/parray method=post>
+<input type="submit" name="submit" value="Print Array"><input type="text" name="aname">
+</form>
+
+<p>
+<form action=/debug/showproc method=post>
+<input type="submit" name="submit" value="Show Proc"><input type="text" name="proc">
+</form>
+
+<h4>
+<a HREF="/debug/source?source=hack.x">Brent's Junk</a> |
+<a HREF="/debug/source?source=debug.x">Fixup</a> |
+<a HREF="/debug/after">After Queue</a>
+</h4>
+[mypage::footer]

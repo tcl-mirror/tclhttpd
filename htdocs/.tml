@@ -4,40 +4,36 @@
 # This allows to reset the package by appending ?packageReset=faq
 # for instance to a .tml query
 
-if {[info exists QueryData]} {
-    unset QueryData
-}
-
-if {[info exists page(query)]} {
-    array set QueryData $page(query)
-    if {[info exists QueryData(packageReset)]} {
-	foreach pkg $QueryData(packageReset) {
-	    package forget $pkg
-	}
-    }
-    if {[info exists QueryData(packageRequire)]} {
-	foreach pkg $QueryData(packageRequire) {
-	    package require $pkg
-	}
-    }
+foreach pkg [ncgi::valuelist packageReset] {
+    package forget $pkg
+    package require $pkg
+    Stderr "Reset package $pkg"
 }
 
 # Here is what the whole site use and which define the look :
 # The 'real thing' is thus in libtml/'s packages:
 
-package require sunscript 1.2
+package require mypage 1.0
 package require faq 1.2
 package require htmlutils
-package require form
 
-# This should be overridden in each sub directories
+# This defines the URLs that appear in the footer
 
-set page(location) home
-set page(timeofday) [clock seconds]
- 
-proc MyHead {title author} {
-    return [Head][Title $title][Author $author][MyBody]<h1>$title</h1>
+mypage::contents {
+    Home		/
+    Status		/status	
+    "Hacks Page"	/hacks.html
+    Register		/register.html
+    "CGI Tests"		/forms/
+    "Templates"		/templates/
+    "Reference Manual"	/manual/reference.html
 }
-proc MyBody {} {
-    return [Body bgcolor=white text=black]
+
+# These are the default colors and fonts for various HTML objects
+
+html::reset {
+    body.bgcolor	white
+    body.text		black
+    thinrule.bgcolor	#cc3300
+    font.face		arial
 }

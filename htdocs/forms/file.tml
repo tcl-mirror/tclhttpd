@@ -1,6 +1,8 @@
+[mypage::header "File Upload Form"]
 <form ENCtype=multipart/form-data action=/cgi-bin/test.cgi method=put>
 
 File <input type=file>
 <p>
 <input type=submit>
 </form>
+[mypage::footer]

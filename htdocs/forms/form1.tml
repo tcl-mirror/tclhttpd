@@ -1,11 +1,4 @@
-<!Doctype HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
-<Html>
-<Head>
-<Title>Sample Form</Title>
-<!-- Author: bwelch -->
-<META HTTP-Equiv=Editor Content="SunLabs WebTk 1.0 DEVELOPMENT">
-</Head>
-<Body>
+[mypage::header "Sample Form"]
 
 <form action="/cgi-bin/test.cgi" method="POST">
 
@@ -34,6 +27,5 @@ Here is a choice among item:<select name="choice" size="5">
 <p>
 Decide what to do with this form: <input type=reset name=Reset><input type="submit" name="Submit"><!--></form>
 
-</Body>
-</Html>
 
+[mypage::footer]

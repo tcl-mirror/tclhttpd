@@ -26,6 +26,8 @@ below for the variables the server can set.
 <dd>Return the size of a file.  The file is named with a virtual= or file= parameter.  The virtual path is relative to the document root.  The file path is relative to the current document.
 <dt><b>flastmod</b>
 <dd>Return the modify time of a file.  The file is named with a virtual= or file= parameter.  The virtual path is relative to the document root.  The file path is relative to the current document.
+<dt><b>exec</b>
+<dd>Execute the cmd= parameter and insert the results.
 <ul>
 <li>&lt;!--#fsize file=include.shtml --&gt;:  <!--#fsize file=include.shtml -->
 <li>&lt;!--#flastmod file="include.shtml"--&gt;: <!--#flastmod file="include.shtml"-->
@@ -52,6 +54,17 @@ Get these with
     <dt>SERVER_PROTOCOL:<dd> <!--#echo var=SERVER_PROTOCOL -->
     <dt>REMOTE_ADDR:<dd> <!--#echo var=REMOTE_ADDR -->
 </ul>
+<h2>Exec tests</h2>
+<p>
+This should be the contents of /etc/motd, or a comment containing an error if it does not exist.
+<pre>
+<!--#exec cmd="cat /etc/motd"-->
+</pre>
+<p>
+There should be a comment following this that complains about
+a missing /xyzzy file, (unless you have one!)
+<!--#exec cmd="cat /xyzzy"-->
+<p>
 <p>
 More stuff
 <p>
