@@ -6,12 +6,15 @@
 <input type="hidden" name="sendto" value="welch@acm.org">
 <input type="hidden" name="subject" value="Register WebServer">
 
-Please
-register your use of the Tcl Web Server. Your registration
-is very important. 
 <p>
 If you are unable to post the registration form, an informal
 note to [html::mailto welch@acm.org "Register WebServer"] would be appreciated.
+
+<p>
+Ahem, this form is all great and everything, but I don't have a good
+"email this form data" handler running, so the mail will go into
+the bit bucket.  The best thing to do is introduce yourself on
+the tclhttpd mailing list.
 
 <p>
 <h2>User Registration</h2>
@@ -37,7 +40,7 @@ visiting
 <a href="http://lists.sourceforge.net/mailman/listinfo/tclhttpd-users">http://lists.sourceforge.net/mailman/listinfo/tclhttpd-users</a>.
 Send mail to the list at [html::mailto tclhttpd-users@lists.sourceforge.net]
 <p>
-[html::submit Register]
+[html::submit "Register (test)"]
 <br>
 </form>
 
