@@ -10,8 +10,8 @@ proc bugdb::insert {Application OS Priority Assigned Summary Description} {
     set date [clock format [clock seconds] ]
 
     # Substitute for characters that break the HTML
-    regsub -all {"} $Summary {\&quot;} safe_summary
-    regsub -all {"} $Description {\&quot;} safe_description
+    set safe_summary [special-chars $Summary]
+    set safe_description [special-chars $Description]
 
     # Open the db
     mk::file open bugdb ../sampleapp/bugdb/bugdb.mk
@@ -93,19 +93,25 @@ proc bugdb::update {Bug Status Application OS Priority Assigned Summary Descript
     set date_updated [clock format [clock seconds] ]
     
     # Substitute for characters that break the HTML
-    regsub -all {"} $Summary {\&quot;} safe_summary
-    regsub -all {"} $Description {\&quot;} safe_description
+    set safe_summary [special-chars $Summary]
+    set safe_description [special-chars $Description]
 
     # Open the db
     mk::file open bugdb ../sampleapp/bugdb/bugdb.mk
 
     # Update the db
     mk::set bugdb.bugs!$Bug Status "$Status" Application "$Application" \
-    OS "$OS" Priority "$Priority" Assigned "$Assigned" Summary "$Summary" \
-    Description "$Description" Updated "$date_updated"
+    OS "$OS" Priority "$Priority" Assigned "$Assigned" Summary "$safe_summary" \
+    Description "$safe_description" Updated "$date_updated"
 
     # Close the db
     mk::file close bugdb
 
     return
+}
+
+proc bugdb::special-chars {value} {
+    # Substitute for characters that break the HTML
+    regsub -all {"} $value {\&quot;} safe_value
+    return $safe_value
 }
