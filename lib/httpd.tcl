@@ -269,7 +269,7 @@ proc HttpdAccept {self sock ipaddr port} {
     Count sockets
     set data(self) $self
     set data(ipaddr) $ipaddr
-    if {[lindex $self 0] == "https"} {
+    if {[Httpd_Protocol $sock] == "https"} {
 	set data(ssl) 1
 	set result [catch {tls::handshake $sock} err]
 	if {$result == 1} {
@@ -308,15 +308,15 @@ proc HttpdReset {sock {left {}}} {
 
     set ipaddr $data(ipaddr)
     set self $data(self)
-	if {[lindex $self 0] == "https"} {
-		set cert $data(cert)
-	}
+    if {[Httpd_Protocol $sock] == "https"} {
+	set cert $data(cert)
+    }
     unset data
     array set data [list state start version 0 \
 	    left $left ipaddr $ipaddr self $self]
-	if {[lindex $self 0] == "https"} {
-		set data(cert) $cert
-	}
+    if {[Httpd_Protocol $sock] == "https"} {
+	set data(cert) $cert
+    }
     # Close the socket if it is not reused within a timeout
     set data(cancel) [after $Httpd(timeout1) \
 	[list Httpd_SockClose $sock 1 ""]]
@@ -371,8 +371,8 @@ proc HttpdRead {sock} {
 
 		if {[regexp {^https?://([^/:]+)(:([0-9]+))?(.*)$} $data(url) \
 			x xserv y xport urlstub]} {
-		    set myname [lindex $data(self) 1]
-		    set myport [lindex $data(self) 2]
+		    set myname [Httpd_Name $sock]
+		    set myport [Httpd_Port $sock]
 		    if {([string compare \
 			    [string tolower $xserv] \
 			    [string tolower $myname]] != 0) ||
@@ -976,9 +976,9 @@ proc Httpd_SelfUrl {url {sock ""}} {
     }
     upvar #0 Httpd$sock data
 
-    set type [lindex $data(self) 0]
-    set name [lindex $data(self) 1]
-    set port [lindex $data(self) 2]
+    set type [Httpd_Protocol $sock]
+    set name [Httpd_Name $sock]
+    set port [Httpd_Port $sock]
     if {[info exists data(mime,host)]} {
 	# use in preference to our "true" name
 	# the client might not have a DNS entry for use
@@ -996,11 +996,25 @@ proc Httpd_SelfUrl {url {sock ""}} {
     append newurl $url
 }
 
-# Return the port for the server
+# Return the protocol for the connection
+
+proc Httpd_Protocol {sock} {
+    upvar #0 Httpd$sock data
+    return [lindex $data(self) 0]
+}
+
+# Return the server name for the connection
+
+proc Httpd_Name {sock} {
+    upvar #0 Httpd$sock data
+    return [lindex $data(self) 1]
+}
+
+# Return the port for the connection
+
 proc Httpd_Port {sock} {
     upvar #0 Httpd$sock data
-    set port [lindex $data(self) 2]
-	return $port
+    return [lindex $data(self) 2]
 }
 
 # Generate a redirect because the trailing slash isn't present

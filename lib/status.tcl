@@ -47,6 +47,7 @@ proc StatusMenu {} {
     set sep ""
     set html "<p>\n"
     foreach {url label} [list \
+	/		"Home" \
 	$_status(dir)/	"Graphical Status" \
 	$_status(dir)/text	"Text Status" \
 	$_status(dir)/doc	"Doc hits" \
