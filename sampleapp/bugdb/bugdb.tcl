@@ -18,7 +18,7 @@ proc bugdb::insert {Application OS Priority Assigned Summary Description} {
 
     set result [catch {mk::row append bugdb.bugs Application "$Application" OS "$OS" \
     Priority "$Priority" Assigned "$Assigned" Summary "$safe_summary" \
-    Description "$safe_description" date "$date"} msg]
+    Description "$safe_description" date "$date" Status "New"} msg]
 
     mk::file commit bugdb
 
@@ -55,7 +55,7 @@ proc bugdb::bug-list {} {
 }
 
 proc bugdb::bug-details {bug Application OS Priority Assigned \
-Summary Description Date} {
+Summary Description Date Status} {
 
     upvar 1 $Application my_application
     upvar 1 $OS my_os
@@ -64,6 +64,7 @@ Summary Description Date} {
     upvar 1 $Summary my_summary
     upvar 1 $Description my_description
     upvar 1 $Date my_date
+    upvar 1 $Status my_status
 
     # Open the db
     mk::file open bugdb ../sampleapp/bugdb/bugdb.mk
@@ -80,6 +81,7 @@ Summary Description Date} {
     set my_summary [lindex $row 9]
     set my_description [lindex $row 11]
     set my_date [lindex $row 13]
+    set my_status [lindex $row 15]
 
     return
 }
