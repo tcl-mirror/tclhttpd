@@ -1,3 +1,8 @@
+2000-09-20  Brent Welch <welch@ajubasolutions.com>
+	* lib/counter.tcl: Fixed Counter_CheckPoint
+	* lib/MakeIndex: Fixed this to create the specially-constructed
+	pkgIndex.tcl file.
+
 2000-09-19  Brent Welch <welch@ajubasolutions.com>
 
 	* lib/auth.tcl:
