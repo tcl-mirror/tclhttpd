@@ -616,7 +616,9 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     if {![catch {
 	interp eval $interp {uplevel #0 {set page(set-cookie)}}
     } cookie]} {
-	Httpd_SetCookie $sock $cookie
+	foreach c $cookie {
+	    Httpd_SetCookie $sock $c
+	}
     }
 
     set dynamic [interp eval $interp {uplevel #0 {set page(dynamic)}}]
@@ -664,6 +666,45 @@ proc Doc_Cookie {cookie} {
 	}
     }
     return ""
+}
+
+# Doc_SetCookie
+#
+#	Set a return cookie
+#
+# Arguments:
+#	args	Name value pairs, where the names are:
+#		-name	Cookie name
+#		-value	Cookie value
+#		-path	Path restriction
+#		-domain	domain restriction
+#		-expires	Time restriction
+
+proc Doc_SetCookie {args} {
+    global page
+    array set opt $args
+    set line "$opt(-name)=$opt(-value) ;"
+    foreach extra {path domain} {
+	if {[info exist opt(-$extra)]} {
+	    append line " $extra=$opt(-$extra) ;"
+	}
+    }
+    if {[info exist opt(-expires)]} {
+	switch -glob -- $opt(-expires) {
+	    *GMT {
+		set expires $opt(-expires)
+	    }
+	    default {
+		set expires [clock format [clock scan $opt(-expires)] \
+			-format "%A, %d-%b-%Y %H:%M:%S GMT" -gmt 1]
+	    }
+	}
+	append line " expires=$expires ;"
+    }
+    if {[info exist opt(-secure)]} {
+	append line " secure "
+    }
+    lappend page(set-cookie) $line
 }
 
 # Doc_IsLinkToSelf
