@@ -1,0 +1,30 @@
+Each tclhttpd process is configured by a configuration file, usually 
+designated with the -config command line option.  The virtual host 
+patch creates another configurable option to appear in that file:
+
+Config virtual [list $host1 $configFile1 $host2 $configFile2 ...]
+
+A slave interp will be created for each $host, and in that slave 
+another complete copy of the tclhttpd packages will be loaded according 
+to the configuration specified in the corresponding $configFile.  From 
+the perspective of the creator of the virtual site, nothing changes, 
+they still create a $configFile to set up their site and interface it 
+with whatever components they are using to build their site.  Their 
+interface code is still running in a Tcl interp; the fact that it's a 
+slave interp makes no difference.
+
+The actual mechanism is that the master interp accepts all socket 
+connections.  When the Host: header on the request is received, the 
+connection gets passed to the appropriate slave interp for further 
+handling.  If there is no Host: header (really ancient clients?) or if 
+the Host: value is not one of those specified in the [Config virtual] 
+argument, then the master interp handles the request according to 
+whatever additional configuration details are found in the master 
+configuration file.  In a sense, every IP address served by tclhttpd 
+has a "default" site determined by the master config file.
+
+The configuration values used in the slave interp are first inherited 
+from the master.  In the $configFile, you only need to specify those 
+values that distinguish the virtual site from the default site.  In my 
+experience that usually includes the following [Config] options: 
+docRoot, main, webmaster, and LogFile.
