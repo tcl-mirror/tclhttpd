@@ -1,3 +1,10 @@
+2004-2-09 Colin McCormack <colin@field.medicine.adelaide.edu.au>
+       * lib/httpd.tcl
+       * lib/auth.tcl
+       * lib/digest.tcl
+       * htdocs/access/digest/*
+       Added digest authentication per http://www.ietf.org/rfc/rfc2617.txt
+	
 2004-1-13 Brent Welch <welch@panasas.com>
         * README
         * VERSION
