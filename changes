@@ -470,3 +470,18 @@ lib/httpd.tcl	Added Httpd_PostDataSize so you can see if there is any
 		so document handlers don't have to worry about the socket.
 
 ----------------- released 2.3.1 October 5, 1999 ------------------
+
+lib/doc.tcl	Fixed cookie bug where Doc_SetCookie could result in a cookie
+		being given out to different browsers!
+		Also fixed use of file mtime so it works on Macintosh.
+
+lib/httpd.tcl	Fixed reading of mime.types so it uses file join and works on Mac.
+		Added HttpdCookieLog, which is not used by default.
+
+lib/status.tcl	Changes status bar charts to use gifs.
+
+lib/url.tcl	Fixed use of the UrlCache array when post data was available.
+ 
+ ----------------- released 2.3.2 October 15, 1999 ------------------
+  
+
