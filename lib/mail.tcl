@@ -18,12 +18,15 @@ proc Mail_Url {dir} {
 
 proc Mail/bugreport {email errorInfo args} {
     global Httpd
-    MailInner $email "$Httpd(server) error" "" text/html "<pre>[protect_text $errorInfo]</pre>"
+    MailInner $email "$Httpd(name):$Httpd(port) error" "" text/html \
+    "<pre>[protect_text $errorInfo]
+    $Httpd(server)
+    $args</pre>"
 }
 
 # If your form action is /mail/forminfo, then this procedure
 # sends the results to the address specified by "sendto"
-proc Mail/forminfo {sendto subject args} {
+proc Mail/forminfo {sendto subject href label args} {
     set from ""
     foreach {name value} $args {
 	append message [list Data $name $value]\n
@@ -31,7 +34,30 @@ proc Mail/forminfo {sendto subject args} {
 	    set from $value
 	}
     }
-    MailInner $sendto $subject $from text/plain $message
+    set html [MailInner $sendto $subject $from text/plain $message]
+    if {[string length $href]} {
+	if {[string length $label] == 0} {
+	    set label Back
+	}
+	append html "<p><a href=\"$href\">$label</a>"
+    }
+    return $html
+}
+
+# This form is designed to be embedded into a page
+# that handles form data.
+
+proc Mail_FormInfo {} {
+    global page
+    set html {<!-- Mail_FormInfo -->}
+    if {[info exist page(query)]} {
+	array set q $page(query)
+	if {[info exist q(sendto)] && [info exist q(subject)]} {
+	    eval {Mail/forminfo $q(sendto) $q(subject) {} {}} $page(query)
+	    set html {<!-- Mail_FormInfo sent email -->}
+	}
+    }
+    return $html
 }
 
 # Older version of mail/forminfo
@@ -63,7 +89,7 @@ Content-Type: $type"
 		Stderr "ERROR: $err"
 		Stderr $message
 	    } else {
-		return "Mailed report to <b>$sendto</b>"
+		return "<font size=+1><b>Thank You!</font></b><p>Mailed report to <b>$sendto</b>"
 	    }
 	}
 	default	{
@@ -72,3 +98,4 @@ Content-Type: $type"
     }
     return "Unable to send mail"
 }
+
