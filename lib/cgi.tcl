@@ -8,13 +8,29 @@
 
 package provide cgi 1.1
 
-# init support
+# Cgi parameters
+# timeout	Seconds before pipe to CGI program is closed
+# maxcgi	Number of concurrent requests allowed
+# cgi		Running total of cgi requests
+# ident		If true, try to use the ident protocol
+# env-pass	List of environment variables to preserve when setting
+#		up the environment.  The rest are deleted and then recreated
+#		from information in the CGI request.
+# tclsh		Pathname to a Tcl interpreter.  If you preserve the env(PATH)
+#		by listing PATH in env-pass, this can be "tclsh80.exe"
+#		or "protclsh80.exe".  Otherwise it has to be an absolute path.
 
 array set Cgi {
     timeout	300000
     maxcgi	100
     cgi		0
     ident	0
+    env-pass	{PATH LD_LIBRARY_PATH}
+}
+if {"$tcl_platform(platform)" == "windows"} {
+    set Cgi(tclsh) "Tclsh80.exe"
+    # Need SystemRoot so DLLs loaded by tcl are found correctly
+    lappend Cgi(env-pass) Lib SystemRoot 
 }
 
 # Register a cgi-bin directory.
@@ -43,9 +59,11 @@ proc Cgi_Domain {directory sock suffix} {
 	incr i
 	set path [file join $path $component]
 	if {[file isfile $path]} {
-	    if {[file executable $path]} {
+#	    if {[file executable $path]} {
+		# Don't bother testing execute permission here,
+		# because it doens't test right on windows anyway.
 		set extra [lrange $pathlist $i end]
-	    }
+#	    }
 	    break
 	} elseif {![file exists $path]} { 
 	    Doc_NotFound $sock
@@ -65,7 +83,7 @@ proc Cgi_Domain {directory sock suffix} {
 }
 
 proc CgiHandle {path extra translated sock} {
-    global Doc
+    global Doc env
     Cgi_SetEnvAll $sock $path $extra $translated env
     CgiSpawn $sock $path
 }
@@ -81,17 +99,28 @@ proc Doc_application/x-cgi {path suffix sock} {
 # the cgi script during the "open" call.
 
 proc Cgi_SetEnv {sock path {var env}} {
-    Cgi_SetEnvAll $sock $path {} $path $var
+    upvar 1 $var env
+    Cgi_SetEnvAll $sock $path {} $path env
 }
 
 proc Cgi_SetEnvAll {sock path extra translated var} {
     upvar #0 Httpd$sock data
-    upvar #0 $var env
+    upvar 1 $var env
     global Httpd Httpd_EnvMap Cgi
 
     # we can't "unset env" or it won't get passed to the CGI script
     foreach i [array names env] {
-	unset env($i)
+	set clear 1
+	foreach x $Cgi(env-pass) {
+	    if {[string match $x $i]} {
+		# Preserve some path settings
+		set clear 0
+		break
+	    }
+	}
+	if {$clear} {
+	    unset env($i)
+	}
     }
     foreach name [array names Httpd_EnvMap] {
 	set env($name) ""
@@ -162,7 +191,7 @@ proc CgiSpawn {sock script} {
     }
     set pwd [pwd]
     cd [file dirname $script]
-    if {[catch {open "|$script $arglist |& cat" r+} fd]} {
+    if {[catch {CgiExec $script $arglist} fd]} {
 	cd $pwd
 	Httpd_Error $sock 400 $fd
 	incr Cgi(cgi) -1
@@ -171,6 +200,10 @@ proc CgiSpawn {sock script} {
     cd $pwd
     Count cgihits
     set data(infile) $fd	;# So close happens in Httpd_SockClose
+    set data(header) 0		;# Have not read header yet
+    set data(headerlist) {}	;# list of read headers
+    set data(headercode) "200 data follows"	;# normal return
+
     fconfigure $fd -blocking 0
     # it might be better to look at "content length" instead.
     if {$data(proto) == "POST"} {
@@ -182,6 +215,32 @@ proc CgiSpawn {sock script} {
     set data(cancel) [after $Cgi(timeout) CgiCancel $fd $sock]
 }
 
+proc CgiExec {script arglist} {
+    global tcl_platform
+    global Cgi
+    switch -- $tcl_platform(platform) {
+	unix {
+	    return [open "|[list $script] $arglist |& cat" r+]
+	}
+	windows {
+	    switch -- [file extension $script] {
+		.cgi -
+		.tcl {
+		    return [open "|[list $Cgi(tclsh) $script] $arglist" r+]
+		}
+		.exe {
+		    return [open "|[list $script] $arglist" r+]
+		}
+		default {
+		    error "Don't know how to execute CGI $script"
+		}
+	    }
+	}
+	macintosh {
+	    error "CGI not supported on Macintosh"
+	}
+    }
+}
 
 # Read data from the CGI script, write to client.
 
@@ -192,21 +251,39 @@ proc CgiRead {fd sock} {
 	CgiClose $fd $sock
     } elseif {[catch {
 	# Socket may have gone away
-	if {![info exists data(header)]} {
-	    puts $sock "HTTP/1.0 200 data follows"
-	    puts $sock "Server: $Httpd(server)"
-	    puts $sock "Date: [HttpdDate [clock seconds]]"
-	    puts $sock "Connection: Close"
-	    set data(header) 1
-	}
-	fconfigure $fd -translation binary
-	fconfigure $sock -translation binary
-	if {$Httpd(fcopy)} {
-	    fileevent $fd readable {}
-	    fcopy $fd $sock -command [list CgiClose $fd $sock]
+
+	if {!$data(header)} {
+	    # Read and accumulate headers until we know what kind
+	    # of response to make
+
+	    if {[gets $fd line] <= 0} {
+		set data(header) 1
+		puts $sock "HTTP/1.0 $data(headercode)"
+		puts $sock "Server: $Httpd(server)"
+		puts $sock "Date: [HttpdDate [clock seconds]]"
+		puts $sock "Connection: Close"
+		foreach line $data(headerlist) {
+		    puts $sock $line
+		}
+		puts $sock ""
+		flush $sock
+	    } else {
+		lappend data(headerlist) $line
+		if {[regexp -nocase ^(location|uri): $line]} {
+		    set data(headercode) "302 found"
+		}
+	    }
 	} else {
-	    fconfigure $sock -blocking 0
-	    copychannel $fd $sock
+	    fconfigure $fd -translation binary
+	    fconfigure $sock -translation binary
+	    if {$Httpd(fcopy)} {
+		fileevent $sock readable {}
+		fileevent $fd readable {}
+		fcopy $fd $sock -command [list CgiClose $fd $sock]
+	    } else {
+		fconfigure $sock -blocking 0
+		copychannel $fd $sock
+	    }
 	}
     } oops]} {
 	CgiCancel $fd $sock
@@ -248,5 +325,3 @@ proc CgiCleanup {fd sock} {
 	CgiCancel $fd $sock
     }
 }
-
-
