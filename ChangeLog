@@ -1,3 +1,6 @@
+2004-07-18 Colin McCormack <colin@chinix.com>
+        * lib/{doc,subst}.tcl: fixed handling of relative symbolic links
+
 2004-07-09 Colin McCormack <colin@chinix.com>
         * sampleapp/ca/: Added a simple Certificate Authority sufficient
 	to create CA and server keys, and deliver them to a client.

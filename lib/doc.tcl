@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.55 2004/06/30 12:52:24 coldstore Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.56 2004/07/18 13:32:32 coldstore Exp $
 
 package provide httpd::doc 1.1
 
@@ -395,8 +395,12 @@ proc Doc_Return {prefix path suffix sock} {
 	    return [DirList_Directory $prefix $path $suffix $sock]
 	}
  
-	link { 
-	    return [Doc_Return $prefix [file readlink $path] $suffix $sock] 
+	link {
+	    set link [file readlink $path]
+	    if {[file pathtype $link] == "relative"} {
+		set link [file join [file dirname $path] $link]
+	    }
+	    return [Doc_Return $prefix $link $suffix $sock] 
 	}
 
 	default {
