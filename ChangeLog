@@ -1,3 +1,18 @@
+2000-09-29  Brent Welch <welch@ajubasolutions.com>
+    
+	* lib/debug.tcl: Fixed /debug/pvalue to properly sort things
+	when given a name pattern.
+	* lib/doc.tcl: Added DocGetTemplates to check for .tml files properly
+	when using user's public_html directory and Doc_AddRoot.  Based on
+	an idea contributed by Glenn Jackmann
+	* lib/httpd.tcl: Added Httpd_RequestComplete so the Url module can
+	determine if a URL implementation actually issued a response.
+	* lib/url.tcl: Url_Dispatch returns a default 403 result if the
+	access hook says "denied" but doesn't send a response.
+	* htdocs_2: added some test pages to ensure that the DocGetTemplates
+	code is working.
+	* Makefile.in: Added mkinstalldirs for the man directory.
+
 2000-09-29  Lee Bernhard  <lfb@ajubasolutions.com>
 
 	* lib/direct.tcl: Split DirectDomain into four functions that
