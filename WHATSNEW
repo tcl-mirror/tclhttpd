@@ -1,5 +1,10 @@
 Whats new in TclHttpd
 
+3.1
+
+This is a cosmetic release that just changed all the "package provides" to
+name packages with a leading "httpd::" to organize the package namespace better.
+
 3.0
 
 The 3.0* releases feature the following major structural changes:

@@ -1,3 +1,17 @@
+2000-08-02  Brent Welch <welch@scriptics.com>
+
+	* Upped the version number to 3.1
+	 Changed the name of every "package" to have a leading "httpd::" to
+	distingquish it as belonging to TclHttpd.
+	* configure:
+	* htdocs/access/index.tml:
+	* htdocs/templates/faqfaq.tml: (Contributed by Colin McCormack)
+	* htdocs_2/index.tml:
+	* lib/passcheck.tcl: (Contributed by Cezar Totth)
+	* lib/prodebug.tcl:
+	 Added a few stray files that were missing from CVS
+
+
 2000-07-26  Brent Welch <welch@scriptics.com>
 
 	* lib/cgi.tcl - Fixed use of "2> /dev/stdout", which can
