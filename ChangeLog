@@ -1,3 +1,9 @@
+2000-09-26  Brent Welch <welch@ajubasolutions.com>
+
+	* lib/httpd.tcl: Fixed long-standing buglet in 
+	Httpd_RedirectDir, which would loose query data from the
+	URL when redirecting from /Manager?a=b to /Manager/?a=b
+
 2000-09-25  Brent Welch <welch@ajubasolutions.com>
 
 	* lib/httpd.tcl: Added data(code) back into support logging.
