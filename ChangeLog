@@ -1,6 +1,7 @@
 2004-06-14 Colin McCormack <colin@chinix.com>
 	* htdoc/htaccess/*: Made /htaccess accept Windows style pathnames
-	* lib/template.tcl: fixed Windows difficulty with .html
+	* lib/{template,fallback,doc}.tcl: fixed Windows difficulty with .html
+	  some corner cases - Thanks to GW Lester
 
 2004-06-12 Colin McCormack <colin@chinix.com>
 	* htdoc/access/htman.tml - updated documentation
