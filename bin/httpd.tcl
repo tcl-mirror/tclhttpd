@@ -60,13 +60,13 @@ set home [file join [pwd] $home]
 # Auto-detect the configuration
 # 1. Development - look for $home/../lib and $home/../../tcllib/modules
 # 2. Standalone install - look for $home/../lib $home/tcllib
-# 3. Tcl package install - look for $tcl_library/../tclhttpd3.0.0
+# 3. Tcl package install - look for $tcl_library/../tclhttpd3.0.2
 
 if {[file exist [file join $home ../lib/httpd.tcl]]} {
     # Cases 1 and 2
     set Config(lib) [file join $home ../lib]
 } else {
-    tcl_findLibrary tclhttpd 3.0.0 3.0.0 version.tcl TCL_HTTPD_LIBRARY Config(lib)
+    tcl_findLibrary tclhttpd 3.0.2 3.0.2 version.tcl TCL_HTTPD_LIBRARY Config(lib)
 }
 if {![info exist Config(lib)]} {
     error "Cannot find TclHttpd library in auto_path:\n[join $auto_path \n]"
