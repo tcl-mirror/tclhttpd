@@ -65,10 +65,10 @@ bin/httpdthread.tcl
 	file and per-thread startup file, you'll need to specify those
 	on the command line:
 
-	tclsh8.3 httpd.tcl -config my.rc -main mythread.tcl
+	tclsh httpd.tcl -config my.rc -main mythread.tcl
 
 	or you can also create a modified copy of httpd.tcl that embeds the
 	names of the other custom files, so starting the server reduces to
 
-	tclsh8.3 myhttpd.tcl
+	tclsh myhttpd.tcl
 

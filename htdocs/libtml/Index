@@ -1,5 +1,5 @@
 #!/bin/sh
 # \
-exec tclsh8.3 "$0" ${1+"$@"}
+exec tclsh "$0" ${1+"$@"}
 
 pkg_mkIndex -verbose . *.tcl

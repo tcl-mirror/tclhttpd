@@ -1,5 +1,5 @@
 [mypage::header "CGI Examples"]
-<i>Note: The CGI scripts use tclsh8.3 and the ncgi module from the Standard Tcl Library.
+<i>Note: The CGI scripts use tclsh and the ncgi module from the Standard Tcl Library.
 Even if you can run the web server, you may need to install the Standard Tcl Library
 before the CGI scripts will work.</i>
 

@@ -6,7 +6,7 @@ run the Tcl Web Server directly from this distribtuion without
 doing any installation steps:
 
 cd tclhttpd3.5/bin
-tclsh8.3 httpd.tcl -port 8001 -debug 1
+tclsh httpd.tcl -port 8001 -debug 1
 
 If you get complaints about missing the Standard Tcl Library,
 then you can install just that by running the install.sh script

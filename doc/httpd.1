@@ -2,7 +2,7 @@
 '\" Copyright (c) 1998-2000 by Ajuba Solutions
 '\" All rights reserved.
 '\" 
-'\" RCS: @(#) $Id: httpd.1,v 1.1 2000/08/27 07:19:54 welch Exp $
+'\" RCS: @(#) $Id: httpd.1,v 1.2 2004/03/09 11:07:31 coldstore Exp $
 '\" 
 .so man.macros
 .TH tclhttpd 1 "" TclPro "TclPro Applications"
@@ -12,7 +12,7 @@
 tclhttpd \- Tcl Web Server
 
 .SH SYNOPSIS
-\fBtclsh8.3 httpd.tcl\fR ?\fIoptions\fR?
+\fBtclsh httpd.tcl\fR ?\fIoptions\fR?
 
 .SH OPTIONS
 .PP
@@ -56,7 +56,7 @@ script with \fItclsh\fP or \fIwish\fP.
 For example, this starts the server on the standard
 Web server port, 80.
 .DE
-tclsh8.3 <installdir>/bin/httpd.tcl -port 80
+tclsh <installdir>/bin/httpd.tcl -port 80
 .DE
 Note that you must start the server as root if you use port numbers
 less than 1024 on UNIX systems.  If you want the server process to
@@ -81,7 +81,7 @@ configuration file.
 There is an explanation about each option, so you can
 make a copy of the configuration file and try out new settings.
 .DS
-tclsh8.3 httpd.tcl -config myserver.rc
+tclsh httpd.tcl -config myserver.rc
 .DE
 .PP
 If you plan to extend Tcl Httpd with your own code,

@@ -1,10 +1,10 @@
 httpd.tcl	Sample startup script.  To run a server on port 8015, just do:
-	wish8.3 httpd.tcl -debug 1
+	wish httpd.tcl -debug 1
 		This should work with any Tcl 8.0 or later wish or tclsh.
 		To run on a different port and in the background, try:
-	tclsh8.3 httpd.tcl -port 80 &
+	tclsh httpd.tcl -port 80 &
 		To try out threads, run with a thread-enabled tclsh and do:
-	tclsh8.3 httpd.tcl -threads 5
+	tclsh httpd.tcl -threads 5
 		where this means use up to 5 worker threads.
 
 		httpd.tcl depends on both tclhttpd.rc and httpdthread.tcl,

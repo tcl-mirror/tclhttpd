@@ -1,6 +1,6 @@
 #!/bin/sh
 # \
-exec tclsh8.3 "$0" ${1+"$@"}
+exec tclsh "$0" ${1+"$@"}
 
 set path [file join [file dirname [file dirname [info script]]] images pwrdLogo200.gif]
 set in [open $path]

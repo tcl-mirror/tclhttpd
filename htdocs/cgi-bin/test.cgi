@@ -1,6 +1,6 @@
 #!/bin/sh
 # \
-exec tclsh8.3 "$0" ${1+"$@"}
+exec tclsh "$0" ${1+"$@"}
 
 if {[catch {
     package require ncgi

@@ -160,7 +160,7 @@ make-modules:
 		echo "Make in $$pwd/build/$(PLATFORM)/$$i" ; \
 		cd $$pwd/build/$(PLATFORM)/$$i ; \
 		echo "" ; \
-		make TCLSH_PROG=$$pwd/install/$(PLATFORM)/bin/tclsh8.3 ; \
+		make TCLSH_PROG=$$pwd/install/$(PLATFORM)/bin/tclsh ; \
 	    else \
 		echo "Skipping Make for $$i" ; \
 	    fi; \

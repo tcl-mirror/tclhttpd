@@ -7,13 +7,13 @@ without any installation at all.  That is the first option we explore.
 
 Try using the server without installing anything.
 The preconditions for this are that you have Tcl 8.3 (or higher)
-and the Tcl Standard Library installed.  Test that by running tclsh8.3
+and the Tcl Standard Library installed.  Test that by running tclsh
 and attempting to
 	package require tcllib
 
 If you can do that, then you should be able to run the server like this:
 
-	tclsh8.3 bin/httpd.tcl -port 8001
+	tclsh bin/httpd.tcl -port 8001
 
 Typical startup messages include:
 
@@ -26,7 +26,7 @@ server is running on that port.  You can ignore the message about
 the limit extension (and crypt).  These extensions are optional
 and the server works fine without them.
 
-If you use wish8.3 instead of tclsh8.3 you get a small Tk window that
+If you use wish3 instead of tclsh you get a small Tk window that
 displays some information.  There is also a big QUIT button that will
 stop the server.
 

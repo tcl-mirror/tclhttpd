@@ -1,6 +1,6 @@
 #!/bin/sh
 # \
-exec tclsh8.3 "$0" ${1+"$@"}
+exec tclsh "$0" ${1+"$@"}
 
 set text [exec sleep 5; exec ls]
 puts $text

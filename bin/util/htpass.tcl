@@ -7,7 +7,9 @@ exec wish8.0 "$0" ${1+"$@"}
 
 lappend auto_path [file join [file dirname [info script]] ../lib]
 package require auth
-package require crypt
+if {[catch {package require crypt}]} {
+    package require tclcrypt
+}
 
 set filename /usr/local/htaccess/passwd
 

@@ -65,10 +65,10 @@ SRCDIR=..
 rm -rf ${SUPER_DIR}
 mkdir ${SUPER_DIR}
 mkdir ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}
-tclsh8.3 ${SRCDIR}/bin/CopyDist ${SRCDIR} ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}
+tclsh ${SRCDIR}/bin/CopyDist ${SRCDIR} ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}
 
 mkdir ${SUPER_DIR}/thread${THREAD_VERSION}
-tclsh8.3 ${SRCDIR}/bin/CopyDist ${SRCDIR}/../thread${THREAD_VERSION} ${SUPER_DIR}/thread${THREAD_VERSION}
+tclsh ${SRCDIR}/bin/CopyDist ${SRCDIR}/../thread${THREAD_VERSION} ${SUPER_DIR}/thread${THREAD_VERSION}
 gunzip < ${TCL_DIST} | (cd ${SUPER_DIR} ; tar xf -)
 gunzip < ${TCLLIB_DIST} | (cd ${SUPER_DIR} ; tar xf -)
 

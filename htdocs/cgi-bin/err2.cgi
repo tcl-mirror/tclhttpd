@@ -1,7 +1,7 @@
 #!/bin/sh
 # This nasty script generates output, then hangs
 # \
-exec tclsh8.3 "$0" ${1+"$@"}
+exec tclsh "$0" ${1+"$@"}
 
 puts "Content-Type: text/html"
 puts ""
