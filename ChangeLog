@@ -1,9 +1,19 @@
+2000-10-20  Brent Welch <welch@ajubasolutions.com>
+    
+	* DIST_build/Makefile.boot: Fixed installation of Tcllib
+	* bin/httpdthread.tcl:
+	* bin/httpd.tcl: Fixed counter initialization for threaded case.
+	* lib/counter.tcl: Fixed broken counter initialization
+	* lib/httpd.tcl: Removed Counter_Reset call as it gets in
+	the way of counter initialization.
+	* lib/status.tcl: Removed 0-valued counters from table display.
+	* Tagged and released 3.2
+
 2000-10-19  Brent Welch <welch@ajubasolutions.com>
     
 	* bin/httpd.tcl: Fixed error handling around SSL startup.
 	* lib/httpd.tcl: Fixed Httpd_Suspend/Httpd_Resume usage that
 	was added to Httpd_ReadPostDataAsync (The Httpd_Resume was omitted)
-	* Tagged and released 3.2
 
 2000-10-12  Brent Welch <welch@ajubasolutions.com>
     
