@@ -1,3 +1,12 @@
+2000-05-08 Brent Welch <welch@scriptics.com>
+
+	* lib/httpd.tcl: Fixed Httpd_SelfUrl to correctly insert the port number if
+	the client passed the Host: HTTP header.  Previously that case wasn't setting
+	custom port numbers correctly.
+	* lib/version.tcl: Upped to 3.0.1
+	* htdocs/register.tml: Added version string to form data
+	* bin/test/bigpost.tcl: Fixed argument handling
+
 2000-05-05 Brent Welch <welch@scriptics.com>
 
 	* lib/auth.tcl, lib/httpd.tcl:  The Basic authentication module
