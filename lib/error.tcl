@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: error.tcl,v 1.1.2.1 2002/08/04 01:25:19 coldstore Exp $
+# RCS: @(#) $Id: error.tcl,v 1.1.2.2 2002/08/04 02:28:05 coldstore Exp $
 
 package provide httpd::error 1.0
 
@@ -72,7 +72,7 @@ proc Error_NotFound { sock } {
     global Error Referer
     upvar #0 Httpd$sock data
     CountName $data(url) notfound
-    set Error(notfound) $data(url)	;# For subst
+    set Error(url,notfound) $data(url)	;# For subst
     if {[info exists data(mime,referer)]} {
 
 	# Record the referring URL so we can track down
@@ -80,7 +80,7 @@ proc Error_NotFound { sock } {
 
 	lappendOnce Referer($data(url)) $data(mime,referer)
     }
-    ErrorSubstSystemFile $sock notfound 404 [protect_text $Error(notfound)]
+    ErrorSubstSystemFile $sock notfound 404 [protect_text $Error(url,notfound)]
 }
 
 # Error_Error --
@@ -125,14 +125,14 @@ proc Error_Error { sock ei } {
 
 proc ErrorSubstSystemFile {sock key code {extra {}} {interp {}}} {
     global Error env
-    if {![info exists Error($key)]} {
+    if {![info exists Error(page,$key)]} {
 	set path [Doc_Virtual {} {} /$key.html]
 	if {[file exists $path]} {
-	    set Error($key) $path
+	    set Error(page,$key) $path
 	}
     }
-    if {![info exists Error($key)] || 
-	[catch {Subst_ReturnFile $sock $Error($key) $interp} err]} {
+    if {![info exists Error(page,$key)] || 
+	[catch {Subst_ReturnFile $sock $Error(page,$key) $interp} err]} {
 	if {[info exists err]} {
 	    Log $sock ErrorSubstSystemFile $err
 	}

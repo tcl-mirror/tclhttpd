@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.43.4.1 2002/08/04 01:25:19 coldstore Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.43.4.2 2002/08/04 02:28:05 coldstore Exp $
 
 package provide httpd::doc 1.1
 
@@ -288,7 +288,7 @@ proc DocDomain {prefix directory sock suffix} {
 
     # Try to find an alternate.
 
-    if {![DocFallback $prefix $path $suffix $sock]} {
+    if {![Fallback_Try $prefix $path $suffix $sock]} {
 	# Couldn't find anything.
 	# check for cgi script in the middle of the path
 	Cgi_Domain $prefix $directory $sock $suffix

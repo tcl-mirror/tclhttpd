@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.68.4.1 2002/08/04 01:25:19 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.68.4.2 2002/08/04 02:28:05 coldstore Exp $
 
 package provide httpd 1.5
 
@@ -2019,3 +2019,5 @@ proc Httpd_Webmaster {{email {}}} {
     }
 }
 
+# this is too much of a compatibility hassle, so we alias
+catch {interp alias {} Doc_Webmaster {} Httpd_Webmaster}
