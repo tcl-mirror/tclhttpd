@@ -44,7 +44,7 @@ in this section.
 [ManRow logstd.man logstd "Standard log format"]
 [ManRow mtype.man mtype "MIME types"]
 [ManRow session.man session "[X] Session support"]
-[ManRow ../manual/stdin.html "Standard input reader"]
+[ManRow ../manual/stdin.html stdin "Standard input reader"]
 [ManRow subst.man subst "Simple templates"]
 [ManRow tclhttpd.man tclhttpd "command line arguments"]
 [ManRow url.man url "[X] URL dispatcher core"]
