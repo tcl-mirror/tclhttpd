@@ -99,13 +99,13 @@ proc DirListInner {dir urlpath sort pattern} {
 	    switch $lst(type) {
 		file {
 		    # Should determine dingbat from file type
-		    append listing "<A HREF=\"${urlpath}[file tail $entry]\">[format %-*s $max [file tail $entry]</a>] [format %8d $lst(size)] [format %-5s bytes]  [clock format $lst(mtime) -format $timeformat]\n"
+		    append listing "<A HREF=\"[DirHref $entry]\">[format %-*s $max [file tail $entry]</a>] [format %8d $lst(size)] [format %-5s bytes]  [clock format $lst(mtime) -format $timeformat]\n"
 		}
 		directory {
-		    append listing "<A HREF=\"${urlpath}[file tail $entry]/\">[format %-*s $max [file tail $entry]/</a>] [format %8s {}] [format %-5s dir]  [clock format $lst(mtime) -format $timeformat]\n"
+		    append listing "<A HREF=\"[DirHref $entry]/\">[format %-*s $max [file tail $entry]/</a>] [format %8s {}] [format %-5s dir]  [clock format $lst(mtime) -format $timeformat]\n"
 		}
 		link {
-		    append listing "<A HREF=\"${urlpath}[file tail $entry]\">[format %-*s $max [file tail $entry]</a>] [format %8s {}] [format %-5s link]  [clock format $lst(mtime) -format $timeformat] -> [file readlink $entry]\n"
+		    append listing "<A HREF=\"[DirHref $entry]\">[format %-*s $max [file tail $entry]</a>] [format %8s {}] [format %-5s link]  [clock format $lst(mtime) -format $timeformat] -> [file readlink $entry]\n"
 		}
 		characterSpecial -
 		blockSpecial -
@@ -123,6 +123,14 @@ proc DirListInner {dir urlpath sort pattern} {
 </PRE>
 "
     return $listing
+}
+
+proc DirHref {entry} {
+    set entry [Url_Encode [file tail $entry]]
+    # Decode ".",
+    regsub -all -nocase {%2e} $entry . entry
+    regsub -all -nocase {%5f} $entry _ entry
+    return $entry
 }
 
 proc DirList {dir urlpath} {

@@ -242,6 +242,18 @@ proc HttpdRead {sock} {
 	    1,start	{
 		if [regexp {^([^ ]+) +([^?]+)\??([^ ]*) +HTTP/(1.[01])} \
 			$line x data(proto) data(url) data(query) data(version)] {
+		    # Strip leading http://server.
+		    # We check and discard proxy requests here, too.
+
+		    if {[regexp {^http://([^/:]+)} $data(url) x xserv]} {
+			if {[string compare \
+				[string tolower $xserv] \
+				[string tolower $Httpd(name)]] != 0} {
+			    Httpd_Error $sock 400 $line
+			    return
+			}
+			regsub {^http://([^/]+)} $data(url) {} data(url)
+		    }
 		    set data(state) mime
 		    set data(line) $line
 		    set data(uri) $data(url)
