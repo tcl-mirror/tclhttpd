@@ -5,6 +5,10 @@ procedure, or filter, that is run before each URL
 is processed.  These filters are registered with the
 Url_AccessInstall procedure.  See the lib/url.tcl file
 for more details about access control filters.
+<p>A web-based utility to maintain .htaccess Access Control
+ can be run by the webmaster <a href="/htaccess">here</a>,
+ here is a brief <a href="htman.html">guide for new installations</a>.
+</p>
 <p>
 The DocAccessHook procedure provides support for
 Apache-style .htaccess files.  This is enabled by
