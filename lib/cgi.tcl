@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cgi.tcl,v 1.22 2000/11/14 00:59:34 welch Exp $
+# RCS: @(#) $Id: cgi.tcl,v 1.23 2000/11/29 18:37:02 welch Exp $
 
 package provide httpd::cgi 1.0
 
@@ -48,13 +48,17 @@ if {"$tcl_platform(platform)" == "windows"} {
 # after the program name.
 
 proc Cgi_Directory {virtual {directory {}}} {
-    global Cgi
+
+    # Set up the URL-directory mapping so that DocAccessHook works right.
+
     if {[string length $directory] == 0} {
 	set directory [Doc_Virtual {} {} $virtual]
     }
+    Doc_RegisterRoot $virtual $directory
 
-    # It doesn't make sense to pass the CGI processing to a thread
-    # because we are going to fork the process and do event driven I/O anyway.
+    # Register the domain - not in a thread becaused we'll use another process anyway.
+    # The CGI module will also read the post data itself so TclHttpd doesn't buffer
+    # it all in memory before passing it to the CGI process.
 
     Url_PrefixInstall $virtual [list Cgi_Domain $virtual $directory] \
 	-thread 0 -readpost 0
@@ -64,8 +68,11 @@ proc Cgi_Directory {virtual {directory {}}} {
 
 proc Cgi_Domain {virtual directory sock suffix} {
     global Cgi env
+
     # Check the path and then find the part beyond the program name.
-    if [catch {Url_PathCheck $suffix} pathlist] {
+    # The trimleft avoids a buildup of extra / after the domain prefix.
+
+    if [catch {Url_PathCheck [string trimleft $suffix /]} pathlist] {
 	Doc_NotFound $sock
 	return
     }
@@ -238,6 +245,7 @@ proc CgiSpawn {sock script} {
 
     # Set up a timer in case it hangs
 
+    catch {after cancel $data(cancel)}
     set data(cancel) [after $Cgi(timeout) CgiCancel $fd $sock]
 
     if {$data(proto) == "POST"} {

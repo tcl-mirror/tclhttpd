@@ -1,3 +1,16 @@
+2000-11-29  Brent Welch <welch@ajubasolutions.com>
+
+	* bin/httpd.tcl: Fixed setting of auto_path in the standard
+	install configuration so that the limit and crypt packages can
+	be found (Peter Farmer)
+	* lib/doc.tcl: Added Doc_RegisterRoot so the cgi domain can set up
+	the directory mapping used by DocAccessHook. (Peter Farmer)
+	* lib/cgi.tcl: Fixed "extra timer" bug found by Petrus that could cause
+	erroneous aborts of CGI connections. (Petrus Vloet)
+	Added use of Doc_RegisterRoot so DocAccessHook works right for
+	/cgi-bin directories outside the htdocs hierarchy.  (Peter Summers)
+	Eliminated extra / build-up in /cgi/bin pathnames (Peter Summers)
+
 2000-11-13  Brent Welch <welch@ajubasolutions.com>
 
 	* lib/cgi.tcl: Added checking in CgiCancel in case

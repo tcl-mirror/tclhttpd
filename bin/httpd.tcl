@@ -42,7 +42,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.35 2000/11/03 08:12:34 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.36 2000/11/29 18:37:02 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -68,8 +68,11 @@ if {[file exist [file join $home ../lib/httpd.tcl]]} {
     # Cases 1 and 2
     set Config(lib) [file join $home ../lib]
 } elseif {[file exist [file join $home ../lib/tclhttpd$v]]} {
-    set Config(lib) [file join $home ../lib/tclhttpd$v]
+    # Standard package install (e.g., TclPro)
+    # By going one level up, we make all Tcl packages available.
+    set Config(lib) [file join $home ../lib]
 } else {
+    # Hmm - see if Tcl can find it for us.
     tcl_findLibrary tclhttpd $v $v version.tcl TCL_HTTPD_LIBRARY Config(lib)
 }
 if {![info exist Config(lib)]} {

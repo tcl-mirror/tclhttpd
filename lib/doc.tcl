@@ -20,7 +20,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.41 2000/09/29 22:53:12 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.42 2000/11/29 18:37:02 welch Exp $
 
 package provide httpd::doc 1.1
 
@@ -54,16 +54,10 @@ proc Doc_Root {{real {}}} {
 # Doc_AddRoot
 #	Add a file system to the virtual document hierarchy
 #
-# Arguments
-#	virtual		The prefix of the URL
-#	directory	The directory that corresponds to $virtual
-#	inThread	True if document handlers should run in a thread
-#			The default is true to handle long-running templates
-#
 # Arguments:
 #	virtual		The URL prefix of the document tree to add.
 #	directory	The file system directory containing the doc tree.
-#	inThread 1	If true, the domain is registered to run in a thread.
+#	inThread	If true, the domain is registered to run in a thread.
 #			(The server may have threading turned off, but
 #			you can still ask for it without error.)
 #
@@ -74,10 +68,33 @@ proc Doc_Root {{real {}}} {
 #	Sets up a document URL domain and the document-based access hook.
 
 proc Doc_AddRoot {virtual directory {inThread 1}} {
-    global Doc
-    set Doc(root,$virtual) $directory
+    Doc_RegisterRoot $virtual $directory
     Url_PrefixInstall $virtual [list DocDomain $virtual $directory] $inThread
     Url_AccessInstall DocAccessHook
+}
+
+# Doc_RegisterRoot
+#	Add a file system managed by any Domain Handler (e.g. CGI)
+#	This is necessary for Doc_AccessControl to search directories right.
+#
+# Arguments:
+#	virtual		The prefix of the URL
+#	directory	The directory that corresponds to $virtual
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Registers the URL to directory mapping
+
+proc Doc_RegisterRoot {virtual directory} {
+    global Doc
+    if {[info exist Doc(root,$virtual)] &&
+	    [string compare $Doc(root,$virtual) $directory] != 0} {
+	return -code error \
+		"Doc_RegisterRoot will not change an existing url to directory mapping"
+    }
+    set Doc(root,$virtual) $directory
 }
 
 # Doc_IndexFile --
