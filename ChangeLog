@@ -1,3 +1,10 @@
+2000-09-13  Brent Welch <welch@ajubasolutions.com>
+
+	* lib/httpd.tcl:
+	Generalized Httpd_Port to return the listening port without having
+	to give it a socket.  Used for configuration managers.
+	Added Httpd_SecurePort to return the https listening port, if any.
+
 2000-09-11  Brent Welch <welch@ajubasolutions.com>
 
 	* DIST_build/DIST:
