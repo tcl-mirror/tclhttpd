@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.63 2000/10/09 19:00:21 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.64 2000/10/12 23:00:41 welch Exp $
 
 package provide httpd 1.5
 
@@ -683,6 +683,30 @@ proc Httpd_GetPostData {sock varName {size -1}} {
     return $data(count)
 }
 
+# Httpd_ReadPostDataAsync --
+#
+#	Convenience layer on Http-GetPostDataAsync to
+#	read the POST data into a the data(query) variable.
+#
+# Arguments:
+#	(Same as HttpdReadPost)
+#
+# Side Effects:
+#	(See Httpd_GetPostDataAsync)
+
+proc Httpd_ReadPostDataAsync {sock cmd} {
+    global Httpd
+    upvar #0 Httpd$sock data
+    if {[string length $data(query)]} {
+	# This merges query data from the GET/POST URL
+	append data(query) &
+    }
+    Httpd_Suspend $sock
+    fileevent $sock readable [list HttpdReadPostGlobal $sock \
+	    Httpd${sock}(query) $Httpd(bufsize) $cmd]
+    return
+}
+
 # Httpd_GetPostDataAsync --
 #
 #	Read the POST data into a Tcl variable, but do it in the
@@ -794,6 +818,7 @@ proc HttpdReadPost {sock varName blockSize {cmd {}}} {
 	    if {[info exist buffer]} {
 		append buffer $block
 	    }
+
 	    set data(count) [expr {$data(count) - [string length $block]}]
 	    if {$data(count) == 0} {
 		set doneMsg ""

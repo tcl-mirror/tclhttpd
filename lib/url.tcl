@@ -96,6 +96,15 @@ proc Url_Dispatch {sock} {
 	    Httpd_CompletionCallback $sock $Url(callback,$prefix)
 	}
 
+	# Pre-read the post data, if the domain wants that
+
+	if {$Url(readpost,$prefix) && $data(count) > 0} {
+	    
+	    Httpd_ReadPostDataAsync $sock \
+		[list Url_DeferredDispatch $prefix $suffix]
+	    return
+	}
+
 	# Invoke the URL domain handler either in this main thread
 	# or in a worker thread
 
@@ -113,6 +122,44 @@ proc Url_Dispatch {sock} {
 	# Note that the return statement for the "denied" case of the
 	# access hook will result in catch returning code == 2, not 1 (or zero)
 
+	global errorInfo
+	global errorCode
+	Url_Unwind $sock $errorInfo $errorCode
+    }
+}
+
+# Url_DeferredDispatch
+#
+#	Dispatch to a type-specific handler for a URL after the
+#	post data has been read.
+#
+# Arguments
+#	sock	The client socket connection
+#
+# Side Effects
+#	Handle the request
+
+proc Url_DeferredDispatch {prefix suffix sock varname errmsg} {
+    global Url
+
+    if {[string length $errmsg]} {
+	Httpd_SockClose $sock 1 $errmsg
+	return
+    }
+    Url_PostHook $sock 0	;# Turn of Url_ReadPost
+    if {[catch {
+	# Invoke the URL domain handler either in this main thread
+	# or in a worker thread
+
+	if {$Url(thread,$prefix)} {
+	    Count UrlToThread
+	    Thread_Dispatch $sock \
+		    [concat $Url(command,$prefix) [list $sock $suffix]]
+	} else {
+	    Count UrlEval
+	    eval $Url(command,$prefix) [list $sock $suffix]
+	}
+    } error] == 1} {
 	global errorInfo
 	global errorCode
 	Url_Unwind $sock $errorInfo $errorCode
@@ -270,6 +317,8 @@ if {![info exist Url(accessHooks)]} {
 #		-callback cmd
 #			A callback to make when the request completes
 #			with or without error, timeout, etc.
+#		-readpost boolean
+#			To indicate we should pre-read POST data.
 
 proc Url_PrefixInstall {prefix command args} {
     global Url
@@ -296,9 +345,19 @@ proc Url_PrefixInstall {prefix command args} {
 
     set Url(command,$prefix) $command
 
+    # Most domains have small amounts of POST data so we read it
+    # by default for them.  If you post massive amounts, create
+    # a special domain that handles the post data specially.
+
+    set readpost 1
+
     # Check for options on the domain
 
     if {[llength $args] == 1} {
+
+	# Compatibility with early 3.* versions that didn't take
+	# arbitrary flags
+
 	set tothread [lindex $args 0]
     } else {
 	set tothread 0
@@ -310,6 +369,9 @@ proc Url_PrefixInstall {prefix command args} {
 		-callback {
 		    set Url(callback,$prefix) $v
 		}
+		-readpost {
+		    set readpost $v
+		}
 		default {
 		    return -code error "Unknown option $n.
 			    Must be -tothread or -callback"
@@ -317,6 +379,8 @@ proc Url_PrefixInstall {prefix command args} {
 	    }
 	}
     }
+    set Url(readpost,$prefix) $readpost
+
     # The decision to use worker threads is done on a domain-by-domain basis
     #
     # Do the check against Thread_Enabled here instead of inside
