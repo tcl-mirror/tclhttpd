@@ -669,7 +669,9 @@ proc Httpd_Redirect {newurl sock} {
     HttpdRespondHeader $sock text/html $close [string length $message] 302
     puts $sock "Location: $newurl"
     puts $sock ""
-    puts $sock $message
+    # The -nonewline is important here to work properly with
+    # keep-alive connections
+    puts -nonewline $sock $message
     Httpd_SockClose $sock $close
 }
 
@@ -731,7 +733,7 @@ proc Httpd_RequestAuth {sock type realm} {
     HttpdRespondHeader $sock text/html $close [string length $HttpdAuthorizationFormat] 401
     puts $sock "Www-Authenticate: $type realm=\"$realm\""
     puts $sock ""
-    puts $sock $HttpdAuthorizationFormat
+    puts -nonewline $sock $HttpdAuthorizationFormat
     Httpd_SockClose $sock $close
 }
 

@@ -38,11 +38,14 @@
 
 package provide url 1.0
 
-# Hack for file name parsing support
-if {$tcl_platform(platform) == "macintosh"} {
-    set Url(fsSep) :
-} else {
-    set Url(fsSep) /
+# This pattern cannot occur inside a URL path component
+# On windows we disallow : to avoid drive-letter attacks
+
+switch $tcl_platform(platform) {
+    windows	{ set Url(fsSep) {[/\\:]} }
+    macintosh	{ set Url(fsSep) : }
+    unix	-
+    default	{ set Url(fsSep) / }
 }
 
 # Dispatch to a type-specific handler for a URL
@@ -183,10 +186,17 @@ proc Url_PathCheck {urlsuffix} {
     set pathlist ""
     foreach part  [split $urlsuffix /] {
 	if {[string length $part] == 0} {
-	    continue
+
+	    # It is important *not* to "continue" here and skip
+	    # an empty component because it could be the last thing,
+	    # /a/b/c/
+	    # which indicates a directory.  In this case you want
+	    # Auth_Check to recurse into the directory in the last step.
+
 	}
 	set part [Url_Decode $part]
 	# Disallow Mac and UNIX path separators in components
+	# Windows drive-letters are bad, too
 	if {[regexp $Url(fsSep) $part]} {
 	    error "URL components cannot include $Url(fsSep)"
 	}
