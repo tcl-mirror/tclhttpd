@@ -22,7 +22,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.89 2004/10/22 03:43:06 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.90 2005/02/26 02:33:31 coldstore Exp $
 
 package provide httpd 1.7
 
@@ -1680,16 +1680,11 @@ proc Httpd_NotModified {sock} {
 	return
     }
 
-    set message [HttpdErrorString 304]
-    set close 1
-    HttpdRespondHeader $sock text/html $close [string length $message] 304
+    HttpdRespondHeader $sock text/html 0 0 304
+    HttpdSetCookie $sock
     puts $sock ""
 
-    # The -nonewline is important here to work properly with
-    # keep-alive connections
-
-    puts -nonewline $sock $message
-    Httpd_SockClose $sock $close
+    Httpd_SockClose $sock 0
 }
 
 # Httpd_RedirectSelf --
