@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.49 2004/03/16 21:38:27 hobbs Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.50 2004/03/17 22:26:52 coldstore Exp $
 
 package provide httpd::doc 1.1
 
@@ -349,6 +349,8 @@ proc DocDomain {prefix directory sock suffix} {
     # to prevent those attacks.
 
     set path [file join $directory [string trimleft $suffix /~]]
+    set data(path) $path	;# record this path for not found handling
+
     if {[file exists $path]} {
 	CountName $data(url) hit
 	Doc_Handle $prefix $path $suffix $sock

@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: template.tcl,v 1.8 2004/02/25 04:36:17 coldstore Exp $
+# RCS: @(#) $Id: template.tcl,v 1.9 2004/03/17 22:26:52 coldstore Exp $
 
 package provide httpd::template 1.0
 
@@ -296,7 +296,8 @@ proc TemplateInstantiate {sock template htmlfile suffix dynamicVar {interp {}}} 
 
     # Source the .tml files from the root downward.
 
-    foreach libfile [TemplateGetTemplates $sock $template] {
+    foreach libdir [Doc_GetPath $sock $template] {
+	set libfile [file join $libdir $Template(tmlExt)]
 	if {[file exists $libfile]} {
 	    interp eval $interp [list uplevel #0 [list source $libfile]]
 	}
@@ -387,7 +388,8 @@ proc TemplateCheck {sock template htmlfile} {
     set rlen [llength [file split $Doc(root)]]
     set dirs [lrange [file split [file dirname $template]] $rlen end]
 	
-    foreach libfile [TemplateGetTemplates $sock $template] {
+    foreach libdir [Doc_GetPath $sock $template] {
+	set libfile [file join $libdir $Template(tmlExt)]
 	if {[file exists $libfile] && ([file mtime $libfile] > $mtime)} {
 	    return 1
 	}
@@ -403,69 +405,4 @@ proc TemplateCheck {sock template htmlfile} {
     }
 
     return [expr {[file mtime $template] > $mtime}]
-}
-
-
-# TemplateGetTemplates --
-#	
-#	Return a list of unique .tml files that need to be sourced for a template
-#
-# Arguments:
-#	sock		The client connection
-#	template	The template file pathname.
-#
-# Results:
-#	A list of .tml file names.
-#
-# Side Effects:
-#	None.
-
-proc TemplateGetTemplates {sock template} {
-    global Doc Template
-    upvar #0 Httpd$sock data
-
-    # Start at the Doc_AddRoot point
-
-    if {[info exist Doc(root,$data(prefix))]} {
-	set root $Doc(root,$data(prefix))
-
-	# always source the .tml in the rootdir
-	set tmls [list [file join $Doc(root) $Template(tmlExt)]]
-    } else {
-	set root $Doc(root,/)
-	set tmls {}
-    }
-
-    set tmpldirs [file split [file dirname $template]]
-    if {[string match ${root}* $template]} {
-
-	# Normal case of pathname under domain prefix
-
-	set path $root
-	set extra [lrange $tmpldirs [llength [file split $root]] end]
-
-    } elseif {[set hindex [lsearch -exact $tmpldirs $Doc(homedir)]] >= 0} {
-	
-	# "public_html" is in the template name, so we have been warped
-	# to a user's URL tree.
-
-	set path [eval file join [lrange $tmpldirs 0 $hindex]]
-	incr hindex
-	set extra [lrange $tmpldirs $hindex end]
-    } else {
-	# Don't know where we are - just use the one in the current directory
-
-	set path [file dirname $template] 
-	set extra {}
-    }
-    foreach dir [concat [list {}] $extra] {
-	set path [file join $path $dir]
-	set file [file join $path $Template(tmlExt)]
-	# Don't add duplicates to the list.
-	if {[lsearch $tmls $file] == -1} {
-	    lappend tmls $file
-	}
-    }
-
-    return $tmls
 }
