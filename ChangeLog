@@ -1,3 +1,7 @@
+2004-08-23 Colin McCormack <colin@sharedtech.dyndns.org>
+	* lib/{cgi,http}.tcl: Changed name of HttpDate to Http_Date
+	in conformance with naming policy, since cgi.tcl was using it.
+
 2004-08-16 Brent Welch <welch@panasas.com>
         * lib/url.tcl: check for URL requests that don't begin with /.
           Browsers won't generate these, but attacks on the server might try
