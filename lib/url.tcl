@@ -215,12 +215,21 @@ proc Url_DecodeQuery {query args} {
 proc Url_DecodeQuery_application/x-www-urlencoded {query qualifiers} {
     regsub -all {\+} $query " " query
     set result {}
-    foreach data [split $query "&="] {
-	regsub -all {([][$\\])} $data {\\\1} data
-	regsub -all {%([0-9a-fA-F][0-9a-fA-F])} $data  {[format %c 0x\1]} data
-	lappend result [subst $data]
+
+    # These foreach loops are structured this way to ensure there are matched
+    # name/value pairs.  Sometimes query data gets garbled.
+
+    foreach pair [split $query "&"] {
+	foreach {name value} [split $query "="] {
+	    lappend result [UrlDecodeData $name] [UrlDecodeData $value]
+	}
     }
     return $result
+}
+proc UrlDecodeData {data} {
+    regsub -all {([][$\\])} $data {\\\1} data
+    regsub -all {%([0-9a-fA-F][0-9a-fA-F])} $data  {[format %c 0x\1]} data
+    return [subst $data]
 }
 
 proc Url_DecodeQuery_application/x-www-form-urlencoded {query qualifiers} [info body Url_DecodeQuery_application/x-www-urlencoded]
