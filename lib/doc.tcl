@@ -219,7 +219,12 @@ proc DocFallback {path suffix cookie sock} {
     }
     set ok {}
     set accept [DocAccept $sock]
+
     foreach choice [glob -nocomplain $root.*] {
+	if {[string compare [file root $choice] $root] != 0} {
+	    # This prevents "foo.html.old" from matching for "foo.html"
+	    continue
+	}
 	set type [Mtype $choice]
 	if {[DocMatch $accept $type] && ![DocExclude $choice]} {
 	    lappend ok $choice
