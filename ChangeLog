@@ -5,6 +5,7 @@
         This vulnerability was identified by David Welton, although
         I'll note you had to had permission to retrieve the access
         control files.
+        * lib/url.tcl: Added Url_AccessUnInstall to remove hooks.
 
 2002-08-29  Brent Welch <welch@panasas.com>
         * (In the tclhttpd-3-4-rel branch).  These were added on

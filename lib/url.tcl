@@ -314,6 +314,24 @@ proc Url_AccessInstallPrepend {proc} {
     }
     return
 }
+# Url_AccessUnInstall
+#
+#       Remove an access control hook
+#
+# Arguments
+#	proc	A procedure previously registered with Url_AccessInstall
+#
+# Side Effects
+#	Remove the access control hook
+
+proc Url_AccessUnInstall {proc} {
+    global Url
+    set ix [lsearch $Url(accessHooks) $proc]
+    if {$ix >= 0} {
+	set Url(accessHooks) [lreplace $Url(accessHooks) $ix $ix]
+    }
+    return
+}
 
 if {![info exist Url(accessHooks)]} {
     set Url(accessHooks) {}
