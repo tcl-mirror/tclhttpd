@@ -4,7 +4,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: utils.tcl,v 1.7 2002/08/15 13:13:30 coldstore Exp $
+# RCS: @(#) $Id: utils.tcl,v 1.8 2004/01/28 23:16:13 coldstore Exp $
 
 package provide httpd::utils 1.0
 
@@ -477,3 +477,127 @@ proc file_latest {files} {
     return $newest
 }
 
+if {([package vcompare [package provide Tcl] 7.6] < 0)
+    && [string match unix $tcl_platform(platform)]} {
+
+    # The subcommands copy, delete, rename, and mkdir were added to
+    # the Tcl command 'file' in Tcl version 7.6.  The following command
+    # approximates them on Unix platforms.  It may not agree with
+    # the Tcl 7.6+ command 'file' in all of its functionality (notably
+    # the way it reports errors).  Further refinements should be made as
+    # needed.
+    rename file Tcl7.5_file
+    proc file {option args} {
+        switch -glob -- $option {
+            c* {
+                if {[string first $option copy] != 0} {
+                    return [uplevel [list Tcl7.5_file $option] $args]
+                }
+                # Translate -force into -f
+                if {[string match -force [lindex $args 0]]} {
+                    set args [lreplace $args 0 0 -f]
+                }
+                uplevel exec cp $args
+            }
+            de* {
+                if {[string first $option delete] != 0} {
+                    return [uplevel [list Tcl7.5_file $option] $args]
+                }
+                if {[string match -force [lindex $args 0]]} {
+                    set args [lreplace $args 0 0 -f]
+                }
+                catch {uplevel exec rm $args}
+            }
+            mk* {
+                if {[string first $option mkdir] != 0} {
+                    return [uplevel [list Tcl7.5_file $option] $args]
+                }
+                uplevel exec mkdir $args
+            }
+            ren* {
+                if {[string first $option rename] != 0} {
+                    return [uplevel [list Tcl7.5_file $option] $args]
+                }
+                if {[string match -force [lindex $args 0]]} {
+                    set args [lreplace $args 0 0 -f]
+                }
+                uplevel exec mv $args
+            }
+            default {
+                uplevel [list Tcl7.5_file $option] $args
+            }
+        }
+    }
+}
+
+if {[package vcompare [package provide Tcl] 8] < 0} {
+    
+    # The subcommands nativename and attributes were added to
+    # the Tcl command 'file' in Tcl version 8.0.  Here is an approximation
+    # for earlier Tcl versions:
+    rename file Tcl7.6_file
+    ;proc file {option args} {
+        switch -glob -- $option {
+            att* {
+                if {[string first $option attributes] != 0} {
+                    uplevel [list Tcl7.6_file $option] $args
+                }
+                return -code error "Tcl [package provide Tcl] does not support\
+			\[file attributes\].\n\tUpgrade to Tcl 8.0 to use it."
+            }
+            n* {
+                if {[string first $option nativename] != 0} {
+                    uplevel [list Tcl7.6_file $option] $args
+                }
+                if {![llength $args]} {
+                    return -code error "wrong # args: should be\
+                	    \"file nativename name ?arg ...?\""
+                }
+                set fcomps [file split [lindex $args 0]]
+                # Take care of tilde substitution
+                set first [lindex $fcomps 0]
+                if {[string match ~* $first]} {
+                    set first [file join [file dirname $first] [file tail $first]]
+                }
+                set result [eval file join [list $first] [lrange $fcomps 1 end]]
+                global tcl_platform
+                if {[string match windows $tcl_platform(platform)]} {
+                    regsub -all -- / $result \\ result
+                }
+                return $result
+            }
+            default {
+                uplevel [list Tcl7.6_file $option] $args
+            }
+        }
+    }
+}
+
+if {[package vcompare [package provide Tcl] 8.4] < 0} {
+    # The subcommands nativename and attributes were added to
+    # the Tcl command 'file' in Tcl version 8.0.  Here is an approximation
+    # for earlier Tcl versions:
+    rename file Tcl8.0_file
+    ;proc file {option args} {
+        switch -glob -- $option {
+	    norm* {
+		set sp [file split [lindex $args 0]]
+		if {[file pathtype [lindex $sp 0]] == "relative"} {
+		    set sp [file split [eval [list file join [pwd]] $sp]]
+		}
+		set np {}
+		foreach ele $sp {
+		    if {$ele != ".."} {
+			if {$ele != "."} { lappend np $ele }
+		    } elseif {[llength $np]> 1} {
+			set np [lrange $np 0 [expr {[llength $np] - 2}]]
+		    }
+		}
+		if {[llength $np] > 0} { return [eval file join $np] }
+	    }
+	    default {
+		uplevel [list Tcl8.0_file $option] $args
+	    }
+	}
+    }
+}
