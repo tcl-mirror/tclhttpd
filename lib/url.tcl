@@ -131,18 +131,23 @@ proc Url_PrefixInstall {prefix command} {
     # to pick off the prefix from the URL
     # NOTE - ought to denature prefix to avoid regexp specials
 
+    regsub -all {([][\\().*+?$])} $prefix {\\\1} prefixquoted
+
     if {[string compare $prefix "/"] == 0} {
 	# / is not in the prefixset because of some special cases.
 	# See Url_Dispatch
     } elseif {![info exists Url(prefixset)]} {
-	set Url(prefixset) $prefix
+	set Url(prefixset) $prefixquoted
     } else {
 	set list [split $Url(prefixset) |]
-	if {[lsearch $list $prefix] < 0} {
-	    lappend list $prefix
+	if {[lsearch $list $prefixquoted] < 0} {
+	    lappend list $prefixquoted
 	}
 	set Url(prefixset) [join [lsort -command UrlSort $list] |]
     }
+
+    # Install the unquoted prefix so the Url dispatch works right
+
     set Url(command,$prefix) $command
 }
 
