@@ -26,7 +26,7 @@ Index, it'll generate internal html references to sections and questions,
 it'll handle the numbering, and it'll let you generate links to each of these 
 indexable elements."]
 
-[FAQ "Wouldn't this format be terribly easy to generate from a text file?"  \
+[FAQ "Wouldn't this format be terribly easy to generate from a text file?" \
 "Yes, it would.  And the text file could be generated from forms.  It'd be a 
 very nice, simple FAQomatic."]
 
