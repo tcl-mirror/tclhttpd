@@ -1,0 +1,37 @@
+[mypage::header "Reference Pages"]
+[html::if {[catch {package require doctools}]} {
+You need the doctools package from Tcllib to view the pages
+in this section.
+}]
+<h3>Overview</h3>
+<ul>
+<li><a href="architecture.man">architecture</a>
+<li><a href="../manual/intro.tml">intro</a>
+</ul>
+<h3>Module Docs</h3>
+<ul>
+<li><a href="cgi.man">cgi</a>
+<li><a href="config.man">config</a>
+<li><a href="cookie.man">cookie</a>
+<li><a href="counter.man">counter</a>
+<li><a href="direct.man">direct</a>
+<li><a href="dirlist.man">dirlist</a>
+<li><a href="doc_error.man">doc_error</a>
+<li><a href="doc.man">doc</a>
+<li><a href="httpd.man">httpd</a>
+<li><a href="log.man">log</a>
+<li><a href="logstd.man">logstd</a>
+<li><a href="mtype.man">mtype</a>
+<li><a href="session.man">session</a>
+<li><a href="../manual/stdin.html">stdin</a>
+<li><a href="subst.man">subst</a>
+<li><a href="tclhttpd.man">tclhttpd</a>
+<li><a href="url.man">url</a>
+<li><a href="version.man">version</a>
+</ul>
+<h3>Tech Notes</h3>
+<ul>
+<li><a href="../manual/htdig.html">htdig</a>
+<li><a href="../manual/embedding.tml">embedding</a>
+</ul>
+[mypage::footer]
