@@ -1,9 +1,8 @@
 [html::description "Learn to program TclHttpd, the Tcl Web Server."]
 [html::keywords Tcl TclHttpd Learn "Tcl Web Server" "Web Server"]
 [html::author "Brent Welch"]
-[learn::header "Tcl-Httpd Lesson Book"]
-This page is an introduction to programming with TclHttpd.
-The web server is designed to be easily extended by adding
+[learn::header "TclHttpd Lesson Book"]
+The TclHttpd web server is designed to be easily extended by adding
 Tcl code to the server.  The server runs this code to generate
 web pages.  There are a few frameworks for this, including
 <a href=#urlprefix>URL prefix domains</a>, 
@@ -20,12 +19,13 @@ or interested in other advanced configuration options.
 <h3><a name="tml">TML Templates</a></h3>
 
 Templates work by embedding Tcl commands into HTML pages.
-The results of the commands replace where those commands
-appeared in the page.
-For example, this is the current time: <b>[clock format [clock seconds]]</b>
-<br>
-[::learn::link "Template #1"]
-includes a page that you can program yourself right now.
+For example, this is the current time:
+<ul>
+<b>[clock format [clock seconds]]</b>
+</ul>
+The
+[::learn::link "Templates"]
+section includes several examples.
 
 <h3><a name="urlprefix">URL Prefix Domains</a></h3>
 

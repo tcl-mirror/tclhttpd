@@ -4,7 +4,7 @@
 namespace eval learn {
   variable order {
     "Basic Setup"       setup.tml
-    "Template #1"       self.tml
+    "Templates"         /templates/
     "Server Security"   security.tml
   }
   variable prefix /learn
@@ -27,7 +27,10 @@ proc ::learn::links {{sep " | "}} {
   set html ""
   append html "<a href=\"$prefix/\">Learn</a> "
   foreach {label url} $order {
-    append html "$sep<a href=\"$prefix/$url\">$label</a>"
+    if {![string match /* $url]} {
+      set url $prefix/$url
+    }
+    append html "$sep<a href=\"$url\">$label</a>"
   }
   return $html
 }
@@ -38,7 +41,7 @@ proc ::learn::links {{sep " | "}} {
 proc ::learn::link {pattern} {
   variable order
   foreach {label url} $order {
-    if {[string match $label $pattern]} {
+    if {[regexp $pattern $label]} {
       return "<a href=\"$url\">$label</a>"
     }
   }

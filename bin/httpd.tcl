@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.51 2004/03/23 04:59:45 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.52 2004/04/20 06:50:30 welch Exp $
 #
 # \
 exec tclsh "$0" ${1+"$@"}
@@ -164,9 +164,11 @@ namespace import config::cget
 #########################
 
 # Override config file settings with command line arguments.
+# The CommandLineOptions global is known to some of the
+# web pages that document the server.
 
 package require cmdline
-array set Config [cmdline::getoptions argv [list \
+set CommandLineOptions [list \
         [list virtual.arg      [cget virtual]      {Virtual host config list}] \
         [list config.arg       [cget config]       {Configuration File}] \
         [list main.arg         [cget main]         {Per-Thread Tcl script}] \
@@ -186,7 +188,8 @@ array set Config [cmdline::getoptions argv [list \
         [list debug.arg	       0	        {If true, start interactive command loop}] \
         [list compat.arg       3.3	        {version compatibility to maintain}] \
         [list gui.arg           [cget gui]      {flag for launching the user interface}]
-    ] \
+    ]
+array set Config [cmdline::getoptions argv $CommandLineOptions \
     "usage: httpd.tcl options:"]
 
 if {[string length $Config(library)]} {

@@ -1,14 +1,20 @@
-2004-04-15 Colin McCormack <colin@chinix.com>
-	* lib/upload.tcl: implemented -maxfiles, -maxbytes
-	and -totalbytes options to Upload_Url.
-	* debian/ added support for Debian daemon package
-	* sampleapp/upload - simple file upload and delete app
+2004-04-19 Brent Welch <welch@panasas.com>
+        * Various doc updates.
+        Moved learn/self.tml to templates/self.tml
+        * bin/httpd.tcl: Introduced the CommandLineOptions variable
+        so it can be reference by the htdocs/learn/setup.tml page.
 
 2004-04-17 Brent Welch <welch@panasas.com>
         * Various doc updates.
         Created htdocs/man/index.tml
         renamed manual/reference.tml -> manual/intro.tml
         renamed manual/technotes.tml -> manual/embedding.tml
+
+2004-04-15 Colin McCormack <colin@chinix.com>
+	* lib/upload.tcl: implemented -maxfiles, -maxbytes
+	and -totalbytes options to Upload_Url.
+	* debian/ added support for Debian daemon package
+	* sampleapp/upload - simple file upload and delete app
 
 2004-04-15 Colin McCormack <colin@chinix.com>
 	* lib/upload.tcl: handle redirect and suspend from upload

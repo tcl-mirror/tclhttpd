@@ -1,4 +1,4 @@
-[::learn::header "Lesson 2: Tcl in your Page"]
+[::learn::header "Tcl in your Page"]
 [Doc_Dynamic]
 
 This page shows what you can do with a little bit of Tcl code in a page.
@@ -9,8 +9,13 @@ This page shows what you can do with a little bit of Tcl code in a page.
 }] -->
 <!-- proc cmd status:
 [if {[ncgi::value proc] != ""} {
-  catch {uplevel #0 [list proc Example1 args [ncgi::value proc]]} _
-  catch {interp eval learn [list proc Example1 args [ncgi::value proc]]} _
+  # The values have cr-lf in them from the POST encoding.
+  # Here we launder those into regular newlines so
+  # that, in particular, a \ at the end of line is 
+  # properly understood
+  regsub -all \r\n [ncgi::value proc] \n body
+  catch {uplevel #0 [list proc Example1 args $body]} _
+  catch {interp eval learn [list proc Example1 args $body]} _
   set _
 }] -->
 Right below the &lt;hr&gt; horizontal line we'll display the

@@ -10,8 +10,19 @@
 
 
 <h1>Tcl-based Templates</h1>
+This page shows the very simple processing done
+for <tt><i>page.</i>subst</tt> pages.
+These pages process Tcl embedded in pages,
+but don't have the more sophisticated support developed
+for the <tt><i>page.</i>tml</tt> pages.
+
 <h2>The time is [clock format [clock seconds]]</h2>
-The counters in the server are: [html::tableFromArray counter]
+<hr>
+Here is a look inside the httpd server module.
+This is generated with the <tt>html::tableFromArray</tt> command
+applied to the <tt>Httpd</tt> array variable in the server.
+<br>
+[html::tableFromArray Httpd]
 
 </Body>
 </Html>

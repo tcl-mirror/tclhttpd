@@ -81,9 +81,7 @@ Home hits: [counter::get hit -hist /]
 <h4>Documentation</h4>
 <ul>
 <li>
-<a href=man/>Manual pages</a>. (requires doctools package)
-<li>
-<a href=manual/intro.html>Programming overview</a>.
+<a href=man/>Manual pages</a>.
 <li>
 <a HREF="templates/">Templates with inline Tcl</a>.
 <li>
