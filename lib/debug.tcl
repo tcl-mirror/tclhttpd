@@ -140,8 +140,11 @@ proc Debug/errorInfo {title errorInfo {env {no environment}}} {
     append html <pre>$errorInfo</pre>
     append html "<p>Environment:</p>"
     append html "<table>"
-    foreach {n v} $env {
-	append html "<tr><td>$n</td><td>$v</td></tr>\n"
+    catch {
+    array set X $env
+    foreach n [lsort [array names X]] {
+	append html "<tr><td>$n</td><td>$X($n)</td></tr>\n"
+    }
     }
     append html "</table>"
     return $html

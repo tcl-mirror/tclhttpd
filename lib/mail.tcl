@@ -22,16 +22,21 @@ proc Mail/bugreport {email errorInfo args} {
     foreach {name value} $args {
 	if {([string compare $name "env"] == 0) && 
 		([catch {array set X $value}] == 0)} {
-	    append html "Environment:\n"
-	    foreach n [lsort [array names X]] {
-		append html "  $n: $X($n)\n"
-	    }
+	    # add this later
+	    continue
 	} else {
 	    append html "$name: $value\n"
 	}
     }
     append html  $Httpd(server)\n
     append html [protect_text $errorInfo]
+
+    if {[info exist X]} {
+	append html "\n\nEnvironment:\n"
+	foreach n [lsort [array names X]] {
+	    append html "  $n: $X($n)\n"
+	}
+    }
     append html "</pre>"
 
     MailInner $email "$Httpd(name):$Httpd(port) error" "" text/html $html
