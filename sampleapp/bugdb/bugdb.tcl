@@ -86,3 +86,6 @@ Summary Description Date Status} {
     return
 }
 
+proc bugdb::update {} {
+    return OK
+}
