@@ -47,4 +47,5 @@ package ifneeded httpd 1.6 "
 	package ifneeded httpd::utils 1.0 \[list source \[file join [list $dir] utils.tcl\]\]
 	package ifneeded httpd::version 3.4 \[list source \[file join [list $dir] version.tcl\]\]
 	package ifneeded tclcrypt 1.0 \[list source \[file join [list $dir] tclcrypt.tcl\]\]
+	package ifneeded httpd::doctools 1.0 \[list source \[file join [list $dir] doctools.tcl\]\]
 "
