@@ -300,6 +300,7 @@ proc HttpdRead {sock} {
 		    fconfigure $sock  -translation {binary crlf}
 		} elseif {$data(proto) != "POST"}  {
 		    # Dispatch upon blank line after headers
+		    fileevent $sock readable {}
 		    Url_Dispatch $sock
 	        } else {
 		    Httpd_Error $sock 411 "Confusing mime headers"
@@ -326,22 +327,30 @@ proc HttpdRead {sock} {
 	# For compatibility, this is postponed until either
 	# Url_DecodeQuery is called or Httpd_GetPostData is called.
 
-	if {![info exist data(dispatch)]} {
-	    set data(dispatch) 1
-	    Url_PostHook $sock $data(count)
-	    Url_Dispatch $sock
-	} else {
-	    # The URL handler has not read the post data yet
-	    # Turn off the fileevent and ensure we close the
-	    # socket when they have generated their reply
-
-	    set data(mime,connection) close
-	    fileevent $sock readable {}
-	}
+	fileevent $sock readable {}
+	Url_PostHook $sock $data(count)
+	Url_Dispatch $sock
     } else {
 	Httpd_Log $sock Error "Broken connection reading POST data"
 	Httpd_SockClose $sock 1 "broken connection during post data"
     }
+}
+
+# Httpd_PostDataSize --
+#
+# Arguments:
+#	sock	Client connection
+#
+# Results:
+#	The amount of post data available.
+
+proc Httpd_PostDataSize {sock} {
+    upvar #0 Httpd$sock data
+
+    if {![info exist data(count)]} {
+	return 0
+    }
+    return $data(count)
 }
 
 # Httpd_GetPostData --
