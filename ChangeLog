@@ -1,6 +1,8 @@
-2001-11-20  Brent Welch <welch@panasas.com>
+2001-11-30  Brent Welch <welch@panasas.com>
 	* bin/url.tcl: Minor cleanup of error message in Url_PrefixInstall.
 	* lib/upload.tcl: Fixed things so files are always uploaded in binary
+	* custom/hello.tcl: Fixed buglet in /hello/there
+
 2001-07-11  Brent Welch <welch@panasas.com>
 	* bin/httpdthread.tcl: Catch around package require html
 	because the latest version of that module conflicts with prodebug.

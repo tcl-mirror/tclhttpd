@@ -20,5 +20,6 @@ proc ::hello::/ {args} {
 #	This implements /hello/there
 
 proc ::hello::/there {args} {
+    variable x
     return "Hello, World!<br>\nThe server started at $x"
 }
