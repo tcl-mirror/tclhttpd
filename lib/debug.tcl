@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.18 2004/03/23 01:16:54 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.19 2004/03/23 01:55:12 welch Exp $
 
 package provide httpd::debug 1.0
 
@@ -35,8 +35,36 @@ proc DebugSetRandomPassword {dir} {
     set c [lindex $alphabet [expr int(rand() * [llength $alphabet])]]
     append passwd $c
   }
-  Stderr "$dir user \"debug\" password \"$passwd\""
   set ::DebugPassword $passwd
+  # This printf is important - it's the only way the admin
+  # knows what this password might be
+  Stderr "$dir user \"debug\" password \"$passwd\""
+}
+
+# DebugPasswordChecker
+#
+#	This is called to verify the username and password
+#
+# Arguments:
+#	sock	Handle on the client connection
+#	realm	Should be the realm we define above
+#	user	The user name
+#	pass	The password
+#
+# Results:
+#	1	if access is allowed
+#	0	if access is denied
+
+proc DebugPasswordChecker {sock realm user pass} {
+    # Any user will do, really, if you know the random password
+    switch $user {
+        tclhttpd -
+        debug -
+        default {
+          return [DebugCheckRandomPassword $pass]
+        }
+    }
+    return 0
 }
 
 # DebugCheckRandomPassword
@@ -44,6 +72,9 @@ proc DebugSetRandomPassword {dir} {
 #       Check that the input matches the random password
 
 proc DebugCheckRandomPassword {input} {
+  if {![info exist ::DebugPassword]} {
+    return 0
+  }
   return [expr {[string compare $::DebugPassword $input] == 0}]
 }
 
