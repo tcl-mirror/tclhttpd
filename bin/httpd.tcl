@@ -263,10 +263,10 @@ if {[info exists tk_version]} {
     package require srvui
     SrvUI_Init "Tcl HTTPD $Httpd(version)"
 }
+Stderr "httpd started on port $Config(port)"
 if {$Config(debug)} {
     Stdin_Start "httpd % "
     Httpd_Shutdown
 } else {
-    Stderr "httpd started on port $Config(port)"
     vwait forever
 }

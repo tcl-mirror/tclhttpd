@@ -5,7 +5,7 @@ proc CopyTree {src dst} {
 		[file join $src .tml] \
 		[file join $src .htaccess] \
 		[file join $src .tclaccess]] {
-	if {[regexp {(CVS|SCCS|.*\.orig|.*\.old)$} $f]} {
+	if {[regexp {(CVS|SCCS|.*\.orig|.*\.old|~|#)$} $f]} {
 	    puts "skipping $f"
 	    continue
 	}

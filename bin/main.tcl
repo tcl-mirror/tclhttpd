@@ -5,6 +5,10 @@
 # and then (if applicable) each worker thread will source this
 # file to initialize itself.
 
+# Standard Library dependencies
+package require ncgi
+package require html
+
 # Core modules
 package require httpd           ;# Protocol stack
 package require html            ;# Simple html generation
