@@ -5,7 +5,7 @@ See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 Version: 3.4.1
-Last Modified: Mon Aug 26 22:11:42 PDT 2002
+Last Modified: Fri Aug 30 17:07:23 PDT 2002
 
 QUICK START
 
@@ -44,7 +44,9 @@ This lets you set basic parameters like port number and server name.
 VERSION SUMMARY
 
 Version 3.4.1 fixes CGI POST forms on Windows, a typo in upload.tcl
-and the lib/pkgIndex.tcl
+and the lib/pkgIndex.tcl.  It also disallows the ability to retrieve
+.tml, .tclaccess, and .htaccess files.  These simple new APIs crept
+in: Url_AccessInstallPrepend, Url_AccessUnInstall, Mtype_Add, Mtype_Reset.
 
 Version 3.4 has several updates to the Doc, Upload, and Thread modules
 done by Melissa Chawla of Panasas. Please see the ChangeLog for details.
