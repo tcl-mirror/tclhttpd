@@ -5,7 +5,9 @@
         * lib/upload.tcl: Nuked the CvsReadFileHeader call
         * lib/version.tcl: Updated to 3.4.1
         * bin/httpd.tcl.new: Deleted this cruft
+        As a bonus - these features:
         * lib/mtype.tcl: Added Mtype_Add and Mtype_Reset
+        * lib/mime.types: added application/x-ns-proxy-autoconfig
 
 2002-08-18  Brent Welch <welch@panasas.com>
         * (In the tclhttpd-3-4-rel branch)

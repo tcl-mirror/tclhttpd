@@ -38,6 +38,7 @@ application/x-dvi              dvi
 application/x-hdf              hdf             
 application/x-latex            latex           
 application/x-netcdf           nc cdf          
+application/x-ns-proxy-autoconfig pac
 application/x-safetcl		thtml
 application/x-server-include	shtml
 application/x-sh               sh              
