@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: log.tcl,v 1.11 2003/10/08 07:55:44 coldstore Exp $
+# RCS: @(#) $Id: log.tcl,v 1.12 2003/10/27 14:08:57 coldstore Exp $
 
 package provide httpd::log 1.1
 package require httpd::logstd 1.0
@@ -20,7 +20,7 @@ package require httpd::logstd 1.0
 
 # This program is used to compress log files
 if {![info exists Log(compressProg)]} {
-    set Log(compressProg) /usr/local/bin/gzip
+    set Log(compressProg) gzip
 }
 
 # Flush interval
