@@ -56,7 +56,7 @@ unset tmp dir
 #
 package require opt
 ::tcl::OptProc _ProcessOptions [list \
-        [list -docRoot      -any    [file join $Config(home) htdocs]      {Root directory for documents}] \
+        [list -docRoot      -any    [file join [file dirname $Config(home)] htdocs]      {Root directory for documents}] \
         [list -port         -int    8015                              {Port number server is to listen on}] \
         [list -host         -any    [info hostname]                 {Server name, should be fully qualified}] \
         [list -ipaddr       -any    {}                              {Interface server should bind to}] \
