@@ -24,6 +24,12 @@ if {![info exists Log(lognames)]} {
     set Log(lognames) 0
 }
 
+# This program is used to compress log files
+if {![info exists Log(compressProg)]} {
+    set Log(compressProg) /usr/local/bin/gzip
+}
+
+
 proc Log {sock reason args} {
     global Log
     upvar #0 Httpd$sock data
@@ -42,7 +48,6 @@ proc Log {sock reason args} {
 	    } else {
 		append result	[LogValue data(ipaddr)]
 	    }
-	    append result     [LogValue data(ipaddr)]
 	    append result { } [LogValue data(mime,auth-user)]
 	    append result { } [LogValue data(mime,username)]
 	    append result { } \[[clock format $now -format %d/%h/%Y:%T] -0700\]
@@ -142,7 +147,7 @@ proc Log_SetFile {{basename {}}} {
 	catch {close $Log(error_fd)}
 	return
     }
-    Counter_CheckPoint 		;# Save counter data
+    catch {Counter_CheckPoint} 		;# Save counter data
 
     # set after event to switch files after midnight
     set now [clock seconds]
@@ -153,9 +158,17 @@ proc Log_SetFile {{basename {}}} {
     # set the log file and error file.
     # Log files rotate, error files don't
 
+    if {[info exists Log(log_file)] && [file exists $Log(log_file)]} {
+	set lastlog $Log(log_file)
+    }
     set Log(log_file) $Log(log)[clock format $now -format %y.%m.%d]
     catch {close $Log(log_fd)}
     catch {set Log(log_fd) [open $Log(log_file) a]}
+
+    if {[info exists lastlog]} {
+	# compress log files as we go
+	catch {exec $Log(compressProg) $lastlog &}
+    }
 
     catch {close $Log(error_fd)}
     catch {set Log(error_fd) [open $Log(log)error a]}
