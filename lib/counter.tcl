@@ -15,7 +15,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: counter.tcl,v 1.15 2000/10/28 05:36:09 welch Exp $
+# RCS: @(#) $Id: counter.tcl,v 1.16 2001/12/19 17:44:07 welch Exp $
 
 # Layer ourselves on top of the Standard Tcl Library counter package.
 
@@ -54,7 +54,7 @@ proc Counter_Init {{secsPerMinute 60}} {
     #
     #	status::countInit hit -simple
 
-    foreach g {domainHit hit notfound error} {
+    foreach g {domainHit hit notfound errors} {
 	counter::init $g -group $g
     }
 

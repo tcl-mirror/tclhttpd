@@ -1,3 +1,6 @@
+2001-12-18  Brent Welch <welch@panasas.com>
+	* bin/counter.tcl: Fixed initialization of the "errors" counter.
+
 2001-11-30  Brent Welch <welch@panasas.com>
 	* bin/url.tcl: Minor cleanup of error message in Url_PrefixInstall.
 	* lib/upload.tcl: Fixed things so files are always uploaded in binary
