@@ -69,12 +69,35 @@ proc Url_Dispatch {sock} {
 	    return
 	}
     }
-    # Prefix match the URL to get a domain handler
-    if [catch {
-	regexp ^($Url(prefixset))(.*) $url x prefix suffix
+    set code [catch {
+	# Prefix match the URL to get a domain handler
+	# Fast check on domain prefixes with regexp
+	# Check that the suffix starts with /, otherwise the prefix
+	# is not a complete component.  E.g., "/tcl" vs "/tclhttpd"
+	# where /tcl is a domain prefix but /tclhttpd is a directory
+	# in the / domain.
+
+	if {![regexp ^($Url(prefixset))(.*) $url x prefix suffix] ||
+		([string length $suffix] && ![string match /* $suffix])} {
+	    # Fall back and assume it is under the root
+	    regexp ^(/)(.*) $url x prefix suffix
+	}
 	eval $Url(command,$prefix) {$sock $suffix}
-    } error] {
+    } error]
+
+    if {$code != 0} {
 	global errorInfo
+	global errorCode
+
+	# URL implementations can raise an error and put redirect info
+	# into the errorCode variable, which should be of the form
+	# HTTPD_REDIRECT $newurl
+
+	set key [lindex $errorCode 0]
+	if {[string match HTTPD_REDIRECT $key]} {
+	    Httpd_Redirect [lindex $errorCode 1] $sock
+	    return
+	}
 
 	switch -glob -- $error {
 	    "*can not find channel*"  {
@@ -100,8 +123,15 @@ proc Url_Dispatch {sock} {
 
 proc Url_PrefixInstall {prefix command} {
     global Url
+
+    # Add the url to the prefixset, which is a regular expression used
+    # to pick off the prefix from the URL
     # NOTE - ought to denature prefix to avoid regexp specials
-    if ![info exists Url(prefixset)] {
+
+    if {[string compare $prefix "/"] == 0} {
+	# / is not in the prefixset because of some special cases.
+	# See Url_Dispatch
+    } elseif {![info exists Url(prefixset)]} {
 	set Url(prefixset) $prefix
     } else {
 	set list [split $Url(prefixset) |]
@@ -194,6 +224,35 @@ proc Url_Decode {data} {
     return [subst $data]
 }
 
+# do x-www-urlencoded character mapping
+# The spec says: "non-alphanumeric characters are replaced by '%HH'"
+ 
+for {set i 1} {$i <= 256} {incr i} {
+    set c [format %c $i]
+    if {![string match \[a-zA-Z0-9\] $c]} {
+        set UrlEncodeMap($c) %[format %.2x $i]
+    }
+}
+ 
+# These are handled specially
+array set UrlEncodeMap {
+    " " +   \n %0d%0a
+}
+ 
+# 1 leave alphanumerics characters alone
+# 2 Convert every other character to an array lookup
+# 3 Escape constructs that are "special" to the tcl parser
+# 4 "subst" the result, doing all the array substitutions
+ 
+proc Url_Encode {string} {
+    global UrlEncodeMap 
+    regsub -all \[^a-zA-Z0-9\] $string {$UrlEncodeMap(&)} string
+    regsub -all \n $string {\\n} string
+    regsub -all \t $string {\\t} string
+    regsub -all {[][{})\\]\)} $string {\\&} string
+    return [subst $string]
+}
+ 
 # Register a new location for a URL
 
 proc Url_Redirect {url location} {
