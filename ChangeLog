@@ -1,5 +1,6 @@
 2004-06-12 Colin McCormack <colin@chinix.com>
 	* htdoc/access/htman.tml - updated documentation
+	* lib/auth.tcl: removed obsolete reference to AuthDefaultFile
 
 2004-06-11 Colin McCormack <colin@chinix.com>
 	* lib/{auth,digest}.tcl: fixed Digest authentication bug

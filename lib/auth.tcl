@@ -29,7 +29,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.20 2004/06/11 08:35:38 coldstore Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.21 2004/06/12 02:29:59 coldstore Exp $
 
 package provide httpd::auth 2.0
 package require base64
@@ -48,9 +48,6 @@ if {![info exists Config(AuthUserFile)]} {
 }
 if {![info exists Config(AuthGroupFile)]} {
     set Config(AuthGroupFile) default
-}
-if {![info exists Config(AuthDefaultFile)]} {
-    set Config(AuthDefaultFile) /tmp/tclhttpd.default
 }
 
 # Authentication bootstrap.
@@ -87,7 +84,7 @@ proc Auth_InitCrypt {} {
 	}
     } else {
 	# we weren't given an Auth Config - generate a default for webmaster
-	# and write it to file $Config(AuthDefaultFile)
+	# and write it to Stderr
 	
 	set webmaster_password [Passgen_Generate]
 	set salt [Passgen_Salt]
