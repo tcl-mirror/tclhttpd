@@ -12,6 +12,10 @@
         (3.5.0 remained unreleased)
 
 2004-05-18 Brent Welch <welch@panasas.com>
+        * lib/mail.tcl: fixed startup so it works with a
+        vanilla server.
+
+2004-05-18 Brent Welch <welch@panasas.com>
         * lib/doc.tcl: added [file normalize] to Doc_Handle to
         avoid returning file contents for files whos name
         ends with extra trailing "." characters.

@@ -9,15 +9,16 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: mail.tcl,v 1.14 2004/05/15 07:23:20 coldstore Exp $
+# RCS: @(#) $Id: mail.tcl,v 1.15 2004/05/19 04:58:17 welch Exp $
 
 package provide httpd::mail 1.0
 
-# If we have no configured mail server, we can't send mail
-if {![info exists Config(mail)] || ($Config(mail) == {})} {
-    return
+# No useful default, but we define procedures so the vanilla server
+# can start up.
+
+if {[info exists Config(mail)] && ($Config(mail) != {})} {
+    set Mail(server) $Config(mail)
 }
-set Mail(server) $Config(mail)
 
 package require smtp
 package require mime
