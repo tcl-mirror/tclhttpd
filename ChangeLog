@@ -1,3 +1,7 @@
+2004-09-05 Colin McCormack <colin@sharedtech.dyndns.org>
+	* session.tcl: fixed error in Session_Value and Session_Variable,
+	fixed error in session saving for values with \n
+
 2004-09-13 Brent Welch <welch@panasas.com>
         * removed htdocs/cgi-bin/env, which was a sparc executable.
 
