@@ -22,7 +22,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.85 2004/04/29 01:34:16 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.86 2004/06/12 04:45:07 coldstore Exp $
 
 package provide httpd 1.7
 
@@ -118,6 +118,8 @@ array set Httpd_EnvMap {
 # callback	Command to invoke when request has completed
 # file_size	Size of file returned by ReturnFile
 # infile	Open file used by fcopy to return a file, or CGI pipe
+# filter	List of http post-generation filter procs to apply to content
+# path	normalized path to Doc file (set by doc.tcl)
 
 # Httpd_Init
 #	Initialize the httpd module.  Call this early, before Httpd_Server.
@@ -1394,6 +1396,15 @@ proc Httpd_ReturnData {sock type content {code 200} {close 0}} {
     global Httpd
     upvar #0 Httpd$sock data
 
+    # process any filters
+    if {[info exists data(filter)]} {
+	while {[llength $data(filter)]} {
+	    set cmd [lindex $data(filter) end]
+	    set data(filter) [lrange $data(filter) 0 end-1]
+	    set content [eval $cmd $sock [list $content]]
+	}
+    }
+
     if {[Thread_Respond $sock \
 	    [list Httpd_ReturnData $sock $type $content $code $close]]} {
 	return
@@ -1435,6 +1446,15 @@ proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
     global Httpd 
     upvar #0 Httpd$sock data
 
+    # process any filters
+    if {[info exists data(filter)]} {
+	while {[llength $data(filter)]} {
+	    set cmd [lindex $data(filter) end]
+	    set data(filter) [lrange $data(filter) 0 end-1]
+	    set content [eval $cmd $sock [list $content]]
+	}
+    }
+
     if {[Thread_Respond $sock \
 	    [list Httpd_ReturnCacheableData $sock $type $content $date $code]]} {
 	return
@@ -1455,6 +1475,20 @@ proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
     } err]} {
 	HttpdCloseFinal $sock $err
     }
+}
+
+# Httpd_Filter
+#	Add a post-generation filter to the socket
+#
+# Arguments:
+#	sock	Client connection
+#	args	filter proc or specs
+#
+# Side Effects:
+#	Adds a filter to data(filter)
+proc Httpd_Filter {sock args} {
+    upvar #0 Httpd$sock data
+    lappend data(filter) $args
 }
 
 # HttpdCopyDone -- this is used with fcopy when the copy completes.
@@ -1807,31 +1841,6 @@ proc Httpd_SecurePort {} {
     } else {
 	return {}
     }
-}
-
-
-# Httpd_RedirectDir --
-#
-# Generate a redirect because the trailing slash isn't present
-# on a URL that corresponds to a directory.
-#
-# Arguments:
-#	sock	Socket connection
-#
-# Results:
-#	None
-#
-# Side Effects:
-#	Generate a redirect page.
-
-proc Httpd_RedirectDir {sock} {
-    global Httpd
-    upvar #0 Httpd$sock data
-    set url  $data(url)/
-    if {[info exist data(query)] && [string length $data(query)]} {
-	append url ?$data(query)
-    }
-    Httpd_Redirect $url $sock
 }
 
 set HttpdAuthorizationFormat {
@@ -2323,3 +2332,4 @@ proc Httpd_Webmaster {{email {}}} {
 
 # this is too much of a compatibility hassle, so we alias
 catch {interp alias {} Doc_Webmaster {} Httpd_Webmaster}
+catch {interp alias {} Httpd_RedirectDir {} Redirect_Dir}
