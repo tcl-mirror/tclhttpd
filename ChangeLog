@@ -1,3 +1,16 @@
+2000-05-05 Brent Welch <welch@scriptics.com>
+
+	* lib/auth.tcl, lib/httpd.tcl:  The Basic authentication module
+	now sets the data(remote_user) and data(auth_type) variables,
+	which are later copied into the REMOTE_USER and AUTH_TYPE
+	environment variables.
+	* lib/log.tcl: Log_FlushMinutes will call Log_Flush if it sees
+	that the chain of after events has already been started.  This
+	will ensure that the next flush occurs when expected.
+	* bin/httpdthread.tcl, lib/thread.tcl:  fixed initialization
+	of threaded interpreters.
+	* htdocs/*:  Added various test pages.
+
 2000-05-03 Brent Welch <welch@scriptics.com>
     
 	* bin/httpd.tcl:  Fixed startup code to find bundled TclLib
