@@ -1,3 +1,8 @@
+2000-09-11  Brent Welch <welch@ajubasolutions.com>
+
+	* DIST_build/DIST:
+	Changed to version 3.2 and tag tclhttpd-3-2-0
+
 2000-09-05  Brent Welch <welch@ajubasolutions.com>
 
 	* Makefile.in:
@@ -13,6 +18,8 @@
 	* bin/httpd.tcl:
 	This calls tls::init instead of doing strange things to
 	get the code in Httpd_SecureSever to set parameters.
+	* bin/tclhttpd.rc.in:
+	Added a config paramter for SSL_USE_TLS1
 	* lib/httpd.tcl:
 	Moved tls parameter setting out of this file and into
 	the main startup script.
