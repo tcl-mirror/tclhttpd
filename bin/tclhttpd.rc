@@ -131,7 +131,7 @@ Config LogFlushMinutes 0
 # CompressProg - the program to use to compress 
 # log files and such
 
-Config CompressProg /usr/local/bin/gzip
+Config CompressProg gzip
 
 # MaxFileDescriptors - the maximum number of file descriptors the
 # server can have open.  This impacts the number of simultaneous
