@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.6.2.4 2002/09/24 04:55:30 welch Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.6.2.5 2002/10/15 01:16:12 welch Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -355,7 +355,7 @@ proc UploadTidyUp {sock errmsg} {
 
 proc UploadTest {flist vlist} {
     set html "<title>Upload Test</title>\n"
-    set html "<h1>Upload Test</h1>\n"
+    append html "<h1>Upload Test</h1>\n"
     append html "<h2>File List</h2>\n"
     append html [html::tableFromList $flist]\n
     append html "<h2>Data List</h2>\n"
