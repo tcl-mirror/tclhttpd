@@ -90,14 +90,7 @@ make:
 		echo "" ; \
 		make ; \
 	    else \
-		if test -f $$pwd/build/$(PLATFORM)/$$i/install.sh ; then \
-		    echo "install.sh in $$pwd/build/$(PLATFORM)/$$i" ; \
-		    cd $$pwd/build/$(PLATFORM)/$$i ; \
-		    echo "" ; \
-		    sh install.sh $$prefix ; \
-		else \
-		    echo "Skipping Make for $$i" ; \
-		fi; \
+		echo "Skipping Make for $$i" ; \
 	    fi; \
 	done;
 
@@ -107,6 +100,7 @@ install-force:
 	-mkdir $(PREFIX)
 	-mkdir $(EXEC_PREFIX)
 	-pwd=`pwd`; \
+	prefix=$(PREFIX) ; \
 	for i in $(MODULES) ; do \
 	    echo "" ; \
 	    if test -f $$pwd/build/$(PLATFORM)/$$i/Makefile ; then \
@@ -119,7 +113,7 @@ install-force:
 		    echo "Running install.sh in $$pwd/$$i" ; \
 		    echo "" ; \
 		    cd $$pwd/$$i ; \
-		    ./install.sh $(PREFIX) ; \
+		    ./install.sh $$prefix ; \
 		else \
 		    echo "Cannot install $$i" ; \
 		fi; \
