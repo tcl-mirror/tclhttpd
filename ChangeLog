@@ -1,6 +1,9 @@
 2003-5-01  Brent Welch <welch@panasas.com>
         * Removed the precompiled .so files as those cause more
           trouble than they are worth.
+        * src/limit.c: added stubs enabled version from Michael Schlenker
+        * lib/debug.tcl: add custom library to path used by /debug/source
+        * lib/doc.tcl: added Doc_Redirect Doc_RedirectSelf compat aliases
 
 2002-12-02  Brent Welch <welch@panasas.com>
         * Merged the tclhttpd-3-4-rel branch into the trunk.
