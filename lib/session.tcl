@@ -40,7 +40,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.7 2004/04/21 06:52:16 welch Exp $
+# RCS: @(#) $Id: session.tcl,v 1.8 2004/04/21 07:03:22 welch Exp $
 
 package provide httpd::session 1.0
 
@@ -56,10 +56,9 @@ if {![info exists Session(expires)]} {
 
 # create a directory for saved sessions
 if {![info exists Session(dir)]} {
+    # I'm not keen on this default location, as it could
+    # be exposed to URL fetches
     set Session(dir) [file join [Doc_Root] .sessions]
-}
-if {![file exists $Session(dir)]} {
-    file mkdir $Session(dir)
 }
 
 # if an MD5 package is available, we use it to make
@@ -288,6 +287,7 @@ proc Session_Save {id} {
 
     # create a session save file, write state
     set sfile [file join $Session(dir) ${id}.sess]
+    file mkdir $Session(dir)
     set fd [open $sfile w]
     puts $fd $session(type)
     puts $fd [interp issafe interp$id]
