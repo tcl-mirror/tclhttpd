@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.6 2000/08/26 06:17:40 welch Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.7 2000/08/28 21:10:21 welch Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -67,6 +67,12 @@ Doc_Root			$Config(docRoot)
 set htdocs_2 [file join [file dirname [info script]] ../htdocs_2]
 if {[file isdirectory $htdocs_2]} {
     Doc_AddRoot /addroot	$htdocs_2
+}
+
+# Merge in TclPro docs, if present
+set htdocs_2 [file join $Config(docRoot) ../../doc/html]
+if {[file isdirectory $htdocs_2]} {
+    Doc_AddRoot /tclpro	$htdocs_2
 }
 
 # Doc_TemplateInterp determines which interpreter to use when
