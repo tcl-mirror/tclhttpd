@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.27 2002/08/19 05:15:20 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.28 2002/09/25 23:00:20 hobbs Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -117,7 +117,7 @@ oldincludedir = /usr/include
 DESTDIR =
 
 pkgdatadir = $(datadir)/@PACKAGE@@VERSION@
-pkglibdir = $(prefix)/lib/@PACKAGE@@VERSION@
+pkglibdir = $(libdir)/@PACKAGE@@VERSION@
 cryptlibdir = $(libdir)/@CRYPT_PACKAGE@@CRYPT_VERSION@
 limitlibdir = $(libdir)/@LIMIT_PACKAGE@@LIMIT_VERSION@
 pkgincludedir = $(includedir)/@PACKAGE@@VERSION@
@@ -292,50 +292,50 @@ cryptLib.$(OBJEXT): $(srcdir)/src/cryptLib.c
 
 
 install-binaries:
-	@echo "Installing script programs in $(prefix)/bin"
+	@echo "Installing script programs in $(DESTDIR)$(prefix)/bin"
 	@for i in $(srcdir)/bin/*.tcl ; do \
-	    $(INSTALL_PROGRAM) $$i $(prefix)/bin ; \
+	    $(INSTALL_PROGRAM) $$i $(DESTDIR)$(prefix)/bin ; \
 	done;
 	@for i in $(srcdir)/bin/*.rc ; do \
-	    $(INSTALL_DATA) $$i $(prefix)/bin ; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)$(prefix)/bin ; \
 	done;
 	@echo "Installing sample boot script"
-	$(INSTALL_DATA) $(srcdir)/bin/tclhttpd.etc.init $(SERVER_ROOT)
+	$(INSTALL_DATA) $(srcdir)/bin/tclhttpd.etc.init $(DESTDIR)$(SERVER_ROOT)
 
 install-libraries: install-custom installdirs 
-	@echo "Installing script files in $(pkglibdir)"
+	@echo "Installing script files in $(DESTDIR)$(pkglibdir)"
 	@for i in $(srcdir)/lib/*.tcl ; do \
-	    $(INSTALL_SCRIPT) $$i $(pkglibdir) ; \
+	    $(INSTALL_SCRIPT) $$i $(DESTDIR)$(pkglibdir) ; \
 	done;
-	$(INSTALL_SCRIPT) $(srcdir)/lib/mime.types $(pkglibdir)
+	$(INSTALL_SCRIPT) $(srcdir)/lib/mime.types $(DESTDIR)$(pkglibdir)
 
 install-htdocs:
 	@echo "Creating htdocs tree in $(htdocsdir)"
 	-chmod 755 `@CYGPATH@ $(srcdir)/htdocs/cgi-bin/*.cgi`
-	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/bin/CopyDist` `@CYGPATH@ $(srcdir)/htdocs` `@CYGPATH@ $(htdocsdir)`
-	-$(mkinstalldirs) $(htdocsdir)/links
+	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/bin/CopyDist` `@CYGPATH@ $(srcdir)/htdocs` `@CYGPATH@ $(DESTDIR)$(htdocsdir)`
+	-$(mkinstalldirs) $(DESTDIR)$(htdocsdir)/links
 	@echo "Copying some READMEs into $(htdocsdir)/links"
-	$(INSTALL_DATA) $(srcdir)/README $(htdocsdir)/links/README.txt
-	$(INSTALL_DATA) $(srcdir)/certs/README.ssl $(htdocsdir)/links/README.ssl.txt
-	$(INSTALL_DATA) $(srcdir)/WHATSNEW $(htdocsdir)/links/WHATSNEW.txt
-	$(INSTALL_DATA) $(srcdir)/INSTALL $(htdocsdir)/links/INSTALL.txt
-	@echo "Copying license.terms into $(htdocsdir)"
-	$(INSTALL_DATA) $(srcdir)/license.terms $(htdocsdir)/license.terms
+	$(INSTALL_DATA) $(srcdir)/README $(DESTDIR)$(htdocsdir)/links/README.txt
+	$(INSTALL_DATA) $(srcdir)/certs/README.ssl $(DESTDIR)$(htdocsdir)/links/README.ssl.txt
+	$(INSTALL_DATA) $(srcdir)/WHATSNEW $(DESTDIR)$(htdocsdir)/links/WHATSNEW.txt
+	$(INSTALL_DATA) $(srcdir)/INSTALL $(DESTDIR)$(htdocsdir)/links/INSTALL.txt
+	@echo "Copying license.terms into $(DESTDIR)$(htdocsdir)"
+	$(INSTALL_DATA) $(srcdir)/license.terms $(DESTDIR)$(htdocsdir)/license.terms
 
 install-custom:
-	@echo "Adding custom code in $(customdir)"
-	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/bin/CopyDist` `@CYGPATH@ $(srcdir)/custom` `@CYGPATH@ $(customdir)`
+	@echo "Adding custom code in $(DESTDIR)$(customdir)"
+	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/bin/CopyDist` `@CYGPATH@ $(srcdir)/custom` `@CYGPATH@ $(DESTDIR)$(customdir)`
 
 install-doc: install-htdocs
 	@echo "Installing man page"
-	$(mkinstalldirs) $(mandir)/man1
-	$(INSTALL_DATA) $(srcdir)/doc/httpd.1 $(mandir)/man1/httpd.1
+	$(mkinstalldirs) $(DESTDIR)$(mandir)/man1
+	$(INSTALL_DATA) $(srcdir)/doc/httpd.1 $(DESTDIR)$(mandir)/man1/httpd.1
 	@echo "Installing README"
-	$(INSTALL_DATA) $(srcdir)/README $(SERVER_ROOT)
-	$(INSTALL_DATA) $(srcdir)/bin/README_custom $(SERVER_ROOT)
+	$(INSTALL_DATA) $(srcdir)/README $(DESTDIR)$(SERVER_ROOT)
+	$(INSTALL_DATA) $(srcdir)/bin/README_custom $(DESTDIR)$(SERVER_ROOT)
 
 installdirs:
-	$(mkinstalldirs) $(pkglibdir) $(cryptlibdir) $(prefix)/bin $(htdocsdir) $(customdir)
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir) $(DESTDIR)$(cryptlibdir) $(DESTDIR)$(prefix)/bin $(DESTDIR)$(htdocsdir) $(DESTDIR)$(customdir)
 
 clean:  
 	-test -z "$(BINARIES)" || rm -f $(BINARIES)
@@ -386,10 +386,10 @@ install-lib-binaries: installdirs
 	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
 	  else :; fi; \
 	done
-	$(INSTALL_SCRIPT) crypt_pkgIndex.tcl $(cryptlibdir)/pkgIndex.tcl
+	$(INSTALL_SCRIPT) crypt_pkgIndex.tcl $(DESTDIR)$(cryptlibdir)/pkgIndex.tcl
 	if test "$(BUILD_LIMIT)" = "1" ; then \
-	    $(mkinstalldirs) $(limitlibdir) ; \
-	    $(INSTALL_SCRIPT) limit_pkgIndex.tcl $(limitlibdir)/pkgIndex.tcl;\
+	    $(mkinstalldirs) $(DESTDIR)$(limitlibdir) ; \
+	    $(INSTALL_SCRIPT) limit_pkgIndex.tcl $(DESTDIR)$(limitlibdir)/pkgIndex.tcl;\
 	fi
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status

@@ -1,3 +1,7 @@
+2002-09-25  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* Makefile.in: better DESTDIR/libdir support (steffen)
+
 2002-08-30  Brent Welch <welch@panasas.com>
         * Merged the tclhttpd-3-4-rel branch into the trunk.
           tclhttpd-3-4-rel-1 represents the 3.4.1 release and
