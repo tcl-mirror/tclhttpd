@@ -4,15 +4,15 @@ Brent is now at Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 2.2.1
-Last update: Wed Jul  7 13:05:56 PDT 1999
+Version: 2.3.0
+Last update: Fri Oct  1 23:00:08 PDT 1999
 
 It requires Tcl7.5 and Tk4.1, or higher.
-It works with the latest 8.0 release.
-I'd avoid 8.0b1 because fcopy doesn't handle errors right.
-Tcl 8.0p2 or later (e.g., 8.0.4) is the best release to use with TclHttpd.
+It works with the latest 8.2 release.
+The following releases are recommended:
+Tcl 7.6p2, Tcl 8.0.5, Tcl 8.2.1
 
-This runs under either tclsh or wish.
+The Web server runs under either tclsh or wish.
 With wish you get a simple GUI that shows some counters.
 
 For a quick test that runs a server on port 8015, do
@@ -28,6 +28,8 @@ Macintosh:
 For a complete set of command line options, do
 httpd.tcl -help
 This lets you set basic parameters like port number and server name.
+
+Version 2.3 changes the way post data is  handled.
 
 Version 2.1.6 introduces a configuration file, tclhttpd.rc
 You can edit this to tune the set of modules used by the server,

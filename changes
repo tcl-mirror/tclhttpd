@@ -1,5 +1,10 @@
-This file was started after the 2.0.1 release.
+TclHttpd Change Log
+
+Information about the latest release is appended to the end
+
 ------------
+This file was started after the 2.0.1 release.
+
 Fixed handling of large amounts of post data.
 
 Folded in 1.1 and keep-alive support, thanks to Steve Uhler.
@@ -395,4 +400,56 @@ url.tcl		Cleanup of Url_PathCheck
 
 ----------------- released 2.2.1 July 7, 1999 ------------------
 
+bin/httpd.tcl	Added load/package require for TclX as an alternate way
+		to get the setuid function.  It looks for either solution now.
 
+bin/imagehttpd.tcl	An updated version of minihttpd.tcl that adds
+		limited keep-alive support.
+
+bin/torture.tcl	Made this work on Windows.
+
+admin.tcl	Have noisy error message if redirect file is bad when 
+		starting the server.
+
+auth.tcl	Guard against missing group definition when parsing
+		password files
+
+cgi.tcl		Fixed initialization of Cgi(tclsh)
+		Fixed definition of env(PATH_TRANSLATED)
+		Updated to use the new Httpd_GetPostData interface
+
+direct.tcl	Added cookie support.  Call Doc_SetCookie from an application
+		direct URL in order to set a return cookie.
+
+dirlist.tcl	Split DirList into three procedures: DirList, which does
+		a complete page, DirListForm, which adds the listing
+		order and pattern form elements, and DirListInner, which
+		displays the file list.
+
+doc.tcl		Doc_Cookie now returns a list because there may be more
+		than one occurence of a named cookie.
+		Added Doc_Redirect and Doc_RedirectSelf to trigger
+		a page redirect.
+
+httpd.tcl	Added Httpd_GetPostData to read the POST payload data.
+		Httpd_GetPostChannel returns the socket and tells you
+		how much POST data is available to read.
+
+url.tcl		Disallow all of /, \, and :, from URLs on Windows
+		to avoid drive-letter attacks.
+		Added Url_PrefixRemove
+		Fixed Url_PathCheck to not ignore trailing empty directories.
+		This was letting you skip the .htaccess file when reading
+		just the directory contents.
+		Added Url_PostHook backdoor between Httpd_GetPostData and
+		Url_DecodeQuery.  If you call Url_DecodeQuery and there
+		is any unread post data, it is automatically read and
+		bundled in with the data that, for example, could have come
+		from the query part of the URL.  Call Url_DecodeQueryOnly
+		if you don't want it to look aside at the POST data.
+
+libtml/htmlutils.tcl	An assortment of procedures useful from
+		within .tml page templates.  Supercedes the old
+		libtml/template.tcl file.
+
+----------------- released 2.3.0 October 3, 1999 ------------------
