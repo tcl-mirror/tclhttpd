@@ -421,6 +421,7 @@ proc HttpdRead {sock} {
 		    append data(mime,$key) ,$value
 		} else {
 		    set data(mime,$key) $value
+		    lappend data(mimeorder) $key
 		}
 		set data(key) $key
 	    } elseif {[regexp {^[ 	]+(.*)}  $line dummy value]} {
@@ -1274,3 +1275,31 @@ proc HttpdReflect {in out} {
     return 0
 }
 
+# Httpd_DumpHeaders --
+#
+#	Dump out the protocol headers so they can be saved for later.
+#
+# Arguments:
+#	sock	Client connection
+#
+# Results:
+#	A list structure that alternates between names and values.
+#	The names are header names without the trailing colon and
+#	mapped to lower case (e.g., content-type).  Two pseudo-headers
+#	added: One that contains the original request URL; its name is "url"
+#	Another that contains the request protocol; its name is "method"
+#	There are no duplications in the header keys.  If any headers
+#	were repeated, their values were combined by separating them
+#	with commas.
+
+proc Httpd_DumpHeaders {sock} {
+    upvar #0 Httpd$sock data
+
+    set result [list url $data(uri) method $data(proto)]
+    if {[info exist data(mimeorder)]} {
+	foreach key $data(mimeorder) {
+	    lappend result $key $data(mime,$key)
+	}
+    }
+    return $result
+}
