@@ -1,3 +1,15 @@
+2000-08-28  Brent Welch <welch@scriptics.com>
+	* lib/url.tcl:
+	Added Url_PrefixExists to see if a prefix has been added with
+	Url_PrefixInstall (e.g., Doc_AddRoot).
+	* htdocs/index.tml:
+	Use Url_PrefixExists to check for TclPro documentation.
+	Use "file exists" to check that /java pages are installed.
+	* bin/httpdthread.tcl:
+	Added Doc_AddRoot to splice in TclPro docs, if they exist.
+	* lib/version.tcl:
+	Nudged up the 3.1.0 date stamp
+
 2000-08-26  Brent Welch <welch@scriptics.com>
 	* doc/httpd.1:
 	Added this man page for TclPro 1.4
