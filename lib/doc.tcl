@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.50 2004/03/17 22:26:52 coldstore Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.51 2004/03/22 05:33:28 coldstore Exp $
 
 package provide httpd::doc 1.1
 
@@ -410,6 +410,73 @@ proc Doc_Handle {prefix path suffix sock} {
 	    Doc_NotFound $sock
 	}
     }
+}
+
+# Doc_GetPath --
+#	
+#	Return a list of unique directories from domain root to a given path
+#	Adjusts for Document roots and user directories
+#
+# Arguments:
+#	sock		The client connection
+#	file		The file endpoint of the path
+# Results:
+#	A list of directories from root to directory of $data(path)
+#
+# Side Effects:
+#	None.
+
+proc Doc_GetPath {sock {file ""}} {
+    global Doc
+    upvar #0 Httpd$sock data
+
+    if {$file == ""} {
+	set file $data(path)
+    }
+
+    # Start at the Doc_AddRoot point
+    if {[info exist Doc(root,$data(prefix))]} {
+	set root $Doc(root,$data(prefix))
+
+	# always start in the rootdir
+	set dirs $Doc(root)
+    } else {
+	set root $Doc(root,/)
+	set dirs {}
+    }
+
+    set dirsplit [file split [file dirname $file]]
+    if {[string match ${root}* $file]} {
+
+	# Normal case of pathname under domain prefix
+
+	set path $root
+	set extra [lrange $dirsplit [llength [file split $root]] end]
+
+    } elseif {[set hindex [lsearch -exact $dirsplit $Doc(homedir)]] >= 0} {
+	
+	# "public_html" is in the path, so we have been warped
+	# to a user's URL tree.
+
+	set path [eval file join [lrange $dirsplit 0 $hindex]]
+	incr hindex
+	set extra [lrange $dirsplit $hindex end]
+    } else {
+	# Don't know where we are - just use the current directory
+
+	set path [file dirname $file] 
+	set extra {}
+    }
+
+    foreach dir [concat [list {}] $extra] {
+	set path [file join $path $dir]
+	# Don't add duplicates to the list.
+	if {[lsearch $dirs $path] == -1} {
+	    lappend dirs $path
+	}
+    }
+
+    return $dirs
 }
 
 # Compat routines with 3.4 routines
