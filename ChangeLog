@@ -10,7 +10,7 @@
         * Applied patches for virtual hosting fixes from Don Porter
           that allow virtual hosts to share an interpreter, which is
           useful if they are just name aliases for each other.
-        * Applied patches from Dave Weldon that fix references to
+        * Applied patches from Dave Welton that fix references to
           scriptics.com in the online docs.
         * Fixes to DIST and Makefile.boot to get the bundled distribution
           to start working.
