@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.75 2003/08/29 22:04:50 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.76 2003/09/27 02:20:26 coldstore Exp $
 
 package provide httpd 1.6
 
@@ -1455,7 +1455,7 @@ proc Httpd_Error {sock code {detail ""}} {
     if {$code == 500} {
 	append message "<h2>Tcl Call Trace</h2>"
 	for {set l [expr [info level]-1]} {$l > 0} {incr l -1} {
-		append message "$l: [info level $l]<br>"
+	    append message "$l: [protect_text [info level $l]]<br>"
 	}
     }
     Log $sock Error $code $data(url) $detail
