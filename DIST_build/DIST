@@ -126,10 +126,10 @@ echo "*** Creating ${DISTDIR}/tclhttpd${HTTPD_VERSION}.tar.gz ***"
 echo "*** Creating ${DISTDIR}/tclhttpd${WIN_VERSION}.zip ***"
 (cd ${SUPER_DIR} ; zip -9 -r -o  ${DISTDIR}/tclhttpd${WIN_VERSION}.zip  tclhttpd${HTTPD_VERSION})
 
-#echo "*** Creating ${DISTDIR}/thread${THREAD_VERSION}.tar.gz ***"
-#(cd ${SUPER_DIR} ;tar cf - ./thread${THREAD_VERSION} | gzip > ${DISTDIR}/thread${THREAD_VERSION}.tar.gz)
-#echo "*** Creating ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip ***"
-#(cd ${SUPER_DIR} ;zip -9 -r -o  ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip thread${THREAD_VERSION})
+#echo "*** Creating ${DISTDIR}/thread-${THREAD_VERSION}.tar.gz ***"
+#(cd ${SUPER_DIR} ;tar cf - ./thread-${THREAD_VERSION} | gzip > ${DISTDIR}/thread-${THREAD_VERSION}.tar.gz)
+#echo "*** Creating ${DISTDIR}/thread-${THREAD_WIN_VERSION}.zip ***"
+#(cd ${SUPER_DIR} ;zip -9 -r -o  ${DISTDIR}/thread-${THREAD_WIN_VERSION}.zip thread-${THREAD_VERSION})
 
 # Bundled packages
 
