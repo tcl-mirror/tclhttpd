@@ -276,9 +276,13 @@ proc File_Reset {} {
 # File_List - report which files are open.
 
 proc File_List {} {
+    global OpenFiles
     for {set i 1} {$i <= 1025} {incr i} {
 	if {! [catch {fconfigure file$i} conf]} {
 	    append result "file$i $conf\n"
+	    if {[info exist OpenFiles(file$i)]} {
+		append result "file$i: $OpenFiles(file$i)\n"
+	    }
 	}
 	if {! [catch {fconfigure sock$i} conf]} {
 	    array set c {-peername {} -sockname {}}
