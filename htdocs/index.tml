@@ -58,7 +58,7 @@ Frankly, these reference pages are somewhat out-of-date.
 The book chapter is more coherent, but may lack some details presented
 in the reference pages.  The source code is the truth!
 <p>
-<a href=man/>Low level tclhttpd manual pages</a>.
+<a href=man/>Low level tclhttpd manual pages</a> contains some detailed server documentation.
 <p>
 Please <a href=register.html>Register Your Software</a> so
 we can see how widely used the server is.
