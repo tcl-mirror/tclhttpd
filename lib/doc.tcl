@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.52 2004/05/19 04:36:37 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.53 2004/06/12 04:47:54 coldstore Exp $
 
 package provide httpd::doc 1.1
 
@@ -324,25 +324,27 @@ proc DocDomain {prefix directory sock suffix} {
     # Check for personal home pages
 
     if {[regexp ^~ $pathlist] && [info exists Doc(homedir)]} {
+
 	set user [lindex $pathlist 0]
 	if {[catch {glob $user} homedir]} {
 	    Doc_NotFound $sock
 	    return	;# No such user
 	}
+
 	set directory [file join $homedir $Doc(homedir)]
 	if {![file isdirectory $directory]} {
 	    Doc_NotFound $sock
 	    return	;# No User's Public Directory
 	}
+
 	if {![file readable $directory]} {
 	    Doc_NotFound $sock
 	    return	;# No access to User's Public Directory
 	}
+
 	set pathlist [lrange $pathlist 1 end]
 	set suffix [join $pathlist /]
     }
-
-    # Handle existing files
 
     # The file join here is subject to attacks that create absolute
     # pathnames outside the URL tree.  We trim left the / and ~
@@ -351,19 +353,62 @@ proc DocDomain {prefix directory sock suffix} {
     set path [file join $directory [string trimleft $suffix /~]]
     set path [DocPathNormalize $path]
     set data(path) $path	;# record this path for not found handling
+    set data(directory) $directory
 
-    if {[file exists $path]} {
-	CountName $data(url) hit
-	Doc_Handle $prefix $path $suffix $sock
-	return
-    }
+    # Handle existing files
+    return [Doc_Handle $prefix $path $suffix $sock]
+}
 
-    # Try to find an alternate.
+# Doc_Return --
+#
+# Return a document from a URL.  Dispatch to the mime type handler, if defined.
+#
+# Arguments:
+#	prefix	The URL prefix of the domain.
+#	path	The file system pathname of the file.
+#	suffix	The URL suffix.
+#	sock	The socket connection.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Dispatch to the correct document handler.
 
-    if {![Fallback_Try $prefix $path $suffix $sock]} {
-	# Couldn't find anything.
-	# check for cgi script in the middle of the path
-	Cgi_Domain $prefix $directory $sock $suffix
+proc Doc_Return {prefix path suffix sock} {
+    upvar #0 Httpd$sock data
+
+    # precise match - return file or dispatch to mime type handler
+    CountName $data(url) hit
+
+    switch [file type $path] {
+	directory {
+	    if {[string length $data(url)] && ![regexp /$ $data(url)]} {
+		# Insist on the trailing slash
+		Redirect_Dir $sock
+		return
+	    }
+
+	    return [DirList_Directory $prefix $path $suffix $sock]
+	}
+
+	default {
+	    # Look for a Tcl procedure whose
+	    # name matches the MIME Content-Type
+	    if {[info exists data(contentType)]} {
+		set ctype $data(contentType) ;# set by a template
+	    } else {
+		set ctype [Mtype $path]
+	    }
+	    
+	    set cmd Doc_$ctype
+	    if {[iscommand $cmd]} {
+		# call the Mime type handler
+		return [$cmd $path $suffix $sock]
+	    } else {
+		return [Httpd_ReturnFile $sock $ctype $path]
+	    }
+	}
     }
 }
 
@@ -385,32 +430,36 @@ proc DocDomain {prefix directory sock suffix} {
 
 proc Doc_Handle {prefix path suffix sock} {
     upvar #0 Httpd$sock data
-    if {[file isdirectory $path]} {
-	if {[string length $data(url)] && ![regexp /$ $data(url)]} {
 
-	    # Insist on the trailing slash
+    # first we check if there's a template file to run, and run it
+    # if there's a precise file match, we return it
+    # otherwise we generate alternatives from the client's Accept
+    # otherwise we leave it Cgi to try to satisfy the request
 
-	    Httpd_RedirectDir $sock
-	    return
-	}
-	DirList_Directory $prefix $path $suffix $sock
-    } elseif {[file readable $path]} {
-	
-	# Look for Tcl procedures whos name match the MIME Content-Type
-
-	set cmd Doc_[Mtype $path]
-	if {![iscommand $cmd]} {
-	    Httpd_ReturnFile $sock [Mtype $path] $path
-	} else {
-	    $cmd $path $suffix $sock
-	}
-    } else {
-	# Either not found, or we can find an alternate (e.g. a template).
-
-	if {![Fallback_Try $prefix $path $suffix $sock]} {
-	    Doc_NotFound $sock
-	}
+    # Look for a fresh template which generates the desired path
+    if {[Template_Try $sock $path $prefix $suffix]} {
+	# template has handled the request
+	return 1
     }
+
+    if {[file exists $path] && [file readable $path]} {
+	# we have a file precisely matching the request
+	Doc_Return $prefix $path $suffix $sock
+	return 1
+    }
+
+    if {[Fallback_Try $prefix $path $suffix $sock]} {
+	# we have found an Accept-able alternative
+	# Fallback_Try generates a redirect
+	return 1
+    }
+
+    # Couldn't find any matches
+    # check for cgi script in the middle of the path
+    # will generate Doc_Notfound if necessary
+    Cgi_Domain $prefix $data(directory) $sock $suffix
+
+    return 1
 }
 
 # Doc_GetPath --
