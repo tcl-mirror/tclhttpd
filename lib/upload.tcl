@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.2 2001/01/30 07:09:35 welch Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.3 2001/02/01 07:15:00 welch Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -72,6 +72,13 @@ proc UploadDomain {dir cmd maxfiles maxbytes totalbytes sock suffix} {
     upvar #0 Httpd$sock data
     upvar #0 Upload$sock upload
 
+    # Testing
+    if {[string match *test* $suffix]} {
+	set fd [open $dir/test w]
+	puts -nonewline $fd [read $sock $data(mime,content-length)]
+	close $fd
+	Httpd_ReturnData $sock text/html $dir/test
+    }
     # Extract multi-part boundary from the headers
 
     if {![info exist data(mime,content-type)] || $data(proto) == "GET"} {
@@ -108,14 +115,16 @@ proc UploadDomain {dir cmd maxfiles maxbytes totalbytes sock suffix} {
     set upload(formName) {}
     set upload(formNames) {}
 
-    fconfigure $sock -trans binary
+    # Accept cr-lf endings in the headers
+    fconfigure $sock -trans auto
     fileevent $sock readable [list UploadFindBoundary $sock]
 }
 
 # Look for the first boundary - should be the first line read,
 # but done in a fileevent to avoid blocking.
 
-proc UploadFindBoundary $sock {
+proc UploadFindBoundary {sock} {
+    upvar #0 Upload$sock upload
     if {[eof $sock]} {
 	UploadDone $sock
 	return
@@ -133,7 +142,7 @@ Stderr "UploadFindBoundary Unexpected line $line"
 #	This is a fileeventhandler used to read the header
 #	of each part in a multipart POST payload.
 
-proc UploadReadHeader $sock {
+proc UploadReadHeader {sock} {
     upvar #0 Upload$sock upload
 
     if {[eof $sock]} {
@@ -146,7 +155,6 @@ proc UploadReadHeader $sock {
     # upload directory.  We read in binary mode to preserve whatever
     # line-ending mode is in the uploaded file.
 
-
     while {[gets $sock line] >= 0} {
 	if {[string length $line] == 0} {
 
@@ -156,14 +164,14 @@ proc UploadReadHeader $sock {
 
 	    lappend upload(formNames) $upload(formName)
 	    set upload(hdrs,$upload(formName)) $upload(headers)
-	    #set upload(formName) ""
-	    #set upload(headers) {}
 
 	    # Now switch to reading the content of that part.
 
+	    # ? Should e use binary mode that will leave the \r in the files
+	    #fconfigure $sock -trans binary
+
 	    if {[info exist upload(fd)]} {
-		fileevent $sock readable [list UploadReadFile $sock $upload(fd)]
-		unset upload(fd)
+		fileevent $sock readable [list UploadReadFile $sock]
 	    } else {
 		fileevent $sock readable [list UploadReadPart $sock]
 	    }
@@ -186,8 +194,14 @@ proc UploadReadHeader $sock {
 			}
 			"filename" {
 			    # Open the upload file
+			    # I'm a bit suprised that "file tail"
+			    # when run on a Unix box will not deal
+			    # with c:\a\b\c.txt correctly...
+			    regsub -all {\\} $v / v
 			    set tail [file tail $v]
-			    set upload(fd) [open [file join $upload(dir) $tail] w]
+			    set path [file join $upload(dir) $tail]
+			    set upload(fd) [open $path w]
+			    set upload(file,$upload(formName)) $path
 			}
 		    }
 		}
@@ -210,8 +224,14 @@ proc UploadReadPart {sock} {
 	return
     }
     if {[gets $sock line] > 0} {
-	if {[regexp ^--$upload(boundary) $line]} {
-	    fileevent $sock readable [list UploadReadHeader $sock]
+	if {[regexp ^--$upload(boundary)(--)? $line x end]} {
+	    if {$end == "--"} {
+		UploadDone $sock
+	    } else {
+		set upload(formName) ""
+		set upload(headers) ""
+		fileevent $sock readable [list UploadReadHeader $sock]
+	    }
 	} else {
 	    append upload(data,$upload(formName)) $line
 	}
@@ -220,26 +240,61 @@ proc UploadReadPart {sock} {
 
 # Read a content part and copy it to a file.
 
-proc UploadReadFile {sock fd} {
+proc UploadReadFile {sock} {
+    upvar #0 Upload$sock upload
     if {[eof $sock]} {
 	UploadDone $sock
 	return
     }
     while {[gets $sock line] >= 0} {
-	if {[regexp ^--$upload(boundary) $line]} {
-	    close $fd
-	    fileevent $sock readable [list UploadReadHeader $sock]
+	if {[regexp ^--$upload(boundary)(--)? $line x end]} {
+	    close $upload(fd)
+	    unset upload(fd)
+	    if {$end == "--"} {
+		UploadDone $sock
+	    } else {
+		set upload(formName) ""
+		set upload(headers) ""
+		fileevent $sock readable [list UploadReadHeader $sock]
+	    }
+	    return
 	} else {
-	    puts $fd $line
+	    puts $upload(fd) $line
 	}
     }
 }
 
 proc UploadDone {sock} {
     upvar #0 Upload$sock upload
-    Httpd_ReturnData $sock text/html [html::tableFromArray upload]
+    catch {
+	# The first argument is a list of file names that were uploaded
+	# The second argument is a name-value list of the other data
+	set flist {}
+	set vlist {}
+	foreach x $upload(formNames) {
+	    if {[info exist upload(file,$x)]} {
+		lappend flist $x $upload(file,$x)
+	    } else {
+		lappend vlist $x $upload(data,$x)
+	    }
+	}
+	eval $upload(cmd) [list $flist $vlist]
+    } result
+    Httpd_ReturnData $sock text/html $result
 }
 
+# UploadTest --
+#	Sample callback procedure for an upload domain
+
+proc UploadTest {flist vlist} {
+    set html "<title>Upload Test</title>\n"
+    set html "<h1>Upload Test</h1>\n"
+    append html "<h2>File List</h2>\n"
+    append html [html::tableFromList $flist]\n
+    append html "<h2>Data List</h2>\n"
+    append html [html::tableFromList $vlist]\n
+    return $html
+}
 if {0} {
     # Set up the environment a-la CGI.
 
