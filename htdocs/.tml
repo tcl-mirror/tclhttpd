@@ -41,3 +41,5 @@ html::init {
     thinrule.bgcolor	#cc3300
     font.face		arial
 }
+
+lappend tmllist [info script]

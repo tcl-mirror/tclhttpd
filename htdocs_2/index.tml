@@ -7,5 +7,7 @@ platform for web application development."]
 [clock format [clock seconds] -format "%B %d, %Y %H:%M:%S"]
 
 This page was added with a Doc_AddRoot command.
+<p>
+[AddrootProc]
 
 [mypage::footer]
