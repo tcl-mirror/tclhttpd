@@ -1,6 +1,6 @@
 # debug.tcl --
 #
-#	Application-direct URLs to help debugg the server.
+#	Application-direct URLs to help debug the server.
 # 	Tcl procedures of the form Debug/hello implement URLS
 #	of the form /debug/hello
 #
@@ -8,13 +8,51 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.14 2002/08/04 06:03:35 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.14.2.1 2002/08/31 06:36:11 welch Exp $
 
 package provide httpd::debug 1.0
 
-proc Debug_Url {dir} {
-    Direct_Url $dir Debug
+namespace eval httpd::debug {
+	
+	variable enabled
+	set enabled 0
+
 }
+
+
+proc Debug_Url {dir} {
+	variable enabled
+	
+	if { $enabled } {
+    	Direct_Url $dir Debug
+	}
+}
+
+# Debug/enable --
+#
+#	Enable or disable debugging in tclhttpd.
+#
+# Arguments:
+#       boolean  0: disable debugging 
+#                1: enable debugging	
+#
+# Results:
+#	Returns HTML code that displays result
+#       Disabling removes the /debug URL.
+#       You have to restart tclhttpd for the
+#       next debug session. 
+
+proc Debug/enable { boolean } {
+	variable enabled
+	
+	set enabled $boolean
+	if { ! $enabled } {
+		Direct_UrlRemove Debug
+		set html "<title>Debugging disabled</title>\n
+				<h1> Debugging disabled</h1>"
+		return $html
+	}
+}  
 
 # Debug/source --
 #
