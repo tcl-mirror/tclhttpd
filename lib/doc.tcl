@@ -653,7 +653,9 @@ proc Doc_Dynamic {} {
 
 # Doc_Cookie
 #
-#	Return a cookie value, if present, else ""
+#	Return a *list* of cookie values, if present, else ""
+#	It is possible for multiple cookies with the same key
+#	to be present, so we return a list.
 #
 # Arguments:
 #	cookie	The name of the cookie (the key)
@@ -661,15 +663,16 @@ proc Doc_Dynamic {} {
 
 proc Doc_Cookie {cookie} {
     global env
+    set result ""
     if {[info exist env(HTTP_COOKIE)]} {
 	foreach pair [split $env(HTTP_COOKIE) \;] {
 	    lassign [split [string trim $pair] =] key value
 	    if {[string compare $cookie $key] == 0} {
-		return $value
+		lappend result $value
 	    }
 	}
     }
-    return ""
+    return $result
 }
 
 # Doc_SetCookie
