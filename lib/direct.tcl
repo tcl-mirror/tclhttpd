@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.15 2002/08/15 13:13:30 coldstore Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.16 2002/08/31 07:30:43 welch Exp $
 
 package provide httpd::direct 1.1
 
@@ -34,6 +34,22 @@ proc Direct_Url {virtual {prefix {}} {inThread 0}} {
     Url_PrefixInstall $virtual [list DirectDomain $prefix] $inThread
 }
 
+# Direct_UrlRemove
+#       Remove a subtree of the URL hierarchy that is implemented by
+#       direct Tcl calls.
+#
+# Arguments
+#       prefix  The Tcl command prefix used when constructing calls,
+#
+# Side Effects
+#
+       
+proc Direct_UrlRemove {prefix} {
+    global Direct
+    catch { Url_PrefixRemove $Direct($prefix) }
+    catch { unset Direct($prefix) }
+}
+        
 # Main handler for Direct domains (i.e. tcl commands)
 # prefix: the Tcl command prefix of the domain registered with Direct_Url 
 # sock: the socket back to the client

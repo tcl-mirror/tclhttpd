@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.7 2002/08/19 05:14:39 welch Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.8 2002/08/31 07:30:44 welch Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -307,7 +307,7 @@ proc UploadReadFile {sock} {
 	incr buffersize [string bytelength $line]
 	if { $buffersize > $maxbuffersize } {
 	    set buffersize 0
-	    fileevent $sock readable [list CsvUploadReadFile $sock]
+	    fileevent $sock readable [list UploadReadFile $sock]
 	    update idletasks
 	    break
 	}

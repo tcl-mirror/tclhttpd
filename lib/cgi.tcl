@@ -5,9 +5,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cgi.tcl,v 1.26 2002/08/15 13:13:29 coldstore Exp $
+# RCS: @(#) $Id: cgi.tcl,v 1.27 2002/08/31 07:30:43 welch Exp $
 
-package provide httpd::cgi 1.0
+package provide httpd::cgi 1.1
 
 # Cgi parameters
 # timeout	Seconds before pipe to CGI program is closed
@@ -256,7 +256,13 @@ proc CgiSpawn {sock script} {
     set data(cancel) [after $Cgi(timeout) CgiCancel $fd $sock]
 
     if {$data(proto) == "POST"} {
-	fconfigure $fd -translation binary
+
+        # Read the pipe in auto mode to properly detect the end of
+        # headers in Unix and Windows.  Pump the POST data in
+        # binary mode.
+
+	fconfigure $fd -translation {auto binary}
+
 	if {$data(count) == 0} {
 
 	    # Either there was no POST data, or we are inside a domain

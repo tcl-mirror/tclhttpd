@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.42 2002/08/31 07:19:10 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.43 2002/08/31 07:30:43 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -63,7 +63,7 @@ set home [file join [pwd] $home]
 # 2. Standalone install - look for $home/../lib/tclhttpd $home/tcllib
 # 3. Tcl package install - look for $tcl_library/../tclhttpd
 
-set v 3.4
+set v 3.4.1
 
 if {[file exist [file join $home ../lib/httpd.tcl]]} {
     # Cases 1 and 2
@@ -85,8 +85,9 @@ if {![info exist Config(lib)]} {
 set auto_path [concat [list $Config(lib)] $auto_path]
 
 # Search around for the Standard Tcl Library
+# We used to require "tcllib", but that now causes complaints
 
-if {![catch {package require tcllib}]} {
+if {![catch {package require counter}]} {
     # Already available in environment
 } elseif {[file exist [file join $home ../tcllib]]} {
     lappend auto_path [file join $home ../tcllib]
