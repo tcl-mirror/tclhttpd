@@ -1,3 +1,11 @@
+2004-2-25 Colin McCormack <colin@field.medicine.adelaide.edu.au>
+       * lib/template.tcl
+       * lib/subst.tcl
+	templates can be directories, their value is from dir.tml
+	index.html now depends on the whole containing directory
+        * lib/*
+	removed some incorrect copyright lines with my name
+
 2004-2-09 Colin McCormack <colin@field.medicine.adelaide.edu.au>
        * lib/httpd.tcl
        * lib/auth.tcl
