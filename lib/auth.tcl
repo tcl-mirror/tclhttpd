@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.17 2004/02/08 22:14:22 coldstore Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.18 2004/03/01 07:02:38 welch Exp $
 
 package provide httpd::auth 2.0
 package require base64
@@ -330,7 +330,10 @@ proc AuthUserCheck  {sock file users user } {
 
 proc AuthGroupCheck {sock file groups user} {
     upvar #0 auth$file info
-    set mtime [file mtime $info(htaccessp,groupfile)]
+    if {[catch {file mtime $info(htaccessp,groupfile)} mtime]} {
+        # File doesn't exist
+        return 0
+    }
 
     # Only parse the group file if it has changed
 
@@ -365,12 +368,15 @@ proc AuthGroupCheck {sock file groups user} {
 
 proc AuthGetPass {sock file user} {
     upvar #0 auth$file info
-    set mtime [file mtime $info(htaccessp,userfile)]
+    if {[catch {file mtime $info(htaccessp,userfile)} mtime]} {
+        # File doesn't exist
+        return *
+    }
     if {![info exists info(user,mtime)] || ($mtime > $info(user,mtime))} {
 	foreach i [array names info "user*"] {
 	    unset info($i)
 	}
-	if {[catch {open $info(htaccessp,userfile)} in err]} {
+	if {[catch {open $info(htaccessp,userfile)} in]} {
 	    return *
 	}
 	while {[gets $in line] >= 0} {

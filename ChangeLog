@@ -1,3 +1,14 @@
+2004-2-29 Brent Welch <welch@panasas.com>
+        * bin/httpd.tcl: removed compatibility warning message
+        * lib/auth.tcl: Fixed to tolerate missing group and user files
+        * htdocs/debug/.tclaccess: added this to provide easier to
+        control access to the /debug URL.
+        * custom/dodirs.tcl: fixed this so it doesn't do "cd" and
+        only looks through subdirectories that contain startup.tcl
+        For example, this skips the CVS directory
+        * contrib/mkweb_05.tcl: metakit admin interface by Stefan Vogel
+        * htdocs/cgi-bin/wiki.cgi: sample CGI for wikit
+ 
 2004-2-25 Colin McCormack <colin@field.medicine.adelaide.edu.au>
        * lib/template.tcl
        * lib/subst.tcl

@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.48 2004/01/14 06:29:35 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.49 2004/03/01 07:02:37 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -205,7 +205,7 @@ if {$Config(compat)} {
     if {[catch {package require httpd::compat}]} {
 	puts stderr "tclhttpd$Config(compat) compatibility mode failed."
     } else {
-	puts stderr "tclhttpd$Config(compat) compatibility mode enabled."
+	# Messages here just confuse people
     }
 }
 

@@ -1,10 +1,8 @@
 # code to start tclhttpd modules contained in subdirs of custom/
 
-set oldpwd [pwd]
-
-foreach dir [glob -nocomplain [file join [file normalize $Config(library)] *]] {
-    if {[file isdirectory $dir]} {
-	cd $dir
+set here [file dirname [info script]]
+foreach dir [glob -nocomplain [file join [file normalize $here] *]] {
+    if {[file isdirectory $dir] && [file exists [file join $dir startup.tcl]]} {
 	if {$Config(debug)} {
 	    Stderr "Loading code from module $dir"
 	}
@@ -15,5 +13,3 @@ foreach dir [glob -nocomplain [file join [file normalize $Config(library)] *]] {
 	}
     }
 }
-
-cd $oldpwd
