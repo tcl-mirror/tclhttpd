@@ -4,13 +4,17 @@ Brent is now at Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 2.3.1
-Last update: Fri Oct  1 23:00:08 PDT 1999
+Version: 2.3.2
+Last update: Fri Oct 15 10:29:20 PDT 1999
 
 It requires Tcl7.5 and Tk4.1, or higher.
 It works with the latest 8.2 release.
 The following releases are recommended:
 Tcl 7.6p2, Tcl 8.0.5, Tcl 8.2.1
+
+[The "opt" package in the main bin/httpd.tcl script is not
+supported in Tcl 7.5 or 7.6.  It is only used for parsing the command
+line options - just remove that code from bin/httpd.tcl if necessary.]
 
 The Web server runs under either tclsh or wish.
 With wish you get a simple GUI that shows some counters.
