@@ -62,6 +62,8 @@ AC_SUBST(WIN_LIMIT_VERSION)
 AC_SUBST(TCL_VERSION)
 AC_SUBST(TCLLIB_VERSION)
 
+AC_SUBST(THREAD_VERSION)
+
 #--------------------------------------------------------------------
 # We put this here so that you can compile with -DVERSION="1.2" to
 # encode the package version directly into the source files.
