@@ -1,3 +1,9 @@
+2000-10-09  Brent Welch <welch@ajubasolutions.com>
+    
+	* lib/direct.tcl: Nuked Count call with incorrect prefix.  Domain hits
+	are already being counted by the Url module.
+	* lib/httpd.tcl: Changed order so Log comes before HttpdDoCallback.
+
 2000-10-04  Brent Welch <welch@ajubasolutions.com>
     
 	* lib/direct.tcl: Exported Direct_MarshallArguments that computes
