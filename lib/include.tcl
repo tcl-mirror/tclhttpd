@@ -10,9 +10,9 @@
 # Look for comments of the form:
 #   <!--#keyword args  -->
 # Where "keyword" is one of:
-#  ECHO FLASTMOD FSIZE INCLUDE
+#  ECHO FLASTMOD FSIZE INCLUDE EXEC
 # We do not implement
-#  CONFIG and EXEC
+#  CONFIG
 # The input string is passed on the command line to Httpd_include,
 # and the result is returned.
 # Note: the included file is treated as text, which possibly has
@@ -33,13 +33,14 @@ array set Include {
 
 proc Doc_application/x-server-include {path suffix sock} {
     Count includes
-    if [catch {open $path} in] {
+    if {[catch {open $path} in]} {
 	Httpd_Error $sock 404 $in
     } else {
+	global env
 	Cgi_SetEnv $sock $path 
 	set html [Include_Html $sock $path [read $in]]
 	close $in
-	Httpd_ReturnCacheableData $sock text/html $html [file mtime $path]
+	Httpd_ReturnData $sock text/html $html
     }
 }
 
@@ -62,9 +63,9 @@ proc Include_Html {sock path html {depth 0}} {
 proc IncludeInner {sock path command params depth} {
     set command [string tolower $command]
     if {![iscommand include_$command]} {
-	return "<!-- Server not configured to processes \"$command\" includes -->"
+	return "<!-- Server not configured to processes \"$command\" includes -->\n"
     } elseif {[catch {include_$command $sock $path $params $depth} result]} {
-    	return "<!-- Server error in include command $command: $result -->"
+    	return "<!-- Server error in include command $command: $result -->\n"
     } else {
     	return $result
     }
@@ -80,7 +81,7 @@ proc IncludeFile {sock op path params} {
 	set key file
 	set npath [Doc_File $sock $path $orig]
     } else {
-	error "<!-- Invalid $op parameter list: $params. -->"
+	error "<!-- Invalid $op parameter list: $params. -->\n"
     }
     return [list $key $npath $orig]
 }
@@ -96,9 +97,9 @@ proc IncludeFile {sock op path params} {
 proc include_include {sock path params depth} {
     global Include
     if {$depth > $Include(maxdepth)} {
-    	return "<!-- Include recursion depth exceeded ($depth) -->"
+    	return "<!-- Include recursion depth exceeded ($depth) -->\n"
     }
-    if [catch {IncludeFile $sock include $path $params} info] {
+    if {[catch {IncludeFile $sock include $path $params} info]} {
 	return $info
     }
     set key [lindex $info 0]
@@ -108,7 +109,7 @@ proc include_include {sock path params depth} {
     # now open the file and re-do substitutions.
 
     if {[catch {open $npath r} fd]} {
-	return "<!-- invalid include $key path $orig: $fd -->"
+	return "<!-- invalid include $key path $orig: $fd -->\n"
     }
     set data [Include_Html $sock $npath [read $fd] $depth]
     close $fd
@@ -119,13 +120,13 @@ proc include_echo {sock path params args} {
     global env
     set var ""
     if {[Html_ExtractParam $params var]} {
-	if [info exists env($var)] {
+	if {[info exists env($var)]} {
 	    return $env($var)
 	} else {
-	    return "<!-- No such variable: $var. -->"
+	    return "<!-- No such variable: $var. -->\n"
 	}
     }
-    return "<!-- Echo: No var parameter. -->"
+    return "<!-- Echo: No var parameter. -->\n"
 }
 
 proc include_fsize {sock path params args} {
@@ -135,31 +136,39 @@ proc include_fsize {sock path params args} {
     set key [lindex $info 0]
     set npath [lindex $info 1]
     set orig [lindex $info 2]
-    if [file exists $npath] {
+    if {[file exists $npath]} {
 	return [file size $npath]
     } else {
-	return "<!-- File not found $key: $npath. -->"
+	return "<!-- File not found $key: $npath. -->\n"
     }
 }
 
 proc include_exec {sock path params args} {
+    set cmd ""
+    if {[Html_ExtractParam $params cmd]} {
+	if {[catch {eval exec $cmd} result]} {
+	    regsub -all -- --> $result {} result
+	    return "<!-- $cmd error: $result  -->\n"
+	} else {
+	    return $result
+	}
+    }
 }
 
 proc include_config {sock path params args} {
+    return "<!-- include config not implemented -->\n"
 }
 
 proc include_flastmod {sock path params args} {
-    if [catch {IncludeFile $sock flastmod $path $params} info] {
+    if {[catch {IncludeFile $sock flastmod $path $params} info]} {
 	return $info
     }
     set key [lindex $info 0]
     set npath [lindex $info 1]
     set orig [lindex $info 2]
-    if [file exists $npath] {
+    if {[file exists $npath]} {
 	return [clock format [file mtime $npath]]
     } else {
-	return "<!-- File not found $key: $npath. -->"
+	return "<!-- File not found $key: $npath. -->\n"
     }
 }
-
-

@@ -96,7 +96,12 @@ proc Url_Dispatch {sock} {
 	    Count UrlEval
 	    eval $Url(command,$prefix) [list $sock $suffix]
 	}
-    } error]} {
+    } error] == 1} {
+
+	# Only do this on uncaught errors.
+	# Note that the return statement for the "denied" case of the
+	# access hook will result in catch returning code == 2, not 1 (or zero)
+
 	global errorInfo
 	global errorCode
 	Url_Unwind $sock $errorInfo $errorCode
