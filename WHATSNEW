@@ -1,5 +1,15 @@
 What's new in TclHttpd
 
+3.5
+
+Mostly this is a cleanup of the code and web pages to cleanly
+separate out the core server from various sample applications and
+demo code.  The default web site is defined by the htdocs and custom
+subdirectories, and all the other stuff is organized under sampleapp.
+There are some new security controls over the debug URL so you can
+start up with that enabled and now worry about unauthorized access
+to that interface.
+
 3.4
 
 The upload domain has seen many fixes as a result of actually using it.

@@ -4,7 +4,7 @@
 # lib directory.  The goal is to not pollute the package namespace
 # until you package require httpd
 
-package ifneeded httpd 1.6 "
+package ifneeded httpd 1.7 "
 	source \[file join [list $dir] httpd.tcl\]
 	package ifneeded httpd::admin 1.0 \[list source \[file join [list $dir] admin.tcl\]\]
 	package ifneeded httpd::auth 2.0 \[list source \[file join [list $dir] auth.tcl\]\]
@@ -14,13 +14,11 @@ package ifneeded httpd 1.6 "
 	package ifneeded httpd::cookie 1.0 \[list source \[file join [list $dir] cookie.tcl\]\]
 	package ifneeded httpd::counter 2.0 \[list source \[file join [list $dir] counter.tcl\]\]
 	package ifneeded httpd::debug 1.0 \[list source \[file join [list $dir] debug.tcl\]\]
-	package ifneeded httpd::demo 1.0 \[list source \[file join [list $dir] demo.tcl\]\]
-	package ifneeded httpd::digest 1.0 \[list source \[file join [list $dir] digest.tcl\]\]
 	package ifneeded httpd::direct 1.1 \[list source \[file join [list $dir] direct.tcl\]\]
 	package ifneeded httpd::dirlist 1.1 \[list source \[file join [list $dir] dirlist.tcl\]\]
 	package ifneeded httpd::doc 1.1 \[list source \[file join [list $dir] doc.tcl\]\]
 	package ifneeded httpd::doc_error 1.0 \[list source \[file join [list $dir] doc_error.tcl\]\]
-	package ifneeded httpd::eval 1.0 \[list source \[file join [list $dir] sendsock.tcl\]\]
+	package ifneeded httpd::doctools 1.0 \[list source \[file join [list $dir] doctools.tcl\]\]
 	package ifneeded httpd::fallback 1.0 \[list source \[file join [list $dir] fallback.tcl\]\]
 	package ifneeded httpd::imagemap 1.0 \[list source \[file join [list $dir] imagemap.tcl\]\]
 	package ifneeded httpd::include 1.0 \[list source \[file join [list $dir] include.tcl\]\]
@@ -36,18 +34,15 @@ package ifneeded httpd 1.6 "
 	package ifneeded httpd::redirect 1.0 \[list source \[file join [list $dir] redirect.tcl\]\]
 	package ifneeded httpd::safecgio 1.0 \[list source \[file join [list $dir] safecgio.tcl\]\]
 	package ifneeded httpd::session 1.0 \[list source \[file join [list $dir] session.tcl\]\]
-	package ifneeded httpd::snmp 1.0 \[list source \[file join [list $dir] snmp.tcl\]\]
 	package ifneeded httpd::srvui 1.0 \[list source \[file join [list $dir] srvui.tcl\]\]
 	package ifneeded httpd::status 1.0 \[list source \[file join [list $dir] status.tcl\]\]
 	package ifneeded httpd::stdin 1.1 \[list source \[file join [list $dir] stdin.tcl\]\]
 	package ifneeded httpd::subst 1.0 \[list source \[file join [list $dir] subst.tcl\]\]
-	package ifneeded httpd::telnet 1.0 \[list source \[file join [list $dir] telnet.tcl\]\]
 	package ifneeded httpd::template 1.0 \[list source \[file join [list $dir] template.tcl\]\]
 	package ifneeded httpd::threadmgr 1.0 \[list source \[file join [list $dir] thread.tcl\]\]
 	package ifneeded httpd::upload 1.0 \[list source \[file join [list $dir] upload.tcl\]\]
 	package ifneeded httpd::url 1.2 \[list source \[file join [list $dir] url.tcl\]\]
 	package ifneeded httpd::utils 1.0 \[list source \[file join [list $dir] utils.tcl\]\]
-	package ifneeded httpd::version 3.4 \[list source \[file join [list $dir] version.tcl\]\]
+	package ifneeded httpd::version 3.5 \[list source \[file join [list $dir] version.tcl\]\]
 	package ifneeded tclcrypt 1.0 \[list source \[file join [list $dir] tclcrypt.tcl\]\]
-	package ifneeded httpd::doctools 1.0 \[list source \[file join [list $dir] doctools.tcl\]\]
 "

@@ -18,12 +18,13 @@
 # Matt Newman (c) 1999 Novadigm Inc.
 # Stephen Uhler / Brent Welch (c) 1997 Sun Microsystems
 # Brent Welch (c) 1998-2000 Ajuba Solutions
+# Brent Welch (c) 2001-2004 Panasas Inc
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.83 2004/02/08 22:14:22 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.84 2004/03/23 03:07:02 welch Exp $
 
-package provide httpd 1.6
+package provide httpd 1.7
 
 # initialize all the global data
 

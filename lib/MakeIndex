@@ -1,8 +1,13 @@
-#!/usr/bin/tclsh8.0
+#!/usr/bin/tclsh
+
+# First, auto-generate the standard direct-style package index
+
 pkg_mkIndex -verbose -direct . *.tcl
 file rename -force pkgIndex.tcl pkgIndex.tcl.direct
 set in [open pkgIndex.tcl.direct r]
 set out [open pkgIndex.tcl w]
+
+# Now generate a new version that hides the sub-packages
 
 puts $out [gets $in]
 # Tcl package index file, version 1.1
