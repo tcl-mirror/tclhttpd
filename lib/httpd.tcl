@@ -183,8 +183,8 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
 	}
 	package require tls
 	# following is temporary until we have good OpenSSL library
-	if {![file exists $Httpd(SSL_CAFILE)]} {
-        return -code error "CA file \"$Httpd(SSL_CAFILE)\" not found"
+	if {![file exists $Httpd(SSL_CADIR)] && ![file exists $Httpd(SSL_CAFILE)]} {
+        return -code error "Need a CA directory or a CA file: file \"$Httpd(SSL_CAFILE)\" not found"
 	}
 	if {![file exists $Httpd(SSL_CERTFILE)]} {
         return -code error "Certificate  \"$Httpd(SSL_CERTFILE)\" not found"
@@ -199,12 +199,13 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
 		-certfile $Httpd(SSL_CERTFILE) \
 		-ssl2 $Httpd(USE_SSL2) \
 		-ssl3 $Httpd(USE_SSL3) \
+		-server 1 \
 		-keyfile $Httpd(SSL_KEYFILE) \
 		-cipher $Httpd(SSL_CIPHERS)
     set cmd [list tls::socket -server [list HttpdAccept [list https $name $port]]]
 	if {0} {
     lappend cmd -request $Httpd(SSL_REQUEST) \
-	    -require $Httpd(SSL_REQUEST) \
+	    -require $Httpd(SSL_REQUIRE) \
 	    -ssl2 $Httpd(USE_SSL2) \
 	    -ssl3 $Httpd(USE_SSL3) \
 	    -tls1 $Httpd(USE_TLS1) \
