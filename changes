@@ -482,6 +482,26 @@ lib/status.tcl	Changes status bar charts to use gifs.
 
 lib/url.tcl	Fixed use of the UrlCache array when post data was available.
  
- ----------------- released 2.3.2 October 15, 1999 ------------------
-  
+----------------- released 2.3.2 October 15, 1999 ------------------
 
+lib/httpd.tcl	*IMPORTANT* fixed a bug in Httpd_GetPostData where an
+		eof condition on the socket was not handled properly.
+		This caused an infinite loop in Url_DecodeQuery.
+  
+lib/cgi.tcl	Added TZ to the environment variables passed
+		through to scripts
+
+lib/doc.tcl	Fixed DocFallback so it will not select files like
+		foo.tml.old when asked for foo.html
+
+lib/log.tcl	Added an optional debug log.  You have to define
+		Log(debug_file) to "1" to enable this, and then make calls
+		to Log with "Debug" as the reason.
+
+bin/imagehttpd.tcl	Updated this to fix the 1.1 support.  This seems
+		correct for simple cases, but generates some spurious errors
+		in real life web-sites.
+
+bin/torture.tcl	Added some feedback to the Iterate proc
+
+----------------- released 2.3.2 October 15, 1999 ------------------
