@@ -375,6 +375,9 @@ proc Httpd_GetPostData {sock varName {size -1}} {
     set block [read $sock $size]
     append buffer $block
     set data(count) [expr {$data(count) - [string length $block]}]
+    if {[eof $sock]} {
+	set data(count) 0
+    }
     return $data(count)
 }
 
