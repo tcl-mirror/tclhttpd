@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cookie.tcl,v 1.7 2004/04/29 01:38:41 coldstore Exp $
+# RCS: @(#) $Id: cookie.tcl,v 1.8 2004/05/01 13:49:21 coldstore Exp $
 
 package provide httpd::cookie 1.0
 
@@ -157,3 +157,17 @@ proc Cookie_Set {args} {
     lappend Cookie(set-cookie) [eval Cookie_Make $args]
 }
 
+
+# Cookie_UnSet
+#
+#$c	Unset a return cookie
+#
+# Arguments:
+#	args	Name value pairs, where the names are:
+#@a		-name	Cookie name
+#@a		-path	Path restriction
+#@a		-domain	domain restriction
+proc Cookie_Unset {name args} {
+    Httpd_RemoveCookies [Httpd_CurrentSocket] name
+    Cookie_Set -name $name -value "" -expires [clock format [clock scan "last year"] -format "%A, %d-%b-%Y %H:%M:%S GMT" -gmt 1]
+}
