@@ -421,9 +421,9 @@ proc Url_DecodeQuery_multipart/form-data {query qualifiers} {
 		set headerName [string tolower $headerName]
 		foreach {major minor quals} [Url_DecodeMIMEField $headerData] break
 		# restore Tcl special characters
-	    regsub -all {(\\\\\\1)} $quals {\\} quals
-	    regsub -all {(\\\\\\2)} $quals {\{} quals
-	    regsub -all {(\\\\\\3)} $quals {\}} quals
+	    regsub -all {(\\\001\001)} $quals {\\} quals
+	    regsub -all {(\\\001\002)} $quals {\{} quals
+	    regsub -all {(\\\001\003)} $quals {\}} quals
 
 		switch -glob -- [string compare content-disposition $headerName],[string compare form-data $major] {
 
@@ -456,9 +456,9 @@ proc Url_DecodeQuery_multipart/form-data {query qualifiers} {
 	    }
 	}
 	# restore Tcl special characters
-	regsub -all {(\\\\\\1)} $elementData {\\} elementData
-	regsub -all {(\\\\\\2)} $elementData {\{} elementData
-	regsub -all {(\\\\\\3)} $elementData {\}} elementData
+	regsub -all {(\\\001\001)} $elementData {\\} elementData
+	regsub -all {(\\\001\002)} $elementData {\{} elementData
+	regsub -all {(\\\001\003)} $elementData {\}} elementData
 	lappend result $parameterName [list $headerList $elementData]
     }
 
