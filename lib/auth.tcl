@@ -77,7 +77,9 @@ proc Auth_Verify {sock cookie} {
 #	realm		Realm for basic authentication.  This appears
 #			in the password prompt from the browser.
 #	callback	Tcl command to check the password.  This gets
-#			as arguments the username and password.  It should
+#			as arguments the sock, realm, username and password.
+#
+# Results:
 #			return 1 or 0, 1 for success.
 
 proc Auth_VerifyCallback {sock realm callback} {
