@@ -25,11 +25,11 @@ foreach pkg [ncgi::valueList packageReset] {
 mypage::contents {
     Home		/
     Status		/status	
-    "Hacks Page"	/hacks.html
-    Register		/register.html
+    "Learn"     	/learn/
     "CGI Tests"		/forms/
     "Templates"		/templates/
     "Access Control"	/access/
+    Register		/register.html
     "Reference Manual"	/manual/reference.html
 }
 

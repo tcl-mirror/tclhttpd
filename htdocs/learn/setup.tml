@@ -1,0 +1,32 @@
+[::learn::header "Lesson 1: Server Setup"]
+[Doc_Dynamic]
+
+<h4>Out of Box Startup</h4>
+
+This page describes how to set up the server for
+a standard "web page server"  and as a
+platform for web applications.  You have probably started
+the server using this simple command:
+<pre>
+tclsh$tcl_version bin/httpd.tcl -debug 1
+</pre>
+
+This runs the server using a standard selection of features
+and displaying the documents stored under <tt>htdocs</tt>
+in the distribution.  If you want an alternate document root,
+use the <tt>-docRoot <i>directory</i></tt> command line option.
+<pre>
+tclsh$tcl_version bin/httpd.tcl -docRoot <i>directory</i>
+</pre>
+<p>
+When you specify the -debug flag, you get additional information
+printed as different modules are loaded.
+You also get a Tcl command prompt that lets you poke around
+in the main Tcl interpreter used by TclHttpd.
+
+<h4>Adding Code</h4>
+
+The server automatically sources the code in its
+<i>custom code directory</i>, which is specified by
+the <tt>-library</tt> command line argument.  
+[mypage::footer]
