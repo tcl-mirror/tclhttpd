@@ -707,6 +707,7 @@ proc HttpdReadPost {sock varName blockSize {cmd {}}} {
 	if {$data(count)} {
 	    set doneMsg "Short read: got [string length $buffer] bytes,\
 		expected $data(count) more bytes"
+	    set data(count) 0
 	} else {
 	    set doneMsg ""
 	}
