@@ -9,7 +9,9 @@
 	* DIST_build/Makefile.boot:
 	* DIST_build/README:
 	* lib/version.tcl:
-	Changed version number to 3.3
+	* bin/httpd.tcl:
+	Changed version number to 3.3.  Gack - the .tcl files at
+	least should be ".in" files.
 
 2001-01-31  Brent Welch <welch@ajubasolutions.com>
 

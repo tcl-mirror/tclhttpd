@@ -5,25 +5,25 @@
 HTTPD_VERSION=3.3
 HTTPD_TAG=tclhttpd-3-3
 WIN_VERSION=321
-DISTDIR=/home/welch/dist
+DISTDIR=/usr10/home/welch/dist
 SUPER_DIR=${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist
 
 TCL_VERSION=8.3.2
-TCL_DIST=/home/hobbs/dist/tcl${TCL_VERSION}.tar.gz
+TCL_DIST=${DISTDIR}/tcl${TCL_VERSION}.tar.gz
 
 TCLLIB_VERSION=0.8
-TCLLIB_DIST=/home/welch/cvs/ajuba3/tcllib/tcllib${TCLLIB_VERSION}.tar.gz
+TCLLIB_DIST=${DISTDIR}/tcllib${TCLLIB_VERSION}.tar.gz
 
 THREAD_VERSION=2.2
 THREAD_WIN_VERSION=22
 THREAD_TAG=thread-2-2
 
-SCRATCH=/home/welch/scratch
+SCRATCH=/usr10/home/welch/scratch
 mkdir ${SCRATCH}
 cd ${SCRATCH}
 
 rm -rf ${SCRATCH}/tclhttpd${HTTPD_VERSION}
-cvs -d /home/cvs checkout -r ${HTTPD_TAG} tclhttpd 
+cvs -d welch@cvs.sourceforge.net:/cvsroot/tclhttpd checkout -r ${HTTPD_TAG} tclhttpd 
 mv tclhttpd tclhttpd${HTTPD_VERSION}
 chmod -R a+r tclhttpd${HTTPD_VERSION}
 chmod a+x tclhttpd${HTTPD_VERSION}/bin/httpd.tcl
@@ -33,7 +33,7 @@ chmod a+x tclhttpd${HTTPD_VERSION}/htdocs/cgi-bin/env
 find tclhttpd${HTTPD_VERSION}/htdocs -name "*.cgi" -exec chmod a+x {} \;
 
 rm -rf ${SCRATCH}/thread${THREAD_VERSION}
-cvs -d /home/cvs checkout -r ${THREAD_TAG} thread
+cvs -d welch@cvs.sourceforge.net:/cvsroot/tcl checkout -r ${THREAD_TAG} thread
 mv thread thread${THREAD_VERSION}
 chmod -R a+r thread${THREAD_VERSION}
 
