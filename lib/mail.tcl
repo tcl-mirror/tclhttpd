@@ -53,7 +53,7 @@ proc Mail/forminfo {sendto subject href label args} {
 	set blob [list $value]
 	if {[regsub -all \\\\ $blob {} _] > 0} {
 	    append message "[list Data64 $name] \\\n"
-	    append message [list [Base64_Encode $value]]\n
+	    append message [list [base64::encode $value]]\n
 	} else {
 	    append message [list Data $name $value]\n
 	}

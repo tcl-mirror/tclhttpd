@@ -95,7 +95,7 @@ proc Auth_VerifyCallback {sock realm callback} {
 	    set user {}
 	    set pass {}
 	} else {
-	    set parts [split [Base64_Decode $code] :]
+	    set parts [split [base64::decode $code] :]
 	    set user [lindex $parts 0]
 	    set pass [lindex $parts 1]
 	}
@@ -191,7 +191,7 @@ proc AuthVerifyBasic {sock file} {
 	if {[string compare $type Basic] != 0} {
 	    set ok 0
 	} else {
-	    set parts [split [Base64_Decode $code] :]
+	    set parts [split [base64::decode $code] :]
 	    set user [lindex $parts 0]
 	    set pass [lindex $parts 1]
 	    if {[info exists info(require,$op,group)]} {

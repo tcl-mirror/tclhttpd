@@ -1,0 +1,9 @@
+2000-03-07  Melissa Chawla  <hershey@scriptics.com>
+
+	* htdocs/access/bydir/user.cgi
+	* htdocs/cgi-bin/user.cgi
+	* lib/auth.tcl
+	* lib/mail.tcl: changed calls to Base64 library to use the
+	"base64" namespace (version 2.0 of the package).
+
+
