@@ -1,12 +1,11 @@
 This is a bundled distribution of TclHttpd, Tcl, the
 Standard Tcl Library, and the Thread extension.
 
-
 If you already have tcl 8.3 installed, then you can probably
 run the Tcl Web Server directly from this distribtuion without
 doing any installation steps:
 
-cd tclhttpd3.0.0/bin
+cd tclhttpd3.0.1/bin
 tclsh8.3 httpd.tcl -port 8001 -debug 1
 
 If you get complaints about missing the Standard Tcl Library,
@@ -29,10 +28,10 @@ PLATFORM value matches what you configured.   Then run MAKE.
 
 More Docs
 There are a few more README-like files you should read:
-tclhttpd/README
-tclhttpd/WHATSNEW
-tclhttpd/ChangeLog
-tclhttpd/certs/README.ssl
+tclhttpd3.0.1/README
+tclhttpd3.0.1/WHATSNEW
+tclhttpd3.0.1/ChangeLog
+tclhttpd3.0.1/certs/README.ssl
 
 Information about TclHttpd is at
 
@@ -43,6 +42,9 @@ mailto:tcl-httpd@scriptics.com
 You must be a member to post to this list.  To join, send a message
 with the subject of "subscribe" to
 tcl-httpd-request@scriptics.com
+
+There are archives of the list at
+http://dev.scriptics.com/lists/tcl-httpd
 
 Brent Welch <welch@scriptics.com>
 
