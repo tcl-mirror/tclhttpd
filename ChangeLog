@@ -4,6 +4,8 @@
 	* lib/maptcl.tcl: Fixed MapRead to handle spaces in map filenames.
 	* lib/maptk.tcl: Fixed MapRead to handle spaces in map filenames.
 	* lib/auth.tcl: fixed funny call to Log in the error case.
+	* bin/httpdthread.tcl: Catch around puts warning so daemons
+	do not need stdout.
 	* htdocs/templates/faqfaq.tml: Added missing \ in .tml Tcl code
 	* Nudged up the tclhttpd-3-1-0 CVS tag.
 
