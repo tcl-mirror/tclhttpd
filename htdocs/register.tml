@@ -2,6 +2,7 @@
 
 <form action="http://www.scriptics.com/mail/forminfo" method="POST">
 <input type="hidden" name="product" value="WebServer">
+<input type="hidden" name="version" value="$Httpd(server)">
 <input type="hidden" name="sendto" value="welch@acm.org">
 <input type="hidden" name="subject" value="Register WebServer">
 
@@ -18,7 +19,7 @@ note to [html::mailto welch@acm.org "Register WebServer"] would be appreciated.
 [html::textInputRow "Name" name]
 [html::textInputRow "Email" emailaddr]
 <tr>[html::cell colspan=2 [html::checkSet noemail {} {
-    1 "<b>Do not</b> contact me about new releases"
+    "<b>Do not</b> contact me about new releases" 1
 }]]</tr>
 [html::textInputRow "Title" title]
 [html::textInputRow "Company" company]
