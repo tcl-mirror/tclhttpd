@@ -7,6 +7,11 @@
 
 The package [package httpd::mtype] provides functionality which
 determines the MIME type of a file and related utilities.
+The MIME type (e.g., text/html or image/jpeg) is used by
+the Document domain to dispatch out to type-specific document
+handlers.  For example, if there is a procedure named [cmd Doc_image/jpeg]
+then the Document domain will use that procedure to handle
+requests for files of that type.
 
 [section {Public API}]
 [para]

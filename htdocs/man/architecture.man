@@ -75,10 +75,17 @@ lets users examine the state of the server.
 }]
 [para]
 
+[emph Note:] It is not strictly necessary to modify [file bin/httpd.tcl] or
+[file bin/httpdthread.tcl].  Instead, you can provide a
+[term "custom code directory"] and put additional Tcl source files there
+and instruct the server to load that code on startup.  Use
+the "-library" command line option to specify the custom code directory.
+
+[para]
+
 The web server should have access to any Tcl package installed along
 with your Tcl installation.  Consult the on-line HTML documentation
 for a more indepth discussion of programming the server.
-
 
 [section {The packages}]
 
@@ -139,7 +146,10 @@ they are.
 packages. They are interdependent (i.e. each requires the other) and
 actually handle only two different aspects of the same thing (files
 and directories).
-
+[nl]
+[emph Answer:] In theory
+your application could provide a different directory listing module.
+But, really, Brent just likes smaller packages.
 
 [lst_item [package httpd::cgi]]
 

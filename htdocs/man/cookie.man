@@ -36,7 +36,7 @@ interpreter is specified the current interpreter is used as data
 source.
 
 
-[call [cmd Cookie_Make]  ([arg {option value}])...]]
+[call [cmd Cookie_Make]  ([arg {option value}])...]
 
 Low-level command to encode the specified options into a cookie. The
 generated cookie is not stored internally but returned as the result

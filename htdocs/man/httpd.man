@@ -140,11 +140,14 @@ was specified the last address set is returned.
 
 [call [cmd Httpd_VirtualHost] [arg {host file}]]
 
-Undocumented in the sources ...
+Initialize a virtual server.  The file is an alternate
+config file, (e.g., [file tclhttpd.rc]).  The pages for each
+virtual server are processed inside their own safe interpreter.
 
 [call [cmd Httpd_VirtualHosts] [arg {hostNames file}]]
 
-Undocumented in the sources ...
+Like  [cmd Httpd_VirtualHost] except that the first argument
+is a list of host names.  All of these share the same config file.
 
 [lst_item [var ::Httpd]]
 
@@ -217,7 +220,7 @@ has a connection handle can import the connection state into its
 current scope via a command like
 
 [nl][example {
-	upvar #0 Httpd$sock date
+	upvar #0 Httpd$sock data
 }][nl]
 
 The elements of this array are documented here.  URL implementations

@@ -20,10 +20,13 @@ virtual files).
 
 [lst_item {Access control}]
 
-This package installs an access control callback which uses the
+This package installs an access control callback,
+[cmd DocAccessControl] which uses the
 package [package httpd::auth] to determine if an request for an url
-has to be denied or not.
-
+has to be denied or not.  This method searches the directory
+path to the file for .htaccess or .tclaccess files that specify
+access controls.  These are explained in the /access/ area
+of the default web site distributed with the server.
 
 [call [cmd Doc_AddRoot] [arg virtual] [arg directory] [arg arg]...]
 
