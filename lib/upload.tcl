@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.9 2002/12/03 07:20:30 welch Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.10 2003/10/27 08:03:31 coldstore Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -34,6 +34,8 @@ package require ncgi
 #		-totalbytes <integer>
 #			Limit on total bytes in all files
 #			in the upload directory
+#		-unique <boolean>
+#			Give uploads unique names
 #
 # Side Effects
 #	Register a prefix
@@ -45,10 +47,11 @@ proc Upload_Url {virtual dir command args} {
 	    -maxfiles -1
 	    -maxbytes -1
 	    -totalbytes -1
+	    -unique 0
     }
     array set opt $args
     Url_PrefixInstall $virtual [list UploadDomain $dir $command \
-	$opt(-maxfiles) $opt(-maxbytes) $opt(-totalbytes)] \
+	$opt(-maxfiles) $opt(-maxbytes) $opt(-totalbytes) $opt(-unique)] \
 	-thread $opt(-inThread) \
         -callback [list UploadTidyUp] \
 	-readpost 0
@@ -69,7 +72,7 @@ proc Upload_Url {virtual dir command args} {
 #	suffix	The part of the url after the domain prefix.
 #
 
-proc UploadDomain {dir cmd maxfiles maxbytes totalbytes sock suffix} {
+proc UploadDomain {dir cmd maxfiles maxbytes totalbytes unique sock suffix} {
     upvar #0 Httpd$sock data
     upvar #0 Upload$sock upload
 
@@ -111,6 +114,7 @@ proc UploadDomain {dir cmd maxfiles maxbytes totalbytes sock suffix} {
     set upload(maxbytes) $maxbytes
     set upload(suffix) $suffix
     set upload(count) $data(count)
+    set upload(unique) $unique
 
     # These are temporary storage used when parsing the headers of each part
 
@@ -219,7 +223,12 @@ proc UploadReadHeader {sock} {
 			    # with c:\a\b\c.txt correctly...
 			    regsub -all {\\} $v / v
 			    set tail [file tail $v]
-			    set path [file join $upload(dir) $tail]
+			    if {$upload(unique)} {
+				# make the file a unique name
+				set path [file join $upload(dir) ${tail}.[clock clicks]]
+			    } else {
+				set path [file join $upload(dir) $tail]
+			    }
                             set upload(fd) [open $path w]
 			    set upload(lastLineExists) 0
 
