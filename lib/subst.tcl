@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: subst.tcl,v 1.5 2004/02/25 04:36:17 coldstore Exp $
+# RCS: @(#) $Id: subst.tcl,v 1.6 2004/04/14 00:07:32 coldstore Exp $
 
 package provide httpd::subst 1.0
 
@@ -125,11 +125,12 @@ proc Subst_File {path {interp {}}} {
     global Subst
 
     switch [file type $path] {
-	file {
-	    return [uplevel 1 SubstFile $path $interp]
+	file -
+	link {
+	    return [uplevel 1 [list SubstFile $path $interp]]
 	}
 	directory {
-	    return [uplevel 1 SubstFile [file join $path dir.tml] $interp]
+	    return [uplevel 1 [list SubstFile [file join $path dir.tml] $interp]]
 	}
 	default {
 	    error "Can't process [file type $path] files."
