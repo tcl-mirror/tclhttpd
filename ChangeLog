@@ -1,3 +1,9 @@
+2000-08-25  Brent Welch <welch@scriptics.com>
+
+	* lib/imagemap.tcl: Fixed typo inexpression in imagemap.tcl
+	* lib/auth.tcl: fixed funny call to Log in the error case.
+	* Nudged up the tclhttpd-3-1-0 CVS tag.
+
 2000-08-23  Brent Welch <welch@scriptics.com>
 
 	* Makefile.in: Fixed install permission bits on files.
