@@ -1,3 +1,10 @@
+2004-08-16 Brent Welch <welch@panasas.com>
+        * lib/url.tcl: check for URL requests that don't begin with /.
+          Browsers won't generate these, but attacks on the server might try
+          to feed it bogus URLs.  The following request was generating an
+          "unknown variable suffix" server internal error.
+              GET foo HTTP/1.0
+
 2004-08-07 Brent Welch <welch@panasas.com>
         * certs/README.ssl: updated with notes taken while generating
           certificates with openssl-0.9.7d

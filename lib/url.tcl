@@ -61,11 +61,14 @@ proc Url_Dispatch {sock} {
 		([string length $suffix] && ![string match /* $suffix])} {
 
 	    # Fall back and assume it is under the root
-	    # The /+ gobbles extra /'s that might be used to sneak
-	    # out to the root of the file hierarchy.
-
-	    regexp ^(/+)(.*) $url x prefix suffix
-	    set prefix /
+            if {[string match /* $url]} {
+              set suffix [string trimleft $url /]
+              set prefix /
+            } else {
+              # Requested URL doesn't start with slash - bad request
+              Httpd_Error $sock 400
+              return
+            }
 	}
 
 	# END INLINE
@@ -208,8 +211,9 @@ proc Url_PrefixMatch {url prefixVar suffixVar} {
 	    ![regexp ^($Url(prefixset))(.*) $url x prefix suffix] ||
 	    ([string length $suffix] && ![string match /* $suffix])} {
 	# Fall back and assume it is under the root
-	regexp ^(/+)(.*) $url x prefix suffix
-	set prefix /
+        # We assume that Url_Dispatch has filtered out bad urls already
+        set suffix [string trimleft $url /]
+        set prefix /
     }
 }
 
