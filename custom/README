@@ -1,0 +1,16 @@
+custom/README
+
+This directory is the default location for adding custom code to TclHttpd.
+There are a couple of sample files here, but they are non critical and you
+can delete them, ignore them, or change the location of this custom code
+directory as noted below.
+
+The custom code location is specified with the -library command line argument or the
+Config library <pathname>
+configuration file entry.
+
+The server sources everything in this directory in alphabetical order.
+This is done by the default "thread main" script, which is by default
+bin/httpdthread.tcl
+If you run with "-debug 1" you'll get feedback as the code here is loaded.
+Otherwise you only see any errors raised during the process.
