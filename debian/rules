@@ -99,8 +99,7 @@ install: build
 		`find $(BUILD)/var/www/ -name '*.css'` \
 		`find $(BUILD)/var/www/ -name '*.html'` \
 		`find $(BUILD)/etc/tclhttpd/` \
-		$(BUILD)/usr/lib/tclhttpd/custom/dodirs.tcl \
-		$(BUILD)/usr/lib/tclhttpd$(VERSION)/httpdthread.tcl
+		$(BUILD)/usr/lib/tclhttpd/custom/dodirs.tcl
 
 	mv $(BUILD)/usr/share/man/man1/httpd.1 $(BUILD)/usr/share/man/man1/httpd.tcl.1
 

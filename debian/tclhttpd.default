@@ -8,3 +8,6 @@
 
 # Additional options that are passed to the Daemon.
 DAEMON_OPTS="-config /etc/tclhttpd/tclhttpd.rc"
+
+# if you have the package daemon installed, uncomment this
+#STARTER="daemon"

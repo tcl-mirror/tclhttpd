@@ -2,18 +2,13 @@
 #
 #	handle the tclhttpd web server
 #
-#		Written by Miquel van Smoorenburg <miquels@cistron.nl>.
-#		Modified for Debian 
-#		by Ian Murdock <imurdock@gnu.ai.mit.edu>.
-#
-# Version:	@(#)skeleton  1.9  26-Feb-2001  miquels@cistron.nl
-#
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/httpd.tcl
 NAME=tclhttpd
 DESC=tclhttpd
 TCLSH=/usr/bin/tclsh
+STARTER="default"
 export TCL_HTTPD_LIBRARY=/usr/lib/tclhttpd
 
 test -x $DAEMON || exit 0
@@ -27,31 +22,34 @@ set -e
 
 case "$1" in
   start)
-	echo -n "Starting $DESC: "
-	start-stop-daemon --start --quiet --background \
+	echo -n "Starting $DESC with $STARTER: "
+	if [ $STARTER = "daemon" ]; then
+	    /usr/bin/daemon --name=tclhttpd \
+		--chdir /var/www \
+		--user=www-data.www-data --umask=005 \
+		--respawn --inherit \
+		--errlog=daemon.err --output=daemon.debug --dbglog=daemon.debug \
+		-- $TCLSH $DAEMON $DAEMON_OPTS
+	else
+	    start-stop-daemon --start --quiet --background \
 		--chuid www-data:www-data \
 		--pidfile /var/run/$NAME.pid --make-pidfile \
 		--exec $TCLSH -- $DAEMON $DAEMON_OPTS
+	fi
 	echo "$NAME."
 	;;
+
   stop)
 	echo -n "Stopping $DESC: "
-	start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid \
+	if [ $STARTER = "daemon" ]; then
+	    /usr/bin/daemon --user www-data.www-data --name=tclhttpd --stop
+	else
+	    start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid \
 		--exec $TCLSH
+	fi
 	echo "$NAME."
 	;;
-  #reload)
-	#
-	#	If the daemon can reload its config files on the fly
-	#	for example by sending it SIGHUP, do it here.
-	#
-	#	If the daemon responds to changes in its config file
-	#	directly anyway, make this a do-nothing entry.
-	#
-	# echo "Reloading $DESC configuration files."
-	# start-stop-daemon --stop --signal 1 --quiet --pidfile \
-	#	/var/run/$NAME.pid --exec $DAEMON
-  #;;
+
   restart|force-reload)
 	#
 	#	If the "reload" option is implemented, move the "force-reload"
@@ -59,13 +57,19 @@ case "$1" in
 	#	just the same as "restart".
 	#
 	echo -n "Restarting $DESC: "
-	start-stop-daemon --stop --quiet --pidfile \
+	if [ $STARTER = "daemon" ]; then
+	    /usr/bin/daemon --user www-data.www-data --name=tclhttpd --restart
+	else
+	    start-stop-daemon --stop --quiet --pidfile \
 		/var/run/$NAME.pid --exec $DAEMON
-	sleep 1
-	start-stop-daemon --start --quiet --pidfile \
+	    sleep 1
+	    start-stop-daemon --start --quiet --pidfile \
 		/var/run/$NAME.pid --exec $DAEMON -- $DAEMON_OPTS
+	fi
+
 	echo "$NAME."
 	;;
+
   *)
 	N=/etc/init.d/$NAME
 	# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2

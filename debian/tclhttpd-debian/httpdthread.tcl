@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.3 2004/03/23 09:56:09 coldstore Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.4 2004/04/19 07:08:28 coldstore Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -155,6 +155,8 @@ Debug_Url			/debug
 
 package require httpd::redirect	;# Url redirection tables
 Redirect_Init			/redirect
+
+package require httpd::doctools ;# doctool type conversions
 
 if {[catch {
     Auth_InitCrypt			;# Probe for crypt module
