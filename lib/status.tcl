@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.14 2000/08/02 07:06:54 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.15 2000/08/27 07:24:43 welch Exp $
 
 package provide httpd::status 1.0
 
@@ -45,7 +45,11 @@ proc Status/hello {args} {return hello}
 proc Status/threads {args} {
     append html "<h2>Thread List</h2>\n"
     append html [StatusMenu]\n
-    append html [Thread_List] 
+    if {[catch {Thread_List} x]} {
+	append html "No thread support\n"
+    } else {
+	append html $x
+    }
     return $html
 }
 
