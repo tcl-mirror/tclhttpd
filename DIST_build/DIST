@@ -17,10 +17,17 @@ TCL_DIST=${DISTDIR}/tcl${TCL_VERSION}-src.tar.gz
 TCLLIB_VERSION=1.6
 TCLLIB_DIST=${DISTDIR}/tcllib-${TCLLIB_VERSION}.tar.gz
 
-THREAD_VERSION=2.6
-THREAD_WIN_VERSION=26
-THREAD_TAG=thread-2-6
-THREAD_TAG=HEAD
+# There is a configure error in CVS right now
+#THREAD_VERSION=2.6
+#THREAD_WIN_VERSION=26
+#THREAD_TAG=thread-2-6
+#THREAD_TAG=HEAD
+
+THREAD_VERSION=2.5.2
+THREAD_WIN_VERSION=252
+THREAD_DIST=${DISTDIR}/thread-${THREAD_VERSION}.tar.gz
+#THREAD_TAG=thread-2-6
+#THREAD_TAG=HEAD
 
 SCRATCH=${WELCH}/scratch
 mkdir -p ${SCRATCH}
@@ -45,25 +52,29 @@ cp tclhttpd${HTTPD_VERSION}/certs/README.ssl tclhttpd${HTTPD_VERSION}/htdocs/lin
 cp tclhttpd${HTTPD_VERSION}/WHATSNEW tclhttpd${HTTPD_VERSION}/htdocs/links/WHATSNEW.txt
 cp tclhttpd${HTTPD_VERSION}/INSTALL tclhttpd${HTTPD_VERSION}/htdocs/links/INSTALL.txt
 
-echo "*** Autoconf tclhttpd ${THREAD_VERSION} ***"
+echo "*** Autoconf tclhttpd ${TCLHTTPD_VERSION} ***"
 
 cd tclhttpd${HTTPD_VERSION}
 autoconf
 cd ..
 
-echo "*** Checkout thread ${THREAD_VERSION} ***"
+#echo "*** Checkout thread ${THREAD_VERSION} ***"
 
+#rm -rf ${SCRATCH}/thread${THREAD_VERSION}
+#cvs -d welch@cvs.sourceforge.net:/cvsroot/tcl checkout -r ${THREAD_TAG} thread
+###(cd thread ; cvs -d welch@cvs.sourceforge.net:/cvsroot/tclpro checkout config)
+#mv thread thread${THREAD_VERSION}
+#chmod -R a+r thread${THREAD_VERSION}
+
+echo "*** Untar thread ${THREAD_VERSION} ***"
 rm -rf ${SCRATCH}/thread${THREAD_VERSION}
-cvs -d welch@cvs.sourceforge.net:/cvsroot/tcl checkout -r ${THREAD_TAG} thread
-#(cd thread ; cvs -d welch@cvs.sourceforge.net:/cvsroot/tclpro checkout config)
-mv thread thread${THREAD_VERSION}
-chmod -R a+r thread${THREAD_VERSION}
+gunzip < ${THREAD_DIST} | (cd ${SCRATCH} ; tar xf -)
 
-echo "*** Autoconf thread ${THREAD_VERSION} ***"
+#echo "*** Autoconf thread ${THREAD_VERSION} ***"
 
-cd thread${THREAD_VERSION}
-autoconf
-cd ..
+#cd thread-${THREAD_VERSION}
+#autoconf
+#cd ..
 
 cd tclhttpd${HTTPD_VERSION}/DIST_build
 
@@ -81,9 +92,9 @@ mkdir ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}
 echo "*** Copy tclhttpd${HTTPD_VERSION} into ${SUPER_DIR} ***"
 tclsh ${SRCDIR}/bin/CopyDist ${SRCDIR} ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}
 
-echo "*** Copy thread${THREAD_VERSION} into ${SUPER_DIR} ***"
-mkdir ${SUPER_DIR}/thread${THREAD_VERSION}
-tclsh ${SRCDIR}/bin/CopyDist ${SRCDIR}/../thread${THREAD_VERSION} ${SUPER_DIR}/thread${THREAD_VERSION}
+echo "*** Copy thread-${THREAD_VERSION} into ${SUPER_DIR} ***"
+mkdir ${SUPER_DIR}/thread-${THREAD_VERSION}
+tclsh ${SRCDIR}/bin/CopyDist ${SRCDIR}/../thread-${THREAD_VERSION} ${SUPER_DIR}/thread-${THREAD_VERSION}
 
 echo "*** Gunzip ${TCL_DIST} into ${SUPER_DIR} ***"
 gunzip < ${TCL_DIST} | (cd ${SUPER_DIR} ; tar xf -)
@@ -115,10 +126,10 @@ echo "*** Creating ${DISTDIR}/tclhttpd${HTTPD_VERSION}.tar.gz ***"
 echo "*** Creating ${DISTDIR}/tclhttpd${WIN_VERSION}.zip ***"
 (cd ${SUPER_DIR} ; zip -9 -r -o  ${DISTDIR}/tclhttpd${WIN_VERSION}.zip  tclhttpd${HTTPD_VERSION})
 
-echo "*** Creating ${DISTDIR}/thread${THREAD_VERSION}.tar.gz ***"
-(cd ${SUPER_DIR} ;tar cf - ./thread${THREAD_VERSION} | gzip > ${DISTDIR}/thread${THREAD_VERSION}.tar.gz)
-echo "*** Creating ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip ***"
-(cd ${SUPER_DIR} ;zip -9 -r -o  ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip thread${THREAD_VERSION})
+#echo "*** Creating ${DISTDIR}/thread${THREAD_VERSION}.tar.gz ***"
+#(cd ${SUPER_DIR} ;tar cf - ./thread${THREAD_VERSION} | gzip > ${DISTDIR}/thread${THREAD_VERSION}.tar.gz)
+#echo "*** Creating ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip ***"
+#(cd ${SUPER_DIR} ;zip -9 -r -o  ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip thread${THREAD_VERSION})
 
 # Bundled packages
 
