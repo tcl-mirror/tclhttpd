@@ -1,3 +1,9 @@
+2004-10-28 Michael Thomas <wart@kobold.org>
+        * tclhttpd.spec:  Improved rpm spec file for Fedora.
+        * bin/httpd.tcl:
+        * bin/tclhttpd.rc:  Add -daemon command line option for
+        starting tclhttpd in the background.
+
 2004-10-22 Colin McCormack <colin@sharedtech.dyndns.org>
 	* lib/*.tcl: added braces around all [if] conditionals - for speed
 	* lib/{doc,template}.tcl: removed redundant prefix arg from Template_Try
