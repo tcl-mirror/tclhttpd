@@ -1,0 +1,24 @@
+
+set application_options {
+    {Application 1}
+    {Application 2}
+    {Application 3}
+}
+
+set os_options {
+    All
+    Windows
+    Unix
+    Macintosh
+}
+
+set priority_options {
+    High
+    Medium
+    Low
+}
+
+set assigned_options {
+    jrankin@oneil.com
+    wrankin@acm.org
+}

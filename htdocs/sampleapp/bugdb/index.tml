@@ -4,6 +4,10 @@
 
 [html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database}]
 
+[html::h2 {Temporary Application Links}]
+
+[html::minorList {{Report A Bug} report.tml}]
+
 [html::h2 {Support Libraries}]
 
 <p>
