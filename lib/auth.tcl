@@ -213,7 +213,7 @@ proc AuthGetPass {sock file user} {
 	    return *
 	}
 	while {[gets $in line] >= 0} {
-	    if [regexp {^([^:]+):[ 	]*(.+)} $line x key value] {
+	    if [regexp {^([^:]+):[ 	]*([^:]+)} $line x key value] {
 		set info(user,$key) $value
 	    }
 	}
