@@ -26,6 +26,10 @@ rm -rf ${SCRATCH}/tclhttpd${HTTPD_VERSION}
 cvs -d /home/cvs checkout -r ${HTTPD_TAG} tclhttpd 
 mv tclhttpd tclhttpd${HTTPD_VERSION}
 chmod -R a+r tclhttpd${HTTPD_VERSION}
+chmod a+x tclhttpd${HTTPD_VERSION}/bin/httpd.tcl
+chmod a-x tclhttpd${HTTPD_VERSION}/bin/httpdthread.tcl
+chmod a+x tclhttpd${HTTPD_VERSION}/htdocs/cgi-bin/junk*
+find tclhttpd${HTTPD_VERSION}/htdocs -name "*.cgi" -exec chmod a+x {} \;
 
 rm -rf ${SCRATCH}/thread${THREAD_VERSION}
 cvs -d /home/cvs checkout -r ${THREAD_TAG} thread
