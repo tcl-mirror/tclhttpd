@@ -259,7 +259,11 @@ proc DocDomain {virtual directory sock suffix} {
 
     # Handle existing files
 
-    set path [file join $directory [string trimleft $suffix /]]
+    # The file join here is subject to attacks that create absolute
+    # pathnames outside the URL tree.  We trim left the / and ~
+    # to prevent those attacks.
+
+    set path [file join $directory [string trimleft $suffix /~]]
     if {[file exists $path]} {
 	Incr Doc(hit,$data(url))
 	DocHandle $path $suffix $sock

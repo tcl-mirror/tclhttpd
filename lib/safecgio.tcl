@@ -175,7 +175,7 @@ proc SafeCGI_Puts {interp max args} {
 	set chan [lindex $args 0]
 	set string [lindex $args 1]
     } else {
-	error "wrong # args: should be \"puts ?-nonewline? ?channelId? string\"
+	error "wrong # args: should be \"puts ?-nonewline? ?channelId? string\""
     }
     if {[string match "stdout" $chan"]} {
 	set size [string length $string]	;# Tell makes no sense

@@ -1304,7 +1304,7 @@ proc Httpd_SockClose {sock closeit {message Close}} {
 	    set data(cancel) [after $Httpd(timeout3) \
 		[list HttpdCloseFinal $sock]]
 
-	    Httpd_GetPostDataAsync $sock "" HttpdCloseFinal
+	    Httpd_GetPostDataAsync $sock "" $data(count) HttpdCloseFinal
 	} else {
 	    HttpdCloseFinal $sock
 	}

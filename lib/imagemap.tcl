@@ -42,9 +42,9 @@ proc MapPointInPoly {tx ty pgonArray} {
                                 incr crossings
 			}
                 } else {
-                        incr crossings [expr $pgon($lastvert,X) - ($y - $ty) *
-                        ($pgon(0,X) - $pgon($lastvert,X)) /
-                        ($p - $y)) >= $tx]
+                        incr crossings [expr {$pgon($lastvert,X) - ($y - $ty) *
+			    ($pgon(0,X) - $pgon($lastvert,X)) /
+			    ($p - $y)) >= $tx}]
                 }
         }
 
