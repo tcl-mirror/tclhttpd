@@ -25,7 +25,7 @@
 <ul>
 <li>a <a href="$page(url)">Link</a> can be used to link to this page, and reference this session.  Note the state(count) element incrementing on each access.</li>
 
-<li>this <a href="$page(url)?session=new">Link</a> reloads this page, and generates a new session, as does this <a href="$page(url)">Link</a>.</li>
+<li>this <a href="$page(url)?session=new">Link</a> reloads this page, and generates a new session.</li>
 <li>this <a href="$page(url)?session_cmd=save">Link</a> will save the session.</li>
 <hr><p><a href=".">return to index</a></p>
 [
