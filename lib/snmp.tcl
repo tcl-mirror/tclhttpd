@@ -439,7 +439,7 @@ proc Snmp_setMib {session mib} {
     	append result "<select name=\"[mib name $mib]\">\n"
     	foreach name $names {
 	    lassign-brent {choice index} $name
-	    if {$value == $choice} {set s " SELECTED"} {set s ""}
+	    set s [expr {("$value" == "$choice") ? "SELECTED" : ""}]
 	    append result "  <option value=$index$s>$choice\n"
 	}
 	append result "</select>"

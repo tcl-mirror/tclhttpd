@@ -270,8 +270,12 @@ proc Status/text {args} {
     return $html
 }
 
-proc Status/ {args} [info body Status/all]
-proc Status {args} [info body Status/all]
+proc Status/ {args} {
+    eval Status/all $args
+}
+proc Status {args} {
+    eval Status/all $args
+}
 
 proc Version {} {
     global tcl_patchLevel Httpd

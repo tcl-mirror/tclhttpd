@@ -143,7 +143,7 @@ proc Httpd_Shutdown {} {
     set ok 1
     foreach handler $Httpd(shutdown) {
 	if [catch {eval $handler} err] {
-	    Log "Shutdown: $handler:\n$err"
+	    Log "" "Shutdown: $handler" $err
 	    set ok 0
 	}
     }

@@ -301,3 +301,4 @@ Quick release to fix a number of quirks in the new 2.1.6 startup configuration
 
 ----------------- released 2.1.7 December 7, 1998 ------------------
 
+base64.tcl	Removed harmless extra ]

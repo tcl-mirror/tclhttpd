@@ -109,7 +109,7 @@ proc Url_Dispatch {sock} {
 		# these are all plugged up.
 		Count numfiles
 		Httpd_SockClose $sock 1 $error
-		File_Reset $sock $error
+		File_Reset
 	    } 
 	    default {
 		Doc_Error $sock $errorInfo
@@ -232,8 +232,16 @@ proc UrlDecodeData {data} {
     return [subst $data]
 }
 
-proc Url_DecodeQuery_application/x-www-form-urlencoded {query qualifiers} [info body Url_DecodeQuery_application/x-www-urlencoded]
-proc Url_DecodeQuery_application/x-ww-urlencoded {query qualifiers} [info body Url_DecodeQuery_application/x-www-urlencoded]
+# Sharing procedure bodies doesn't work with compiled procs,
+# so these call each other instead of doing
+# proc xprime [info args x] [info body x]
+
+proc Url_DecodeQuery_application/x-www-form-urlencoded {query qualifiers} {
+    Url_DecodeQuery_application/x-www-urlencoded $query $qualifiers
+}
+proc Url_DecodeQuery_application/x-ww-urlencoded {query qualifiers} {
+    Url_DecodeQuery_application/x-www-urlencoded $query $qualifiers
+}
 
 # steve: 5/8/98: This is a very crude start at parsing MIME documents
 # Return filename/content pairs

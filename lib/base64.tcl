@@ -63,7 +63,7 @@ proc Base64_Decode {string} {
 	}
 
 	if {[incr j -6] < 0} {
-		scan [format %06x $group]] %2x%2x%2x a b c
+		scan [format %06x $group] %2x%2x%2x a b c
 		append output [format %c%c%c $a $b $c]
 		set group 0
 		set j 18

@@ -14,7 +14,7 @@ proc SrvUI_Init {title} {
     option add *font 9x15
     
     wm title . $Httpd(name):$Httpd(port)
-    wm protocol . WM_DELLETE_WINDOW {Httpd_Shutdown; exit}
+    wm protocol . WM_DELETE_WINDOW {Httpd_Shutdown; exit}
     wm iconname . $Httpd(name):$Httpd(port)
     message .msg -text "$title\n$Httpd(name):$Httpd(port)\n$Doc(root)" -aspect 1000
     grid .msg -columnspan 2 -sticky news

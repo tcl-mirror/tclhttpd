@@ -15,7 +15,8 @@
 # There are also handlers for server errors and doc-not-found cases.
 # Template processing is supported by Doc_Subst.
 #
-# Stephen Uhler / Brent Welch (c) 1997 Sun Microsystems
+# Stephen Uhler / Brent Welch (c) 1997-1998 Sun Microsystems
+# Brent Welch (c) 1999 Scriptics Corporation
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
@@ -613,6 +614,15 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	}
     }
     return $html
+}
+
+# Doc_Dynamic
+#	Supress generation of HTML cache
+
+proc Doc_Dynamic {} {
+    global page
+    set page(dynamic) 1
+    return "<!-- DynamicOnly -->\n"
 }
 
 # Check modify times on all templates that affect a page

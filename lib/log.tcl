@@ -29,6 +29,11 @@ if {![info exists Log(compressProg)]} {
     set Log(compressProg) /usr/local/bin/gzip
 }
 
+# Flush interval
+if {![info exists Log(flushInterval)]} {
+    set Log(flushInterval) [expr {60 * 1000}]
+}
+
 
 proc Log {sock reason args} {
     global Log
