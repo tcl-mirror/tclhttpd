@@ -3,7 +3,8 @@ When a template is processed with subst, the following
 state information is available.  This page is used as
 an example.
 <p>
-<form action=$page(url) method=GET>Hit this page with form data: <input type=text name=data><br>
+<form action=$page(url) method=GET>Hit this page with form data:
+<input type=text [form::value data]><br>
 [form::radioset somevariable {&nbsp;} {
     orage Orange
     blu Blue
