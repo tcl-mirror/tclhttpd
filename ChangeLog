@@ -1,3 +1,7 @@
+2004-04-03 Jeffrey Rankin <jrankin@oneil.com>
+	* sampleapp/bugdb/htdocs/*.tml: Adjusted stylesheet reference
+	to account for reorg.
+
 2004-04-02 Jeffrey Rankin <jrankin@oneil.com>
 	* sampleapp/bugdb/htdocs/.tml: Added .tml which was left
 	out during the recent sampleapp reorganization.
