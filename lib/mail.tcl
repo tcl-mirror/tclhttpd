@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: mail.tcl,v 1.13 2004/05/09 05:46:42 coldstore Exp $
+# RCS: @(#) $Id: mail.tcl,v 1.14 2004/05/15 07:23:20 coldstore Exp $
 
 package provide httpd::mail 1.0
 
@@ -50,7 +50,7 @@ proc Mail_Send {recipients subject from type body} {
     set result [smtp::sendmessage $token \
 		    -recipients $recipients \
 		    -originator $from \
-		    -servers $Mail(mail)]
+		    -servers $Mail(server)]
     mime::finalize $token
     return $result
 }
