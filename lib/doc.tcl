@@ -533,10 +533,12 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     global Doc
 
     # Look for .tml library files down the hierarchy.
+
     set rlen [llength [file split $Doc(root)]]
     set dirs [lrange [file split [file dirname $template]] $rlen end]
 
-    # Set state in the interpreter about this page
+    # Populate the global "page" array with state about this page
+
     set root ""
     set prefix ""
     foreach d $dirs {
@@ -560,11 +562,17 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	filename	$filename	\
 	root		$root		\
 	dynamic		$dynamic	\
+	set-cookie	{}		\
     ]]]
+
+    # Populate the global "env" array similarly to the CGI environment
 
     Cgi_SetEnv $sock $filename pass
     interp eval $interp [list uplevel #0 \
 	[list array set env [array get pass]]]
+
+    # Duplicate this in the "cgienv" array.
+
     interp eval $interp [list uplevel #0 \
 	{catch {unset cgienv}}]
     interp eval $interp [list uplevel #0 \
@@ -602,10 +610,19 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 
     set html [DocSubst $template $interp]
 
-    # Cache the result
-    set dynamic [interp eval $interp {uplevel #0 {set page(dynamic)}}]
+    # Save return cookies, if any
 
+    if {![catch {
+	interp eval $interp {uplevel #0 {set page(set-cookie)}}
+    } cookie]} {
+	Httpd_SetCookie $sock $cookie
+    }
+
+    set dynamic [interp eval $interp {uplevel #0 {set page(dynamic)}}]
     if {!$dynamic} {
+
+	# Cache the result
+
 	catch {file delete -force $htmlfile}
 	if {[catch {open  $htmlfile w} out]} {
 	    set dynamic 1
