@@ -1,6 +1,15 @@
 2004-06-12 Colin McCormack <colin@chinix.com>
 	* htdoc/access/htman.tml - updated documentation
 	* lib/auth.tcl: removed obsolete reference to AuthDefaultFile
+	* lib/httpd.tcl: added filtering of content through Httpd_ReturnData
+	  and Httpd_ReturnCacheableData
+	* lib/url.tcl: added -filter option to Url_PrefixInstall,
+	  specifying a content filter.
+	* htdoc/man/{url,http}.man: updated for filtering changes.
+	* lib/{template,doc,fallback}.tcl: reorganised for
+	  generalised templates.
+	* lib/redirect.tcl: added Redirect_QuerySelf - Redirect_Self
+	  preserving query data
 
 2004-06-11 Colin McCormack <colin@chinix.com>
 	* lib/{auth,digest}.tcl: fixed Digest authentication bug
