@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cgi.tcl,v 1.20 2000/08/02 07:06:51 welch Exp $
+# RCS: @(#) $Id: cgi.tcl,v 1.21 2000/10/28 05:36:09 welch Exp $
 
 package provide httpd::cgi 1.0
 
@@ -52,11 +52,12 @@ proc Cgi_Directory {virtual {directory {}}} {
     if {[string length $directory] == 0} {
 	set directory [Doc_Virtual {} {} $virtual]
     }
-    # Set inThread to 0 to fork the CGI process directly from the main thread.
-    # Set it to 1 to dispatch it to a thread that forks.
 
-    set inThread 0
-    Url_PrefixInstall $virtual [list Cgi_Domain $virtual $directory] $inThread
+    # It doesn't make sense to pass the CGI processing to a thread
+    # because we are going to fork the process and do event driven I/O anyway.
+
+    Url_PrefixInstall $virtual [list Cgi_Domain $virtual $directory] \
+	-thread 0 -readpost 0
 }
 
 # Cgi_Domain is called from Url_Dispatch for URLs inside cgi-bin directories.
@@ -234,30 +235,60 @@ proc CgiSpawn {sock script} {
     set data(headerlist) {}	;# list of read headers
     set data(headercode) "200 data follows"	;# normal return
     fconfigure $fd -blocking 0
+
+    # Set up a timer in case it hangs
+
+    set data(cancel) [after $Cgi(timeout) CgiCancel $fd $sock]
+
     if {$data(proto) == "POST"} {
+	if {$data(count) == 0} {
 
-	# We are not using fcopy here so that the Httpd module
-	# can keep track of how much post data is left.
+	    # Either there was no POST data, or we are inside a domain
+	    # that automatically read the POST data into data(query) already
+	    # Errors appear here because of the non-blocking writes.
 
-	set more 1 
-	set buffer ""
-	while {$more > 0} {
-	    set more [Httpd_GetPostData $sock buffer 8192]
-	    puts -nonewline $fd $buffer
-	    set buffer {}
+	    catch {
+		puts -nonewline $fd $data(query)
+		flush $fd
+	    }
+	} else {
+
+	    # Pump the query data to the CGI process in the background
+	    # We set up fileevents after this finishes, so return now
+
+	    fcopy $sock $fd -command [list CgiCopyDone $sock $fd] -size $data(count)
+	    return
 	}
-
-	# Errors appear here because of the non-blocking writes.
-
-	catch {flush $fd}
     }
 
-    # In a worker thread, this is not really a socket, hence the catch.
-
-    catch {fileevent $sock readable [list CgiCleanup $fd $sock]}
-    fileevent $fd readable [list CgiRead $fd $sock]
-    set data(cancel) [after $Cgi(timeout) CgiCancel $fd $sock]
+    CgiCopyDone $sock $fd $data(count) ""
 }
+
+# CgiCopyDone --
+#
+#	Called when we have finished copying POST data to the CGI process
+
+proc CgiCopyDone {sock fd bytes {errmsg {}}} {
+    upvar #0 Httpd$sock data
+
+    # Reset this otherwise the Httpd module tries to read the
+    # extra data
+
+    set data(count) 0
+
+    if {[string length $errmsg]} {
+	CgiCancel
+    } else {
+	# Wait for output from the CGI process (CgiRead)
+	# Watch the socket (CgiCleanup)
+	# In a worker thread, this is not really a socket, hence the catch.
+
+	catch {fileevent $sock readable [list CgiCleanup $fd $sock]}
+	fileevent $fd readable [list CgiRead $fd $sock]
+    }
+}
+
+# Execute the CGI process.
 
 proc CgiExec {script arglist} {
     global tcl_platform
@@ -309,12 +340,12 @@ proc CgiExec {script arglist} {
 proc CgiRead {fd sock} {
     upvar #0 Httpd$sock data
     global Cgi Httpd
+
     if {[eof $fd]} {
 	CgiClose $fd $sock
     } elseif {[catch {
-	# Socket may have gone away
-
 	if {!$data(header)} {
+
 	    # Read and accumulate headers until we know what kind
 	    # of response to make
 
@@ -336,42 +367,49 @@ proc CgiRead {fd sock} {
 		}
 	    }
 	} else {
+
 	    CgiCopy $fd $sock
 	}
     } oops]} {
+	# Socket may have gone away
 	CgiCancel $fd $sock
     }
 }
 
+# Emit the header, handling the case where we are in a worker thread.
+
 proc CgiPutHeader {sock header} {
     upvar #0 Httpd$sock data
-    if {[info exist data(master_thread)] && 
-	    $data(master_thread) != [Thread_Id]} {
+    if {[info exist data(master_thread)] &&
+            $data(master_thread) != [Thread_Id]} {
 
-	Thread_Send $data(master_thread) \
-	    [list CgiCopyDirect $sock $header]
-	Thread_Send $data(master_thread) \
-	    [list fconfigure $sock -translation binary]
+        Thread_Send $data(master_thread) \
+            [list CgiCopyDirect $sock $header]
+        Thread_Send $data(master_thread) \
+            [list fconfigure $sock -translation binary]
     } else {
-	puts -nonewline $sock $header
+        puts -nonewline $sock $header
     }
 
 }
+
+# Copy data from the pipe to the socket
+
 proc CgiCopy {fd sock} {
     upvar #0 Httpd$sock data
     global Httpd
 
     fconfigure $fd -translation binary
-    if {[info exist data(master_thread)] && 
-	    $data(master_thread) != [Thread_Id]} {
-	# Read the data and copy it to the main thread for return.
-	# Quick and dirty until we can transfer file descriptors.
-	# The pipe is already non-blocking - read what we can
+    if {[info exist data(master_thread)] &&
+            $data(master_thread) != [Thread_Id]} {
+        # Read the data and copy it to the main thread for return.
+        # Quick and dirty until we can transfer file descriptors.
+        # The pipe is already non-blocking - read what we can
 
-	Thread_SendAsync $data(master_thread) \
-		    [list CgiCopyDirect $sock [read $fd]]
+        Thread_SendAsync $data(master_thread) \
+                    [list CgiCopyDirect $sock [read $fd]]
 
-	return
+        return
     }
 
     # Normal one-thread case - set up to copy data from pipe to socket
@@ -387,31 +425,14 @@ proc CgiCopyDirect {sock block} {
     flush $sock
 }
 
-proc CgiClose {fd sock {bytes {}} {error {}}} {
-    global Cgi
-    upvar #0 Httpd$sock data
+# This is installed after running the sub-process to
+# check for eof on the socket before the processing is complete.
 
-    catch {after cancel $data(cancel)}
-    incr Cgi(cgi) -1
-    if {![info exists data(header)]} {
-	Httpd_Error $sock 204
-    } else {
-
-	if {[info exist data(master_thread)] && 
-		$data(master_thread) != [Thread_Id]} {
-	    catch {close $fd}
-		    Thread_Send $data(master_thread) \
-			[list Httpd_SockClose $sock 1]
-		    Thread_SendAsync $data(master_thread) \
-			[list HttpdFreeThread [Thread_Id]]
-
-	} else {
-	    Httpd_SockClose $sock 1
-	}
-
-    }
-    if {[string length $error] > 0} {
-	Log $sock CgiClose $error
+proc CgiCleanup {fd sock} {
+    fconfigure $sock -blocking 0 -translation auto
+    set n [gets $sock line]
+    if [eof $sock] {
+	CgiCancel $fd $sock
     }
 }
 
@@ -425,14 +446,20 @@ proc CgiCancel {fd sock} {
     CgiClose $fd $sock
 }
 
-# This is installed after running the sub-process to
-# check for eof on the socket before the processing is complete.
+# Close down the CGI connection
 
-proc CgiCleanup {fd sock} {
-    fconfigure $sock -blocking 0 -translation auto
-    set n [gets $sock line]
-    if [eof $sock] {
-	CgiCancel $fd $sock
+proc CgiClose {fd sock {bytes {}} {error {}}} {
+    global Cgi
+    upvar #0 Httpd$sock data
+
+    catch {after cancel $data(cancel)}
+    incr Cgi(cgi) -1
+    if {![info exists data(header)]} {
+	Httpd_Error $sock 204
+    } else {
+	Httpd_SockClose $sock 1
+    }
+    if {[string length $error] > 0} {
+	Log $sock CgiClose $error
     }
 }
-

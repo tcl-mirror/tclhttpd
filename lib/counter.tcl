@@ -15,7 +15,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: counter.tcl,v 1.14 2000/10/20 17:51:26 welch Exp $
+# RCS: @(#) $Id: counter.tcl,v 1.15 2000/10/28 05:36:09 welch Exp $
 
 # Layer ourselves on top of the Standard Tcl Library counter package.
 
@@ -61,7 +61,7 @@ proc Counter_Init {{secsPerMinute 60}} {
     # These are simple counters about each kind of connection event
 
     foreach c {accepts sockets connections urlreply keepalive connclose 
-		http1.0 http1.1} {
+		http1.0 http1.1 cgihits} {
 	counter::init $c
     }
     Httpd_RegisterShutdown Counter_CheckPoint
