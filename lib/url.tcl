@@ -61,32 +61,32 @@ proc Url_Dispatch {sock} {
     regsub -nocase  {(^http://[^/]+)?} $data(url) {} url
 
     # Dispatch to cached handler for the URL, if any
-    if {(![info exists data(query)] || [string length $data(query)] == 0) \
+
+    if {![info exists data(query)] && [Httpd_PostDataSize $sock] == 0 
 	    && [info exists UrlCache($url)]} {
 	Count cachehit,$url
-	if {[catch {
-	    eval $UrlCache($url) {$sock}
-	}]} {
-	    catch {Url_UnCache $sock}
-	} else {
+	set code [catch { eval $UrlCache($url) {$sock} } error]
+	if {$code == 0} {
 	    return
 	}
-    }
-    set code [catch {
-	# Prefix match the URL to get a domain handler
-	# Fast check on domain prefixes with regexp
-	# Check that the suffix starts with /, otherwise the prefix
-	# is not a complete component.  E.g., "/tcl" vs "/tclhttpd"
-	# where /tcl is a domain prefix but /tclhttpd is a directory
-	# in the / domain.
+	catch {Url_UnCache $sock}
+    } else {
+	set code [catch {
+	    # Prefix match the URL to get a domain handler
+	    # Fast check on domain prefixes with regexp
+	    # Check that the suffix starts with /, otherwise the prefix
+	    # is not a complete component.  E.g., "/tcl" vs "/tclhttpd"
+	    # where /tcl is a domain prefix but /tclhttpd is a directory
+	    # in the / domain.
 
-	if {![regexp ^($Url(prefixset))(.*) $url x prefix suffix] ||
-		([string length $suffix] && ![string match /* $suffix])} {
-	    # Fall back and assume it is under the root
-	    regexp ^(/)(.*) $url x prefix suffix
-	}
-	eval $Url(command,$prefix) {$sock $suffix}
-    } error]
+	    if {![regexp ^($Url(prefixset))(.*) $url x prefix suffix] ||
+		    ([string length $suffix] && ![string match /* $suffix])} {
+		# Fall back and assume it is under the root
+		regexp ^(/)(.*) $url x prefix suffix
+	    }
+	    eval $Url(command,$prefix) {$sock $suffix}
+	} error]
+    }
 
     if {$code != 0} {
 	global errorInfo
