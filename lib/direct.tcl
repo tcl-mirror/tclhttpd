@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.20 2004/10/22 03:43:06 coldstore Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.21 2004/11/20 07:10:04 coldstore Exp $
 
 package provide httpd::direct 1.1
 
@@ -102,7 +102,7 @@ proc DirectDomain {prefix sock suffix} {
 	set type $aType
     }
 
-    DirectRespond $sock $code $result $type
+    Direct_Respond $sock $code $result $type
 }
 
 # Direct_MarshallArguments --
@@ -171,7 +171,7 @@ proc Direct_MarshallArguments {prefix suffix} {
     return $cmd
 }
 
-# DirectRespond --
+# Direct_Respond --
 #
 #	This function returns the result of evaluating the direct
 #	url.  Usually, this involves returning a page, but a redirect
@@ -195,7 +195,7 @@ proc Direct_MarshallArguments {prefix suffix} {
 #	will cause a stack trace to be returned to the client.
 #
 
-proc DirectRespond {sock code result {type text/html}} {
+proc Direct_Respond {sock code result {type text/html}} {
     switch $code {
 	0 {
 	    # Fall through to Httpd_ReturnData.

@@ -1,3 +1,8 @@
+2004-11-20 Colin McCormack <colin@sharedtech.dyndns.org>
+	* lib/direct.tcl: export DirectRespond as Direct_Respond
+	It makes no sense to export Direct_Marshall, and not Direct_Respond
+	Direct_Respond is generally useful in custom domains.
+	
 2004-11-07 Michael Thomas <wart@kobold.org>
         * config/tcl.m4:  Add the value that was passed to the --libdir
           configure switch to the search path for tclConfig.sh
