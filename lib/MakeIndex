@@ -1,0 +1,2 @@
+#!/usr/local/bin/tclsh8.0
+pkg_mkIndex -verbose -direct . *.tcl
