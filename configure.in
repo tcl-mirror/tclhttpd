@@ -31,6 +31,9 @@ VERSION=${MAJOR_VERSION}.${MINOR_VERSION}${PATCHLEVEL}
 NODOT_VERSION=${MAJOR_VERSION}${MINOR_VERSION}
 WIN_VERSION=`echo ${VERSION} | sed -e 's/\.//g'`
 
+TCL_VERSION=8.3.1
+TCLLIB_VERSION=0.4
+
 # We build two minor packages for the crypt and limit C extensions
 
 CRYPT_PACKAGE=crypt
@@ -54,6 +57,9 @@ AC_SUBST(WIN_CRYPT_VERSION)
 AC_SUBST(LIMIT_PACKAGE)
 AC_SUBST(LIMIT_VERSION)
 AC_SUBST(WIN_LIMIT_VERSION)
+
+AC_SUBST(TCL_VERSION)
+AC_SUBST(TCLLIB_VERSION)
 
 #--------------------------------------------------------------------
 # We put this here so that you can compile with -DVERSION="1.2" to
