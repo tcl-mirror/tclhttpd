@@ -222,18 +222,23 @@ open.tcl
 
 auth.tcl
 	Added REMOTE_USER and AUTH_TYPE environment variable settings
+	Fixed handling of .htaccess files in the root directory
 
 cgi.tcl
 	Improvements to work under Windows - including a filter on
 	what environment variables must be preserved,  plus the server
 	watches the reply so CGI scripts can return MIME headers
 	and 302 return codes, etc.
+	Added explicit handling of .tcl, .pl, and .cgi files
 
 httpd.tcl
 	Added GMT to HttpdDate
 
 utime.c
 	New file to implement the utime() system call
+
+doc.tcl, url.tcl
+	Added Steve Ball's parser for multipart/form-data
 
 ---- 2.1.4 released, sources put up on netCVS ---
 ---- see http://www.scriptics.com/software/netcvs.html ----

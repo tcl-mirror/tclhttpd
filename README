@@ -4,7 +4,7 @@ Brent is now at Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Last update: Mon Aug 10 22:38:01 PDT 1998
+Last update: Tue Oct  6 17:17:15 PDT 1998
 
 It requires Tcl7.5 and Tk4.1, or higher.
 It works with the latest 8.0 release.
@@ -18,8 +18,7 @@ For a quick test that runs a server on port 8015, do
 UNIX:
 	tclsh bin/httpd -debug
 Windows:
-	Run wish or tclsh and source the bin/win95 script
-	NOTE: Cgi_Spawn in cgi.tcl doesn't work right.
+	Run wish or tclsh and source the bin/win95.tcl script
 Macintosh:
 	You'll need to edit httpd and tune the file names because I
 	haven't gotten around to this yet. Then source the file from
@@ -52,3 +51,6 @@ ftp://ftp.scriptics.com/pub/tcl/httpd/
 There is documentation at
 http://www.beedub.com/tclhttpd/
 http://www.scriptics.com/tclhttpd/
+
+There is a netCVS repository on cvs.scriptics.com.
+For details, please see http://www.scriptics.com/software/netcvs.html
