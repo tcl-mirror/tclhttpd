@@ -35,11 +35,11 @@ if {[catch {package require Random}]} {
     }]} {
 	set seed [clock clicks]
     }
-    ::random::isaac seed $seed	;# seed random
+    ::isaac::isaac seed $seed	;# seed random
 
     # get an integer secret
     proc DigestRand {} {
-	return [::random::isaac integer]
+	return [::isaac::isaac integer]
     }
 }
 set DigestSecret [DigestRand]
