@@ -7,12 +7,18 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.1 2000/01/20 23:31:00 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.2 2000/01/26 21:31:41 wart Exp $
 
 # TEMPORARY:  Values for the dist target.
 
 DISTDIR=/tmp/
 DEST=${DISTDIR}/tclhttpd${VERSION}
+
+PACKAGE = @PACKAGE@
+VERSION = @VERSION@
+
+SERVERROOT = @SERVERROOT@
+htdocsdir = $(SERVERROOT)/htdocs
 
 HTDOCS_FILES = \
 	error.html \
@@ -177,7 +183,6 @@ top_srcdir = @top_srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 bindir = @bindir@
-htdocsdir = $(prefix)/htdocs
 
 pkglibdir = ${prefix}/lib/@PACKAGE@@VERSION@
 

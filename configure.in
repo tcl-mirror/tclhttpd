@@ -18,6 +18,21 @@ eval AC_DEFINE_UNQUOTED(VERSION, "${VERSION}")
 AC_PROG_INSTALL
 
 #--------------------------------------------------------------------
+# Let users specify a different directory in which to place the htdocs
+# tree.
+#--------------------------------------------------------------------
+
+AC_ARG_WITH(serverroot, [ --with-serverroot=DIR             Directory in which to install document root], SERVERROOT=${withval}, SERVERROOT="")
+
+if test "x${SERVERROOT}" = x ; then
+    SERVERROOT='$(prefix)'
+else
+    AC_MSG_WARN(You will have to modify your tclhttpd.rc file to point to the new document root)
+fi
+
+AC_SUBST(SERVERROOT)
+
+#--------------------------------------------------------------------
 # "cygpath" is used on windows to generate native path names for include
 # files.
 # These variables should only be used with the compiler and linker since
