@@ -23,6 +23,8 @@
 	    Removed data(ssl), data(code).
 	Added better catching around the routines that generate
 	replies in case the socket goes bad.
+	Added Httpd_Resume and Httpd_CurrentSocket to help domains that
+	use Httpd_Suspend find their context again.
 	* lib/url.tcl:
 	Generalized Url_PrefixInstall to take option, value pairs.  This
 	is done in a backwards compatible way.  The new signature is:
