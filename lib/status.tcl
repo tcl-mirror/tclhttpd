@@ -300,9 +300,9 @@ proc StatusMinuteHist {array title time {unit minute}} {
 	setmax max $value
     }
     switch $unit {
-	minute	{set bar 3}
-	hour	{set bar 5}
-	day	{set bar 5}
+	minute	{set width 3}
+	hour	{set width 5}
+	day	{set width 5}
     }
     append result "<h3>$title ($max max)</h3>"
     append result <ul>
@@ -329,11 +329,13 @@ proc StatusMinuteHist {array title time {unit minute}} {
 	    puts "Skipping $percent"
 	    continue
 	}
-	set width [expr {$percent * $base / 100}]
+	set height [expr {$percent * $base / 100}]
 	if {$marker} {
-	    append result "<td valign=bottom><hr size=$width width=$bar></td>\n"
+	    append result "<td valign=bottom><img src=/images/Red.gif height=$height width=$width XYZ></td>\n"
+#	    append result "<td valign=bottom><hr size=$height width=$width></td>\n"
 	} else {
-	    append result "<td valign=bottom><hr NOSHADE size=$width width=$bar></td>\n"
+	    append result "<td valign=bottom><img src=/images/Blue.gif  height=$height width=$width ABC></td>\n"
+#	    append result "<td valign=bottom><hr NOSHADE size=$height width=$width></td>\n"
 	}
     }
     append result "</tr>"
