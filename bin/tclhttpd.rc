@@ -112,15 +112,15 @@ Config threads		0
 # The parameters below here are not settable via the command line
 
 # LogFile - the file used for standard logging informaation.
-# This is actually the prefix of the name.  The current date stamp
+# This is actually the prefix of the name.  The port and current date stamp
 # is append to this file, and it is rolled every night at midnight
 
-Config LogFile	[file join /tmp log[Config port]_ ]
+Config LogFile	[file join /tmp log ]
 
 # LogFlushMinutes - how frequently the log file is flushed to disk.
 # Use 0 to have each URL request cause a log flush.
 
-Config LogFlushMinutes 1
+Config LogFlushMinutes 0
 
 # MaxFileDescriptors - the maximum number of file descriptors the
 # server can have open.  This impacts the number of simultaneous

@@ -42,7 +42,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.31 2000/09/22 05:39:04 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.32 2000/09/25 22:47:35 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -304,7 +304,7 @@ if {[catch {source $Config(main)} message]} then {
 
 # The main thread owns the log
 
-Log_SetFile		[cget LogFile]
+Log_SetFile		[cget LogFile]$Config(port)_
 Log_FlushMinutes	[cget LogFlushMinutes]
 Log_Flush
 
