@@ -31,5 +31,4 @@
 [
  unset session
  Session_Reap 500 Demo
- ::session::debug
 ]
