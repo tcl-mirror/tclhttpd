@@ -1,4 +1,10 @@
 2004-04-20 Brent Welch <welch@panasas.com>
+	* lib/session.tcl: Fixed a couple of typos.  Moved the
+        "file mkdir" of the sessions save directory into Session_Save
+        because this doesn't work in the starkit version.  We should
+        still fix the default sessions dir so it isn't under htdocs
+
+2004-04-20 Brent Welch <welch@panasas.com>
 	* DIST_build/DIST: Added generation of tclhttpd.kit starkit
 
 2004-04-21 Colin McCormack <colin@chinix.com>
