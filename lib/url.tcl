@@ -66,8 +66,13 @@ proc Url_Dispatch {sock} {
 
 	if {![regexp ^($Url(prefixset))(.*) $url x prefix suffix] ||
 		([string length $suffix] && ![string match /* $suffix])} {
+
 	    # Fall back and assume it is under the root
-	    regexp ^(/)(.*) $url x prefix suffix
+	    # The /+ gobbles extra /'s that might be used to sneak
+	    # out to the root of the file hierarchy.
+
+	    regexp ^(/+)(.*) $url x prefix suffix
+	    set prefix /
 	}
 
 	# END INLINE
@@ -137,7 +142,8 @@ proc Url_PrefixMatch {url prefixVar suffixVar} {
 	    ![regexp ^($Url(prefixset))(.*) $url x prefix suffix] ||
 	    ([string length $suffix] && ![string match /* $suffix])} {
 	# Fall back and assume it is under the root
-	regexp ^(/)(.*) $url x prefix suffix
+	regexp ^(/+)(.*) $url x prefix suffix
+	set prefix /
     }
 }
 

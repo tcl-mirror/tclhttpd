@@ -389,7 +389,6 @@ proc CgiClose {fd sock {bytes {}} {error {}}} {
 
 	if {[info exist data(master_thread)] && 
 		$data(master_thread) != [Thread_Id]} {
-    puts stderr "Thread [Thread_Id] sending free msg to master $data(master_thread)"
 	    catch {close $fd}
 		    Thread_Send $data(master_thread) \
 			[list Httpd_SockClose $sock 1]

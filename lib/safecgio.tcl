@@ -20,7 +20,7 @@ package provide safecgio 1.0
 
 proc SafeCGI_Server {port} {
     if {[catch {socket -server SafeCGI_Accept $port} oops]} {
-	puts stderr "SafeCGI_Server: $oops"
+	catch {puts stderr "SafeCGI_Server: $oops"}
 	exit 1
     }
 }
@@ -74,7 +74,7 @@ proc SafeCGIDo {sock filename} {
 	} result]} {
 	    puts -nonewline $sock $result
 	} else {
-	    puts stderr "$argv0 Error in $filename\n\t<$result>"
+	    Log $sock SafeCGIDo "$argv0 Error in $filename\n\t<$result>"
 	}
 	interp delete $child		;# Does close of transferred fd
     }
@@ -205,5 +205,5 @@ proc SafeCGI_Close {interp chan} {
 
     proc bgerror {msg} {
 	global errorInfo
-	puts stderr $errorInfo
+	catch {puts stderr $errorInfo}
     }

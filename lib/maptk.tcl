@@ -43,7 +43,7 @@ proc Map_Lookup {request} {
 
 proc MapRead {file} {
     if {[catch {open $file} fd]} {
-	puts stderr $fd
+	Log "" "file open" $fd
 	return {}
     }
     regsub -all  {\.}  $file _ cookie
