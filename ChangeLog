@@ -1,3 +1,8 @@
+2004-04-14 Colin McCormack <colin@chinix.com>
+	* lib/subst.tcl: Fixed list quote bug in Subst_File preventing subst
+	of filenames with spaces and bug subst'ing links, both in directory
+	subst hack.
+
 2004-04-03 Jeffrey Rankin <jrankin@oneil.com>
 	* sampleapp/bugdb/htdocs/*.tml: Adjusted stylesheet reference
 	to account for reorg.
