@@ -7,7 +7,7 @@ package provide utils 1.0
 # Stderr - print to standard error
 
 proc Stderr {string} {
-    puts stderr $string
+    catch {puts stderr $string}
 }
 # iscommand - returns true if the command is defined  or lives in auto_index.
 
