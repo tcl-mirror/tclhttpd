@@ -1,75 +1,151 @@
 # tclhttpd.rc
 #
-# This is the default configuration file for TclHttpd, the Tcl Web Server
+# This is the default configuration file for TclHttpd
+#
+# Note - you should assume that all the paramters listed here 
+# are required in one place or another.  If you want to "delete"
+# a parameter you should set the associated value to the
+# empty string, which is written either "" or {}
+#
+# This file is processed in a safe interpreter.  The only side
+# effects it has are through the Config command.  Given two arguments,
+# the Config command sets a parameter.  With a single argument,
+# it returns the value of that parameter.
 
-# The Config array is set from the command line options or
-# from defaults defined in httpd
-# You can set them here, but then they smash any command-line values
+# Config parameters in all lower-case have a command line
+# argument alternative (see httpd.tcl)
+# You can specify a value on the command line to override
+# what is in this configuration file.
 
-# Config Array
-# Element	Default
-# host		[info hostname]
-# port		8015
-# debug		0
-# docRoot	[file join $home htdocs]
-# ipaddr	{}
-# webmaster	webmaster@[info hostname]
-# uid		50
-# gid		100
+# docRoot - the name of the file system directory containing
+# the root of your document tree.
 
-# These packages are required for "normal" web servers
+Config docRoot		[file join [Config home] ../htdocs]
 
-package require doc		;# Basic file URLS
-package require include		;# Server side includes
-package require cgi		;# Standard CGI
-package require dirlist		;# Directory listings
+# uid - the server executes as the following user ID.
+# If you have TclX available, these can be user names.
+# If you use the simple "setuid" extension, this must be a number.
 
-# These packages are for special things built right into the server
+Config uid		50
 
-package require direct		;# Application Direct URLs
-package require status		;# Built in status counters
-package require mail		;# Crude email support
-package require admin		;# Url-based administration
-package require session		;# Session state module (better Safe-Tcl)
-package require debug		;# Debug utilites
+# gid - the server executes as the following group ID.
+# If you are using .tml templates then the server will try
+# to cache corresponding .html files.  Put the server into
+# the group that has write permission to the htdocs area
+# so it can do this.  If it cannot write the cache files it
+# just has to process the template on every URL request.
 
-# This is currently broken
-if {0} {
-    package require safetcl	;# External process running safetcl shells
-}
+Config gid		50
 
-# These packages are for the SNMP demo application
+# host - the name of the server (i.e., www.yourcompany.com)
+# This should be fully qualified.
 
-if {[catch {
-    package require snmp       ;# SNMP form creation
-    package require Tnm        ;# Low level network stuff
-}]} {
-    puts "No SNMP support"
-}
+Config host		[info hostname]
 
-# For information about these calls, see htdocs/reference.html
+# port - the listening port for the server for HTTP requests.
+# The standard web port is 80.
 
-Doc_Root		$Config(docRoot)
-Doc_IndexFile		index.{tml,html,shtml,thtml,htm,subst}
-Doc_PublicHtml		public_html
-Cgi_Directory		/cgi-bin
-Status_Url		/status
-Debug_Url		/debug
-Mail_Url		/mail
-Admin_Url		/admin
-Redirect_Init		/redirect
-Doc_TemplateInterp	{}
-Doc_CheckTemplates	1
-Doc_TemplateLibrary	[file join $Config(docRoot) libtml]
-Doc_ErrorPage		/error.html
-Doc_NotFoundPage	/notfound.html
-Doc_Webmaster		$Config(webmaster)
-if {[catch {
-    Auth_AccessFile	.htaccess       ;# Enable Basic Auth
-} err]} {
-    puts "No Basic Authentication support: $err"
-}
+Config port		8015
 
-Log_SetFile		/tmp/log$Config(port)_
-Log_FlushMinutes	1
+# https_port - the listening port for the server for HTTPS requests.
+# The standard SSL port is 443.
+
+Config https_port	8016
+
+# ipaddr - the IP address of the server's end of the HTTP socket.
+# Only specify this if you have a machine with several IP addresses
+# and you want the server to only listen on one IP address.
+# If this is the empty string, then it will listen on all
+# network interfaces for connections.
+
+Config ipaddr	{}
+
+# https_ipaddr - ditto, but for https (i.e., SSL) connections
+
+Config https_ipaddr	{}
+
+# webmaster - an email address for error mailings
+
+Config webmaster	webmaster@[info hostname]
+
+# library - additional directory to add to the auto_path
+# If you add custom code to the server, put it in this directory.
+
+Config library		{}
+
+# threads - the maximum number of worker threads to create.
+# If 0, then no threads are ever used.
+
+Config threads		0
+
+#####################
+
+# The parameters below here are not settable via the command line
+
+# LogFile - the file used for standard logging informaation.
+# This is actually the prefix of the name.  The current date stamp
+# is append to this file, and it is rolled every night at midnight
+
+Config LogFile	[file join /tmp log[Config port]_ ]
+
+# LogFlushMinutes - how frequently the log file is flushed to disk.
+# Use 0 to have each URL request cause a log flush.
+
+Config LogFlushMinutes 1
+
+# MaxFileDescriptors - the maximum number of file descriptors the
+# server can have open.  This impacts the number of simultaneous
+# client requests it can have open.
+
+Config MaxFileDescriptors	256
+
+#########################
+# SSL Configuration
+
+# SSL_REQUEST - should the server ask for certificates?
+
+Config SSL_REQUEST	1
+
+# SSL_REQUIRE - should the server require certificates?
+
+Config SSL_REQUIRE	0
+
+# SSL_CADIR - the directory containing Certificate Authority
+# certificate files.  If you have only one such file, you can use
+# SSL_CAFILE described below.
+
+Config SSL_CADIR	[Config lib]
+
+# SSL_CAFILE - the file containing the Certificate Authority
+# certificate.  If this is empty, then the directory specified by
+# SSL_CADIR is scanned for certificate files.
+
+Config SSL_CAFILE 	{}
+
+# SSL_CERTFILE - The server's certificate.
+
+Config SSL_CERTFILE	[file join [Config lib] server.pem]
+
+# SSL_KEYFILE - The server's key file.  If this is empty,
+# then just use the SSL_CERTFILE
+
+Config SSL_KEYFILE	""
+
+# USE_SSL2 - Allow the use of SSL version 2 
+# (You cannot get this with a "no patents" build of OpenSSL)
+
+Config SSL_v2		0
+
+# USE_SSL3 - Allow the use of SSL version 3
+
+Config SSL_v3		1
+
+# USE_TLS1 - ??
+
+Config SSL_TLS1		0
+
+# SSL_CIPHERS - list of SSL ciphers to support.  If this is empty,
+# then all the ciphers supported by the SSL implementation are available.
+
+Config SSL_CIPHERS	{}
 

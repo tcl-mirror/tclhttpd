@@ -4,20 +4,39 @@
 #
 # This is the main script for an HTTP server. 
 # To test out of the box, do
-# tclsh httpd -debug
+# tclsh httpd.tcl -debug 1
 # or
-# wish httpd -debug
+# wish httpd.tcl -debug 1
 #
 # Ordinarily you'll not want to edit this file.
 # For a quick spin, just pass the appropriate settings via the command line.
 # For fully custom operation, copy tclhttpd.rc to your own configuration file,
 # modify it, and specify it as the value of the -config command line option.
 #
-# Tcl 7.5 or higher is required, this works with the latest version of Tcl 8.0, too
+# A note about the code structure:
+# httpd.tcl	This file, which is the main startup script.  It does
+#		command line processing, sets up the auto_path, and
+#		loads tclhttpd.rc and main.tcl.  This file also opens
+#		the server listening sockets and does setuid, if possible.
+# tclhttpd.rc	This has simple configuration settings like port and host
+# main.tcl	This has the bulk of the initialization code.  It is
+#		split out into its own file because it is loaded by
+#		worker threads if you are using the thread feature.
+# ../lib	The script library that contains most of the TclHttpd
+#		implementation
+# ../tcllib	The Standard Tcl Library.  TclHttpd ships with a copy
+#		of this library because it depends on it.  If you already
+#		have copy installed TclHttpd will attempt to find it.
 #
+# TclHttpd now requires Tcl 8.0 or higher because it depends on some
+#	modules in the Standard Tcl Library (tcllib) that use namespaces.
+#	In practice, some of the modules in tcllib may depend on
+#	new string commands introduced in Tcl 8.2 and 8.3.  However,
+#	the server core only depends on the base64 and ncgi packages
+#	that may/should be/are compatible with Tcl 8.0
 #
 # Copyright (c) 1997 Sun Microsystems, Inc.
-# Copyright (c) 1998 Scriptics Corporation
+# Copyright (c) 1998-2000 Scriptics Corporation
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -25,15 +44,49 @@
 # \
 exec tclsh8.0 "$0" ${1+"$@"}
 
+############
+# auto_path
+############
+
 # Configure the auto_path so we can find the script library.
-# It the source distribution it is in a peer directory of bin.
-# It may also be in a "standard" location as a peer of the Tcl library.
-# home is our location
+# home is the directory containing this script
 
 set home [string trimright [file dirname [info script]] ./]
 set home [file join [pwd] $home]
-set Config(lib) [file join [file dirname $home] lib]
+
+# Auto-detect the configuration
+# 1. Development - look for $home/../lib and $home/../../tcllib/modules
+# 2. Standalone install - look for $home/../lib $home/tcllib
+# 3. Tcl package install - look for $tcl_library/../tclhttpd3.0 
+
+if {[file exist [file join $home ../lib/httpd.tcl]]} {
+    # Cases 1 and 2
+    set Config(lib) [file join $home ../lib]
+} else {
+    tcl_findLibrary tclhttpd 3.0 "" version.tcl TCL_HTTPD_LIBRARY Config(lib)
+}
+if {![info exist Config(lib)]} {
+    error "Cannot find TclHttpd library in auto_path:\n[join $auto_path \n]"
+}
 lappend auto_path $Config(lib)
+
+# Search around for the Standard Tcl Library
+
+if {![catch {package require base64 2.0}]} {
+    # Already available in environment
+} elseif {[file exist [file join $home ../tcllib]]} {
+    lappend auto_path [file join $home ../tcllib]
+} else {
+    # Look for the CVS development sources
+    set cvs [lindex [lsort -decreasing \
+	[glob -nocomplain [file join $home ../../tcllib*]]] 0]
+    if {[file exist [file join $cvs modules]]} {
+	lappend auto_path [file join $cvs modules]
+    } else {
+	error "Cannot find Standard Tcl Library in auto_path:\n[join $auto_path \n]"
+    }
+}
+
 set Config(home) $home
 unset home
 
@@ -44,107 +97,109 @@ regsub -all { } $tcl_platform(os) {} tmp
 foreach dir [list \
 	[file join $Config(lib) Binaries $tmp] \
 	[file join $Config(lib) Binaries $tmp $tcl_platform(osVersion)] \
-	$Config(lib)] {
+	] {
     if {[file isdirectory $dir]} {
 	lappend auto_path $dir
     }
 }
 unset tmp dir
 
-#
-# Define the command line option processing procedure
-# The options are mapped into elements of the Config array
-#
-package require opt
-::tcl::OptProc _ProcessOptions [list \
-        [list -docRoot      -any    [file join [file dirname $Config(home)] htdocs]      {Root directory for documents}] \
-        [list -port         -int    8015                              {Port number server is to listen on}] \
-        [list -host         -any    [info hostname]                 {Server name, should be fully qualified}] \
-        [list -ipaddr       -any    {}                              {Interface server should bind to}] \
-        [list -webmaster    -any    webmaster@[info hostname]       {E-mail address for errors}] \
-        [list -uid          -int    50                              {User Id that server ans scripts are to run under}] \
-        [list -gid          -int    100                             {Group Id for caching templates}] \
-        [list -limit        -int    256                              {File descriptor limit}] \
-        [list -config       -any    [file join $Config(home) tclhttpd.rc]   {Configuration File}] \
-        [list -library      -any    {}                              {Directory list where custom packages and auto loads are}] \
-	[list -debug	    -boolean false			    {If true, start interactive command loop}] \
-    ] {
+##############
+# Config file
+##############
 
-    # Map the local variables defined by OptProc onto the globals used by the server
-    global auto_path Config
-    if {[string length $library]} {
-	lappend auto_path $library
-    }
-    foreach var {docRoot port host ipaddr webmaster uid gid debug limit library} {
-	set Config($var) [set $var]
-    }
-    set Config(file) $config 
+# Load the configuration file into the Config array
+# First, we preload a couple of defaults
+
+set Config(docRoot) [file join [file dirname $Config(home)] htdocs]
+set Config(library) [file join [file dirname $Config(home)] htdocs/libtml]
+set Config(main) [file join $Config(home) main.tcl]
+set Config(debug) 0
+
+# The configuration bootstrap goes like this:
+# 1) Look on the command line for a -config rcfile name argument
+# 2) Load this configuration file via the config module
+# 3) Process the rest of the command line arguments so the user
+#       can override things in the rc file.
+
+set ix [lsearch $argv -config]
+if {$ix >= 0} {
+    incr ix
+    set Config(config) [lindex $argv $ix]
+} else {
+    set Config(config) [file join $Config(home) tclhttpd.rc]
 }
 
-eval _ProcessOptions $argv
+package require config
+namespace import config::cget
+config::init $Config(config) Config
 
-# Core modules
-package require httpd           ;# Protocol stack
-package require html            ;# Simple html generation
-package require url		;# URL dispatching
-package require counter         ;# Statistics
-package require mtype           ;# Mime content types
-package require utils           ;# junk
-package require threadmgr
-package require redirect	;# URL redirection
+# The Config array now reflects the info in the configuration file
 
-#  Not strictly required, but nearly always used
-package require auth            ;# Basic authentication
-package require log             ;# Standard loggin
+#########################
+# command line arguments
+#########################
 
-# When debugging, a command reader is helpful
+# Merge command line args into the Config array
+
+package require cmdline
+array set Config [cmdline::getoptions argv [list \
+        [list config.arg       [cget config]       {Configuration File}] \
+        [list docRoot.arg      [cget docRoot]      {Root directory for documents}] \
+        [list port.arg         [cget port]         {Port number server is to listen on}] \
+        [list host.arg         [cget host]         {Server name, should be fully qualified}] \
+        [list ipaddr.arg       [cget ipaddr]       {Interface server should bind to}] \
+        [list webmaster.arg    [cget webmaster]    {E-mail address for errors}] \
+        [list uid.arg          [cget uid]          {User Id that server runs under}] \
+        [list gid.arg          [cget gid]          {Group Id for caching templates}] \
+        [list threads.arg      [cget threads]      {Number of worker threads (zero for non-threaded)}] \
+        [list main.arg         [cget main]         {Main Tcl startup script}] \
+        [list library.arg      [cget library]      {Directory list where custom packages and auto loads are}] \
+	[list debug.arg	       0	        {If true, start interactive command loop}] \
+    ] \
+    "usage: httpd.tcl options:"]
+
+if {[string length $Config(library)]} {
+    lappend auto_path $Config(library)
+}
+
 if {$Config(debug)} {
+    puts stderr "auto_path:\n[join $auto_path \n]"
     if {[catch {package require stdin}]} {
 	puts "No command loop available"
-	set debug 0
+	set Config(debug) 0
     }
 }
 
-# This automatically uses Tk for image maps and
-# a simple control panel.  If you have a Tcl-only shell,
-# then image maps hits are done differently and you
-# don't get a control panel.
-# You may need to tweak
-# this if your Tcl shell can dynamically load Tk
-# because tk_version won't be defined, but it could be.
+###################
+# Start the server
+###################
 
-if [info exists tk_version] {
-    # Use a Tk canvas for imagemap hit detection
-    package require ismaptk
-    # Display Tk control panel
-    package require srvui
-} else {
-    # Do imagemap hit detection in pure Tcl code
-    package require ismaptcl
-}
-
-# This initializes some state, but doesn't start the server yet.
-# Do this before loading the configuraiton file.
+package require httpd
+package require utils		;# For Stderr
+package require counter		;# Fix Httpd_Init and move to main.tcl
+package require mtype		;# Fix Httpd_Init and move to main.tcl
 
 Httpd_Init
 
-if {[catch {source $Config(file)} message]} then {
-    set error "Error processing configuration file \"[file nativename $Config(file)]\"."
-    append error "\n\t" "Error was: $message"
-    puts stderr $error
-    exit 1
+# Override the defaults wired into Httpd_Init
+# Smashing these parameters is a crock -
+# Httpd should use the config module directly
+
+foreach x {SSL_REQUEST SSL_REQUIRE SSL_CERTFILE SSL_KEYFILE
+		SSL_CADIR SSL_CAFILE USE_SSL2 USE_SSL3 USE_TLS1 SSL_CIPHERS} {
+    set Httpd($x) [cget $x]
 }
 
-# Finally, start the server
+# Open the listening sockets
 
 Httpd_Server $Config(port) $Config(host) $Config(ipaddr)
-
-Log_Flush
 
 # Try to increase file descriptor limits
 
 if [catch {
     package require limit
+    set Config(limit) [cget MaxFileDescriptors]
     limit $Config(limit)
 } err] {
     Stderr $err
@@ -172,16 +227,46 @@ if ![catch {
     Stderr "Running as user $Config(uid)"
 }
 
+# Initialize worker thread pool, if requested
+
+if {$Config(threads) > 0} {
+    package require Thread		;# C extension
+    package require threadmgr		;# Tcl layer on top
+    Stderr "Threads enabled"
+    Thread_Init $Config(threads)
+} else {
+    # Stub out Thread_Respond so threadmgr isn't required
+    proc Thread_Respond {args} {return 0}
+    proc Thread_Enabled {} {return 0}
+}
+
+##################################
+# Main application initialization
+##################################
+
+if {[catch {source $Config(main)} message]} then {
+    global errorInfo
+    set error "Error processing main startup script \"[file nativename $Config(main)]\"."
+    append error "\n$errorInfo"
+    error $error
+}
+
+# The main thread owns the log
+
+Log_SetFile		[cget LogFile]
+Log_FlushMinutes	[cget LogFlushMinutes]
+Log_Flush
+
 # Start up the user interface and event loop.
 
 if {[info exists tk_version]} {
+    package require srvui
     SrvUI_Init "Tcl HTTPD $Httpd(version)"
 }
 if {$Config(debug)} {
-    # Enter interactive command loop, then exit.  Otherwise run forever.
     Stdin_Start "httpd % "
     Httpd_Shutdown
 } else {
-    catch {puts stderr "httpd started on port $Config(port)"}
+    Stderr "httpd started on port $Config(port)"
     vwait forever
 }
