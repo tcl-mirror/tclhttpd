@@ -14,9 +14,9 @@ set os_options {
 }
 
 set priority_options {
-    High
-    Medium
     Low
+    Medium
+    High
 }
 
 set assigned_options {
