@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cookie.tcl,v 1.6 2004/03/23 04:58:34 welch Exp $
+# RCS: @(#) $Id: cookie.tcl,v 1.7 2004/04/29 01:38:41 coldstore Exp $
 
 package provide httpd::cookie 1.0
 
@@ -50,7 +50,7 @@ proc Cookie_Get {cookie} {
     set result ""
     if {[info exist env(HTTP_COOKIE)]} {
 	set rawcookie $env(HTTP_COOKIE)
-    } elseif {![info exist env(HTTP_COOKIE)]} {
+    } else {
 	# Try to find the connection
 	if {[info exists env(HTTP_CHANNEL)]} {
 	    upvar #0 Httpd$env(HTTP_CHANNEL) data
