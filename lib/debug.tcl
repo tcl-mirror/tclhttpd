@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.13 2001/03/13 06:17:51 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.13.4.1 2002/08/04 01:25:19 coldstore Exp $
 
 package provide httpd::debug 1.0
 
@@ -273,7 +273,7 @@ proc Debug/errorInfo {title errorInfo {env {no environment}}} {
     set html "<title>$title</title>\n"
     append html "<H1>$title</H1>\n"
     append html "<p>[Version]"
-    append html "<br>Webmaster: [Doc_Webmaster]"
+    append html "<br>Webmaster: [Httpd_Webmaster]"
     append html <pre>$errorInfo</pre>
     append html "<p>Environment:</p>"
     append html "<table>"

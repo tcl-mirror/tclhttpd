@@ -5,9 +5,35 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: imagemap.tcl,v 1.5 2000/10/02 16:58:53 welch Exp $
+# RCS: @(#) $Id: imagemap.tcl,v 1.5.4.1 2002/08/04 01:25:19 coldstore Exp $
 
 package provide httpd::imagemap 1.0
+
+# Doc_application/x-imagemap --
+#
+# this is called by DocHandle to process .map files
+#
+# Arguments:
+#	path	The file name of the .map file.
+#	suffix	The URL suffix
+#	sock	The socket connection.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Redirect to the URL indicated by the map.
+
+proc Doc_application/x-imagemap {path suffix sock} {
+    upvar #0 Httpd$sock data
+    if {![info exists data(query)]} {
+	Httpd_ReturnData $sock text/plain "[parray Httpd$sock]"
+	return
+    }
+    set url [Map_Lookup $path?$data(query)]
+    Count maphits
+    Httpd_Redirect $url $sock
+}
 
 proc MapPointInRect {X Y coordArray} {
 	upvar $coordArray coords

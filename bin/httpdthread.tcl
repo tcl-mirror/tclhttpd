@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.11 2001/07/12 01:12:21 welch Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.11.4.1 2002/08/04 01:25:19 coldstore Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -66,7 +66,7 @@ package require httpd::doc
 
 Doc_Root			$Config(docRoot)
 if {[file isdirectory [file join $Config(docRoot) libtml]]} {
-    Doc_TemplateLibrary [file join $Config(docRoot) libtml]
+    Template_Library [file join $Config(docRoot) libtml]
 }
 
 # Merge in a second file system into the URL tree.
@@ -76,15 +76,15 @@ if {[file isdirectory $htdocs_2]} {
     Doc_AddRoot /addroot	$htdocs_2
 }
 
-# Doc_TemplateInterp determines which interpreter to use when
+# Template_Interp determines which interpreter to use when
 # interpreting templates.
 
-Doc_TemplateInterp		{}
+Template_Interp		{}
 
 # Doc_IndexFile defines the name of the default index file
 # in each directory.  Its value is a glob pattern.
 
-Doc_IndexFile			index.{tml,html,shtml,thtml,htm,subst}
+DirList_IndexFile			index.{tml,html,shtml,thtml,htm,subst}
 
 # Doc_PublicHtml turns on the mapping from ~user to the
 # specified directory under their home directory.
@@ -96,24 +96,24 @@ Doc_PublicHtml			public_html
 # up-to-date.  If the .tml (or its dependent files) are newer than
 # the HTML file, the HTML file is regenerated from the template.
 
-Doc_CheckTemplates		1
+Template_Check		1
 
 # Doc_ErrorPage registers a template to be used when a page raises an
 # uncaught Tcl error.  This is a crude template that is simply passed through
 # subst at the global level.  In particular,  it does not have the
 # full semantics of a .tml template.
 
-Doc_ErrorPage			/error.html
+Error_ErrorPage			/error.html
 
 # Doc_NotFoundPage registers a template to be used when a 404 not found
 # error occurs.  Like Doc_ErrorPage, this page is simply subst'ed.
 
-Doc_NotFoundPage		/notfound.html
+Error_NotFoundPage		/notfound.html
 
 # Doc_Webmaster returns the value last passed into it.
 # Designed to be used in page templates where contact email is needed.
 
-Doc_Webmaster			$Config(webmaster)
+Httpd_Webmaster			$Config(webmaster)
 
 package require httpd::dirlist		;# Directory listings
 package require httpd::include		;# Server side includes

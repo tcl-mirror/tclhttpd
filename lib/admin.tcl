@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: admin.tcl,v 1.6 2000/08/02 07:06:51 welch Exp $
+# RCS: @(#) $Id: admin.tcl,v 1.6.4.1 2002/08/04 01:25:19 coldstore Exp $
 
 
 package provide httpd::admin 1.0
@@ -44,9 +44,9 @@ proc Admin/redirect {old new} {
     ####
 
     return "<h1>Redirect Form Disabled</h1>\n\
-	   Url_Redirect $old http:$server$new"
+	   Redirect_Url $old http:$server$new"
 
-    Url_Redirect $old $new
+    Redirect_Url $old $new
     if [info exists Doc(notfound,$old)] {
 	unset Doc(notfound,$old)
     }

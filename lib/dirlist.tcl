@@ -7,10 +7,74 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: dirlist.tcl,v 1.7 2000/08/02 07:06:52 welch Exp $
+# RCS: @(#) $Id: dirlist.tcl,v 1.7.4.1 2002/08/04 01:25:19 coldstore Exp $
 
 package provide httpd::dirlist 1.0
  
+# DirList_IndexFile --
+#
+#	Define the index file for a directory
+#
+# Arguments:
+#	pat	A glob pattern for index files in a directory.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the index file glob pattern.
+
+proc DirList_IndexFile {pat} {
+    global dirlist
+    set dirlist(indexpat) $pat
+}
+
+# DirList_Directory --
+#
+#	Handle a directory.  Look for the index file, falling back to
+#	the Directory Listing module, if necessary.
+#
+# Arguments:
+#	prefix	The URL domain prefix.
+#	path	The file system pathname of the directory.
+#	suffix	The URL suffix.
+#	sock	The socket connection.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Dispatches to the appropriate page handler.
+
+proc DirList_Directory {prefix path suffix sock} {
+    upvar #0 Httpd$sock data
+    global dirlist tcl_platform
+
+    # Special case because glob doesn't work in wrapped files
+    # Just set indexpat to "index.tml" or "index.html"
+
+    set npath [file join $path $dirlist(indexpat)]
+    if {[info exist tcl_platform(isWrapped)] && $tcl_platform(isWrapped)} {
+	set newest $npath
+    } else {
+	set newest [file_latest [glob -nocomplain $npath]]
+    }
+    if {[string length $newest]} {
+
+	# Template hack.  Ask for the corresponding .html file in
+	# case that file should be cached when running the template.
+	# If we ask for the .tml directly then its result is never cached.
+	global Template
+	if {[string compare $Template(tmlExt) [file extension $newest]] == 0} {
+	    set newest [file root $newest]$Template(htmlExt)
+	}
+	return [Doc_Handle $prefix $newest $suffix $sock]
+    }
+
+    Httpd_ReturnData $sock text/html [DirList $sock $path $data(url)]
+}
+
+
 proc DirListForm {dir urlpath {sort name} {pattern *}} {
     set what [DirListTerm]
     set namecheck ""
@@ -134,8 +198,7 @@ proc DirHref {entry} {
     return $entry
 }
 
-proc DirList {dir urlpath} {
-    upvar 1 sock sock	;# DISGUSTING HACK
+proc DirList {sock dir urlpath} {
     upvar #0 Httpd$sock data
 
     set sort name

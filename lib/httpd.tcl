@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.68 2001/07/12 01:12:21 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.68.4.1 2002/08/04 01:25:19 coldstore Exp $
 
 package provide httpd 1.5
 
@@ -1991,3 +1991,31 @@ proc Httpd_DumpHeaders {sock} {
     }
     return $result
 }
+
+# Httpd_Webmaster --
+#
+# Define an email address for the webmaster
+#
+# Arguments:
+#	email 	The email of the webmaster.  If empty, the
+#		current value is returned, which is handy in
+#		web pages.
+#
+# Results:
+#	Returns the webmaster email.
+#
+# Side Effects:
+#	Sets the webmaster email.
+
+proc Httpd_Webmaster {{email {}}} {
+    global Httpd
+    if {[string length $email] == 0} {
+	if {![info exists Httpd(webmaster)]} {
+	    set Httpd(webmaster) webmaster
+	}
+	return $Httpd(webmaster)
+    } else {
+	set Httpd(webmaster) $email
+    }
+}
+

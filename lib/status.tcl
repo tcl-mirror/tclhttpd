@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.25 2001/03/13 06:17:51 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.25.4.1 2002/08/04 01:25:19 coldstore Exp $
 
 package provide httpd::status 1.0
 
@@ -731,7 +731,7 @@ proc Doc_application/x-tcl-status {path suffix sock} {
     # the page as ordinary html if the session has ended.
 
     if {$result} {
-	Doc_Subst $sock $path interp$session
+	Subst_ReturnFile $sock $path interp$session
     } else {
 	Httpd_ReturnFile $sock text/html $path
     }

@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: include.tcl,v 1.4 2000/08/02 07:06:53 welch Exp $
+# RCS: @(#) $Id: include.tcl,v 1.4.4.1 2002/08/04 01:25:19 coldstore Exp $
 
 # Process server side includes.
 # Look for comments of the form:
@@ -81,7 +81,7 @@ proc IncludeFile {sock op path params} {
 	set npath [Doc_Virtual $sock $path $orig]
     } elseif {[html::extractParam $params file orig]} {
 	set key file
-	set npath [Doc_File $sock $path $orig]
+	set npath [file join [file dirname $path] $orig]
     } else {
 	error "<!-- Invalid $op parameter list: $params. -->\n"
     }
