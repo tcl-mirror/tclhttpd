@@ -1,3 +1,9 @@
+2004-06-30 Colin McCormack <colin@chinix.com>
+        * lib/doc.tcl: fixed sf [977562] Url_AccessInstallPrepend crashes
+	DocDomain with suggested patch.
+        * lib/{doc,subst}.tcl: fixed bugs handling symlinks to directories.
+        * lib/md5hex.tcl: fixed md5 alias argument error.
+
 2004-06-18 Brent Welch <welch@panasas.com>
         * bin/httpd.tcl: Fixed stacktrace caused by -? command line arg
             Added "wm withdraw ."  if Config(gui) is false
