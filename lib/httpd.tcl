@@ -1295,7 +1295,7 @@ proc HttpdReflect {in out} {
 proc Httpd_DumpHeaders {sock} {
     upvar #0 Httpd$sock data
 
-    set result [list url $data(uri) method $data(proto)]
+    set result [list url $data(uri) method $data(proto) version $data(version)]
     if {[info exist data(mimeorder)]} {
 	foreach key $data(mimeorder) {
 	    lappend result $key $data(mime,$key)
