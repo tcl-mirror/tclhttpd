@@ -34,6 +34,8 @@ cd ..
 cd thread${THREAD_VERSION}
 autoconf
 cd ..
+tar cf - ./tclhttpd${HTTPD_VERSION} | gzip > ${DISTDIR}/tclhttpd${HTTPD_VERSION}.tar.gz
+zip -9 -r -o  ${DISTDIR}/tclhttpd${WIN_VERSION}.zip  tclhttpd${HTTPD_VERSION}
 
 cd tclhttpd${HTTPD_VERSION}/DIST_build
 
