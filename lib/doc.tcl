@@ -677,6 +677,7 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 
 	interp eval $interp [list ncgi::reset $data(query) $type]
 	interp eval $interp [list ncgi::parse]
+	interp eval $interp [list ncgi::urlStub $data(url)]
 
 	# Define page(query) and page(querytype)
 	# for compatibility with older versions of TclHttpd

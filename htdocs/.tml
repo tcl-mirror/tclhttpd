@@ -1,21 +1,24 @@
 # Sunscript web site template definitions
 # SCCS: @(#) .tml 1.18 97/12/23 21:15:27
 
+# Site-specific modules from libtml
+
+package require mypage 1.0
+package require faq 1.2
+
+# Standard Tcl Library
+
+package require html
+package require ncgi
+
 # This allows to reset the package by appending ?packageReset=faq
 # for instance to a .tml query
 
-foreach pkg [ncgi::valuelist packageReset] {
+foreach pkg [ncgi::valueList packageReset] {
     package forget $pkg
     package require $pkg
     Stderr "Reset package $pkg"
 }
-
-# Here is what the whole site use and which define the look :
-# The 'real thing' is thus in libtml/'s packages:
-
-package require mypage 1.0
-package require faq 1.2
-package require htmlutils
 
 # This defines the URLs that appear in the footer
 
