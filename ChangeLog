@@ -4,6 +4,9 @@
         * bin/tclhttpd.rc:  Add -daemon command line option for
         starting tclhttpd in the background if either tclx or expect
         are available.
+        * config/tcl.m4:  Add /usr/lib64 to the default list of directories
+        where tclConfig.sh might be located.  This enables building tclhttpd
+        on x86_64 platforms.
 
 2004-10-22 Colin McCormack <colin@sharedtech.dyndns.org>
 	* lib/*.tcl: added braces around all [if] conditionals - for speed
