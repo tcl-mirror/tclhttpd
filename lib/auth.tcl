@@ -177,6 +177,10 @@ proc AuthVerifyBasic {sock file} {
     }
     if {! $ok} {
 	Httpd_RequestAuth $sock Basic $info(name)
+    } else {
+	global env
+	set env(REMOTE_USER) $user
+	set env(AUTH_TYPE) Basic
     }
     return $ok
 }
