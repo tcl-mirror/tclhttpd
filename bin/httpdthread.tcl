@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.15 2003/08/11 16:46:58 welch Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.16 2003/10/19 03:47:47 coldstore Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -130,9 +130,20 @@ Doc_NotFoundPage		/notfound.html
 
 Httpd_Webmaster			$Config(webmaster)
 
+# uncomment the following and commment out the package requires
+# if you want to leave out dirlist support
+#proc Dir_ListingIsHidden {} {
+#    return 1
+#}
 package require httpd::dirlist		;# Directory listings
 package require httpd::include		;# Server side includes
 
+# uncomment this and comment the package requires
+# if you want to leave out cgi support
+#proc Cgi_Domain {virtual directory sock suffix} {
+#	Doc_NotFound $sock
+#	return
+#}
 package require httpd::cgi		;# Standard CGI
 Cgi_Directory			/cgi-bin
 
@@ -154,6 +165,8 @@ Debug_Url			/debug
 
 package require httpd::redirect	;# Url redirection tables
 Redirect_Init			/redirect
+
+package require httpd::doctools ;# doctool type conversions
 
 if {[catch {
     Auth_InitCrypt			;# Probe for crypt module
