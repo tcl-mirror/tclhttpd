@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.4 2000/02/12 19:07:19 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.5 2000/02/12 23:42:49 wart Exp $
 
 # TEMPORARY:  Values for the dist target.
 
@@ -29,7 +29,7 @@ BINARIES=$(lib_BINARIES)
 # This will be used when a dist target is added to the Makefile.
 #========================================================================
 
-crypt_SOURCES = src/crypt. src/cryptLib.c
+crypt_SOURCES = src/crypt.c src/cryptLib.c
 SOURCES = $(crypt_SOURCES)
 
 #========================================================================
@@ -324,9 +324,9 @@ EXTRA_CFLAGS = $(TCL_DEFS) $(PROTO_FLAGS) $(SECURITY_FLAGS) $(MEM_DEBUG_FLAGS) $
 DEFS = @DEFS@ $(EXTRA_CFLAGS)
 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-CONFIGDIR = $(top_srcdir)
+CONFIGDIR = @CONFIGDIR@
 mkinstalldirs = $(SHELL) $(CONFIGDIR)/mkinstalldirs
-CONFIG_CLEAN_FILES = mkIndex.tcl
+CONFIG_CLEAN_FILES =
 
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
@@ -366,10 +366,6 @@ doc:
 install: all install-binaries install-libraries install-doc
 
 install-binaries: binaries install-lib-binaries
-	$(TCLSH_PROG) mkIndex.tcl $(crypt_LIB_FILE)
-	if test "x$(SHARED_BUILD)" = "x1"; then \
-	    $(TCLSH_PROG) mkIndex.tcl $(crypt_LIB_FILE); \
-	fi
 
 test:
 
@@ -494,6 +490,7 @@ install-lib-binaries: installdirs
 	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
 	  else :; fi; \
 	done
+	$(INSTALL_SCRIPT) crypt_pkgIndex.tcl $(altpkg1libdir)/pkgIndex.tcl
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \

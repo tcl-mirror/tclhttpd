@@ -97,13 +97,16 @@ AC_EXEEXT
 case "`uname -s`" in
     *win32* | *WIN32* | *CYGWIN_NT*)
 	CYGPATH="cygpath -w"
+	RELPATH=".. .. bin"
     ;;
     *)
 	CYGPATH=echo
+	RELPATH=..
     ;;
 esac
 
 AC_SUBST(CYGPATH)
+AC_SUBST(RELPATH)
 
 #--------------------------------------------------------------------
 # Load the tclConfig.sh file
@@ -188,6 +191,20 @@ AC_SUBST(SHLIB_CFLAGS)
 AC_SUBST(SHLIB_LDFLAGS)
 
 #--------------------------------------------------------------------
+# Look for the crypt function in the crypt library on Linux systems.
+#--------------------------------------------------------------------
+
+case "'uname -s'" in 
+    Linux)
+	AC_CHECK_LIB(crypt, crypt, CRYPT_LIB=-lcrypt)
+	;;
+    *)
+	CRYPT_LIB=
+	;;
+esac
+
+
+#--------------------------------------------------------------------
 # Set the default compiler switches based on the --enable-symbols 
 # option.
 #--------------------------------------------------------------------
@@ -242,7 +259,7 @@ case "`uname -s`" in
 	;;
     *)
 	if test "${SHARED_BUILD}" = "1" ; then
-	    SHLIB_LD_LIBS="${TCL_STUB_LIB_SPEC}"
+	    SHLIB_LD_LIBS="${TCL_STUB_LIB_SPEC} ${CRYPT_LIB}"
 	    eval "${PACKAGE}_LIB_FILE=lib${PACKAGE}${SHARED_LIB_SUFFIX}"
 	    eval "${ALTPACKAGE1}_LIB_FILE=lib${ALTPACKAGE1}${SHARED_LIB_SUFFIX}"
 	    RANLIB=:
@@ -277,5 +294,4 @@ SC_PROG_TCLSH
 # Finally, substitute all of the various values into the Makefile.
 #--------------------------------------------------------------------
 
-AC_OUTPUT([Makefile mkIndex.tcl],
-	chmod +x ${srcdir}/install-sh ${srcdir}/mkinstalldirs)
+AC_OUTPUT([Makefile crypt_pkgIndex.tcl])
