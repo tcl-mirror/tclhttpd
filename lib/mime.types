@@ -102,9 +102,9 @@ video/mpeg                     mpeg mpg mpe
 video/quicktime                qt mov          
 video/x-msvideo                avi             
 video/x-sgi-movie              movie           
-text/vnd.wap.wml                .wml
-text/vnd.wap.wmlscript          .wmls
-application/vnd.wap.wmlc        .wmlc
-application/vnd.wap.wmscriptc   .wmlsc
-image/vnd.wap.wbmp              .wbmp
-
+text/vnd.wap.wml                wml
+text/vnd.wap.wmlscript          wmls
+application/vnd.wap.wmlc        wmlc
+application/vnd.wap.wmscriptc   wmlsc
+image/vnd.wap.wbmp              wbmp
+audio/mpeg	mp3
