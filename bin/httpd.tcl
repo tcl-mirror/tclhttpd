@@ -71,7 +71,10 @@ if {[file exist [file join $home ../lib/httpd.tcl]]} {
 if {![info exist Config(lib)]} {
     error "Cannot find TclHttpd library in auto_path:\n[join $auto_path \n]"
 }
-lappend auto_path $Config(lib)
+# Put the library in front in case there is both the development
+# library and an installed library
+
+set auto_path [concat [list $Config(lib)] $auto_path]
 
 # Search around for the Standard Tcl Library
 
