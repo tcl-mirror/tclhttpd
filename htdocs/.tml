@@ -25,7 +25,6 @@ if {[info exists page(query)]} {
 # Here is what the whole site use and which define the look :
 # The 'real thing' is thus in libtml/'s packages:
 
-package require template 1.2
 package require sunscript 1.2
 package require faq 1.2
 package require htmlutils
