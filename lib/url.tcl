@@ -71,6 +71,8 @@ proc Url_Dispatch {sock} {
 
 	set data(prefix) $prefix
 	set data(suffix) $suffix
+	CountName $prefix domainHit
+
 	foreach hook $Url(accessHooks) {
 	    switch -- [eval $hook [list $sock $url]] {
 		ok	{ break }

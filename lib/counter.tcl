@@ -15,7 +15,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: counter.tcl,v 1.11 2000/10/02 16:29:15 welch Exp $
+# RCS: @(#) $Id: counter.tcl,v 1.12 2000/10/02 16:58:53 welch Exp $
 
 package provide httpd::counter 2.0
 package require stats 1.0
@@ -50,9 +50,12 @@ proc Counter_Init {{secsPerMinute 60}} {
     #stats::countInit serviceTime -histlog 10
 
     # These group counters are used for per-page hit, notfound, and error
-    # statistics.  If you auto-gen unique URLS, these are a memory leak.
+    # statistics.  If you auto-gen unique URLS, these are a memory leak
+    # that you can plug by doing
+    #
+    #	status::countInit hit -simple
 
-    foreach g {hit notfound error} {
+    foreach g {domainHit hit notfound error} {
 	stats::countInit $g -group $g
 	set counterTags($g) 1
     }

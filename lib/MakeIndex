@@ -24,10 +24,12 @@ while {[gets $in line] >= 0} {
     }
 }
 
-# Now reformat the other lines slightly
+# Now reformat the other lines slightly to protect the
+# list and file join commands, but let the $dir get expanded
 
 while {[gets $in line] >= 0} {
-    regsub {\[list} $line {\\[list} line
+    regsub -all {[][]} $line {\\&} line
+    regsub -all {\$dir} $line {[list &]} line
     puts $out \t$line
 }
 puts $out "\""

@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.21 2000/10/02 16:29:15 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.22 2000/10/02 16:58:54 welch Exp $
 
 package provide httpd::status 1.0
 
@@ -76,8 +76,9 @@ proc StatusMenu {} {
 	/		"Home" \
 	$_status(dir)/	"Graphical Status" \
 	$_status(dir)/text	"Text Status" \
-	$_status(dir)/doc	"Doc hits" \
-	$_status(dir)/notfound	"Doc misses" \
+	$_status(dir)/domain	"Domains" \
+	$_status(dir)/doc	"Documents" \
+	$_status(dir)/notfound	"Not Found" \
 	$_status(dir)/threads	"Threads" \
 	$_status(dir)/size	"Memory Size" \
     ] {
@@ -106,11 +107,30 @@ proc Status/doc {{pattern *} {sort number}} {
     append result "<h1>Document Hits</h1>\n"
     append result [StatusMenu]
     append result [StatusSortForm $_status(dir)/doc "Hit Count" $pattern $sort]
-    append result [StatusPrintHits $pattern $sort]
-}
-proc StatusPrintHits {aname {pattern *} {sort number}} {
     append result [StatusPrintArray [stats::countGet hit -histVar] * $sort Hits Url]
 }
+
+# Status/domain --
+#
+#	Show the number of hits for documents in different domains.
+#
+# Arguments:
+#	pattern	(optional) the glob pattern of the domain to report on.
+#	sort	(optional) how to sort the output.  If the default "number" is
+#		not given, output is sorted by url alphabetically.
+#
+# Results:
+#	Returns HTML code that displays document hit info.
+
+proc Status/domain {{pattern *} {sort number}} {
+    global _status
+    set result ""
+    append result "<h1>Domain Hits</h1>\n"
+    append result [StatusMenu]
+    append result [StatusSortForm $_status(dir)/domain "Hit Count" $pattern $sort]
+    append result [StatusPrintArray [stats::countGet domainHit -histVar] * $sort Hits Domain]
+}
+
 proc StatusPrintArray {aname pattern sort col1 col2} {
     upvar #0 $aname a
     set result ""
@@ -697,4 +717,10 @@ proc Doc_application/x-tcl-status {path suffix sock} {
     }
 }
 
+if {0} {
+    proc StatusPrintHits {aname {pattern *} {sort number}} {
+	append result [StatusPrintArray [stats::countGet hit -histVar] *\
+		$sort Hits Url]
+    }
+}
 

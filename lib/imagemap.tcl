@@ -5,9 +5,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: imagemap.tcl,v 1.4 2000/08/25 23:21:00 welch Exp $
+# RCS: @(#) $Id: imagemap.tcl,v 1.5 2000/10/02 16:58:53 welch Exp $
 
-package provide httpd::ismaptcl 1.0
+package provide httpd::imagemap 1.0
 
 proc MapPointInRect {X Y coordArray} {
 	upvar $coordArray coords
