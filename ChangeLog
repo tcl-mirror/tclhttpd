@@ -1,4 +1,8 @@
 2004-08-23 Colin McCormack <colin@sharedtech.dyndns.org>
+	* lib/digest.tcl: force md5 calculations to be lower case hex
+	As the spec requires.
+
+2004-08-23 Colin McCormack <colin@sharedtech.dyndns.org>
 	* lib/{cgi,http}.tcl: Changed name of HttpDate to Http_Date
 	in conformance with naming policy, since cgi.tcl was using it.
 
