@@ -46,6 +46,7 @@ application/x-tcl-subst		subst
 application/x-tcl-template	tml
 application/x-tcl-auth		auth
 application/x-tcl-snmp		snmp
+application/x-tcl-connect	xtcl
 application/x-tex              tex             
 application/x-texinfo          texinfo texi   
 application/x-troff            t tr roff       
