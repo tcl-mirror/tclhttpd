@@ -720,6 +720,18 @@ proc Doc_IsLinkToSelf {url} {
     return [expr {[string compare $url $page(url)] == 0}]
 }
 
+# Trigger a page redirect
+
+proc Doc_Redirect {newurl} {
+    return -code error \
+	    -errorcode  [list HTTPD_REDIRECT $newurl] \
+	    "Redirect to $newurl"
+}
+
+proc Doc_RedirectSelf {newurl} {
+    Doc_Redirect [Httpd_SelfUrl $newurl]
+}
+
 # Check modify times on all templates that affect a page
 
 proc DocCheckTemplate {template htmlfile} {

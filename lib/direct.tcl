@@ -140,6 +140,19 @@ proc DirectDomain {prefix sock suffix} {
     if {[info exist aType]} {
 	set type $aType
     }
+
+    # See if any cookies have been set
+    # This works with the Doc_SetCookie procedure that populates
+    # the global page array
+
+    global page
+    if {[info exist page(set-cookie)]} {
+	foreach c $page(set-cookie) {
+	    Httpd_SetCookie $sock $c
+	}
+	unset page(set-cookie)
+    }
+
     Httpd_ReturnData $sock $type $result
     return ""
 }
