@@ -320,15 +320,78 @@ proc HttpdRead {sock} {
 	    }
 	}
     } elseif {![eof $sock]} {
-	# Use counted mode to get the post data
 
-        if {[HttpdPostData $sock [read $sock $data(count)]]} {
+	# TclHttpd used to read all the post data here and
+	# blindly merge it with the query data from the URL.
+	# For compatibility, this is postponed until either
+	# Url_DecodeQuery is called or Httpd_GetPostData is called.
+
+	if {![info exist data(dispatch)]} {
+	    set data(dispatch) 1
+	    Url_PostHook $sock $data(count)
 	    Url_Dispatch $sock
+	} else {
+	    # The URL handler has not read the post data yet
+	    # Turn off the fileevent and ensure we close the
+	    # socket when they have generated their reply
+
+	    set data(mime,connection) close
+	    fileevent $sock readable {}
 	}
     } else {
 	Httpd_Log $sock Error "Broken connection reading POST data"
 	Httpd_SockClose $sock 1 "broken connection during post data"
     }
+}
+
+# Httpd_GetPostData --
+#
+# Arguments:
+#	sock	Client connection
+#	varName	Name of buffer variable to append post data to
+#	size	Amount of data to read this call. -1 to read all available.
+#
+# Results:
+#	The amount of data left to read.  When this goes to zero, you are done.
+
+proc Httpd_GetPostData {sock varName {size -1}} {
+    upvar #0 Httpd$sock data
+    upvar 1 $varName buffer
+
+    if {![info exist data(count)]} {
+	error "no post data"
+    }
+    if {$data(count) == 0} {
+	return 0
+    }
+    if {$size < 0 || $size > $data(count)} {
+	set size $data(count)
+    }
+    set block [read $sock $size]
+    append buffer $block
+    set data(count) [expr {$data(count) - [string length $block]}]
+    return $data(count)
+}
+
+# Httpd_GetPostChannel --
+#
+# Arguments:
+#	sock		Client connection
+#	sizeName	Name of variable to get the amount of post
+#			data expected to be read from the channel
+#
+# Results:
+#	The socket, as long as there is POST data to read
+
+proc Httpd_GetPostChannel {sock sizeName} {
+    upvar #0 Httpd$sock data
+    upvar 1 $sizeName size
+
+    if {![info exist data(count)]} {
+	error "no post data"
+    }
+    set size $data(count)
+    return $sock
 }
 
 # HttpdPostData --
@@ -439,7 +502,9 @@ proc HttpdRespondHeader {sock type close size {code 200}} {
 	append reply "Connection: Keep-Alive" \n
     }
     append reply "Content-Type: $type" \n
-    append reply "Content-Length: $size" \n
+    if {[string length $size]} {
+	append reply "Content-Length: $size" \n
+    }
     puts -nonewline $sock $reply
 }
 
