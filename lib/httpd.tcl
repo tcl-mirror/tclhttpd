@@ -685,7 +685,7 @@ proc Httpd_RequestAuth {sock type realm} {
 # generate a date string in HTTP format
 
 proc HttpdDate {seconds} {
-    return [clock format $seconds -format {%a, %d %b %Y %T %Z} -gmt true]
+    return [clock format $seconds -format {%a, %d %b %Y %T GMT} -gmt true]
 }
 
 
