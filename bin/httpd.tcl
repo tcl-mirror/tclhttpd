@@ -90,6 +90,7 @@ package require url		;# URL dispatching
 package require counter         ;# Statistics
 package require mtype           ;# Mime content types
 package require utils           ;# junk
+package require threadmgr
 
 #  Not strictly required, but nearly always used
 package require auth            ;# Basic authentication
