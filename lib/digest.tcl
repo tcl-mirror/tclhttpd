@@ -261,7 +261,7 @@ proc Digest_Challenge {sock realm user} {
     eval Httpd_RequestAuth $sock Digest $realm $challenge
 }
 
-if {1} {
+if {0} {
     # test
     array set Httpd999 {
 	digest,username Mufasa
