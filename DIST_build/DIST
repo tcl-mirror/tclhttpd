@@ -118,3 +118,35 @@ echo "*** Creating ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist.tar.gz ***"
 (cd ${DISTDIR}; tar cf - ./tclhttpd${HTTPD_VERSION}-dist | gzip > tclhttpd${HTTPD_VERSION}-dist.tar.gz)
 echo "*** Creating ${DISTDIR}/tclhttpd${WIN_VERSION}.zip ***"
 (cd ${DISTDIR} ; zip -9 -r -o  tclhttpd${WIN_VERSION}dist.zip  tclhttpd${HTTPD_VERSION}-dist)
+
+# Starkit
+
+echo "*** Creating ${DISTDIR}/tclhttpd${HTTPD_VERSION}.kit ***"
+VFS_DIR=${DISTDIR}/tclhttpd${HTTPD_VERSION}.vfs
+mkdir ${VFS_DIR}
+mkdir ${VFS_DIR}/lib
+mkdir ${VFS_DIR}/lib/tclhttpd${HTTPD_VERSION}
+mkdir ${VFS_DIR}/lib/tcllib
+
+cd ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}
+tar cf - ./bin ./custom ./htdocs | (cd ${VFS_DIR} ; tar xf -)
+if [ -e ${VFS_DIR}/htdocs/java ]; then
+  # Save space
+  rm -rf ${VFS_DIR}/htdocs/java
+fi
+
+cd ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}/lib
+tar cf - . | (cd ${VFS_DIR}/lib/tclhttpd${HTTPD_VERSION} ; tar xf -)
+
+cd ${SUPER_DIR}/tcllib-${TCLLIB_VERSION}/modules
+tar cf - ./base64 ./cmdline ./counter ./doctools ./fileutil ./html ./md5 ./md5crypt ./ncgi ./uri | \
+        (cd ${VFS_DIR}/lib ; tar xf -)
+
+cat > ${VFS_DIR}/main.tcl << EOF
+package require starkit
+starkit::startup
+source [file join \$starkit::topdir bin/httpd.tcl]
+EOF
+
+cd ${DISTDIR}
+tclkit ~welch/bin/sdx wrap tclhttpd${HTTPD_VERSION}.kit
