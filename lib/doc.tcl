@@ -20,7 +20,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.39 2000/09/20 00:25:44 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.40 2000/09/28 06:58:05 welch Exp $
 
 package provide httpd::doc 1.1
 
@@ -557,8 +557,15 @@ proc DocFallback {virtual path suffix sock} {
 	    regsub $old\$ $suffix $new suffix
 	}
 
-	Httpd_RedirectSelf $virtual/[string trimleft $suffix /~] $sock
+	# Preserve query data when bouncing among pages.
 
+	upvar #0 Httpd$sock data
+	set url  $virtual/[string trimleft $suffix /~]
+	if {[info exist data(query)] && [string length $data(query)]} {
+	    append url ? $data(query)
+	}
+	    
+	Httpd_RedirectSelf $url $sock
 	return 1
     }
 }
