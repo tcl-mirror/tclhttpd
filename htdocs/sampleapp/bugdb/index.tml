@@ -1,0 +1,11 @@
+[html-strict::head {TclHttpd &gt; Sample Apps &gt; Bug Database} \
+{/sampleapp/bugdb/default.css screen} {} ]
+[Doc_Dynamic]
+
+[html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database}]
+
+<p>
+This sample application...
+</p>
+
+[html-strict::foot]
