@@ -1,0 +1,22 @@
+# Expect script to drive DIST, and handle the CVS password prompting.
+
+stty -echo
+send_user "CVS Password: "
+expect_user {
+    -re "(.*)\n" { set Password $expect_out(1,string) }
+    timeout { return -code error "You must enter a password!"}
+}
+stty echo
+send_user \n
+
+set timeout 1000
+spawn sh DIST
+expect {
+  password: {
+    stty -echo
+    after 200   ;# necessary to avoid echoing password
+    send $Password\r
+    stty echo 
+    exp_continue
+  }
+}
