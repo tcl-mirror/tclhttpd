@@ -4,12 +4,11 @@
 
 [html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database}]
 
-[html::h2 {Temporary Application Links}]
-
-[html::minorList {
-    {Report A Bug} report.tml
-    {List All Bugs} bug-list.tml
-}]
+<p>
+    [html::foreach {title ref} $my_navigation {
+        <a href="$ref">$title</a> |
+    }]
+</p>
 
 [html::h2 {Support Libraries}]
 

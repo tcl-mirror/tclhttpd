@@ -4,6 +4,12 @@
 
 [html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database &gt; Report A Bug}]
 
+<p>
+    [html::foreach {title ref} $my_navigation {
+        <a href="$ref">$title</a> |
+    }]
+</p>
+
 <form action="report-insert.tml" method="post">
 
 <p>
