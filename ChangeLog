@@ -8,6 +8,8 @@
 	Fixed use of Log(log) in Counter_CheckPoint.
 	* lib/debug.tcl: Added wired-in defaults for debug host, port
 	in case things are so broken you cannot pass parameters.
+	* lib/doc.tcl: Fixed similar "redirect looses query" bug
+	inside the redirect done by DocFallback
 
 2000-09-26  Brent Welch <welch@ajubasolutions.com>
 
