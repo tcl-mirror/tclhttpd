@@ -1,3 +1,6 @@
+2004-06-16 Colin McCormack <colin@chinix.com>
+	* Fixed problem with virtual hosts and md5 tcllib bugfix.
+
 2004-06-15 Brent Welch <welch@panasas.com>
         * lib/template.tcl: code smithing and bug fixes in new code.
 
