@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.14.6.1 2002/08/30 02:46:06 welch Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.14.6.2 2002/08/30 22:25:39 welch Exp $
 
 package provide httpd::auth 2.0
 package require base64
@@ -58,6 +58,8 @@ proc Auth_Check {sock directory pathlist} {
     set path $directory
     foreach component $pathlist {
         if {![file isdirectory $path]} {
+            # Don't bother looking if we are in an "artificial"
+            # url domain that isn't mapped to files.
             break
         }
 	foreach {name type} {.htaccess Basic .tclaccess Tcl} {
@@ -65,10 +67,22 @@ proc Auth_Check {sock directory pathlist} {
 	    if {[file exists $file]} {
 		set cookie [list $type $file]
 		# Keep looking for cookie files lower in the directory tree
-	    }
+            }
 	}
 	set path [file join $path $component]
     }
+
+    # Block access to the access control files themselves.
+    # We toss in a block against the .tml files as well,
+    # although that isn't strictly clean modularity.
+    set tail [file tail $path]
+    if {$tail == ".tclaccess" ||
+          $tail == ".htaccess" ||
+          $tail == ".tml"} {
+        set cookie [list Deny $path]
+        return $cookie
+    }
+
     return $cookie
 }
 
@@ -78,8 +92,11 @@ proc Auth_Verify {sock cookie} {
     }
     set type [lindex $cookie 0]
     set key [lindex $cookie 1]
-    set ok [AuthVerify$type $sock $key]
-    return $ok
+    if {$type == "Deny"} {
+        return 0
+    } else {
+        return [AuthVerify$type $sock $key]
+    }
 }
 
 # Auth_VerifyCallback -- 
