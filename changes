@@ -303,6 +303,10 @@ Quick release to fix a number of quirks in the new 2.1.6 startup configuration
 
 base64.tcl	Removed harmless extra ]
 
+cgi.tcl		Added env(REQUEST_URI)
+
+dirlist.tcl	Added sorting by size.  (Modified contributed patch.)
+
 doc.tcl		Added Doc_Dynamic for use in .tml pages.  This sets
 		page(dynamic) to 1 so the html cache file is not generated.
 
@@ -311,8 +315,13 @@ doc.tcl		Added Doc_Dynamic for use in .tml pages.  This sets
 
 httpd.tcl	Fix broken call to Log in Httpd_Shutdown
 
+		Moved Httpd(library) definition into this file, away
+		from bin/httpd.tcl
+
+		Added data(uri) element, which is the complete request.
+
 		Added Httpd_SetCookie, which you can use to set a cookie
-		during a subsequent Httpd_ReturnFile, Httpd_ReturnData
+		during a subsequent Httpd_ReturnFile, Httpd_ReturnData.
 
 log.tcl		Made it possible to not log anything if you never call
 		Log_SetFile.  You can still call Log and Log_Flush.
