@@ -10,7 +10,8 @@ application/dca-rft
 application/dec-dx                             
 application/mac-binhex40	hqx
 application/macwriteii
-application/msword
+application/msword		doc
+application/ms-powerpoint	ppt
 application/news-message-id                    
 application/news-transmission      
 application/octet-stream       bin  exe gz Z zip          
