@@ -30,10 +30,15 @@ proc DebugPasswordChecker {sock realm user pass} {
             return 1
           }
         }
-        welch {
-          # I've trusted the debug URL forever
-          return 1
+        debug {
+          return [DebugCheckRandomPassword $pass]
         }
     }
     return 0
+}
+proc DebugCheckRandomPassword {input} {
+  if {![info exist ::DebugPassword]} {
+    return 0
+  }
+  return [expr {[string compare $::DebugPassword $input] == 0}]
 }
