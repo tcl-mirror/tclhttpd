@@ -1,3 +1,8 @@
+2000-10-30  Brent Welch <welch@ajubasolutions.com>
+
+	* lib/pkgIndex.tcl:  Fixed quoting issue when you have
+	installed TclHttpd under "Program Files".
+
 2000-10-26  Brent Welch <welch@ajubasolutions.com>
 
 	* lib/cgi.tcl:  fixed POST data handling in light of the

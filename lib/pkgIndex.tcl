@@ -5,7 +5,7 @@
 # until you package require httpd
 
 package ifneeded httpd 1.5 "
-	source [file join $dir httpd.tcl]
+	source [file join [list $dir] httpd.tcl]
 	package ifneeded httpd::admin 1.0 \[list source \[file join [list $dir] admin.tcl\]\]
 	package ifneeded httpd::auth 1.0 \[list source \[file join [list $dir] auth.tcl\]\]
 	package ifneeded httpd::cgi 1.0 \[list source \[file join [list $dir] cgi.tcl\]\]
