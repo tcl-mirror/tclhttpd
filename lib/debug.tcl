@@ -125,11 +125,11 @@ proc Debug/after {} {
 proc Debug/echo {title args} {
     set html "<title>$title</title>\n"
     append html "<H1>$title</H1>\n"
-    append html <dl>
+    append html "<table border=1>\n"
     foreach {name value} $args {
-	append html "<dt>$name<dd>$value"
+	append html "<tr><td>$name</td><td>$value</td></tr>\n"
     }
-    append html </dl>
+    append html </table>
     return $html
 }
 proc Debug/errorInfo {title errorInfo {env {no environment}}} {
