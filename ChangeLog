@@ -1,4 +1,8 @@
 2004-05-28 Brent Welch <welch@panasas.com>
+	* fixed Digest authentication bug
+	* improved /htaccess tool
+	
+2004-05-28 Brent Welch <welch@panasas.com>
         * CVS tag tclhttpd-3-5-1 for the 3.5.1 release
 
 2004-05-28 Brent Welch <welch@panasas.com>
