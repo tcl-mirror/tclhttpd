@@ -8,12 +8,17 @@ create a crypto library with the same interface.
 	http://www.rsa.com
 	http://www.openssl.org
 
-Next comes the "TLS" Tcl extension, which uses the crypto library.  You can get
-this from the Scriptics CVS repository, or from its home at
-	http://www.sensus.org/tcl/
-NOTE: You really do need the version from our CVS repository.  There is
-a snapshot of this at ftp://ftp.tcl.tk/pub/tcl/httpd/
-As of this writing, the stable version of TLS is version 1.4.1
+Next comes the "TLS" Tcl extension, which uses the crypto library.
+The development home page for TLS is
+        http://sourceforge.net/projects/tls/
+I have used the 1.4.1 version for a number of years, although
+there is a recent 1.5.0 version.  At SourceForge there are
+binary releases for Linux and Solaris that save you the chore
+of building OpenSSL.
+
+If you can run tclsh and
+        package require tls
+then you are almost ready to go.
 
 Finally you need keys and certificates for your server.  OpenSSL comes with
 a command-line utility called "openssl" that you can use to generate keys
@@ -28,8 +33,8 @@ One example Certificate Authority is
     http://www.verisign.com
 
 Once you get the signed certificate back, edit the tclhttpd.rc file so they
-accurately record the location of your keyfile and certificate.  The server should
-then be able to listen for SSL connections on the https port.
+accurately record the location of your keyfile and certificate.
+The server should then be able to listen for SSL connections on the https port.
 
 You can also bootstrap yourself into your own CA by following the steps
 outlined below.  This lets you sign your own certificate requests to

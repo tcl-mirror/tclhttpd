@@ -90,7 +90,7 @@ Home hits: [counter::get hit -hist /]
 [html::if {[info commands "::learn::links"] == "::learn::links"} {
   [::learn::links \n<li>]
 } else {
-  <a href=/learn/>Learn</a>
+  <a href=/learn/>Learn more</a>
 }]
 </ul>
 

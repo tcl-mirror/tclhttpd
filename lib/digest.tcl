@@ -15,7 +15,6 @@ package provide httpd::digest 1.0
 
 package require base64
 package require md5
-catch {package import ::md5::md5}
 
 # generate private key
 if {[catch {package require Random}]} {
@@ -46,7 +45,7 @@ if {[catch {package require Random}]} {
 set DigestSecret [DigestRand]
 
 proc md5hex {what} {
-    set result [md5 $what]
+    set result [::md5::md5 $what]
     binary scan $result H* result
     return $result
 }

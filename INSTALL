@@ -9,7 +9,7 @@ Try using the server without installing anything.
 The preconditions for this are that you have Tcl 8.3 (or higher)
 and the Tcl Standard Library installed.  Test that by running tclsh
 and attempting to
-	package require tcllib
+	package require counter
 
 If you can do that, then you should be able to run the server like this:
 
@@ -35,14 +35,14 @@ stop the server.
 If approach #1 doesn't work because you don't have the Standard Tcl Library,
 then either fetch it from ftp://www.tcl.tk/pub/tcl/tcllib
 or use the one that comes with the "bundled TclHttpd" distribution.
-Grab the highest version number one you can find in:
+Grab the highest version number one you can find from:
 
-	ftp://www.tcl.tk/pub/tcl/tcllib
+	http://tcllib.sourceforge.net/
 
-It contains a Tcl or SH script that copies its files into peer directories
+Tcllib contains a Tcl or SH script that copies its files into peer directories
 of your Tcl script library.  For example, if your Tcl library is in
 /usr/local/tcl/tcl8.3, then it will create a directory named something like
-/usr/local/tcl/tcllib1.3.  Once these are in place, you should be able to
+/usr/local/tcl/tcllib1.6.  Once these are in place, you should be able to
 "package require tcllib" from your Tcl shell.
 
 WARNING: The Tcl package mechanism doesn't deal correctly with multiple
@@ -108,6 +108,28 @@ blocks.  Without threads, you are forced to put your blocking
 operations into CGI scripts so that the external CGI process blocks.
 The server continues to service requests until the pipe connected
 to the CGI process produces data.
+
+5. Starkit Distribution
+
+The tclhttpd3.5.0.kit file is a starkit that is used with the
+tclkit Tcl interpreter.  There is more information about Tclkit at
+  http://wiki.tcl.tk/tclkit/
+but the basic idea is simple.  All you need is a tclkit binary
+installed for your platform, and the platform-independent tclhttpd.kit.
+Start the server like this:
+  tclkit tclhttpd.kit -port 8001 -docRoot /your/htdocs -library /your/code
+If you don't supply a docRoot or library, then you get the sample
+htdocs and extension code that is bundled inside the tclhttpd.kit file.
+You can supply all the regular command line arguments to the starkit.
+
+NOTE: CGI scripts don't work if you use the sample document tree because
+the hosting OS cannot find the CGI script files inside the starkit.
+
+Feel free to create your own tclhttpd.kit that has your own doc tree
+and application code.  You'll need the "sdx" utility that wraps and unwraps
+a tclkit.  You can even create a single-file Starpack that includes
+tclkit and the tclhttpd.kit wrapped up into a single executable file.
+
 
 ----------------------------------------------------------------------------
 PLATFORM ISSUES

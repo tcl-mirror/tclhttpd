@@ -31,7 +31,11 @@ if {![file exists $datafile]} {
 		set item $Guestbook($name)
 		set homepage [lindex $item 0]
 		set markup [lindex $item 1]
-		H3 [Link $name $homepage]
+                if {[string length $homepage]} {
+                  H3 [Link $name $homepage]
+                } else {
+                  H3 $name
+                }
 		puts $markup
 	}
 }

@@ -36,9 +36,7 @@ to configure, make, and install it. e.g.,
 Windows and Macintosh:
 	Run wish or tclsh and source bin/httpd.tcl
 
-3) If you do not have the Standard Tcl Library, then perhaps the
-easiest thing to do is get the "bundled distribution" of TclHttpd
-and use its configure, make, and make install scripts.
+3) For more detailed installation instructions, see the INSTALL file.
 
 For a complete set of command line options, do
 httpd.tcl -help

@@ -73,10 +73,4 @@ it is enough to call
 <br><br>
 http://yourserver:port/debug/dbg
 
-
-<h4>
-<a HREF="/debug/source?source=hack.x">Brent's Junk</a> |
-<a HREF="/debug/source?source=debug.x">Fixup</a> |
-<a HREF="/debug/after">After Queue</a>
-</h4>
 [mypage::footer]

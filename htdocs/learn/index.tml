@@ -7,8 +7,7 @@ Tcl code to the server.  The server runs this code to generate
 web pages.  There are a few frameworks for this, including
 <a href=#urlprefix>URL prefix domains</a>, 
 <a href=#direct>application-direct URL</a>,
-<a href=#tml>TML Templates</a>, and
-<a href=#custom>your own custom framework</a>.
+and <a href=#tml>TML Templates</a>.
 
 <h3><a name="setup">Server Setup</a></h3>
 
@@ -34,7 +33,5 @@ by <i>url prefix</i>.  For example, everything below <tt><a href=/status>/status
 information for the server.
 
 <h3><a name="direct">Application Direct URL</a></h3>
-
-<h3><a name="custom">Custom Frameworks</a></h3>
 
 [mypage::footer]
