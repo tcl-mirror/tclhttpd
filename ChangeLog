@@ -1,5 +1,6 @@
 2004-10-22 Colin McCormack <colin@sharedtech.dyndns.org>
 	* lib/*.tcl: added braces around all [if] conditionals - for speed
+	* lib/{doc,template}.tcl: removed redundant prefix arg from Template_Try
 
 2004-10-19 Colin McCormack <colin@sharedtech.dyndns.org>
 	* session.tcl: Added SessionFetch and SessionDiscard to get and clean up
