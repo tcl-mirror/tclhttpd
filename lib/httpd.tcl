@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.64 2000/10/12 23:00:41 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.65 2000/10/18 23:30:11 welch Exp $
 
 package provide httpd 1.5
 
@@ -721,6 +721,7 @@ proc Httpd_ReadPostDataAsync {sock cmd} {
 #	The callback is made 
 
 proc Httpd_GetPostDataAsync {sock varName blockSize cmd} {
+    Httpd_Suspend $sock
     fileevent $sock readable \
 	[list HttpdReadPostGlobal $sock $varName $blockSize $cmd]
     return
@@ -827,10 +828,11 @@ proc HttpdReadPost {sock varName blockSize {cmd {}}} {
     }
     if {[info exist doneMsg]} {
 	Url_PostHook $sock 0
+	catch {fileevent $sock readable {}}
+	Httpd_Resume $sock
 	if {[string length $cmd]} {
 	    eval $cmd [list $sock $varName $doneMsg]
 	}
-	catch {fileevent $sock readable {}}
 	return $doneMsg
     } else {
 	return ""
