@@ -40,7 +40,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.9 2004/04/22 09:12:15 coldstore Exp $
+# RCS: @(#) $Id: session.tcl,v 1.10 2004/05/01 13:50:41 coldstore Exp $
 
 package provide httpd::session 1.0
 
@@ -233,7 +233,7 @@ proc Session_Cookie {{querylist {}} {type {}} {error_name error} {isSafe 1}} {
     # fetch cookies pertaining to session
     set old 0
     foreach {key var} {session session session_sequence sequence} {
-	set x [Cookie_GetSock $Httpd(currentSocket) $key]
+	set x [Cookie_GetSock $Httpd(currentSocket) ${type}_$key]
 	if {$x != ""} {
 	    incr old
 	    lappend querylist $var [lindex $x 0]
@@ -248,6 +248,7 @@ proc Session_Cookie {{querylist {}} {type {}} {error_name error} {isSafe 1}} {
     # we must have lost the old session. lose the cookies and try again
     if {$error == "Session: Invalid session id."} {
 	set query(session) new
+	set error ""
 	set id [Session_Match [array get query] $type error $isSafe]
 	set old 0
     }
@@ -261,7 +262,7 @@ proc Session_Cookie {{querylist {}} {type {}} {error_name error} {isSafe 1}} {
 	    session_sequence session(sequence)
 	    session_type session(type)} {
 	    if {[info exists $var]} {
-		Cookie_Set -expires $Session(expires) -path / -name $key -value [set $var]
+		Cookie_Set -expires $Session(expires) -path / -name ${type}_$key -value [set $var]
 	    }
 	}
     }
@@ -276,6 +277,15 @@ proc Session_Cookie {{querylist {}} {type {}} {error_name error} {isSafe 1}} {
     }
 
     return $id
+}
+
+# Destroy the session cookie for this type
+# note, this won't take immediate effect,
+# you may have to reload the page to get the new cookies
+proc Session_CookieDestroy {{type {}}} {
+    foreach key {session session_sequence} {
+	Cookie_Unset ${type}_$key -path /
+    }
 }
 
 # Save session state in a file under $Session(dir),
@@ -337,8 +347,8 @@ proc Session_Match {querylist {type {}} {error_name error} {isSafe 1}} {
     }
 
     if {![info exists query(session)]} {
-    	set error "Session: no session id provided."
-    	return {}
+	set error "Session: no session id provided."
+	return {}
     }
 
     set id $query(session)
@@ -380,7 +390,7 @@ proc Session_Match {querylist {type {}} {error_name error} {isSafe 1}} {
 
     if {$type != {} && $type != $session(type)} {
     	set error "Session: Invalid session type."
-    	return {}
+    	return $id
     }
 
     # Check sequence number (if any).
@@ -388,11 +398,11 @@ proc Session_Match {querylist {type {}} {error_name error} {isSafe 1}} {
     if {[info exists session(sequence)]} {
     	if {![info exists query(sequence)]} {
 	    set error "Session: Sequence number required, not provided."
-	    return {}
+	    return $id
     	}
     	if {$query(sequence) != $session(sequence)} {
 	    set error "Session: Sequence number invalid."
-	    return {}
+	    return $id
     	}
     	unset session(sequence)
     }
