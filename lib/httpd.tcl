@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.52 2000/09/06 21:45:44 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.53 2000/09/13 21:50:49 welch Exp $
 
 package provide httpd 1.4
 
@@ -189,9 +189,6 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
     set Httpd(https_port) $port
     if {[string length $name] == 0} {
 	set Httpd(name) [info hostname]
-    }
-    if {[info exists Httpd(port)] == 0} {
-	set Httpd(port) $port
     }
     package require tls
 
@@ -1161,10 +1158,37 @@ proc Httpd_Name {sock} {
 
 # Return the port for the connection
 
-proc Httpd_Port {sock} {
-    upvar #0 Httpd$sock data
-    return [lindex $data(self) 2]
+proc Httpd_Port {{sock {}}} {
+    if {[string length $sock]} {
+
+	# Return the port for this connection
+
+	upvar #0 Httpd$sock data
+	return [lindex $data(self) 2]
+    } else {
+
+	# Return the non-secure listening port
+
+	global Httpd
+	if {[info exist Httpd(port)]} {
+	    return $Httpd(port)
+	} else {
+	    return {}
+	}
+    }
 }
+proc Httpd_SecurePort {} {
+
+    # Return the secure listening port
+
+    global Httpd
+    if {[info exist Httpd(https_port)]} {
+	return $Httpd(https_port)
+    } else {
+	return {}
+    }
+}
+
 
 # Generate a redirect because the trailing slash isn't present
 # on a URL that corresponds to a directory.
@@ -1172,11 +1196,6 @@ proc Httpd_Port {sock} {
 proc Httpd_RedirectDir {sock} {
     global Httpd
     upvar #0 Httpd$sock data
-    # set url http://$Httpd(name)
-    # if {$Httpd(port) != 80} {
-    # 	append url :$Httpd(port)
-    #    }
-    # Httpd_Redirect $url$data(url)/ $sock
     Httpd_Redirect $data(url)/ $sock
 }
 
