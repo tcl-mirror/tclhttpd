@@ -135,6 +135,11 @@ run in its own thread. The default is [const false]. In a server which
 is not thread-enabled this option will be ignored and the value always
 forced to [const false].
 
+[opt_def filter]
+
+takes a command to be applied as a filter to content returned to the client.
+See [cmd Httpd_Filter] for more information.
+
 [list_end]
 
 

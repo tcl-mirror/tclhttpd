@@ -685,6 +685,19 @@ Generates a "Authorization required" reply (code 401) and then closes
 the connection [arg sock]. The type is usually [const basic]. The data
 in [arg realm] is used by browsers to cache credentials.
 
+[call [cmd Httpd_Filter] [arg {sock args}]]
+
+Adds a filter command to a per-socket stack of such commands.
+
+Filter commands are run over data to be returned by [cmd Httpd_ReturnData]
+and [cmd Httpd_ReturnCacheableData].  The commands are passed [arg sock] and
+the page contents.  Page contents are replaced by whatever is returned by the
+filter commands.
+
+Filter commands are run in reverse order of their declaration, so the oldest is
+run last.  [Url_PrefixInstall] takes a [arg -filter] which allows
+per-domain filtering.
+
 [list_end]
 
 [see_also httpd::url http::log httpd::logstd httpd::version]
