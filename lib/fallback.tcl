@@ -14,7 +14,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: fallback.tcl,v 1.5 2004/06/12 04:51:08 coldstore Exp $
+# RCS: @(#) $Id: fallback.tcl,v 1.6 2004/06/14 06:09:06 coldstore Exp $
 
 package provide httpd::fallback 1.0
 
@@ -44,6 +44,9 @@ if {![info exists Fallback(excludePat)]} {
 
 # Fallback_Try
 #
+# Try to find an file which matches the HTTP Accept alternatives
+# given by the client.
+#
 # Arguments:
 #	prefix	The URL prefix of the domain.
 #	path	The pathname we were trying to find.
@@ -65,11 +68,11 @@ proc Fallback_Try {virtual path suffix sock} {
 	return 0
     }
 
-    # Here we look for files indicated by any Accept headers.
+    # Look for files indicated by any Accept headers.
     # Most browsers say */*, but they may provide some ordering info, too.
 
     # First generate a list of candidate files by ignoring extension
-    global Template
+    global Template	;# we need the template extension here
     set ok {}
     foreach choice [glob -nocomplain $root.*] {
 	# don't let "foo.html.old" match for "foo.html"
@@ -85,16 +88,20 @@ proc Fallback_Try {virtual path suffix sock} {
     }
 
     # Now we pick the best file from the files and templates that matched
+    # Template_Choose will return us the best possible match
+    # the best match might not yet exist, but may be able to be generated 
+    # from a template, which will be handled after the redirection we provoke
     set npath [Template_Choose [Mtype_Accept $sock] $ok]
     if {[string length $npath] == 0} {
 	# there was no viable alternative
 	return 0
     } elseif {[string compare $path $npath] == 0} {
 	# the best alternative was the original path requested
-	# this is bogus - we shouldn't be called if there's a match
+	# FIXME: this is bogus - we shouldn't even be called if there's a match
 	return 0
     } else {
 	# A file matched with a different extension to that requested
+	# (if the match was a template, we offer the untemplated name.)
 
 	# Redirect_to/offer our best match.
 	# Redirect so we don't mask spelling errors like john.osterhoot
@@ -106,13 +113,17 @@ proc Fallback_Try {virtual path suffix sock} {
 	} else {
 	    # client requested foo.$old, we're offering foo.$new
 	    # Watch out for specials in $old, like .html)
+	    # FIXME: the following seems bogus and heavyweight
+	    # if there's an element in the path which happens to match the ext,
+	    # we will subst it too, which can't be a good thing.
+	    # we should really decompose the path and reconstruct it.
 	    regsub -all {[][$^|().*+?\\]} $old {\\&} old ;# quote special chars
 	    regsub $old\$ $suffix $new suffix	;# substitute $new for $old
 	}
 
-	# Offer what we have to the client, preserving query data
-	Redirect_QuerySelf $virtual/[string trimleft $suffix /~] ;# offer what we have to the client
-	return 1
+	# Offer alternative to the client by redirection, preserving query data
+	Redirect_QuerySelf $virtual/[string trimleft $suffix /~]
+	return 1	;# we have completely handled the request.
     }
 }
 

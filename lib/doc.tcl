@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.53 2004/06/12 04:47:54 coldstore Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.54 2004/06/14 06:09:06 coldstore Exp $
 
 package provide httpd::doc 1.1
 
@@ -442,12 +442,17 @@ proc Doc_Handle {prefix path suffix sock} {
 	return 1
     }
 
+    # Template_Try hasn't satisfied the request,
+    # Look for an exact match.
     if {[file exists $path] && [file readable $path]} {
 	# we have a file precisely matching the request
 	Doc_Return $prefix $path $suffix $sock
 	return 1
     }
 
+    # Negotiate an Acceptable available alternative file
+    # if one is found, a redirect is provoked
+    # (FIXME: is this according to the spec?)
     if {[Fallback_Try $prefix $path $suffix $sock]} {
 	# we have found an Accept-able alternative
 	# Fallback_Try generates a redirect

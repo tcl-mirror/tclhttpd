@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: template.tcl,v 1.15 2004/06/13 15:05:11 coldstore Exp $
+# RCS: @(#) $Id: template.tcl,v 1.16 2004/06/14 06:09:06 coldstore Exp $
 
 package provide httpd::template 1.0
 
@@ -25,11 +25,16 @@ if {![info exists Template(env)]} {
 
 if {![info exists Template(htmlExt)]} {
     switch $tcl_platform(platform) {
-	windows { set Template(htmlExt) .htm }
-	default { set Template(htmlExt) .html }
+	windows {
+	    set Template(htmlExt) .htm
+	}
+	default {
+	    set Template(htmlExt) .html
+	}
     }
 }
 
+set Template(htmlMatch) {([.]html?)}
 
 # Template_Check --
 #
@@ -124,8 +129,14 @@ proc Doc_application/x-tcl-template {path suffix sock} {
     # so the result is not cached at the remote end, nor is a local
     # .html file cached.
 
-    return [Httpd_ReturnData $sock text/html \
-	    [TemplateInstantiate $sock $path {} $suffix {} $Template(templateInterp)]]
+    set content [TemplateInstantiate $sock $path {} $suffix {} $Template(templateInterp)]
+    # If the content type was set, use it.  Otherwise, use the default.
+    if {[info exists data(contentType)]} {
+	set ctype $data(contentType)
+    } else {
+	set ctype text/html
+    }
+    return [Httpd_ReturnData $sock $ctype $content]
 }
 
 # TemplateInstantiate --
@@ -411,9 +422,16 @@ proc Template_Try {sock path prefix suffix} {
 	set ext $Template(htmlExt)
 	set template ${root}$Template(tmlExt)
 	
-	if {([file extension $path] != $Template(htmlExt))
-	    || ![file exists $template]} {
+	# ensure request was for *.htm[l]? and .tml exists
+	if {![regexp $Template(htmlMatch) [file extension $path] x ext]
+	    && ![file exists $template]} {
 	    # no template found
+	    return 0
+	}
+
+	if {$template == $path} {
+	    # corner case - client asked explicitly for the .tml file
+	    # so let the caller handle it as an exact match
 	    return 0
 	}
     }
@@ -421,7 +439,7 @@ proc Template_Try {sock path prefix suffix} {
     # we have a matching template and extension for path
     # See if the cached result is up-to-date
     if {[TemplateCheck $sock $template $path]} {
-	
+	# Template file is newer than its cached version
 	# Do the subst and cache the result in the .html file
 	set html [TemplateInstantiate $sock $template $path $suffix dynamic \
 		      $Template(templateInterp)]
@@ -438,6 +456,7 @@ proc Template_Try {sock path prefix suffix} {
 	    Httpd_ReturnData $sock $ctype $html
 	    return 1
 	} else {
+	    # we have generated a cached file from the template.
 	    # leave it to caller to return newly generated file
 	    return 0
 	}
@@ -453,21 +472,27 @@ proc Template_Try {sock path prefix suffix} {
 proc Template_Choose {accept choices} {
     global Template
 
-    # generate a map map from mime_type -> choice
+    # generate a map map from mime_type -> choices
     foreach f $choices {
+	# get first of two extensions eg .css.tml
 	set type [file extension [file root $f]]	;# use .css in .css.tml
 	if {$type == ""} {
-	    set type [file extension $f]	;# path has a single extension
+	    set type [file extension $f]	;# path has only a single extension
+	    if {$type == $Template(tmlExt)} {
+		# we've found a .tml file - x.tml matches x.html
+		set type $Template(htmlExt)
+	    }
 	}
-	if {$type == $Template(tmlExt)} {
-	    # we've found a .tml file - x.tml matches x.html
-	    set type $Template(htmlExt)
-	}
-	lappend set mtype([Mtype $type]) $f
+	lappend mtype([Mtype $type]) $f
     }
 
-    # look at what mime types the client accepts, in order
+    # array mtype is now a mapping from mime types to files
+    # for the collection of files we can offer.
+
+    # look at what mime types the client accepts, in order of presentation
+    # (nb FIXME: the spec says we should accept them in q= order)
     foreach t [split $accept ,] {
+	# find something that matches 
 	regsub {;.*} $t {} t	;# Nuke quality parameters
 	set t [string trim [string tolower $t]]
 
@@ -477,11 +502,18 @@ proc Template_Choose {accept choices} {
 	    set hits [concat $hits $files]
 	}
 
-	# if some files match on type, choose most recent
-	set hit [file_latest $hits]
+	# if some file choices match on type, choose the most recent
+	if {[llength $hits] > 1} {
+	    set hit [file_latest $hits]
+	} else {
+	    set hit [lindex $hits 0]
+	}
+
 	if {[string length $hit]} {
+	    # we have a matching file
 	    if {[file extension $hit] == $Template(tmlExt)} {
-		# our candidate is a .tml file - strip the tml
+		# our candidate is a template file
+		# return the name of the file as it will be.
 		if {[file extension [file root $hit]] == ""} {
 		    # we're about to offer a .tml - as an .html
 		    return "[file root $hit]$Template($htmlExt)"
@@ -490,7 +522,7 @@ proc Template_Choose {accept choices} {
 		    return [file root $hit]
 		}
 	    }
-	    return $hit
+	    return $hit	;# not a templated match
 	}
     }
 
