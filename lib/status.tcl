@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.16 2000/09/20 00:25:44 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.17 2000/09/20 00:49:47 welch Exp $
 
 package provide httpd::status 1.0
 
@@ -496,7 +496,7 @@ proc StatusTclPower {{align left}} {
 #	Returns HTML.
 
 proc Status/all {args} {
-    global CntMinuteurlhits CntHoururlhits CntDayurlhits counter
+    global _status
     set html "<html><head><title>Tcl HTTPD Status</title></head>\n"
     append html "<body><h1>Tcl HTTPD Status</h1>\n"
     append html [StatusMenu]
@@ -504,17 +504,19 @@ proc Status/all {args} {
     append html [StatusMainTable]
     append html "<br><a href=/status/text>Text only view.</a>\n"
 
-	append html [stats::histHtmlDisplay serviceTime \
-		-title "Service Time" -unit seconds -max 100]
+    append html [stats::histHtmlDisplay serviceTime \
+	    -title "Service Time" -unit seconds -max 100 \
+	    -images $_status(images)]
 
-    catch {
-	append html [stats::histHtmlDisplay urlhits \
-		-title "Per Minute Url Hits" -unit minutes]
-	append html [stats::histHtmlDisplay urlhits \
-		-title "Hourly Url Hits" -unit hours]
-	append html [stats::histHtmlDisplay urlhits \
-		-title "Daily Url Hits" -unit days]
-    }
+    append html [stats::histHtmlDisplay urlhits \
+	    -title "Per Minute Url Hits" -unit minutes \
+	    -images $_status(images)]
+    append html [stats::histHtmlDisplay urlhits \
+	    -title "Hourly Url Hits" -unit hours \
+	    -images $_status(images)]
+    append html [stats::histHtmlDisplay urlhits \
+	    -title "Daily Url Hits" -unit days \
+	    -images $_status(images)]
     return $html
 }
 
@@ -529,7 +531,7 @@ proc Status/all {args} {
 #	Returns HTML.
 
 proc Status/text {args} {
-    global CntMinuteurlhits CntHoururlhits CntDayurlhits counter _status
+    global _status
     set html "<title>Tcl HTTPD Status</title>\n"
     append html "<body><h1>Tcl HTTPD Status</h1>\n"
     append html [StatusMenu]
