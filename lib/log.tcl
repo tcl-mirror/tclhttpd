@@ -34,6 +34,11 @@ if {![info exists Log(flushInterval)]} {
     set Log(flushInterval) [expr {60 * 1000}]
 }
 
+# This is used to turn on an alternate debug log file
+if {![info exist Log(debug_log)]} {
+    set Log(debug_log) 0
+}
+
 
 proc Log {sock reason args} {
     global Log
@@ -65,6 +70,15 @@ proc Log {sock reason args} {
 	    if {$Log(flushInterval) == 0} {
 		catch {flush $Log(log_fd)}
 	    }
+	}
+	"Debug" {
+	    set now [clock seconds]
+	    append result { } \[[clock format $now -format %d/%h/%Y:%T]\]
+	    append result { } $sock { } $reason { } $args
+	    if {[info exists data(url)]} {
+		append result { } $data(url)
+	    }
+	    catch { puts $Log(debug_fd)  $result ; flush $Log(debug_fd) }
 	}
 	default {
 	    set now [clock seconds]
@@ -150,6 +164,7 @@ proc Log_SetFile {{basename {}}} {
     if {![info exists Log(log)]} {
 	catch {close $Log(log_fd)}
 	catch {close $Log(error_fd)}
+	catch {close $Log(debug_fd)}
 	return
     }
     catch {Counter_CheckPoint} 		;# Save counter data
@@ -177,6 +192,18 @@ proc Log_SetFile {{basename {}}} {
 
     catch {close $Log(error_fd)}
     catch {set Log(error_fd) [open $Log(log)error a]}
+
+    # This debug log gets reset daily
+
+    catch {close $Log(debug_fd)}
+    if {[info exists Log(debug_file)] && [file exists $Log(debug_file)]} {
+	catch {file rename -force $Log(debug_file) $Log(debug_file).old}
+    }
+
+    if {[info exist Log(debug_log)] && $Log(debug_log)} {
+	set Log(debug_file) $Log(log)debug
+	catch {set Log(debug_fd) [open $Log(debug_file) w]}
+    }
 }
 
 # Log_Flush --
