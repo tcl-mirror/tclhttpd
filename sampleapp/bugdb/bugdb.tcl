@@ -9,12 +9,16 @@ proc bugdb::insert {Application OS Priority Assigned Summary Description} {
     # set date
     set date [clock format [clock seconds] ]
 
+    # Substitute for characters that break the HTML
+    regsub -all {"} $Summary {\&quot;} safe_summary
+    regsub -all {"} $Description {\&quot;} safe_description
+
     # Open the db
     mk::file open bugdb ../sampleapp/bugdb/bugdb.mk
 
     set result [catch {mk::row append bugdb.bugs Application "$Application" OS "$OS" \
-    Priority "$Priority" Assigned "$Assigned" Summary "$Summary" \
-    Description "$Description" date "$date"} msg]
+    Priority "$Priority" Assigned "$Assigned" Summary "$safe_summary" \
+    Description "$safe_description" date "$date"} msg]
 
     mk::file commit bugdb
 
