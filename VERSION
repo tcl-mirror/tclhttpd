@@ -5,6 +5,7 @@ README
         For informational purposes
 configure.in
         The patchlevel is either "" or ".1" etc.
+        *re-run* autoconf to update configure
 bin/httpd.tcl
         set v 3.4.2
         So it can look for the right tclhttpd library
