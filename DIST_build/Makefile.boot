@@ -95,7 +95,9 @@ build/$(PLATFORM):  build
 	mkdir build/$(PLATFORM)
 
 # We have to make and install Tcl first so that the extensions
-# can properly find the stubs library.
+# can properly find the stubs library.  We also redefine TCLSH_PROG
+# to use the installed version so various utilities in tcllib work
+# when the make is done there.
 
 make-tcl:
 	-pwd=`pwd`; \
@@ -114,7 +116,7 @@ make-modules:
 		echo "Make in $$pwd/build/$(PLATFORM)/$$i" ; \
 		cd $$pwd/build/$(PLATFORM)/$$i ; \
 		echo "" ; \
-		make ; \
+		make TCLSH_PROG=$$pwd/install/$(PLATFORM)/bin/tclsh8.3 ; \
 	    else \
 		echo "Skipping Make for $$i" ; \
 	    fi; \
