@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.26.6.3 2002/10/29 22:45:05 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.26.6.4 2002/10/30 00:56:20 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -264,13 +264,13 @@ depend:
 
 $(crypt_LIB_FILE): $(crypt_OBJECTS)
 	-rm -f $(crypt_LIB_FILE)
-	${SHLIB_LD} -o $@ $(limit_OBJECTS) ${SHLIB_LDFLAGS} ${SHLIB_LD_LIBS}
+	${SHLIB_LD} -o $@ $(crypt_OBJECTS) ${SHLIB_LDFLAGS} ${SHLIB_LD_LIBS}
 
 	$(RANLIB) $(crypt_LIB_FILE)
 
 $(limit_LIB_FILE): $(limit_OBJECTS)
 	-rm -f $(limit_LIB_FILE)
-	${SHLIB_LD} -o $@ $(crypt_OBJECTS) ${SHLIB_LDFLAGS} ${SHLIB_LD_LIBS}
+	${SHLIB_LD} -o $@ $(limit_OBJECTS) ${SHLIB_LDFLAGS} ${SHLIB_LD_LIBS}
 	$(RANLIB) $(limit_LIB_FILE)
 
 #========================================================================
