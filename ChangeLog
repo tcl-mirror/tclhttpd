@@ -3,7 +3,9 @@
 	content type of returned file.
 	* lib/httpd.tcl: fixed sf error '[925210] bad message length in Httpd_Error'
 	* lib/cookie.tcl: removed redundant test
-
+	* lib/status.tcl: fixed sf bug '[943990] Status/text uses wrong counter names'
+	per patch supplied.
+	
 2004-04-27 Colin McCormack <colin@chinix.com>
 	* src/crypt.c: added a test for error return from crypt()
 	* lib/{fallback,mtype,template}.tcl: corrected and extended source
