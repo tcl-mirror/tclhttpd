@@ -8,7 +8,10 @@
         tree from the Makefile to the distribution creation script.
         * configure.in:
         * README
+        * bin/httpd.tcl:
         * lib/version.tcl: Changed to 3.4.2 (sigh)
+        * Added VERSION so I remember how to change the version number in
+          all the right places!
 
 2002-08-30  Brent Welch <welch@panasas.com>
         * (In the tclhttpd-3-4-rel branch).
