@@ -1,4 +1,11 @@
 2004-03-22 Brent Welch <welch@panasas.com>
+        * htdocs/man: minor updates to some of these pages
+        * lib/cookie.tcl: Added Cookie_GetSock to get a cookie from the
+        connection as opposed to getting it from the environment
+        * bin/httpd.tcl: rooted out another reference to libtml
+        * DIST_build/{DIST,README}: tweaks for packaging
+
+2004-03-22 Brent Welch <welch@panasas.com>
         * Large reshuffle of files among
           htdocs/libtml, lib, custom, and sampleapp
           The goal is that the minimum is in the lib directory for

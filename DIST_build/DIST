@@ -2,17 +2,19 @@
 #
 # Create a super distribution of TclHttpd, Tcl, Tcllib, and Thread
 
+WELCH=/panfs/panwest/home/welch
+
 HTTPD_VERSION=3.5.0
 HTTPD_TAG=tclhttpd-3-5-rel-0
 HTTPD_TAG=HEAD
 WIN_VERSION=350
-DISTDIR=/usr10/home/welch/dist
+DISTDIR=${WELCH}/dist
 SUPER_DIR=${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist
 
 TCL_VERSION=8.4.5
 TCL_DIST=${DISTDIR}/tcl${TCL_VERSION}-src.tar.gz
 
-TCLLIB_VERSION=1.4
+TCLLIB_VERSION=1.6
 TCLLIB_DIST=${DISTDIR}/tcllib-${TCLLIB_VERSION}.tar.gz
 
 THREAD_VERSION=2.6
@@ -20,13 +22,15 @@ THREAD_WIN_VERSION=26
 THREAD_TAG=thread-2-6
 THREAD_TAG=HEAD
 
-SCRATCH=/usr10/home/welch/scratch
-mkdir ${SCRATCH}
+SCRATCH=${WELCH}/scratch
+mkdir -p ${SCRATCH}
 cd ${SCRATCH}
+
+echo "*** Checkout tclhttpd ${HTTPD_VERSION} ***"
 
 rm -rf ${SCRATCH}/tclhttpd${HTTPD_VERSION}
 cvs -d welch@cvs.sourceforge.net:/cvsroot/tclhttpd checkout -r ${HTTPD_TAG} tclhttpd 
-(cd tclhttpd ; cvs -d welch@cvs.sourceforge.net:/cvsroot/tclpro checkout config)
+#(cd tclhttpd ; cvs -d welch@cvs.sourceforge.net:/cvsroot/tclpro checkout config)
 mv tclhttpd tclhttpd${HTTPD_VERSION}
 chmod -R a+r tclhttpd${HTTPD_VERSION}
 chmod a+x tclhttpd${HTTPD_VERSION}/bin/httpd.tcl
@@ -41,15 +45,21 @@ cp tclhttpd${HTTPD_VERSION}/certs/README.ssl tclhttpd${HTTPD_VERSION}/htdocs/lin
 cp tclhttpd${HTTPD_VERSION}/WHATSNEW tclhttpd${HTTPD_VERSION}/htdocs/links/WHATSNEW.txt
 cp tclhttpd${HTTPD_VERSION}/INSTALL tclhttpd${HTTPD_VERSION}/htdocs/links/INSTALL.txt
 
-rm -rf ${SCRATCH}/thread${THREAD_VERSION}
-cvs -d welch@cvs.sourceforge.net:/cvsroot/tcl checkout -r ${THREAD_TAG} thread
-(cd thread ; cvs -d welch@cvs.sourceforge.net:/cvsroot/tclpro checkout config)
-mv thread thread${THREAD_VERSION}
-chmod -R a+r thread${THREAD_VERSION}
+echo "*** Autoconf tclhttpd ${THREAD_VERSION} ***"
 
 cd tclhttpd${HTTPD_VERSION}
 autoconf
 cd ..
+
+echo "*** Checkout thread ${THREAD_VERSION} ***"
+
+rm -rf ${SCRATCH}/thread${THREAD_VERSION}
+cvs -d welch@cvs.sourceforge.net:/cvsroot/tcl checkout -r ${THREAD_TAG} thread
+#(cd thread ; cvs -d welch@cvs.sourceforge.net:/cvsroot/tclpro checkout config)
+mv thread thread${THREAD_VERSION}
+chmod -R a+r thread${THREAD_VERSION}
+
+echo "*** Autoconf thread ${THREAD_VERSION} ***"
 
 cd thread${THREAD_VERSION}
 autoconf
@@ -62,14 +72,22 @@ cd tclhttpd${HTTPD_VERSION}/DIST_build
 
 SRCDIR=..
 
+echo "*** Copy bundle into ${SUPER_DIR} ***"
+
 rm -rf ${SUPER_DIR}
 mkdir ${SUPER_DIR}
 mkdir ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}
+
+echo "*** Copy tclhttpd${HTTPD_VERSION} into ${SUPER_DIR} ***"
 tclsh ${SRCDIR}/bin/CopyDist ${SRCDIR} ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}
 
+echo "*** Copy thread${THREAD_VERSION} into ${SUPER_DIR} ***"
 mkdir ${SUPER_DIR}/thread${THREAD_VERSION}
 tclsh ${SRCDIR}/bin/CopyDist ${SRCDIR}/../thread${THREAD_VERSION} ${SUPER_DIR}/thread${THREAD_VERSION}
+
+echo "*** Gunzip ${TCL_DIST} into ${SUPER_DIR} ***"
 gunzip < ${TCL_DIST} | (cd ${SUPER_DIR} ; tar xf -)
+echo "*** Gunzip ${TCLLIB_DIST} into ${SUPER_DIR} ***"
 gunzip < ${TCLLIB_DIST} | (cd ${SUPER_DIR} ; tar xf -)
 
 mkdir ${SUPER_DIR}/build
@@ -84,13 +102,19 @@ sed -e s/@HTTPD_VERSION@/$HTTPD_VERSION/ \
 
 # Unbundled packages
 
+echo "*** Creating ${DISTDIR}/tclhttpd${HTTPD_VERSION}.tar.gz ***"
 (cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ; tar cf - ./tclhttpd${HTTPD_VERSION} | gzip > ${DISTDIR}/tclhttpd${HTTPD_VERSION}.tar.gz)
+echo "*** Creating ${DISTDIR}/tclhttpd${WIN_VERSION}.zip ***"
 (cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ; zip -9 -r -o  ${DISTDIR}/tclhttpd${WIN_VERSION}.zip  tclhttpd${HTTPD_VERSION})
 
+echo "*** Creating ${DISTDIR}/thread${THREAD_VERSION}.tar.gz ***"
 (cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ;tar cf - ./thread${THREAD_VERSION} | gzip > ${DISTDIR}/thread${THREAD_VERSION}.tar.gz)
+echo "*** Creating ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip ***"
 (cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ;zip -9 -r -o  ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip thread${THREAD_VERSION})
 
 # Bundled packages
 
+echo "*** Creating ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist.tar.gz ***"
 (cd ${DISTDIR}; tar cf - ./tclhttpd${HTTPD_VERSION}-dist | gzip > tclhttpd${HTTPD_VERSION}-dist.tar.gz)
+echo "*** Creating ${DISTDIR}/tclhttpd${WIN_VERSION}.zip ***"
 (cd ${DISTDIR} ; zip -9 -r -o  tclhttpd${WIN_VERSION}dist.zip  tclhttpd${HTTPD_VERSION}-dist)

@@ -45,12 +45,13 @@ application.
 }]
 
 <p>
-Please <a href=register.html>Register Your Software</a> so
-we can see how widely used the server is.
-<p>
 The <a href="mailto:tclhttpd-users@lists.sourceforge.net">tclhttpd-users@lists.sourceforge.net</a> mailing list is the best source of current
 information about TclHttpd.
 There is an <a href=http://www.tcl.tk/lists/tcl-httpd>archive</a>.
+
+<p>
+Please <a href=register.html>Register Your Software</a> so
+we can see how widely used the server is.
 
 <h4>Related Articles</h4>
 
@@ -62,15 +63,6 @@ A <a href=book/TCLHTTPD.html>Tcl Httpd Book Chapter</a> from the
 3rd Edition of
 <em><a href=http://www.beedub.com/book>Practical Programming in Tcl and Tk</a></em>
 by Brent Welch.
-<p>
-<a href=manual/reference.html>The local Server Reference Page</a>.
-Frankly, these reference pages are somewhat out-of-date.
-The book chapter is more coherent, but may lack some details presented
-in the reference pages.  The source code is the truth!
-<p>
-<a href=man/>Low level tclhttpd manual pages</a> contains some detailed server documentation.
-You need the doctools package available to your
-server to view the .man pages.
 <p>
 The <a HREF="http://www.tcl.tk/software/tclhttpd/server.html">white
 paper</a> presents a case for an embedded web server from more of a
@@ -86,28 +78,29 @@ business angle.
 Home hits: [counter::get hit -hist /]
 <li><a HREF="hacks.html">Control panel</a> 
 </ul>
-<h4>Learn TclHttpd</h4>
+<h4>Documentation</h4>
 <ul>
 <li>
-[if {[info commands "::learn::links"] == "::learn::links"} {
-  set _ [::learn::links \n<li>]
+<a href=man/>Manual pages</a>. (requires doctools package)
+<li>
+<a href=manual/reference.html>Server Reference Page</a>. (somewhat out of date)
+<li>
+<a HREF="templates/">Templates with inline Tcl</a>.
+<li>
+<a HREF="access/">Access control schemes</a>. 
+<li>
+[html::if {[info commands "::learn::links"] == "::learn::links"} {
+  [::learn::links \n<li>]
 } else {
-  set _ "<a href=/learn/>Learn</a>"
+  <a href=/learn/>Learn</a>
 }]
-</ul>
-
-<h4>Sample GuestBook</h4>
-<ul>
-<li><a href="guestbook/guestbook.cgi">View Guest Book</a>
-<li><a href="guestbook/newguest.html">Update Guest Book</a>
 </ul>
 
 <h4>Test Pages</h4>
 <ul>
+<li><a href="guestbook/guestbook.cgi">View Guest Book</a>
+<li><a href="guestbook/newguest.html">Update Guest Book</a>
 <li><a HREF="include.shtml">Server includes</a> 
-<li><a HREF="templates/">Templates with inline Tcl</a>.  The simple look-and-feel for these
-pages is implemented in the htdocs/libtml/mypage.tcl file.
-<li><a HREF="access/">Access control schemes</a>. 
 <li><a HREF="forms/">CGI</a>  You probably need to install the Standard Tcl Library for this.
 <li><a HREF="map/">Imagemaps</a> 
 [if {[file exists [file join [Doc_Root] java]]} {

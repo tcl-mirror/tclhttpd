@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.50 2004/03/09 07:55:54 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.51 2004/03/23 04:59:45 welch Exp $
 #
 # \
 exec tclsh "$0" ${1+"$@"}
@@ -129,7 +129,7 @@ unset tmp dir
 # First, we preload a couple of defaults
 
 set Config(docRoot) [file join [file dirname $Config(home)] htdocs]
-set Config(library) [file join [file dirname $Config(home)] htdocs/libtml]
+set Config(library) [file join [file dirname $Config(home)] custom]
 set Config(main) [file join $Config(home) httpdthread.tcl]
 set Config(debug) 0
 set Config(compat) 3.3

@@ -13,7 +13,7 @@ This is obtained with \[Httpd_Version\] in the page.
 <ul>
 <li><a href=faqfaq.html>FAQ Generator</a> example that illustrates
 how to use
-the <tt>faq</tt> module in the sample libtml directory.
+the <tt>faq</tt> module in the sample custom directory.
 <li><a HREF="simple.subst">Simple Tcl template</a>.  If you have a file
 that ends with ".subst", then it is processed every time the page is
 fetched.
