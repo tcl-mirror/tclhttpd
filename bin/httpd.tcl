@@ -63,7 +63,7 @@ if {[file exist [file join $home ../lib/httpd.tcl]]} {
     # Cases 1 and 2
     set Config(lib) [file join $home ../lib]
 } else {
-    tcl_findLibrary tclhttpd 3.0 "" version.tcl TCL_HTTPD_LIBRARY Config(lib)
+    tcl_findLibrary tclhttpd 3.0.0 3.0.0 version.tcl TCL_HTTPD_LIBRARY Config(lib)
 }
 if {![info exist Config(lib)]} {
     error "Cannot find TclHttpd library in auto_path:\n[join $auto_path \n]"
@@ -149,6 +149,9 @@ array set Config [cmdline::getoptions argv [list \
         [list port.arg         [cget port]         {Port number server is to listen on}] \
         [list host.arg         [cget host]         {Server name, should be fully qualified}] \
         [list ipaddr.arg       [cget ipaddr]       {Interface server should bind to}] \
+        [list https_port.arg   [cget https_port]   {SSL Port number}] \
+        [list https_host.arg   [cget https_host]   {SSL Server name, should be fully qualified}] \
+        [list https_ipaddr.arg [cget https_ipaddr] {Interface SSL server should bind to}] \
         [list webmaster.arg    [cget webmaster]    {E-mail address for errors}] \
         [list uid.arg          [cget uid]          {User Id that server runs under}] \
         [list gid.arg          [cget gid]          {Group Id for caching templates}] \
@@ -194,6 +197,16 @@ foreach x {SSL_REQUEST SSL_REQUIRE SSL_CERTFILE SSL_KEYFILE
 # Open the listening sockets
 
 Httpd_Server $Config(port) $Config(host) $Config(ipaddr)
+append startup "httpd started on port $Config(port)\n"
+
+if {![catch {package require tls}]} {
+    if {[catch {
+	Httpd_SecureServer $Config(https_port) $Config(https_host) $Config(https_ipaddr)
+	append startup "secure httpd started on SSL port $Config(https_port)\n"
+    } err]} {
+	append startup "SSL startup failed: $err"
+    }
+}
 
 # Try to increase file descriptor limits
 
@@ -263,7 +276,7 @@ if {[info exists tk_version]} {
     package require srvui
     SrvUI_Init "Tcl HTTPD $Httpd(version)"
 }
-Stderr "httpd started on port $Config(port)"
+Stderr $startup
 if {$Config(debug)} {
     Stdin_Start "httpd % "
     Httpd_Shutdown

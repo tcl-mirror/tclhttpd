@@ -42,6 +42,11 @@ Config gid		50
 
 Config host		[info hostname]
 
+# https_host - the name of the server (i.e., www.yourcompany.com)
+# This should be fully qualified.
+
+Config https_host	[info hostname]
+
 # port - the listening port for the server for HTTP requests.
 # The standard web port is 80.
 
@@ -102,9 +107,9 @@ Config MaxFileDescriptors	256
 #########################
 # SSL Configuration
 
-# SSL_REQUEST - should the server ask for certificates?
+# SSL_REQUEST - should the server ask for certificates from clients?
 
-Config SSL_REQUEST	1
+Config SSL_REQUEST	0
 
 # SSL_REQUIRE - should the server require certificates?
 
@@ -114,35 +119,35 @@ Config SSL_REQUIRE	0
 # certificate files.  If you have only one such file, you can use
 # SSL_CAFILE described below.
 
-Config SSL_CADIR	[Config lib]
+Config SSL_CADIR	[file join [file dirname [Config home]] certs]
 
 # SSL_CAFILE - the file containing the Certificate Authority
 # certificate.  If this is empty, then the directory specified by
 # SSL_CADIR is scanned for certificate files.
 
-Config SSL_CAFILE 	{}
+Config SSL_CAFILE 	""
 
 # SSL_CERTFILE - The server's certificate.
 
-Config SSL_CERTFILE	[file join [Config lib] server.pem]
+Config SSL_CERTFILE	[file join [Config SSL_CADIR] server.pem]
 
 # SSL_KEYFILE - The server's key file.  If this is empty,
 # then just use the SSL_CERTFILE
 
-Config SSL_KEYFILE	""
+Config SSL_KEYFILE	[file join [Config SSL_CADIR] skey.pem]
 
 # USE_SSL2 - Allow the use of SSL version 2 
 # (You cannot get this with a "no patents" build of OpenSSL)
 
-Config SSL_v2		0
+Config USE_SSL2		1
 
 # USE_SSL3 - Allow the use of SSL version 3
 
-Config SSL_v3		1
+Config USE_SSL3		1
 
 # USE_TLS1 - ??
 
-Config SSL_TLS1		0
+Config USE_TLS1		0
 
 # SSL_CIPHERS - list of SSL ciphers to support.  If this is empty,
 # then all the ciphers supported by the SSL implementation are available.
