@@ -73,11 +73,11 @@ install: build
 	rm $(BUILD)/var/www/README*
 
 	# move some lib dirs out of the way
-        # The htdocs/libtml directory is no longer used
-        # The code to support the sample website is in the custom directory
+	# The htdocs/libtml directory is no longer used
+	# The code to support the sample website is in the custom directory
 	mkdir $(BUILD)/usr/lib/tclhttpd/
 #	mv $(BUILD)/var/www/htdocs/libtml $(BUILD)/usr/lib/tclhttpd/
-        rm -rf $(BUILD)/var/www/htdocs/libtml
+	-rm -rf $(BUILD)/var/www/htdocs/libtml
 	mv $(BUILD)/var/www/custom $(BUILD)/usr/lib/tclhttpd/
 
 	mv $(BUILD)/var/www/htdocs/* $(BUILD)/var/www
@@ -85,18 +85,20 @@ install: build
 
 	mkdir $(BUILD)/etc
 	mkdir $(BUILD)/etc/tclhttpd
-	mv $(BUILD)/usr/bin/httpdthread.tcl $(BUILD)/usr/lib/tclhttpd$(VERSION)/
+	#mv $(BUILD)/usr/bin/httpdthread.tcl $(BUILD)/usr/lib/tclhttpd$(VERSION)/
 
 	# supply our own config files
 	rm $(BUILD)/usr/bin/tclhttpd.rc
 	cp $(BUILD)/../tclhttpd-debian/tclhttpd.rc $(BUILD)/etc/tclhttpd/
+
+	rm $(BUILD)/usr/bin/httpdthread.tcl
 	cp $(BUILD)/../tclhttpd-debian/httpdthread.tcl $(BUILD)/etc/tclhttpd/
-	#cp $(BUILD)/../tclhttpd-debian/httpd.tcl $(BUILD)/usr/bin/httpd.tcl/
 
 	# clean up some mess to keep lintian happy
-	chmod a-x `find $(BUILD)/var/www/htdocs/ -name '*.gif'` \
-		`find $(BUILD)/var/www/htdocs/ -name '*.css'` \
-		`find $(BUILD)/var/www/htdocs/ -name '*.html'` \
+	chmod a-x `find $(BUILD)/var/www/ -name '*.gif'` \
+		`find $(BUILD)/var/www/ -name '*.css'` \
+		`find $(BUILD)/var/www/ -name '*.html'` \
+		`find $(BUILD)/etc/tclhttpd/` \
 		$(BUILD)/usr/lib/tclhttpd/custom/dodirs.tcl \
 		$(BUILD)/usr/lib/tclhttpd$(VERSION)/httpdthread.tcl
 
@@ -113,9 +115,9 @@ binary-arch: build install
 	dh_installchangelogs
 	dh_installdocs -n
 	dh_installexamples
-#	dh_install
+	dh_install
 #	dh_installmenu
-#	dh_installdebconf	
+	dh_installdebconf	
 #	dh_installlogrotate
 #	dh_installemacsen
 #	dh_installcatalogs

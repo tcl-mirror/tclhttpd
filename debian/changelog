@@ -1,3 +1,9 @@
+tclhttpd (3.5.0-2) unstable; urgency=low
+
+  * cleaned up some errors
+
+ -- Colin McCormack <colin@chinix.com>  Sat, 13 Mar 2004 15:36:24 +1000
+
 tclhttpd (3.5.0-1) unstable; urgency=low
 
   * tclhttpd native debian release.

@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.2 2004/03/23 02:53:25 welch Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.3 2004/03/23 09:56:09 coldstore Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -58,6 +58,7 @@ package require httpd::utils	;# handy stuff like "lassign"
 package require httpd::redirect	;# URL redirection
 package require httpd::auth	;# Basic authentication
 package require httpd::log	;# Standard logging
+package require httpd::digest	;# Digest authentication
 
 if {$Config(threads) > 0} {
     package require Thread		;# C extension
@@ -188,5 +189,3 @@ if {[info exist Config(library)] && [string length $Config(library)]} {
 	}
     }
 }
-
-
