@@ -58,7 +58,7 @@ proc Doc_ExcludePat {patlist} {
     set Doc(excludePat) $patlist
 }
 if {![info exists Doc(excludePat)]} {
-    set Doc(excludePat) {*.bak *.swp}
+    set Doc(excludePat) {*.bak *.swp *~}
 }
 
 # Allow or disable automatic template checking
@@ -415,7 +415,7 @@ proc Doc_Error { sock ei } {
 }
 
 proc DocSubstSystemFile {sock key code {extra {}} {interp {}}} {
-    global Doc
+    global Doc env
     if {![info exists Doc(page,$key)]} {
 	set path [Doc_Virtual {} {} /$key.html]
 	if {[file exists $path]} {

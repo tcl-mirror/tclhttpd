@@ -61,9 +61,9 @@ proc Url_Dispatch {sock} {
     if {(![info exists data(query)] || [string length $data(query)] == 0) \
 	    && [info exists UrlCache($url)]} {
 	Count cachehit,$url
-	if [catch {
+	if {[catch {
 	    eval $UrlCache($url) {$sock}
-	}] {
+	}]} {
 	    catch {Url_UnCache $sock}
 	} else {
 	    return
@@ -184,7 +184,7 @@ proc Url_PathCheck {urlsuffix} {
     foreach part  [split $urlsuffix /] {
 	set part [Url_Decode $part]
 	# Disallow Mac and UNIX path separators in components
-	if [regexp $Url(fsSep) $part] {
+	if {[regexp $Url(fsSep) $part]} {
 	    error "URL components cannot include $Url(fsSep)"
 	}
 	switch -- $part {
@@ -207,8 +207,11 @@ proc Url_PathCheck {urlsuffix} {
 # convert a x-www-urlencoded string into a list of name/value pairs
 
 proc Url_DecodeQuery {query args} {
-    array set options {-type application/x-ww-urlencoded -qualifiers {}}
+    array set options {-type application/x-www-urlencoded -qualifiers {}}
     catch {array set options $args}
+    if {[string length [info command Url_DecodeQuery_$options(-type)]] == 0} {
+	set options(-type) application/x-www-urlencoded
+    }
     return [Url_DecodeQuery_$options(-type) $query $options(-qualifiers)]
 }
 
@@ -237,9 +240,6 @@ proc UrlDecodeData {data} {
 # proc xprime [info args x] [info body x]
 
 proc Url_DecodeQuery_application/x-www-form-urlencoded {query qualifiers} {
-    Url_DecodeQuery_application/x-www-urlencoded $query $qualifiers
-}
-proc Url_DecodeQuery_application/x-ww-urlencoded {query qualifiers} {
     Url_DecodeQuery_application/x-www-urlencoded $query $qualifiers
 }
 

@@ -71,7 +71,7 @@ or Size <input type=radio name=sort value=size $sizecheck><br>
     }
 
     set timeformat "%b %e, %Y %X"
-    if [string compare {} $list] {
+    if {[llength $list] > 0} {
 	set max 0
 	foreach entry $list {
 	    setmax max [string length [file tail $entry]]
@@ -89,6 +89,7 @@ or Size <input type=radio name=sort value=size $sizecheck><br>
 		if {[catch {lsort -decreasing -integer -index 1 $mlist} list2]} {
 		    set list2 [lsort -command DateCompare $mlist]
 		}
+		set extra 1
 	    }
 	    size {
 		set slist {}
@@ -98,18 +99,22 @@ or Size <input type=radio name=sort value=size $sizecheck><br>
 		if {[catch {lsort -decreasing -integer -index 1 $slist} list2]} {
 		    set list2 [lsort -command SizeCompare $slist]
 		}
+		set extra 1
 	    }
 	    default {
 		if {[catch {lsort -dict $list} list2]} {
 		    set list2 [lsort -command DirlistCompare $list]
 		}
+		set extra 0
 	    }
 	}
 
-	# Loop through list2, which may have an extra sorting file we ignore
+	# Loop through list2, which may have an extra sorting field we ignore
 
 	foreach entry $list2 {
-	    set entry [lindex $entry 0]
+	    if {$extra} {
+		set entry [lindex $entry 0]
+	    }
 	    file lstat $entry lst
 	    switch $lst(type) {
 		file {
