@@ -49,6 +49,7 @@ proc DirectDomain {prefix sock suffix} {
 
     # Set up the environment a-la CGI
 
+    global env
     Cgi_SetEnv $sock $prefix$suffix
 
     set valuelist {}
