@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: thread.tcl,v 1.14 2003/10/08 05:47:40 coldstore Exp $
+# RCS: @(#) $Id: thread.tcl,v 1.15 2004/06/11 08:51:27 coldstore Exp $
 
 package provide httpd::threadmgr 1.0
 
@@ -489,7 +489,7 @@ proc Thread_Id {} {
 
 proc Thread_IsFree {id} {
     global Thread
-    return [expr {[lsearch $Thread(freelist) $id] <= 0}]
+    return [expr {[lsearch $Thread(freelist) $id] >= 0}]
 }
 
 # Thread_ReapAll --
