@@ -521,4 +521,7 @@ htdocs/libtml/form.tcl	Fixed form::value to entity encode characters like
 
 ----------------- released 2.3.4 November 28, 1999 ------------------
 
+lib/cgi.tcl	Urk - stray debugging puts got into the 2.3.4 release.
+
+----------------- released 2.3.5 November 30, 1999 ------------------
 
