@@ -80,26 +80,38 @@ proc CopyDone {s null {bytes 0} {error {}}} {
     }
 }
 
-proc Iterate {server port count args} {
+proc IterateInner {sockcmd server port count url {postdata {}} args} {
     global max finish done start total null_path
     set countOrig $count
     set total 0
+    if {[string length $postdata]} {
+	set op POST
+    } else {
+	set op GET
+    }
+    set urls [concat [list $url] $args]
     puts "Starting $count fetches"
     set start [clock clicks]
     while {[incr count -1] >=0} {
 	set max 1
 	set done 0
-	if {[catch {socket $server $port} s]} {
+	if {[catch {$sockcmd $server $port} s]} {
 	    set countOrig [expr $max - $count]
 	    puts "Only $countOrig fetches started"
 	    puts ($s)
 	    break
 	}
 	fconfigure $s -block 0
-	puts $s "GET [lindex $args [expr $count%[llength $args]]] HTTP/1.0"
+	puts $s "$op [lindex $urls [expr $count%[llength $urls]]] HTTP/1.0"
     	puts $s "User-agent: Tcl-Web-tester"
     	puts $s "Accept: */*"
-	puts $s ""
+	if {$op == "POST"} {
+	    puts $s "Content-Length: [string length $postdata]"
+	    puts $s ""
+	    puts $s $postdata
+	} else {
+	    puts $s ""
+	}
 	flush $s
 	set null [open $null_path w]
 	if {[info commands fcopy] == "fcopy"} {
@@ -116,4 +128,14 @@ proc Iterate {server port count args} {
     }
     Report $countOrig
 }
+proc Iterate {args} {
+    eval {IterateInner socket} $args
+}
 
+if {![catch {package require tls}]} {
+    puts "Defining SIterate for https torture"
+
+    proc SIterate {args} {
+	eval {IterateInner tls::socket} $args
+    }
+}
