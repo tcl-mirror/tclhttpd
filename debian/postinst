@@ -25,9 +25,11 @@ set -e
 
 case "$1" in
     configure)
-	chown -R www-data:www-data /var/www/
-	chown -R www-data:www-data /var/log/tclhttpd
-	chown -R www-data:www-data /usr/lib/tclhttpd
+	for i in /var/www/ /var/log/tclhttpd /usr/lib/tclhttpd /usr/lib/tclhttpd%VERSION%
+	    do
+		chown -R www-data:www-data $i
+		chmod -R g+rwx $i
+	    done
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

@@ -137,6 +137,7 @@ binary-arch: build install
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol
+	sed -i "s/%VERSION%/${VERSION}/" $(BUILD)/DEBIAN/postinst
 	dh_md5sums
 	dh_builddeb
 
