@@ -5,7 +5,7 @@ See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 Version: 3.5.0
-Last Modified: Mon Mar 22 19:07:08 PST 2004
+Last Modified: Wed May  5 22:25:55 PDT 2004
 
 QUICK START
 
@@ -157,8 +157,5 @@ http://www.tcl.tk/software/tclhttpd/
 
 SourceForge
 
-There is a netCVS repository on SourceForge
-For details, please see http://www.sourceforge.net/projects/tclhttpd
-
-See also
+http://www.sourceforge.net/projects/tclhttpd
 http://tclhttpd.sourceforge.net/

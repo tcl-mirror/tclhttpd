@@ -100,17 +100,25 @@ sed -e s/@HTTPD_VERSION@/$HTTPD_VERSION/ \
     -e s/@THREAD_VERSION@/$THREAD_VERSION/ \
         < Makefile.boot > ${SUPER_DIR}/Makefile
 
+# Copy select tcllib man pages into the htdocs tree
+
+TCLLIB_MODULES="./base64 ./cmdline ./counter ./doctools ./fileutil ./html ./md5 ./md5crypt ./ncgi ./textutil ./uri"
+for f in ${TCLLIB_MODULES}; do
+  cp ${SUPER_DIR}/tcllib-${TCLLIB_VERSION}/modules/$f/$f.man \
+        ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}/htdocs/man
+done
+
 # Unbundled packages
 
 echo "*** Creating ${DISTDIR}/tclhttpd${HTTPD_VERSION}.tar.gz ***"
-(cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ; tar cf - ./tclhttpd${HTTPD_VERSION} | gzip > ${DISTDIR}/tclhttpd${HTTPD_VERSION}.tar.gz)
+(cd ${SUPER_DIR} ; tar cf - ./tclhttpd${HTTPD_VERSION} | gzip > ${DISTDIR}/tclhttpd${HTTPD_VERSION}.tar.gz)
 echo "*** Creating ${DISTDIR}/tclhttpd${WIN_VERSION}.zip ***"
-(cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ; zip -9 -r -o  ${DISTDIR}/tclhttpd${WIN_VERSION}.zip  tclhttpd${HTTPD_VERSION})
+(cd ${SUPER_DIR} ; zip -9 -r -o  ${DISTDIR}/tclhttpd${WIN_VERSION}.zip  tclhttpd${HTTPD_VERSION})
 
 echo "*** Creating ${DISTDIR}/thread${THREAD_VERSION}.tar.gz ***"
-(cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ;tar cf - ./thread${THREAD_VERSION} | gzip > ${DISTDIR}/thread${THREAD_VERSION}.tar.gz)
+(cd ${SUPER_DIR} ;tar cf - ./thread${THREAD_VERSION} | gzip > ${DISTDIR}/thread${THREAD_VERSION}.tar.gz)
 echo "*** Creating ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip ***"
-(cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ;zip -9 -r -o  ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip thread${THREAD_VERSION})
+(cd ${SUPER_DIR} ;zip -9 -r -o  ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip thread${THREAD_VERSION})
 
 # Bundled packages
 
