@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.10 2003/10/27 08:03:31 coldstore Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.11 2004/04/18 04:10:06 coldstore Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -334,7 +334,7 @@ proc UploadReadFile {sock} {
 proc UploadDone {sock} {
     upvar #0 Upload$sock upload
 
-    catch {
+    if {[catch {
 	# The first argument is a list of file names that were uploaded
 	# The second argument is a name-value list of the other data
 	set flist {}
@@ -347,7 +347,21 @@ proc UploadDone {sock} {
 	    }
 	}
 	eval $upload(cmd) [list $flist $vlist]
-    } result
+    } result] == 1} {
+	# handle special error codes
+	set ec $::errorCode
+	switch -- [lindex $ec 0] {
+	    HTTPD_REDIRECT {
+		Httpd_Redirect [lindex $ec 1] $sock
+		return
+	    }
+	    HTTPD_SUSPEND {
+		Httpd_Suspend $sock
+		return
+	    }
+	}
+    }
+
     Httpd_ReturnData $sock text/html $result
 }
 
