@@ -4,4 +4,6 @@
 
 [html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database &gt; Bug Details}]
 
+<p>[bugdb::update]</p>
+
 [html-strict::foot]
