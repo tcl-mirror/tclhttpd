@@ -25,14 +25,14 @@
 # \
 exec tclsh8.0 "$0" ${1+"$@"}
 
-# Bootstrap the location of the script library.  This requires that
-# the main httpd script be in a peer directory (e.g., ./bin and ./lib)
+# Configure the auto_path so we can find the script library.
+# It the source distribution it is in a peer directory of bin.
+# It may also be in a "standard" location as a peer of the Tcl library.
 # home is our location
-# Httpd(library) is where the script libraries are
 
 set home [string trimright [file dirname [info script]] ./]
 set home [file join [pwd] $home]
-set Httpd(library) [file join [file dirname $home] lib]
+lappend auto_path [file join [file dirname $home] lib]
 set Config(home) $home
 unset home
 
