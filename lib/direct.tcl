@@ -46,6 +46,11 @@ proc DirectDomain {prefix sock suffix} {
     global Direct
     upvar #0 Httpd$sock data
     Count $prefix
+
+    # Set up the environment a-la CGI
+
+    Cgi_SetEnv $sock $prefix$suffix
+
     set valuelist {}
     if [info exists data(query)] {
 
