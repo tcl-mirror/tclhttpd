@@ -152,8 +152,19 @@ Stderr "Running with $Config(limit) file descriptor limit"
 
 # Try to change UID to tclhttpd so we can write template caches
 
+# Try to get TclX, if present
+catch {load {} TclX}		;# From statically linked shell
+catch {package require TclX}	;# From dynamically linked DLL
+catch {package require setuid}	;# TclHttpd extension
+
+if {"[info command id]" == "id"} {
+    # Emulate TclHttpd C extension with TclX commands
+    proc setuid {uid gid} {
+	id userid $uid
+	id groupid $gid
+    }
+}
 if ![catch {
-    package require setuid
     setuid $Config(uid) $Config(gid)
 }] {
     Stderr "Running as user $Config(uid)"
