@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.17 2000/04/26 19:32:13 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.18 2000/04/26 20:35:29 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -382,24 +382,6 @@ dist:
 	$(TCLSH_PROG) $(srcdir)/bin/CopyDist $(srcdir) $(DEST)
 	(cd $(DISTDIR); tar cf - ./tclhttpd$(VERSION) | gzip > tclhttpd$(VERSION).tar.gz)
 	(cd $(DISTDIR) ; zip -9 -r -o  tclhttpd$(WIN_VERSION).zip  tclhttpd$(VERSION))
-
-SUPER_DIR=${DISTDIR}/tclhttpd$(VERSION)-dist
-TCL_DIST=tcl$(TCL_VERSION).tar.gz
-TCLLIB_DIST=tcllib$(TCLLIB_VERSION).tar.gz
-
-superdist:
-	rm -rf $(SUPER_DIR)
-	mkdir $(SUPER_DIR)
-	mkdir $(SUPER_DIR)/tclhttpd$(VERSION)
-	$(TCLSH_PROG) $(srcdir)/bin/CopyDist $(srcdir) $(SUPER_DIR)/tclhttpd$(VERSION)
-	mkdir $(SUPER_DIR)/thread$(THREAD_VERSION)
-	$(TCLSH_PROG) $(srcdir)/bin/CopyDist $(srcdir)/../thread$(THREAD_VERSION) $(SUPER_DIR)/thread$(THREAD_VERSION)
-	gunzip < $(TCL_DIST) | (cd $(SUPER_DIR) ; tar xf -)
-	gunzip < $(TCLLIB_DIST) | (cd $(SUPER_DIR) ; tar xf -)
-
-	(cd $(DISTDIR); tar cf - ./tclhttpd$(VERSION)-dist | gzip > tclhttpd$(VERSION)-dist.tar.gz)
-	(cd $(DISTDIR) ; zip -9 -r -o  tclhttpd$(WIN_VERSION)dist.zip  tclhttpd$(VERSION)-dist)
-	
 
 
 .PHONY: all binaries clean depend distclean doc install installdirs \
