@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: log.tcl,v 1.12 2003/10/27 14:08:57 coldstore Exp $
+# RCS: @(#) $Id: log.tcl,v 1.13 2004/05/09 05:50:17 coldstore Exp $
 
 package provide httpd::log 1.1
 package require httpd::logstd 1.0
@@ -232,7 +232,8 @@ proc Log_SetFile {{basename {}}} {
 
     if {[info exists lastlog]} {
 	# compress log files as we go
-	if {[catch {exec $Log(compressProg) $lastlog &} err]} {
+	if {[file executable $Log(compressProg)] &&
+	    [catch {exec $Log(compressProg) $lastlog &} err]} {
 	    Stderr $err
 	}
     }
