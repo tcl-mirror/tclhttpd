@@ -60,6 +60,11 @@ Config uid		50
 
 Config gid		50
 
+# The name of the file that will contain the pid of the
+# main tclhttpd process.
+
+Config pidfile		/var/run/tclhttpd/tclhttpd.pid
+
 # host - the name of the server (i.e., www.yourcompany.com)
 # This should be fully qualified.
 

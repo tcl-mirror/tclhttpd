@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.56 2004/06/18 16:03:42 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.57 2004/10/28 20:21:41 wart Exp $
 #
 # \
 exec tclsh "$0" ${1+"$@"}
@@ -188,6 +188,7 @@ set CommandLineOptions [list \
         [list compat.arg       3.3	        {version compatibility to maintain}] \
         [list gui.arg           [cget gui]      {flag for launching the user interface}] \
         [list mail.arg           [cget MailServer]      {Mail Servers for sending email from tclhttpd}] \
+        [list daemon.arg        0      		   {Run in the background as a daemon process.  Requires the 'Expect' package.}] \
     ]
 if {[catch {
   array set Config [cmdline::getoptions argv $CommandLineOptions \
@@ -340,6 +341,22 @@ if {[info exists tk_version]} {
   }
 }
 Stderr $startup
+
+# Fork a child process if expect is present.
+if {$Config(daemon) && ![catch {package require Expect}]} {
+    if {[fork]} {
+	exit
+    }
+}
+
+if {[catch {
+    set pidFileId [open [cget pidfile] w]
+    puts $pidFileId [pid]
+    close $pidFileId
+} msg]} {
+    Stderr "Could not write to pid file [cget pidfile]: $msg"
+}
+
 if {$Config(debug)} {
     if {[info commands "console"] == "console"} {
 	console show
