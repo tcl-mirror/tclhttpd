@@ -18,10 +18,15 @@ proc Mail_Url {dir} {
 
 proc Mail/bugreport {email errorInfo args} {
     global Httpd
-    MailInner $email "$Httpd(name):$Httpd(port) error" "" text/html \
-    "<pre>[protect_text $errorInfo]
-    $Httpd(server)
-    $args</pre>"
+    set html "<pre>"
+    foreach {name value} $args {
+	append html "$name: $value\n"
+    }
+    append html  $Httpd(server)\n
+    append html [protect_text $errorInfo]
+    append html "</pre>"
+
+    MailInner $email "$Httpd(name):$Httpd(port) error" "" text/html $html
 }
 
 # If your form action is /mail/forminfo, then this procedure
