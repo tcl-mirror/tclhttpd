@@ -1,3 +1,6 @@
+2000-04-19  Brent Welch <welch@scriptics.com>
+	* lib/doc.tcl: restored old page(querytype) variable for compatibility
+
 2000-04-18  Sandeep Tamhankar <sandeep@scriptics.com>
         * Makefile.in: Added calls to @CYGPATH@ so that Cygwin //z/
         references get converted to z:/.
