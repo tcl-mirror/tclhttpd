@@ -4,10 +4,10 @@
 
 WELCH=/panfs/panwest/home/welch
 
-HTTPD_VERSION=3.5.0
-HTTPD_TAG=tclhttpd-3-5-rel-0
+HTTPD_VERSION=3.5.1
+HTTPD_TAG=tclhttpd-3-5-rel-1
 HTTPD_TAG=HEAD
-WIN_VERSION=350
+WIN_VERSION=351
 DISTDIR=${WELCH}/dist
 SUPER_DIR=${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist
 

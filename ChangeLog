@@ -1,3 +1,21 @@
+2004-05-18 Brent Welch <welch@panasas.com>
+        * README
+        * VERSION
+        * configure.in
+        * DIST_build/DIST
+        * DIST_build/DIST.exp
+        * DIST_build/Makefile.boot
+        * DIST_build/README
+        * lib/version.tcl
+        * bin/httpd.tcl
+        Version updates in preparation for a 3.5.1 release
+        (3.5.0 remained unreleased)
+
+2004-05-18 Brent Welch <welch@panasas.com>
+        * lib/doc.tcl: added [file normalize] to Doc_Handle to
+        avoid returning file contents for files whos name
+        ends with extra trailing "." characters.
+
 2004-05-14 Colin McCormack <colin@chinix.com>
 	* lib/mail.tcl: fixed another config bug for mailserver
 

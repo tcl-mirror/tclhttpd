@@ -4,10 +4,17 @@ Brent is now at Panasas, Inc.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 3.5.0
-Last Modified: Wed May  5 22:25:55 PDT 2004
+Version: 3.5.1
+Tue May 18 21:15:39 PDT 2004
 
-QUICK START
+STARKIT QUICK START
+
+tclkit tclhttpd3.5.1.kit -port 80 -docRoot htmldir -library tcldir
+
+The server loads all the tcl sources in the library.  Try also
+tclkit tclhttpd3.5.1.kit -help
+
+STANDARD QUICK START
 
 It requires Tcl 8.3 (or higher) and the Standard Tcl Library.
 This uses the cmdline, base64, ncgi, html, and counter
@@ -45,7 +52,7 @@ This lets you set basic parameters like port number and server name.
 VERSION SUMMARY
 
 Version 3.5 has various bug fixes, improvements to the docs, and
-some sample applications.
+some sample applications.  3.5.1 adds a mail client module.
 
 Version 3.4.3  fixes loading code from the custom code directory,
 which broke in 3.4.2

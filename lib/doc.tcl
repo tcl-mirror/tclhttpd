@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.51 2004/03/22 05:33:28 coldstore Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.52 2004/05/19 04:36:37 welch Exp $
 
 package provide httpd::doc 1.1
 
@@ -349,6 +349,7 @@ proc DocDomain {prefix directory sock suffix} {
     # to prevent those attacks.
 
     set path [file join $directory [string trimleft $suffix /~]]
+    set path [DocPathNormalize $path]
     set data(path) $path	;# record this path for not found handling
 
     if {[file exists $path]} {
@@ -477,6 +478,27 @@ proc Doc_GetPath {sock {file ""}} {
     }
 
     return $dirs
+}
+
+# Helper routine for cleaning up file names
+# Part of the context here is that "file exists" on Windows
+# ignores trailing . in a pathname, leading to cute attacks
+
+if {[catch {file normalize /a/b/../c/foo.tml.}]} {
+  # No file normalize command
+  if {$tcl_platform(platform) == "windows"} {
+    proc DocPathNormalize {path} {
+      return [string trimright $path .]
+    }
+  } else {
+    proc DocPathNormalize {path} {
+      return $path
+    }
+  }
+} else {
+  proc DocPathNormalize {path} {
+    return [file normalize $path]
+  }
 }
 
 # Compat routines with 3.4 routines
