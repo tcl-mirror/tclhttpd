@@ -53,6 +53,8 @@ namespace eval learn {
     "Basic Setup"       setup.tml
     "Templates"         /templates/
     "Server Security"   security.tml
+    "Direct URLs"       direct.tml
+    "URL Domains"    domain.tml
   }
   variable prefix /learn
 }

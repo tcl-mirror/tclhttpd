@@ -51,5 +51,4 @@ proc ::hello::/formhandler {foo} {
 }
 </pre>
 
-
 [mypage::footer]

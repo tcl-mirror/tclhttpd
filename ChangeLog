@@ -1,3 +1,6 @@
+2004-05-06 Brent Welch <welch@panasas.com>
+        * Various doc updates
+
 2004-05-05 Brent Welch <welch@panasas.com>
         * Various doc updates
         * lib/digest.tcl: fixed use of the md5 package
