@@ -4,8 +4,8 @@ Brent is now at Panasas, Inc.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 3.4.2
-Last Modified: Mon Oct 14 18:17:43 PDT 2002
+Version: 3.4.3
+Last Modified: Mon Oct 28 21:58:12 PST 2002
 
 QUICK START
 
@@ -42,6 +42,9 @@ httpd.tcl -help
 This lets you set basic parameters like port number and server name.
 
 VERSION SUMMARY
+
+Version 3.4.3  fixes loading code from the custom code directory,
+which broke in 3.4.2
 
 Version 3.4.2 has bug fixes in the directory listing code (dirlist.tcl).
 Prevent listing of directory trees outside the URL tree, and get them to work
