@@ -99,7 +99,7 @@ proc Httpd_Init {} {
     }
     # We always have the counter module and mimetyes
     Counter_Init
-    Mtype_ReadTypes $Httpd(library)/mime.types
+    Mtype_ReadTypes [file join $Httpd(library) mime.types]
 }
 
 # Httpd_Server
@@ -541,6 +541,8 @@ proc HttpdSetCookie {sock} {
 	foreach item $data(set-cookie) {
 	    puts $sock "Set-Cookie: $item"
 	}
+	# HttpdCookieLog $sock HttpdSetCookie
+	unset data(set-cookie)
     }
 }
 
@@ -851,3 +853,30 @@ proc Httpd_SockClose {sock closeit {message Close}} {
 	    catch {puts stderr $msg}
 	}
     }
+
+proc HttpdCookieLog {sock what} {
+    global Log Httpd
+    upvar #0 Httpd$sock data
+    if {[info exist Log(log)] && ![info exist Httpd(cookie_log)]} {
+	set Httpd(cookie_log) [open $Log(log)cookie a]
+    }
+    if {[info exist Httpd(cookie_log)]} {
+	append result [LogValue data(ipaddr)]
+	append result { } \[[clock format [clock seconds] -format %d/%h/%Y:%T] -0700\]
+
+	append result { } $what
+	switch $what {
+	    Url_Dispatch {
+		if {![info exist data(mime,cookie)]} {
+		    return
+		}
+		append result { } \"$data(mime,cookie)\"
+	    }
+	    Httpd_SetCookie -
+	    HttpdSetCookie {
+		append result { } \"[LogValue data(set-cookie)]\"
+	    }
+	}
+	catch { puts $Httpd(cookie_log) $result ; flush $Httpd(cookie_log)}
+    }
+}
