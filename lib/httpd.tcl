@@ -1014,21 +1014,28 @@ proc Httpd_SelfUrl {url {sock ""}} {
     upvar #0 Httpd$sock data
 
     set type [Httpd_Protocol $sock]
-    set name [Httpd_Name $sock]
     set port [Httpd_Port $sock]
     if {[info exists data(mime,host)]} {
-	# use in preference to our "true" name
-	# the client might not have a DNS entry for use
+
+	# Use in preference to our "true" name because
+	# the client might not have a DNS entry for use.
+
 	set name $data(mime,host)
-    	set newurl $type://$name
     } else {
-	set newurl $type://$name
+	set name [Httpd_Name $sock]
+    }
+    set newurl $type://$name
+    if {[string first : $name] == -1} {
+	# Add in the port number, which may or may not be present in
+	# the name already.  IE5 sticks the port into the Host: header,
+	# while Tcl's own http package does not...
+
 	if {$type == "http" && $port != 80} {
 	    append newurl :$port
-        }
+	}
 	if {$type == "https" && $port != 443} {
 	    append newurl :$port
-        }
+	}
     }
     append newurl $url
 }
