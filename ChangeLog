@@ -1,3 +1,7 @@
+2004-04-29 Colin McCormack <colin@chinix.com>
+	* lib/template.tcl: allow non-dynamic templates to control
+	content type of returned file.
+
 2004-04-27 Colin McCormack <colin@chinix.com>
 	* src/crypt.c: added a test for error return from crypt()
 	* lib/{fallback,mtype,template}.tcl: corrected and extended source
