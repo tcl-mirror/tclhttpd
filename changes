@@ -525,3 +525,24 @@ lib/cgi.tcl	Urk - stray debugging puts got into the 2.3.4 release.
 
 ----------------- released 2.3.5 November 30, 1999 ------------------
 
+lib/admin.tcl	Added the /admin/reset/counter Direct URL.  It takes
+		a "name" argument that is the name of an element of
+		the counter array to reset.
+
+lib/base64.tcl	Fixed a bug that shows up in 8.1 and higher where
+		trailing NULL bytes are added to the result of
+		Base64_Decode - each trailing '=' becomes a NULL.
+
+lib/counter.tcl	Record the time that counters were reset.
+
+lib/direct.tcl	Honor the content-type of query data so the right
+		arguments are passed to Url_DecodeQuery.
+
+lib/doc.tcl	Proctect against regexp specials in file name suffixes
+		when mapping from non-existing file names to existing
+		ones, e.g.,  from "foo.html)" to "foo.html"
+
+lib/status.tcl	Display the time that a counter was reset.
+
+----------------- released 2.3.6 January 19, 2000 ------------------
+

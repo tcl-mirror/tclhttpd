@@ -4,13 +4,13 @@ Brent is now at Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 2.3.5
-Last update: Tue Nov 30 22:37:26 PST 1999
+Version: 2.3.6
+Last update: Wed Jan 19 10:00:58 PST 2000
 
 It requires Tcl7.5 and Tk4.1, or higher.
-It works with the latest 8.2 release.
+It works with the latest 8.2 (and 8.3beta) release.
 The following releases are recommended:
-Tcl 7.6p2, Tcl 8.0.5, Tcl 8.2.2
+Tcl 7.6p2, Tcl 8.0.5, Tcl 8.2.3
 
 [The "opt" package in the main bin/httpd.tcl script is not
 supported in Tcl 7.5 or 7.6.  It is only used for parsing the command
@@ -32,6 +32,10 @@ Macintosh:
 For a complete set of command line options, do
 httpd.tcl -help
 This lets you set basic parameters like port number and server name.
+
+Version 2.3.6 is the last in the 2.3 series.  It has a few minor
+bug fixes.  The next release, 3.0, will support threading using
+the Thread extension and SSL using the TLS extension.
 
 Version 2.3 changes the way post data is  handled.
 The various point releases (e.g., 2.3.4) fix important
