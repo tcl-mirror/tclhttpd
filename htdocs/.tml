@@ -1,0 +1,42 @@
+# Sunscript web site template definitions
+# SCCS: @(#) .tml 1.18 97/12/23 21:15:27
+
+# This allows to reset the package by appending ?packageReset=faq
+# for instance to a .tml query
+
+if {[info exists QueryData]} {
+    unset QueryData
+}
+
+if {[info exists page(query)]} {
+    array set QueryData $page(query)
+    if {[info exists QueryData(packageReset)]} {
+	foreach pkg $QueryData(packageReset) {
+	    package forget $pkg
+	}
+    }
+    if {[info exists QueryData(packageRequire)]} {
+	foreach pkg $QueryData(packageRequire) {
+	    package require $pkg
+	}
+    }
+}
+
+# Here is what the whole site use and which define the look :
+# The 'real thing' is thus in libtml/'s packages:
+
+package require template 1.2
+package require sunscript 1.2
+package require faq 1.2
+
+# This should be overridden in each sub directories
+
+set page(location) home
+set page(timeofday) [clock seconds]
+ 
+proc MyHead {title author} {
+    return [Head][Title $title][Author $author][MyBody]<h1>$title</h1>
+}
+proc MyBody {} {
+    return [Body bgcolor=white text=black]
+}

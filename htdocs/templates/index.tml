@@ -1,0 +1,32 @@
+[MyHead "HTML/Tcl Templates" "Brent Welch"]
+<p>
+A Tcl template works by mixing Tcl code into normal HTML pages.
+The server uses the Tcl subst command to replace the Tcl code and
+variable references with their results and values.
+For example, the version of the Tcl server is:
+<blockquote>[Httpd_Version]</blockquote>
+<p>
+This is obtained with \[Httpd_Version\] in the page.
+<p>The time this page was generated is:
+<blockquote>[clock format $page(timeofday)]</blockquote>
+
+<ul>
+<li><a HREF="simple.subst">Simple Tcl template</a>.  If you have a file
+that ends with ".subst", then it is processed every time the page is
+fetched.
+<li>A ".tml" file can be used just like .subst in that if you ask for
+"page.tml" it will be processed.
+However, if the link is instead to "page.html", then the .html version
+is only generated if the corresponding .tml file is newer, or if
+any of the .tml files in the directory tree above the file are newer.
+The results of processing the .tml are cached in the .html file.
+<li>The Doc_CheckTemplates command is used to enable template checking for
+every .html  file in your hierarchy.  This way you can have links to
+.html files,  but have the server check for corresponding .tml template files.
+</ul>
+
+<h2><a href="form.tml">Templates with Form Data</a></h2>
+If you want to process query data, it is available in the 
+page(querylist) variable.  This is already decoded into a
+list of names and values.  Take a look inside form.tml, for example.
+

@@ -1,0 +1,5 @@
+# template library file
+
+array set template [list \
+	location	"Templates"
+]

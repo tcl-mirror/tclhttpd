@@ -1,0 +1,15 @@
+[MyHead "Templates and State" "Brent Welch"]
+When a template is processed with subst, the following
+state information is available.  This page is used as
+an example.
+<p>
+<form action=$page(url) method=GET>Hit this page with form data: <input type=text name=data><br>
+[RadioSet somevariable Orange Blue Green "Violet Red"]
+<br>
+<input type=submit>
+[ShowArray page]
+[if {[info exists page(query)]} {
+    ShowQuery  $page(query)
+}
+]
+[ShowArray env]

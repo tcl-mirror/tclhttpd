@@ -1,0 +1,17 @@
+httpd	- Sample startup script.  To run a server on port 8015, just do:
+	wish8.0 httpd -debug
+win95.tcl	- Sample startup script tuned a bit for Windows. Also port 8015
+
+tclhttpd.etc.init	- This is a Solaris startup script:
+		/etc/init.d/tclhttpd
+		You'd install this and make appropriate symbolic links
+		into the various runlevel directories (rc2.d)
+		to get the server to start at boot.  The details vary
+		among different UNIX's
+
+mini1.1.tcl	- These are a set of tiny HTTPD implementations by
+minihttpd.tcl	- Steve Uhler (suhler@eng.sun.com)
+small1.1.tcl
+
+echosrv.tcl	- Testing routines for Tcl sockets
+torture.tcl	- Testing for parallel HTTP fetches against servers

@@ -1,0 +1,33 @@
+#!/sbin/sh
+#
+# /etc/init.d/tclhttpd - Start/Stop the tcl httpd server
+#
+
+#
+PATH=/usr/bin:/bin
+TDIR=/export/tclhttpd/bin
+SCRIPT=scriptics
+PROG=$TDIR/$SCRIPT
+
+case $1 in 
+'start')
+	if [ -f $PROG ]; then
+		$PROG &
+	fi	
+	;;
+'stop')
+	pid=`/usr/ucb/ps -axc | /usr/bin/grep $SCRIPT | /usr/bin/sed -e 's/^  *//' -e 's/ .*//'`
+	if test "$pid"
+	then
+		echo "Stopping $PROG"
+		kill $pid
+	fi
+	;;
+'restart')
+	$0 stop
+	$0 start
+	;;
+*)
+	echo "usage: $0 {start|stop}"
+	;;
+esac

@@ -1,0 +1,5 @@
+Copy the compiled .so files from the Linux or Solaris
+directories into the lib directory, then recreate
+your pkgIndex.tcl file by running tclsh in that directory
+and doing
+pkg_mkIndex . *.tcl *.so
