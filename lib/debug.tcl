@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.16 2002/08/31 07:30:43 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.17 2003/05/01 23:38:49 welch Exp $
 
 package provide httpd::debug 1.0
 
@@ -35,6 +35,9 @@ proc Debug/source {source {thread main}} {
     if {[info exists Doc(templateLibrary)]} {
 	lappend dirlist $Doc(templateLibrary)
     }
+    if {[info exists Config(library)]} {
+	lappend dirlist $Config(library)
+    }
     if {[info exists Config(lib)]} {
 	lappend dirlist $Config(lib)
     }
@@ -44,6 +47,12 @@ proc Debug/source {source {thread main}} {
 	    break
 	}
     }
+    if {![file exists $file]} {
+      set html "<h1>Error sourcing $source</h1>"
+      append html "Cannot find it in <br>[join $dirlist <br>]"
+      return $html
+    }
+      
     set error [catch {
 	switch -- $thread {
 	    main {

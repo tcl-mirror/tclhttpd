@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.47 2003/04/04 04:10:54 coldstore Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.48 2003/05/01 23:38:49 welch Exp $
 
 package provide httpd::doc 1.1
 
@@ -402,5 +402,8 @@ proc Doc_Handle {prefix path suffix sock} {
     }
 }
 
-# this is too much of a compatibility hassle, so we alias
+# Compat routines with 3.4 routines
+
 catch {interp alias {} Doc_Dynamic {} Template_Dynamic}
+catch {interp alias {} Doc_Redirect {} Redirect_To}
+catch {interp alias {} Doc_RedirectSelf {} Redirect_Self}
