@@ -1,7 +1,12 @@
 # This is based on the Makefile generated in the Tcl dltest directory
 
 CC = gcc
-LIBS =			-ltcl8.0 -ldl  -lm -lc
+
+# Linux - probably needs -lcrypt
+CRYPT_LIB =
+#CRYPT_LIB = -lcrypt
+LIBS =			$(CRYPT_LIB) -ltcl8.0 -ldl  -lm -lc
+
 SHLIB_CFLAGS =		-fPIC
 SHLIB_LD =		ld -G -z text
 SHLIB_SUFFIX =		.so
