@@ -682,6 +682,7 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	# This is a bit hideous because it reaches inside ::ncgi
 	# to avoid parsing the data twice.
 
+	interp eval $interp [list uplevel #0 [list set page(querytype) $type]]
 	interp eval $interp [list uplevel #0 {
 	    set page(query) {}
 	    foreach n $ncgi::varlist {
@@ -694,6 +695,7 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     } else {
 	interp eval $interp [list ncgi::reset ""]
 	interp eval $interp [list uplevel #0 [list set page(query) {}]]
+	interp eval $interp [list uplevel #0 [list set page(querytype) {}]]
     }
 
     # Source the .tml files from the root downward.
