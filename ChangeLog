@@ -1,3 +1,8 @@
+2005-02-26 Colin McCormack <colin@sharedtech.dyndns.org>
+	   * lib/httpd.tcl Fixes per sf bugs 1152183 1152182
+	    NotModified can't contain a message body and
+	    shouldn't close connection.
+
 2005-01-02 Colin McCormack <colin@sharedtech.dyndns.org>
 	* lib/cookie.tcl Cookie_Unset - was using 'name' instead of
 	'$name' to remove cookies. Fixed to allow additional arguments,
