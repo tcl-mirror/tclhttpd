@@ -1,3 +1,6 @@
+2004-04-27 Colin McCormack <colin@chinix.com>
+	* src/crypt.c: added a test for error return from crypt()
+
 2004-04-23 Colin McCormack <colin@chinix.com>
 	* bin/httpdthread.tcl: added a missing package require httpd::digest
 
