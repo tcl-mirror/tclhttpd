@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.80 2003/10/27 00:03:47 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.81 2003/10/27 01:10:51 coldstore Exp $
 
 package provide httpd 1.6
 
@@ -1153,6 +1153,36 @@ proc Http_RemoveHeaders {sock {pattern *}} {
         set data(headers) $tmp
     }
     return
+}
+
+# Httpd_NoCache
+#	Insert header into http header to indicate that this page
+#	should not be cached
+#
+# Arguments:
+#	sock	handle on the connection
+
+proc Http_NoCache {sock} {
+    Http_RemoveHeaders $sock Cache-Control
+    Http_AddHeaders $sock Cache-Control no-cache
+}
+
+# Httpd_Refresh
+#	Insert header into http header to cause browser to refresh
+#	after a delay, optionally to a different URL
+#
+# Arguments:
+#	sock	handle on the connection
+#	time	time in seconds before refresh
+#	url	optional: url to refresh to
+
+proc Http_Refresh {sock time {url ""}} {
+    Http_RemoveHeaders $sock Cache-Control
+    if {$url == ""} {
+	Http_AddHeaders $sock Refresh $time
+    } else {
+	Http_AddHeaders $sock Refresh ${time}\;url=${url}
+    }
 }
 
 # HttpdRespondHeader --
