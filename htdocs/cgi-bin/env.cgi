@@ -1,6 +1,6 @@
 #!/bin/sh
 # \
-exec /proj/tcl/install/5.x-sparc/bin/tclsh8.0 "$0" ${1+"$@"}
+exec tclsh8.0 "$0" ${1+"$@"}
 
 #close [open /tmp/iwashere w]
 
