@@ -1,5 +1,10 @@
 2000-10-02  Brent Welch <welch@ajubasolutions.com>
     
+	* lib/counter.tcl: Changed stats:: to counter::
+	* lib/status.tcl: Changed stats:: to counter::
+
+2000-10-02  Brent Welch <welch@ajubasolutions.com>
+    
 	* lib/counter.tcl: Fixed secsPerMinute initialization.
 	* lib/status.tcl: Added use of stats::htmlHistDisplayRow
 	Added /status/domain for per-domain counting
