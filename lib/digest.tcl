@@ -122,7 +122,7 @@ proc Digest_Request {sock realm file} {
 
     if {![info exists digest(A1)]} {
 	set A1 [AuthGetPass $sock $file $data(digest,username)@$data(digest,realm)]
-	if {$A1 ne "*"} {
+	if {$A1 != "*"} {
 	    set digest(A1) $A1
 	} else {
 	    # no digest password on record - use plaintext password
@@ -136,7 +136,7 @@ proc Digest_Request {sock realm file} {
     }
 
     # check that realms match
-    if {$realm ne $data(digest,realm)} {
+    if {$realm != $data(digest,realm)} {
 	#Stderr "realm"
 	return 0
     }
@@ -144,7 +144,7 @@ proc Digest_Request {sock realm file} {
     #Stderr "Digest_Request: [array get digest] - [array get data digest,*]"
 
     if {[info exists digest(opaque)]} {
-	if {$digest(opaque) ne $data(digest,opaque)} {
+	if {$digest(opaque) != $data(digest,opaque)} {
 	    #Stderr "Digest Opaque $digest(opaque) ne $data(digest,opaque)"
 	    return 0
 	}
@@ -167,7 +167,7 @@ proc Digest_Request {sock realm file} {
 
     # check the password
     set calc_digest [DigestDigest $sock]
-    if {$calc_digest ne $data(digest,response)} {
+    if {$calc_digest != $data(digest,response)} {
 	#Stderr "Digest Response: $calc_digest ne $data(digest,response)"
 	return 0
     }

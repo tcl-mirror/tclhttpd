@@ -1,3 +1,8 @@
+2004-06-14 Brent Welch <welch@panasas.com>
+        * lib/digest.tcl: Removed the "ne" operator from expressions
+          as that is an 8.5-specific feature.  We have not formally
+          given up on Tcl 8.* compatibility
+
 2004-06-14 Colin McCormack <colin@chinix.com>
 	* htdoc/htaccess/*: Made /htaccess accept Windows style pathnames
 	* lib/{template,fallback,doc}.tcl: fixed Windows difficulty with .html
