@@ -28,9 +28,18 @@ array set Cgi {
     env-pass	{PATH LD_LIBRARY_PATH}
 }
 if {"$tcl_platform(platform)" == "windows"} {
-    set Cgi(tclsh) "Tclsh80.exe"
-    # Need SystemRoot so DLLs loaded by tcl are found correctly
-    lappend Cgi(env-pass) Lib SystemRoot 
+
+    # On windows we hard-code the interpreters for various script types
+
+    set Cgi(tclsh) "Tclsh80.exe"		;# For .tcl
+    set Cgi(perl) "perl.exe"			;# For .pl
+    set Cgi(cgiexe) "Tclsh80.exe"		;# For .cgi
+
+    # More environment variables need to be passed through.
+    # Windows NT Need Lib and SystemRoot so DLLs loaded by tcl are found.
+    # Windows 95 needs more... so we just pass everything
+
+    lappend Cgi(env-pass) * 
 }
 
 # Register a cgi-bin directory.
@@ -224,7 +233,12 @@ proc CgiExec {script arglist} {
 	}
 	windows {
 	    switch -- [file extension $script] {
-		.cgi -
+		.pl {
+		    return [open "|[list $Cgi(perl) $script] $arglist" r+]
+		}
+		.cgi {
+		    return [open "|[list $Cgi(cgiexe) $script] $arglist" r+]
+		}
 		.tcl {
 		    return [open "|[list $Cgi(tclsh) $script] $arglist" r+]
 		}
@@ -325,3 +339,4 @@ proc CgiCleanup {fd sock} {
 	CgiCancel $fd $sock
     }
 }
+
