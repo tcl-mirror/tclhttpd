@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.61 2000/09/29 22:53:12 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.62 2000/10/05 04:53:51 welch Exp $
 
 package provide httpd 1.5
 
@@ -1840,10 +1840,10 @@ proc Httpd_Resume {sock {timeout ""}} {
 
 # Httpd_CurrentSocket --
 #
-#	Return the handle to the current socket.
+#	Return (or set) the handle to the current socket.
 #
 # Arguments:
-#	none.
+#	sock	Optional - if specified, set the current socket.
 #
 # Results:
 #	A socket.
@@ -1851,8 +1851,11 @@ proc Httpd_Resume {sock {timeout ""}} {
 # Side Effects:
 #	None.
 
-proc Httpd_CurrentSocket {} {
+proc Httpd_CurrentSocket {{sock {}}} {
     global Httpd
+    if {[string length $sock]} {
+	set Httpd(currentSocket) $sock
+    }
     return $Httpd(currentSocket)
 }
 

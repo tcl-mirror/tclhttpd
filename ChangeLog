@@ -5,6 +5,8 @@
 	on application-direct URLs.
 	* lib/url.tcl: Added Url_QuerySetup that is like the old
 	Url_DecodeQuery, but passes the information to the ncgi:: module.
+	* lib/httpd.tcl: Added optional sock parameter to Httpd_CurrentSocket
+	so you can set the current socket.
 
 2000-10-02  Brent Welch <welch@ajubasolutions.com>
     
