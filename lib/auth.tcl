@@ -8,7 +8,15 @@
 # Each .htaccess file is parsed once and the information is kept in a
 # Tcl global array named auth$filename, and upvar aliases this to "info".
 # "info" contains the info provided by the .htaccess file ( info(htaccessp,..) )
-# The AuthUserFile ( info(user,..) ) and the AuthGroupFile( info(group,..) )
+#
+# The AuthUserFile and the AuthGroupFile are parsed and stored
+# in authentication array auth$filename.
+#
+# Authentication arrays need not be associated with physical files.
+# To create an authentication array:
+#	array set auth$pseudo [list mtime 0 user,$u password group,$g group]
+#
+# Configuration creates an authentication array authdefault, for bootstrapping.
 #
 # There is also support for ".tclaccess" files in each directory.
 # These contain hook code that define password checking procedures
@@ -21,21 +29,76 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.18 2004/03/01 07:02:38 welch Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.19 2004/03/22 16:23:32 coldstore Exp $
 
 package provide httpd::auth 2.0
 package require base64
 
 set Auth_DigestOnly 0;	# set this to 1 to only use Digest auth
 
+# Crypto packages
+if {[catch {package require crypt}] || [catch {crypt foo ba}]} {
+    # if we don't have a C library, fall back to pure tcl crypt
+    package require tclcrypt
+}
+
+# set default user/group files
+if {![info exists Config(AuthUserFile)]} {
+    set Config(AuthUserFile) default
+}
+if {![info exists Config(AuthGroupFile)]} {
+    set Config(AuthGroupFile) default
+}
+if {![info exists Config(AuthDefaultFile)]} {
+    set Config(AuthDefaultFile) /tmp/tclhttpd.default
+}
+
+# Authentication bootstrap.
+#
+# The /htaccess URL allows admins to create passwords and groups,
+# and .htaccess files per directory, however it is necessary to have a
+# password to bootstrap this process.
+#
+# The approach taken is to allow the administrator to give plaintext
+# passwords via Config, or (failing that) to generate and Log a random
+# password at runtime.  A new random password will be created on each 
+# server startup.
+#
+# Here, we create a default authentication array from Config(Auth)
+
+array set authdefault {mtime -1}
+package require httpd::passgen	;# random password generation
+
+if {[info exists Config(Auth)]} {
+    foreach {var val} $Config(Auth) {
+	if {[string match user,* $var]} {
+	    # encrypt the password
+	    set salt [Passgen_Salt]
+	    set val [crypt $password $salt]
+	}
+	
+	set authdefault($var) $val
+    }
+} else {
+    # we weren't given an Auth Config - generate a default for webmaster
+    # and write it to file $Config(AuthDefaultFile)
+    
+    set webmaster_password [Passgen_Generate]
+    set salt [Passgen_Salt]
+    set authdefault(user,webmaster) [crypt $webmaster_password $salt]
+    set authdefault(group,webmaster) webmaster
+    set fd [open $Config(AuthDefaultFile) w 0660]
+    puts $fd $webmaster_password
+    close $fd
+    unset webmaster_password
+}
+
 # Auth_InitCrypt --
 # Attempt to turn on the crypt feature used to store crypted passwords.
 
 proc Auth_InitCrypt {} {
-    if {[catch {package require crypt}]} {
-	package require tclcrypt
-    }
 }
+
 proc Auth_AccessFile {args} {
     Stderr "Auth_AccessFile is obsolete: use Auth_InitCrypt instead"
     Auth_InitCrypt
@@ -325,37 +388,45 @@ proc AuthUserCheck  {sock file users user } {
     return [expr {[lsearch $users $user] >= 0}]
 }
 
-# Parse the AuthGroupFile.
-# The information is built up in the info array
+# Parse the AuthGroupFile and find the user in it.
+# The information is built up in the array:
+#	auth$info(htaccessp,groupfile)
+#
+# To create an authentication array, unconnected to a physical file:
+# array set auth$pseudo [list mtime 0 user,$u password group,$g group]
+#
+# If the .htaccess file didn't specify a groupfile, it defaults to an authentication
+# array authdefault, which contains configured default passwords and groups
 
 proc AuthGroupCheck {sock file groups user} {
     upvar #0 auth$file info
+    upvar #0 auth$info(htaccessp,groupfile) group
+
     if {[catch {file mtime $info(htaccessp,groupfile)} mtime]} {
-        # File doesn't exist
-        return 0
+	set mtime -1	;# the file may not exist
     }
 
     # Only parse the group file if it has changed
-
-    if {![info exists info(group,mtime)] || ($mtime > $info(group,mtime))} {
-	foreach i [array names info "group*"] {
-	    unset info($i)
+    if {![info exists group(mtime)] || ($mtime > $group(mtime))} {
+	catch {unset group(mtime)}	;# unset to catch errors
+	foreach i [array names group "group*"] {
+	    unset group($i)
 	}
 	if {[catch {open $info(htaccessp,groupfile)} in]} {
 	    return 0
 	}
 	while {[gets $in line] >= 0} {
 	    if {[regexp {^([^:]+):[      ]*(.+)} $line x key value]} {
-		set info(group,$key) [split $value " ,"]
+		set group(group,$key) [split $value " ,"]
 	    }
 	}
 	close $in
-	set info(group,mtime) $mtime
+	set group(mtime) $mtime
     }
 
     foreach index $groups {
-	if {[info exist info(group,$index)]} {
-	    if {[lsearch $info(group,$index) $user] >= 0} {
+	if {[info exist group(group,$index)]} {
+	    if {[lsearch $group(group,$index) $user] >= 0} {
 		return 1
 	    }
 	}
@@ -363,32 +434,42 @@ proc AuthGroupCheck {sock file groups user} {
     return 0
 }
 
-# Parse the AuthUserFile.
-# The information is built up in the info array
+# Parse the AuthUserFile and return the user's information.
+# The information is built up in the array:
+#	auth$info(htaccessp,userfile)
+# 
+# To create an authentication array, unconnected to a physical file:
+# array set auth$pseudo [list mtime 0 user,$u password group,$g group]
+#
+# If the .htaccess file didn't specify a userfile, it defaults to an authentication
+# array authdefault, which contains configured default passwords and groups
 
 proc AuthGetPass {sock file user} {
     upvar #0 auth$file info
+    upvar #0 auth$info(htaccessp,userfile) passwd
+
     if {[catch {file mtime $info(htaccessp,userfile)} mtime]} {
-        # File doesn't exist
-        return *
+	set mtime -1	;# the file may not exist
     }
-    if {![info exists info(user,mtime)] || ($mtime > $info(user,mtime))} {
-	foreach i [array names info "user*"] {
-	    unset info($i)
+
+    if {![info exists passwd(mtime)] || ($mtime > $passwd(mtime))} {
+	catch {unset passwd(mtime)}	;# unset to catch errors
+	foreach i [array names passwd "user*"] {
+	    unset passwd($i)
 	}
 	if {[catch {open $info(htaccessp,userfile)} in]} {
 	    return *
 	}
 	while {[gets $in line] >= 0} {
 	    if {[regexp {^([^:]+):[      ]*([^:]+)} $line x key value]} {
-		set info(user,$key) $value
+		set passwd(user,$key) $value
 	    }
 	}
 	close $in
-	set info(user,mtime) $mtime
+	set passwd(mtime) $mtime
     }
-    if {[info exists info(user,$user)]} {
-	return $info(user,$user)
+    if {[info exists passwd(user,$user)]} {
+	return $passwd(user,$user)
     } else {
 	return *
     }
@@ -446,8 +527,11 @@ proc AuthParseHtaccess {sock file} {
 	    unset info($i)
 	}
 	set info(htaccessp,mtime) $mtime
-	set info(htaccessp,userfile) {}
-	set info(htaccessp,groupfile) {}
+
+	global Config
+	set info(htaccessp,userfile) $Config(AuthUserFile)
+	set info(htaccessp,groupfile) $Config(AuthGroupFile)
+
 	set info(htaccessp,name) Digest
 	if {[catch {open $file} in]} {
 	    return 1
