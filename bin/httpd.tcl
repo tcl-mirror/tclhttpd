@@ -42,7 +42,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.24 2000/08/02 07:05:52 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.25 2000/08/02 07:23:42 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -142,6 +142,7 @@ if {$ix >= 0} {
     set Config(config) [file join $Config(home) tclhttpd.rc]
 }
 
+package require httpd
 package require httpd::config
 namespace import config::cget
 config::init $Config(config) Config
@@ -190,7 +191,6 @@ if {$Config(debug)} {
 # Start the server
 ###################
 
-package require httpd
 package require httpd::utils		;# For Stderr
 package require httpd::counter		;# Fix Httpd_Init and move to main.tcl
 package require httpd::mtype		;# Fix Httpd_Init and move to main.tcl
