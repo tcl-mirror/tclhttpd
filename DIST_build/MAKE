@@ -1,0 +1,27 @@
+# This script runs make on everything in the
+# TclHttpd distribution bundle.
+# You must run the CONFIG script first.
+
+PWD=`pwd`
+PLATFORM=solaris
+
+cd ../tclsh8.3.1/unix/${PLATFORM}
+make
+make install
+cd ${PWD}
+
+cd ../thread2.0/unix/${PLATFORM}
+make
+make install
+cd ${PWD}
+
+cd ../tclhttpd3.0.0/build/${PLATFORM}
+make
+make install
+cd ${PWD}
+
+cd ../tcllib0.4
+./install.sh
+cd ${PWD}
+
+

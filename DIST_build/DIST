@@ -1,14 +1,62 @@
-mkdir /home/welch/scratch
-cd /home/welch/scratch
+#!/bin/sh
+#
+# Create a super distribution of TclHttpd, Tcl, Tcllib, and Thread
 
+HTTPD_VERSION=3.0.0
+WIN_VERSION=300
+DISTDIR=/home/welch/dist
+SUPER_DIR=${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist
+
+TCL_VERSION=8.3.1
+TCL_DIST=/home/hobbs/dist/tcl${TCL_VERSION}.tar.gz
+
+TCLLIB_VERSION=0.4
+TCLLIB_DIST=/home/welch/cvs/tcllib/tcllib${TCLLIB_VERSION}.tar.gz
+
+THREAD_VERSION=2.0
+
+SCRATCH=/home/welch/scratch
+mkdir ${SCRATCH}
+cd ${SCRATCH}
+
+rm -rf ${SCRATCH}/tclhttpd${HTTPD_VERSION}
 cvs -d /home/cvs checkout tclhttpd
-mv tclhttpd tclhttpd3.0.0
+mv tclhttpd tclhttpd${HTTPD_VERSION}
 
+rm -rf ${SCRATCH}/thread${THREAD_VERSION}
 cvs -d /home/cvs checkout thread
-mv thread thread2.0
+mv thread thread${THREAD_VERSION}
 
-cd tclhttpd3.0.0/DIST_build
+cd tclhttpd${HTTPD_VERSION}
+autoconf
+cd ..
 
-make superdist DISTDIR=/home/welch/dist \
-	TCL_DIST=/home/hobbs/dist/tcl8.3.1.tar.gz \
-	TCLLIB_DIST=/home/welch/cvs/tcllib/tcllib0.4.tar.gz
+cd thread${THREAD_VERSION}
+autoconf
+cd ..
+
+cd tclhttpd${HTTPD_VERSION}/DIST_build
+
+sh ../configure --enable-gcc --with-tcl=/home/welch/cvs/tcl8.3/unix/solaris \
+	--prefix=/usr/local 
+
+SRCDIR=..
+
+rm -rf ${SUPER_DIR}
+mkdir ${SUPER_DIR}
+mkdir ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}
+tclsh8.3 ${SRCDIR}/bin/CopyDist ${SRCDIR} ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}
+
+mkdir ${SUPER_DIR}/thread${THREAD_VERSION}
+tclsh8.3 ${SRCDIR}/bin/CopyDist ${SRCDIR}/../thread${THREAD_VERSION} ${SUPER_DIR}/thread${THREAD_VERSION}
+gunzip < ${TCL_DIST} | (cd ${SUPER_DIR} ; tar xf -)
+gunzip < ${TCLLIB_DIST} | (cd ${SUPER_DIR} ; tar xf -)
+
+mkdir ${SUPER_DIR}/build
+cp CONFIG MAKE ${SUPER_DIR}/build
+
+cp README ${SUPER_DIR}
+
+(cd ${DISTDIR}; tar cf - ./tclhttpd${HTTPD_VERSION}-dist | gzip > tclhttpd${HTTPD_VERSION}-dist.tar.gz)
+(cd ${DISTDIR} ; zip -9 -r -o  tclhttpd${WIN_VERSION}dist.zip  tclhttpd${HTTPD_VERSION}-dist)
+	

@@ -1,1 +1,42 @@
-sh ../configure --enable-gcc --with-tcl=/home/welch/cvs/tcl8.3/unix/solaris
+# This script is for the build directory of the super
+# TclHttpd distribution bundle.
+# Edit this to run configure on all the modules with the
+# appropriate PLATFORM and PREFIX for your site
+
+HTTPD_VERSION=3.0.0
+TCL_VERSION=8.3.1
+TCLLIB_VERSION=0.4
+THREAD_VERSION=2.0
+
+PWD=`pwd`
+PLATFORM=solaris
+
+# PREFIX is the root of the installation tree
+# EXEC_PREFIX is where the binaries and DLLs go.
+
+PREFIX=/usr/local/tclhttpd${HTTPD_VERSION}
+EXEC_PREFIX=/usr/local/tclhttpd${HTTPD_VERSION}/${PLATFORM}
+
+mkdir ../tcl${TCL_VERSION}/unix/${PLATFORM}
+cd ../tcl${TCL_VERSION}/unix/${PLATFORM}
+sh ../configure --enable-gcc --enable-threads --enable-symbols \
+	--prefix=${PREFIX} \
+	--exec-prefix=${EXEC_PREFIX}
+cd ${PWD}
+
+mkdir ../thread${THREAD_VERSION}/unix/${PLATFORM}
+cd ../thread${THREAD_VERSION}/unix/${PLATFORM}
+sh ../configure --enable-gcc --enable-threads --enable-symbols \
+	--prefix=${PREFIX} \
+	--exec-prefix=${EXEC_PREFIX} \
+	--with-tcl=../../../tcl${TCL_VERSION}/unix/${PLATFORM}
+cd ${PWD}
+
+mkdir ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM}
+cd ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM}
+sh ../configure --enable-gcc --enable-threads --enable-symbols \
+	--prefix=${PREFIX} \
+	--exec-prefix=${EXEC_PREFIX} \
+	--with-tcl=../../../tcl${TCL_VERSION}/unix/${PLATFORM}
+cd ${PWD}
+

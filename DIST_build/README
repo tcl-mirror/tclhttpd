@@ -1,0 +1,40 @@
+This is a bundled distribution of TclHttpd, Tcl, the
+Standard Tcl Library, and the Thread extension.
+
+If you already have tcl 8.3 installed, then you can probably
+run the Tcl Web Server directly from this distribtuion without
+doing any installation steps:
+
+cd tclhttpd3.0.0/bin
+tclsh8.3 httpd.tcl -port 8001 -debug 1
+
+If you get complaints about missing the Standard Tcl Library,
+then you can install just that by running the install.sh script
+in the tcllib0.4 directory.
+
+If you want a clean install of everything, including a Tcl 8.3.1
+that has thread enabled, then use the CONFIG and MAKE scripts
+in the build directory.
+
+First, edit CONFIG to set the PREFIX and PLATFORM appropriately
+for your site.  PREFIX determines the installation location of
+all the software.  The PLATFORM is used to keep the binaries for
+different platforms (e.g., Linux and Solaris) partitioned.
+If you have more than one platform, you can edit CONFIG and
+change the PLATFORM variable and re-run it.
+
+To compile and install the software, edit MAKE so that the
+PLATFORM value matches what you configured.   Then run MAKE.
+
+Information about TclHttpd is at
+
+http://dev.scriptics.com/software/tclhttpd
+
+The mailing list is
+mailto:tcl-httpd@scriptics.com
+You must be a member to post to this list.  To join, send a message
+with the subject of "subscribe" to
+tcl-httpd-request@scriptics.com
+
+Brent Welch <welch@scriptics.com>
+
