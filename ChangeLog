@@ -1,3 +1,33 @@
+2000-09-05  Brent Welch <welch@ajubasolutions.com>
+
+	* Makefile.in:
+	* configure.in:
+	* lib/version.tcl:
+	Changed version number to 3.2
+	* bin/httpdthread.tcl:
+	Changed the -library (i.e., Config library) parameter to
+	be a directory that contains custom code that is sourced
+	as part of (per thread) startup.  This makes it easier
+	to drop code into TclHttpd without modifying the
+	distributed files.
+	* bin/httpd.tcl:
+	This calls tls::init instead of doing strange things to
+	get the code in Httpd_SecureSever to set parameters.
+	* lib/httpd.tcl:
+	Moved tls parameter setting out of this file and into
+	the main startup script.
+	* lib/utils.tcl:
+	Fixed iscommand to work better with commands in namespaces,
+	and to auto_load procedures if necessary.
+	* lib/direct.tcl:
+	Used Doc_NotFound instead of returning 403 errors.
+	* custom/*
+	Added sample custom code
+	* lib/doc.tcl:
+	Changed html::resolveUrl to uri::resolve as the former got deleted from TclLib,
+	this means that Doc_RedirectSelf is probably broken in 3.1.0 if you use
+	TclLib 0.6.1
+
 2000-09-01  Brent Welch <welch@ajubasolutions.com>
 
 	* lib/doc.tcl:

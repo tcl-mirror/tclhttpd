@@ -569,8 +569,8 @@ CONFIGDIR=${srcdir}/config
 PACKAGE=tclhttpd
 
 MAJOR_VERSION=3
-MINOR_VERSION=1
-PATCHLEVEL=".0"
+MINOR_VERSION=2
+PATCHLEVEL=""
 
 VERSION=${MAJOR_VERSION}.${MINOR_VERSION}${PATCHLEVEL}
 NODOT_VERSION=${MAJOR_VERSION}${MINOR_VERSION}
@@ -1332,7 +1332,7 @@ else
 
 		eval "temp_includedir=${includedir}"
 		for i in \
-			`ls -d ${TCL_PREFIX} 2>/dev/null` \
+			`ls -d ${TCL_PREFIX}/include 2>/dev/null` \
 			`ls -d ${temp_includedir} 2>/dev/null` \
 			`ls -d ${TCL_BIN_DIR}/../include 2>/dev/null` \
 			/usr/local/include /usr/include ; do

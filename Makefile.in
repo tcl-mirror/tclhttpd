@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.23 2000/08/28 16:22:40 build Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.24 2000/09/06 21:42:15 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -123,6 +123,7 @@ limitlibdir = $(libdir)/@LIMIT_PACKAGE@@LIMIT_VERSION@
 pkgincludedir = $(includedir)/@PACKAGE@@VERSION@
 SERVER_ROOT = @SERVER_ROOT@
 htdocsdir = $(SERVER_ROOT)/htdocs
+customdir = $(SERVER_ROOT)/custom
 
 top_builddir = .
 
@@ -301,7 +302,7 @@ install-binaries:
 	@echo "Installing sample boot script"
 	$(INSTALL_DATA) $(srcdir)/bin/tclhttpd.etc.init $(SERVER_ROOT)
 
-install-libraries: installdirs 
+install-libraries: install-custom installdirs 
 	@echo "Installing script files in $(pkglibdir)"
 	@for i in $(srcdir)/lib/*.tcl ; do \
 	    $(INSTALL_SCRIPT) $$i $(pkglibdir) ; \
@@ -312,7 +313,10 @@ install-htdocs:
 	@echo "Creating htdocs tree in $(htdocsdir)"
 	-chmod 755 `@CYGPATH@ $(srcdir)/htdocs/cgi-bin/*.cgi`
 	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/bin/CopyDist` `@CYGPATH@ $(srcdir)/htdocs` `@CYGPATH@ $(htdocsdir)`
-	-ln -s ../../doc/html $(htdocsdir)/tclpro
+
+install-custom:
+	@echo "Adding custom code in $(customdir)"
+	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/bin/CopyDist` `@CYGPATH@ $(srcdir)/custom` `@CYGPATH@ $(customdir)`
 
 install-doc: install-htdocs
 	@echo "Installing man page"
@@ -322,7 +326,7 @@ install-doc: install-htdocs
 	$(INSTALL_DATA) $(srcdir)/bin/README_custom $(SERVER_ROOT)
 
 installdirs:
-	$(mkinstalldirs) $(pkglibdir) $(cryptlibdir) $(prefix)/bin $(htdocsdir)
+	$(mkinstalldirs) $(pkglibdir) $(cryptlibdir) $(prefix)/bin $(htdocsdir) $(customdir)
 
 clean:  
 	-test -z "$(BINARIES)" || rm -f $(BINARIES)
