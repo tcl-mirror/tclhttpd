@@ -18,7 +18,7 @@ mypage.tcl
 This provides the page templates for the files under
 the htdocs directory.
 
-dodirs.tcl 
+zzzdodirs.tcl 
 This will source files from any subdirectory of custom/
 which contains a file called startup.tcl.  Can be used to modularise
 customisations.
