@@ -16,7 +16,7 @@ set start [clock clicks]
 after 2000
 set end [clock clicks]
 set rate [expr {($end - $start) / 2.0}]
-puts $rate
+puts "$rate clicks/second"
 
 proc Spray {server port count args} {
     global max finish done start total null null_path
