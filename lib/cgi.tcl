@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cgi.tcl,v 1.27 2002/08/31 07:30:43 welch Exp $
+# RCS: @(#) $Id: cgi.tcl,v 1.28 2003/04/04 04:10:54 coldstore Exp $
 
 package provide httpd::cgi 1.1
 
@@ -73,7 +73,7 @@ proc Cgi_Domain {virtual directory sock suffix} {
     # The trimleft avoids a buildup of extra / after the domain prefix.
 
     if [catch {Url_PathCheck [string trimleft $suffix /]} pathlist] {
-	Error_NotFound $sock
+	Doc_NotFound $sock
 	return
     }
 
@@ -95,7 +95,7 @@ proc Cgi_Domain {virtual directory sock suffix} {
 #	    }
 	    break
 	} elseif {![file exists $path]} { 
-	    Error_NotFound $sock
+	    Doc_NotFound $sock
 	    return
 	}
     }

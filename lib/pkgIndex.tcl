@@ -17,7 +17,7 @@ package ifneeded httpd 1.6 "
 	package ifneeded httpd::direct 1.1 \[list source \[file join [list $dir] direct.tcl\]\]
 	package ifneeded httpd::dirlist 1.1 \[list source \[file join [list $dir] dirlist.tcl\]\]
 	package ifneeded httpd::doc 1.1 \[list source \[file join [list $dir] doc.tcl\]\]
-	package ifneeded httpd::error 1.0 \[list source \[file join [list $dir] error.tcl\]\]
+	package ifneeded httpd::doc_error 1.0 \[list source \[file join [list $dir] doc_error.tcl\]\]
 	package ifneeded httpd::eval 1.0 \[list source \[file join [list $dir] sendsock.tcl\]\]
 	package ifneeded httpd::fallback 1.0 \[list source \[file join [list $dir] fallback.tcl\]\]
 	package ifneeded httpd::imagemap 1.0 \[list source \[file join [list $dir] imagemap.tcl\]\]

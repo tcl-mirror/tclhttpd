@@ -8,15 +8,11 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: compat.tcl,v 1.3 2003/03/28 08:02:30 coldstore Exp $
+# RCS: @(#) $Id: compat.tcl,v 1.4 2003/04/04 04:10:54 coldstore Exp $
 
 package provide httpd::compat 1.1
 
 foreach {oldname newname} {
-    Doc_NotFound	Error_NotFound
-    Doc_NotFoundPage	Error_NotFoundPage
-    Doc_ErrorPage	Error_ErrorPage
-    Doc_Error		Error_Error
     Doc_Cookie	Cookie_Get
     Doc_GetCookie	Cookie_Get
     Doc_SetCookie	Cookie_Set

@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.13 2002/12/03 07:20:30 welch Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.14 2003/04/04 04:10:39 coldstore Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -103,12 +103,12 @@ Template_Check		1
 # subst at the global level.  In particular,  it does not have the
 # full semantics of a .tml template.
 
-Error_ErrorPage			/error.html
+Doc_ErrorPage			/error.html
 
 # Doc_NotFoundPage registers a template to be used when a 404 not found
 # error occurs.  Like Doc_ErrorPage, this page is simply subst'ed.
 
-Error_NotFoundPage		/notfound.html
+Doc_NotFoundPage		/notfound.html
 
 # Doc_Webmaster returns the value last passed into it.
 # Designed to be used in page templates where contact email is needed.

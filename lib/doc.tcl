@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.46 2002/12/03 07:20:30 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.47 2003/04/04 04:10:54 coldstore Exp $
 
 package provide httpd::doc 1.1
 
@@ -26,7 +26,7 @@ package require httpd::fallback
 package require httpd::subst
 package require httpd::template
 package require httpd::dirlist
-package require httpd::error
+package require httpd::doc_error
 package require httpd::cookie
 
 # Doc_Root --
@@ -263,7 +263,7 @@ proc DocAccessHook {sock url} {
     # This turns the URL suffix into a list of pathname components
 
     if {[catch {Url_PathCheck $data(suffix)} data(pathlist)]} {
-	Error_NotFound $sock
+	Doc_NotFound $sock
 	return denied
     }
 
@@ -326,7 +326,7 @@ proc DocDomain {prefix directory sock suffix} {
     if {[regexp ^~ $pathlist] && [info exists Doc(homedir)]} {
 	set user [lindex $pathlist 0]
 	if {[catch {glob $user} homedir]} {
-	    Error_NotFound $sock
+	    Doc_NotFound $sock
 	    return	;# No such user
 	}
 	set directory [file join $homedir $Doc(homedir)]
@@ -397,7 +397,7 @@ proc Doc_Handle {prefix path suffix sock} {
 	# Either not found, or we can find an alternate (e.g. a template).
 
 	if {![Fallback_Try $prefix $path $suffix $sock]} {
-	    Error_NotFound $sock
+	    Doc_NotFound $sock
 	}
     }
 }

@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: dirlist.tcl,v 1.9 2002/12/03 07:20:30 welch Exp $
+# RCS: @(#) $Id: dirlist.tcl,v 1.10 2003/04/04 04:10:54 coldstore Exp $
 
 package provide httpd::dirlist 1.1
  
@@ -73,7 +73,7 @@ proc DirList_Directory {prefix path suffix sock} {
     }
     if {[Dir_ListingIsHidden]} {
         # Directory listings are hidden, so give the not-found page.
-        return [Error_NotFound $sock]
+        return [Doc_NotFound $sock]
     }
     # Listings are not hidden, so show it.
     Httpd_ReturnData $sock text/html [DirList $sock $path $data(url)]

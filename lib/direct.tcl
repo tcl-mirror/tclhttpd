@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.17 2003/03/28 08:03:56 coldstore Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.18 2003/04/04 04:10:54 coldstore Exp $
 
 package provide httpd::direct 1.1
 
@@ -81,7 +81,7 @@ proc DirectDomain {prefix sock suffix} {
     Url_QuerySetup $sock
     set cmd [Direct_MarshallArguments $prefix $suffix]
     if {$cmd == ""} {
-	Error_NotFound $sock
+	Doc_NotFound $sock
 	return
     }
 

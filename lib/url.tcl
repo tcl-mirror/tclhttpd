@@ -272,7 +272,7 @@ proc Url_Unwind {sock ei ec} {
 	    File_Reset
 	} 
 	default {
-	    Error_Error $sock $ei
+	    Doc_Error $sock $ei
 	}
     }
 }
