@@ -1,11 +1,13 @@
 2000-05-08 Brent Welch <welch@scriptics.com>
 
-	* lib/httpd.tcl: Fixed Httpd_SelfUrl to correctly insert the port number if
-	the client passed the Host: HTTP header.  Previously that case wasn't setting
-	custom port numbers correctly.
+	* lib/httpd.tcl: Fixed Httpd_SelfUrl to correctly insert the port
+	number if the client passed the Host: HTTP header. 
+	Previously that case wasn't setting custom port numbers correctly.
 	* lib/version.tcl: Upped to 3.0.1
 	* htdocs/register.tml: Added version string to form data
 	* bin/test/bigpost.tcl: Fixed argument handling
+	* lib/cgi.tcl: set env(SERVER_HTTPS_PORT) if the server has
+	a secure port open.
 
 2000-05-05 Brent Welch <welch@scriptics.com>
 
