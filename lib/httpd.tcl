@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.73 2002/12/03 07:20:30 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.74 2003/04/04 04:08:55 coldstore Exp $
 
 package provide httpd 1.6
 
@@ -1240,6 +1240,7 @@ proc HttpdSetCookie {sock} {
 #	sock	handle on the connection
 #	type	is a Content-Type
 #	path	is the file pathname
+#	offset	amount to skip at the start of file
 #
 # Side Effects:
 #	Sends the file contents back as the reply.
@@ -1297,6 +1298,7 @@ proc Httpd_ReturnFile {sock type path {offset 0}} {
 #	Return data for a page.
 #
 # Arguments:
+#	sock	handle on the connection
 #	type	a Content-Type
 #	content	the data to return
 #	code	the HTTP reply code.
