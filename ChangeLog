@@ -1,3 +1,15 @@
+2000-08-23  Brent Welch <welch@scriptics.com>
+
+	* Makefile.in: Fixed install permission bits on files.
+	* bin/httpd.tcl: Fixed setuid emulation under Tclx to setgid
+	before setuid.
+	* lib/url.tcl: Added support for raising an error with errorCode
+	set to HTTPD_SUSPEND in order to suspend a request - this calls
+	the Httpd_Suspend funciton.
+	* certs/README.ssl:  Added documentation about creating self-signed
+	certificates.
+	* Applied tclhttpd-3-1-0 CVS tag.
+
 2000-08-02  Brent Welch <welch@scriptics.com>
 
 	* Upped the version number to 3.1

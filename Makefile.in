@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.20 2000/08/12 02:54:19 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.21 2000/08/23 20:39:25 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -127,9 +127,9 @@ htdocsdir = $(SERVER_ROOT)/htdocs
 top_builddir = .
 
 INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
-INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ -m 755
+INSTALL_DATA = @INSTALL_DATA@ -m 644
+INSTALL_SCRIPT = @INSTALL_SCRIPT@ -m 644
 INSTALL_STRIP_FLAG =
 transform = @program_transform_name@
 
@@ -293,10 +293,10 @@ cryptLib.$(OBJEXT): $(srcdir)/src/cryptLib.c
 install-binaries:
 	@echo "Installing script programs in $(prefix)/bin"
 	@for i in $(srcdir)/bin/*.tcl ; do \
-	    $(INSTALL_SCRIPT) $$i $(prefix)/bin ; \
+	    $(INSTALL_PROGRAM) $$i $(prefix)/bin ; \
 	done;
 	@for i in $(srcdir)/bin/*.rc ; do \
-	    $(INSTALL_SCRIPT) $$i $(prefix)/bin ; \
+	    $(INSTALL_DATA) $$i $(prefix)/bin ; \
 	done;
 
 install-libraries: installdirs install-htdocs
@@ -308,6 +308,7 @@ install-libraries: installdirs install-htdocs
 
 install-htdocs:
 	@echo "Creating htdocs tree in $(htdocsdir)"
+	-chmod 755 `@CYGPATH@ $(srcdir)/htdocs/cgi-bin/*.cgi`
 	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/bin/CopyDist` `@CYGPATH@ $(srcdir)/htdocs` `@CYGPATH@ $(htdocsdir)`
 
 install-doc:
