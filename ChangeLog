@@ -1,4 +1,4 @@
-2003-9-27  Brent Welch <welch@panasas.com>
+2003-9-27  Colin McCormack <colin@field.medicine.adelaide.edu.au>
         * lib/httpd.tcl: HTML armour default error output
         * htdocs/admin htdocs/debug htdocs/status:
         added access control .htaccess to direct domains
