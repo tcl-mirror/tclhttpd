@@ -42,7 +42,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.29 2000/09/11 18:08:29 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.30 2000/09/20 20:40:54 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -82,7 +82,7 @@ set auto_path [concat [list $Config(lib)] $auto_path]
 
 # Search around for the Standard Tcl Library
 
-if {![catch {package require tcllib 0.6}]} {
+if {![catch {package require tcllib 0.7}]} {
     # Already available in environment
 } elseif {[file exist [file join $home ../tcllib]]} {
     lappend auto_path [file join $home ../tcllib]
@@ -142,7 +142,7 @@ if {$ix >= 0} {
     set Config(config) [file join $Config(home) tclhttpd.rc]
 }
 
-package require httpd
+package require httpd 1.5
 package require httpd::version		;# For Version proc
 package require httpd::utils		;# For Stderr
 package require httpd::counter		;# For Count
