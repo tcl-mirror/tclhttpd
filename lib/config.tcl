@@ -6,7 +6,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: config.tcl,v 1.2 2000/08/02 07:06:52 welch Exp $
+# RCS: @(#) $Id: config.tcl,v 1.3 2004/07/08 08:39:02 coldstore Exp $
 
 package provide httpd::config 1.0
 
@@ -150,7 +150,7 @@ proc config::setValue {args} {
 
 	foreach {name value} $args {
 	    if {[regsub -all "\n\\s*?Config\\s*?[list $name](\\s*?).*?\n" $X \
-			    "\nConfig [list $name]\\1[list $value]\n" X] == 0} {
+			    "\nConfig [list $name]\\1 [list $value]\n" X] == 0} {
 		append X "\n[list Config $name $value]\n"
 	    }
 	}
