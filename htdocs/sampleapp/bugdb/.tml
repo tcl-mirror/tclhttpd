@@ -1,9 +1,8 @@
 # 'Report A Bug' template options: 
 
 set application_options {
-    {Application 1}
-    {Application 2}
-    {Application 3}
+    {Bug Database}
+    {TclHttpd Documentation}
 }
 
 set os_options {
@@ -21,5 +20,12 @@ set priority_options {
 
 set assigned_options {
     jrankin@oneil.com
-    wrankin@acm.org
+}
+
+# Application navigation links
+
+set my_navigation {
+    Home index.tml
+    {Report A Bug} report.tml
+    {List All Bugs} bug-list.tml
 }
