@@ -4,9 +4,9 @@
 <p>
 <form action=$page(url) method=POST>
 <table>
-[html::row "General Info" "<input type=text [html::formvalue data]>"]
+[html::row "General Info" "<input type=text [html::formValue data]>"]
 [html::row "Exclusive Choice" \
-    [html::radioset somevariable {&nbsp;} {
+    [html::radioSet somevariable {&nbsp;} {
 	orange Orange
 	blue Blue
 	green Green
@@ -21,7 +21,7 @@
 	"violet red" "Violet Red"
     }]]
 [html::row "Multiple Choice " \
-    [html::checkset check "&nbsp;" {
+    [html::checkSet check "&nbsp;" {
 	orange Orange
 	blue Blue
 	green Green

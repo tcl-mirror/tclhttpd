@@ -15,13 +15,13 @@ note to [html::mailto welch@acm.org "Register WebServer"] would be appreciated.
 <p>
 <h2>User Registration</h2>
 <table>
-[html::textinputrow "Name" name]
-[html::textinputrow "Email" emailaddr]
-<tr>[html::cell colspan=2 [html::checkset noemail {} {
+[html::textInputRow "Name" name]
+[html::textInputRow "Email" emailaddr]
+<tr>[html::cell colspan=2 [html::checkSet noemail {} {
     1 "<b>Do not</b> contact me about new releases"
 }]]</tr>
-[html::textinputrow "Title" title]
-[html::textinputrow "Company" company]
+[html::textInputRow "Title" title]
+[html::textInputRow "Company" company]
 </table>
 <p>How do you plan to use the server?<br>
 <textarea name="why" cols=60 rows=4>

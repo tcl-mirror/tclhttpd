@@ -37,7 +37,7 @@ proc mypage::contents {list} {
 proc mypage::header {title} {
     mypage::SetLevels $title
     set html [html::head $title]\n
-    append html [html::bodytag]\n
+    append html [html::bodyTag]\n
 
     append html "<table cellpadding=0 cellspacing=0 border=0 width=100%>\n"
     append html "<tr> \
@@ -97,7 +97,7 @@ proc mypage::footer {} {
     append html "<!-- $contents -->\n"
     append html "<table cellpadding=0 cellspacing=2 border=0 width=100%>\n"
     append html [thinrule colspan=[expr {[llength $contents]/2}]]
-    append html <tr>[html::cell "" [html::minormenu $contents </font></td><td>[html::font]]]</tr>\n
+    append html <tr>[html::cell "" [html::minorMenu $contents </font></td><td>[html::font]]]</tr>\n
     append html </table>\n
     append html "</body>\n</html>\n"
     return $html
