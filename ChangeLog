@@ -1,3 +1,8 @@
+2003-11-04 Colin McCormack <colin@field.medicine.adelaide.edu.au>
+       * preparing Debian package for tclhttpd
+       * fixed innocuous bug causing noise on loading libtml under
+       Debian package
+	
 2003-10-28 Colin McCormack <colin@field.medicine.adelaide.edu.au>
        * Fixed sf.net bug [804488] Redirect_To does not work in .tml
         Added suggested patch to template.tcl
