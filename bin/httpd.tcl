@@ -91,6 +91,7 @@ package require counter         ;# Statistics
 package require mtype           ;# Mime content types
 package require utils           ;# junk
 package require threadmgr
+package require redirect	;# URL redirection
 
 #  Not strictly required, but nearly always used
 package require auth            ;# Basic authentication

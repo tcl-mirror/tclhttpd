@@ -57,6 +57,7 @@ Status_Url		/status
 Debug_Url		/debug
 Mail_Url		/mail
 Admin_Url		/admin
+Redirect_Init		/redirect
 Doc_TemplateInterp	{}
 Doc_CheckTemplates	1
 Doc_TemplateLibrary	[file join $Config(docRoot) libtml]
