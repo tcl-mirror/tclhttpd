@@ -53,6 +53,13 @@ package require doc
 
 Doc_Root			$Config(docRoot)
 
+# Merge in a second file system into the URL tree.
+
+set htdocs_2 [file join [file dirname [info script]] ../htdocs_2]
+if {[file isdirectory $htdocs_2]} {
+    Doc_AddRoot /addroot	$htdocs_2
+}
+
 # Doc_TemplateInterp determines which interpreter to use when
 # interpreting templates.
 
