@@ -4,5 +4,5 @@ AuthName TCL97
 AuthType Basic
  
 <Limit GET POST>
-require group tcl97
+require user tcl97
 </Limit>              

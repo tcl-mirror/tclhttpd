@@ -11,14 +11,15 @@ Apache-style .htaccess files.  This is enabled by
 default.  Here is an <a href="htaccess.html">explanation
 of .htaccess files</a> by Piet Vloet.
 <p>
-Another feature implemented by Doc_AccessHook is support
+Another feature implemented by DocAccessHook is support
 for .tclaccess files.  These files are short Tcl scripts
 that define two variables: "realm" and "callback".
 The browser will display the realm string in the password
 prompt.  The server will invoke the procedure named by
 the callback variable to check the password.
 
-<b>Examples using .tclaccess files</b>
+<p>
+<b>Examples using .htaccess files</b>
 <ul>
 <li>
 <a href=bytcl/>The first example</a> uses a .tclaccess file in the directory that
