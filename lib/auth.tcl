@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.14 2001/03/13 06:17:51 welch Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.14.6.1 2002/08/30 02:46:06 welch Exp $
 
 package provide httpd::auth 2.0
 package require base64
@@ -57,6 +57,9 @@ proc Auth_Check {sock directory pathlist} {
     # or .tclaccess files with a general authorization callback
     set path $directory
     foreach component $pathlist {
+        if {![file isdirectory $path]} {
+            break
+        }
 	foreach {name type} {.htaccess Basic .tclaccess Tcl} {
 	    set file [file join $path $name]
 	    if {[file exists $file]} {

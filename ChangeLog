@@ -1,3 +1,11 @@
+2002-08-29  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch).  These were added on
+        the suggestion of David Welton
+        * lib/auth.tcl: Auth_Check checks that the path is a directory
+        before rummaging around for the .tclaccess and .htaccess files
+        * lib/url.tcl: Added Url_AccessInstallPrepend to put the
+        access hook at the front of the search path.
+
 2002-08-26  Brent Welch <welch@panasas.com>
         * (In the tclhttpd-3-4-rel branch)
         * lib/cgi.tcl: Fixed POST forms on Windows so we correctly set up

@@ -303,6 +303,18 @@ proc Url_AccessInstall {proc} {
     return
 }
 
+# Url_AccessInstallPrepend
+#
+#       Exactly like AccessInstall, but puts the hook first in the list
+
+proc Url_AccessInstallPrepend {proc} {
+    global Url
+    if {[lsearch $Url(accessHooks) $proc] < 0} {
+	set Url(accessHooks) [concat $proc $Url(accessHooks)]
+    }
+    return
+}
+
 if {![info exist Url(accessHooks)]} {
     set Url(accessHooks) {}
 }
