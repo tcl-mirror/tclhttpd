@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.6.2.3 2002/09/15 20:59:35 welch Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.6.2.4 2002/09/24 04:55:30 welch Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -50,6 +50,7 @@ proc Upload_Url {virtual dir command args} {
     Url_PrefixInstall $virtual [list UploadDomain $dir $command \
 	$opt(-maxfiles) $opt(-maxbytes) $opt(-totalbytes)] \
 	-thread $opt(-inThread) \
+        -callback [list UploadTidyUp] \
 	-readpost 0
 }
 
