@@ -1,3 +1,7 @@
+2004-06-15 Colin McCormack <colin@chinix.com>
+	* lib/{template,fallback}.tcl: Fixed bugs in .html/.htm substitution
+	  and fallback content negotiation
+
 2004-06-14 Brent Welch <welch@panasas.com>
         * lib/digest.tcl: Removed the "ne" operator from expressions
           as that is an 8.5-specific feature.  We have not formally
