@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.57 2000/09/22 21:15:19 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.58 2000/09/26 06:42:44 welch Exp $
 
 package provide httpd 1.5
 
@@ -967,6 +967,7 @@ proc HttpdRespondHeader {sock type close size {code 200}} {
     global Httpd
     upvar #0 Httpd$sock data
 
+    set data(code) $code
     append reply "HTTP/$data(version) $code [HttpdErrorString $code]" \n
     append reply "Date: [HttpdDate [clock seconds]]" \n
     append reply "Server: $Httpd(server)\n"
@@ -1356,9 +1357,9 @@ proc Httpd_RedirectSelf {newurl sock} {
 #	None
 
 proc Httpd_SelfUrl {url {sock ""}} {
-    global Httpd env
+    global Httpd
     if {$sock == ""} {
-	set sock $env(HTTP_CHANNEL)
+	set sock $Httpd(currentSocket)
     }
     upvar #0 Httpd$sock data
 
