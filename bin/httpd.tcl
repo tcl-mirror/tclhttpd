@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.57 2004/10/28 20:21:41 wart Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.58 2004/10/28 20:49:26 wart Exp $
 #
 # \
 exec tclsh "$0" ${1+"$@"}
@@ -85,8 +85,11 @@ if {![info exist Config(lib)]} {
 set auto_path [concat [list $Config(lib)] $auto_path]
 
 # Search around for the Standard Tcl Library
+# We used to require "tcllib", but that now causes complaints
+# Tcllib 1.6 has inconsistencies with md5 1.4.3 and 2.0.0,
+# and requiring 1.0 cures later conflicts with 2.0
 
-if {![catch {package require ncgi}]} {
+if {![catch {package require md5 1}]} {
     # Already available in environment
 } elseif {[file exist [file join $home ../tcllib]]} {
     lappend auto_path [file join $home ../tcllib]
@@ -190,13 +193,9 @@ set CommandLineOptions [list \
         [list mail.arg           [cget MailServer]      {Mail Servers for sending email from tclhttpd}] \
         [list daemon.arg        0      		   {Run in the background as a daemon process.  Requires the 'Expect' package.}] \
     ]
-if {[catch {
-  array set Config [cmdline::getoptions argv $CommandLineOptions \
+array set Config [cmdline::getoptions argv $CommandLineOptions \
     "usage: httpd.tcl options:"]
-} err]} {
-  Stderr $err
-  exit 1
-}
+
 if {[string length $Config(library)]} {
     lappend auto_path $Config(library)
 }
@@ -332,22 +331,25 @@ Log_Flush
 
 # Start up the user interface and event loop.
 
-if {[info exists tk_version]} {
-  if {$Config(gui)} {
+if {[info exists tk_version] && $Config(gui)} {
     package require httpd::srvui
     SrvUI_Init "Tcl HTTPD $Httpd(version)"
-  } else {
-    wm withdraw .
-  }
 }
 Stderr $startup
 
 # Fork a child process if expect is present.
-if {$Config(daemon) && ![catch {package require Expect}]} {
-    if {[fork]} {
-	exit
+if {$Config(daemon)} {
+    if {![catch {package require Expect}] || ![catch {package require Tclx}]} {
+        if {[fork]} {
+            exit
+        }
+    } else {
+        Stderr "Could not fork into the background:"
+        Stderr "    One of either Expect or Tclx must be available."
+        Stderr "    Running in foreground instead."
     }
 }
+    
 
 if {[catch {
     set pidFileId [open [cget pidfile] w]
