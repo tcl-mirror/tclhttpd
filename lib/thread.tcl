@@ -131,7 +131,7 @@ proc Thread_Start {} {
 #	Allocate a thread or queue the command/sock for later execution
 
 proc Thread_Dispatch {sock cmd} {
-    global Thread
+    global Thread Url
     upvar #0 Httpd$sock data
     if {!$Thread(enable) || $Thread(maxthreads) == 0} {
 	eval $cmd
@@ -158,6 +158,13 @@ puts stderr "Queued request $sock"
 	set Thread(freelist) [lrange $Thread(freelist) 1 end]
 	set data(master_thread) [thread id]
 #puts stderr "Dispatch $sock to thread $id"
+	
+	# Until we can pass sockets, read the post data here
+
+	while {[info exists Url(postlength)] && $Url(postlength) > 0} {
+	    set Url(postlength) [Httpd_GetPostData $sock data(query)]
+	}
+	unset Url(postlength)
 	Thread_SendAsync $id [list Thread_Invoke $sock [array get data] $cmd]
     }
 }

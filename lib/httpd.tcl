@@ -178,20 +178,20 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
     if {[string length $name] == 0} {
 	set Httpd(name) [info hostname]
     }
-	if {[info exists Httpd(port)] == 0} {
-		set Httpd(port) $port
-	}
-	package require tls
-	# following is temporary until we have good OpenSSL library
-	if {![file exists $Httpd(SSL_CADIR)] && ![file exists $Httpd(SSL_CAFILE)]} {
-        return -code error "Need a CA directory or a CA file: file \"$Httpd(SSL_CAFILE)\" not found"
-	}
-	if {![file exists $Httpd(SSL_CERTFILE)]} {
-        return -code error "Certificate  \"$Httpd(SSL_CERTFILE)\" not found"
-	}
-	if {![file exists $Httpd(SSL_CADIR)]} {
-        return -code error "Directory \"$Httpd(SSL_CADIR)\" not found"
-	}
+    if {[info exists Httpd(port)] == 0} {
+	set Httpd(port) $port
+    }
+    package require tls
+    # following is temporary until we have good OpenSSL library
+    if {![file exists $Httpd(SSL_CADIR)] && ![file exists $Httpd(SSL_CAFILE)]} {
+	return -code error "Need a CA directory or a CA file: file \"$Httpd(SSL_CAFILE)\" not found"
+    }
+    if {![file exists $Httpd(SSL_CERTFILE)]} {
+	return -code error "Certificate  \"$Httpd(SSL_CERTFILE)\" not found"
+    }
+    if {![file exists $Httpd(SSL_CADIR)]} {
+	return -code error "Directory \"$Httpd(SSL_CADIR)\" not found"
+    }
     set cmd [list tls::socket -server [list HttpdAccept \
 	    [list https $name $port]]]
     lappend cmd -request $Httpd(SSL_REQUEST) \
@@ -297,7 +297,7 @@ proc HttpdReset {sock {left {}}} {
 		set cert $data(cert)
 	}
     unset data
-    array set data [list state start linemode 1 version 0 \
+    array set data [list state start version 0 \
 	    left $left ipaddr $ipaddr self $self]
 	if {[lindex $self 0] == "https"} {
 		set data(cert) $cert
@@ -328,135 +328,124 @@ proc HttpdRead {sock} {
 
     # Use line mode to read the request and the mime headers
 
-    if {$data(linemode)} {
-	if [catch {gets $sock line} readCount] {
-	    Httpd_SockClose $sock 1 "read error: $readCount"
-	    return
-	}
+    if {[catch {gets $sock line} readCount]} {
+	Httpd_SockClose $sock 1 "read error: $readCount"
+	return
+    }
 
-	# State machine is a function of our state variable:
-	#	start: the connection is new
-	#	mime: we are reading the protocol headers
-	# and how much was read. Note that
-	# [string compare $readCount 0] maps -1 to -1, 0 to 0, and > 0 to 1
-    
-	set state [string compare $readCount 0],$data(state)
-	switch -glob -- $state {
-	    1,start	{
-		if {[regexp {^([^ ]+) +([^?]+)\??([^ ]*) +HTTP/(1.[01])} \
-			$line x data(proto) data(url) data(query) data(version)]} {
+    # State machine is a function of our state variable:
+    #	start: the connection is new
+    #	mime: we are reading the protocol headers
+    # and how much was read. Note that
+    # [string compare $readCount 0] maps -1 to -1, 0 to 0, and > 0 to 1
 
-                    if {0} {
-		    # Strip leading http://server.
-		    # We check and discard proxy requests here, too.
+    set state [string compare $readCount 0],$data(state)
+    switch -glob -- $state {
+	1,start	{
+	    if {[regexp {^([^ ]+) +([^?]+)\??([^ ]*) +HTTP/(1.[01])} \
+		    $line x data(proto) data(url) data(query) data(version)]} {
 
-		    if {[regexp {^http://([^/:]+)} $data(url) x xserv]} {
-			if {[string compare \
-				[string tolower $xserv] \
-				[string tolower $Httpd(name)]] != 0} {
-			    Httpd_Error $sock 400 $line
-			    return
-			}
-			regsub {^http://([^/]+)} $data(url) {} data(url)
-		    }
-		    }
-		    set data(state) mime
-		    set data(line) $line
-		    set data(uri) $data(url)
-		    if {[string length $data(query)]} {
-			append data(uri) ?$data(query)
-		    }
-		    CountHist urlhits
-		    # Limit the time allowed to serve this request
-		    catch {after cancel $data(cancel)}
-		    set data(cancel) [after $Httpd(timeout2) \
-			[list HttpdCancel $sock]]
-		} else {
-		    Httpd_Error $sock 400 $line
-		}
-	    }
-	    0,start {
-		# This can happen in between requests.
-	    }
-	    1,mime	{
-		# This regexp picks up
-		# key: value
-		# MIME headers.  MIME headers may be continue with a line
-		# that starts with spaces.
-		if {[regexp {^([^ :]+):[ 	]*(.*)} $line dummy key value]} {
-		    set key [string tolower $key]
-		    if [info exists data(mime,$key)] {
-			append data(mime,$key) ,$value
-		    } else {
-			set data(mime,$key) $value
-		    }
-		    set data(key) $key
-		} elseif {[regexp {^[ 	]+(.*)}  $line dummy value]} {
-		    # Are there really continuation lines in the spec?
-		    if [info exists data(key)] {
-			append data(mime,$data(key)) " " $value
-		    } else {
+		# Strip leading http://server.
+		# We check and discard proxy requests here, too.
+
+		if {[regexp {^https?://([^/:]+)} $data(url) x xserv]} {
+		    set myname [lindex $data(self) 1]
+		    if {[string compare \
+			    [string tolower $xserv] \
+			    [string tolower $myname]] != 0} {
 			Httpd_Error $sock 400 $line
+			return
 		    }
+		    regsub {^https?://([^/]+)} $data(url) {} data(url)
+		}
+		set data(state) mime
+		set data(line) $line
+		set data(uri) $data(url)
+		if {[string length $data(query)]} {
+		    append data(uri) ?$data(query)
+		}
+		CountHist urlhits
+		# Limit the time allowed to serve this request
+		catch {after cancel $data(cancel)}
+		set data(cancel) [after $Httpd(timeout2) \
+		    [list HttpdCancel $sock]]
+	    } else {
+		# Could check for FTP requests, here...
+		Httpd_Error $sock 400 $line
+	    }
+	}
+	0,start {
+	    # This can happen in between requests.
+	}
+	1,mime	{
+	    # This regexp picks up
+	    # key: value
+	    # MIME headers.  MIME headers may be continue with a line
+	    # that starts with spaces.
+	    if {[regexp {^([^ :]+):[ 	]*(.*)} $line dummy key value]} {
+		set key [string tolower $key]
+		if [info exists data(mime,$key)] {
+		    append data(mime,$key) ,$value
+		} else {
+		    set data(mime,$key) $value
+		}
+		set data(key) $key
+	    } elseif {[regexp {^[ 	]+(.*)}  $line dummy value]} {
+		# Are there really continuation lines in the spec?
+		if [info exists data(key)] {
+		    append data(mime,$data(key)) " " $value
 		} else {
 		    Httpd_Error $sock 400 $line
 		}
-	    }
-	    0,mime	{
-	        if {$data(proto) == "POST" && \
-	        	[info exists data(mime,content-length)]} {
-		    set data(linemode) 0
-	            set data(count) $data(mime,content-length)
-	            if {$data(version) >= 1.1 && [info exists data(mime,expect)]} {
-	                if {$data(mime,expect) == "100-continue"} {
-			    puts $sock "100 Continue HTTP/1.1\n"
-			    flush $sock
-			} else {
-			    Httpd_Error $sock 419 $data(mime,expect)
-			}
-		    }
-		    if {$data(count) == 0} {
-			# reenter
-			return
-                    } else {
-		        fconfigure $sock  -translation {binary crlf}
-		    }
-		} elseif {$data(proto) != "POST"}  {
-		    # Dispatch upon blank line after headers
-		    # fileevent $sock readable {}
-		    set ::env(HTTP_CHANNEL) $sock
-		    Url_Dispatch $sock
-	        } else {
-		    Httpd_Error $sock 411 "Confusing mime headers"
-	        }
-	    }
-	    -1,* {
-		if {[fblocked $sock]} {
-		    # Blocked before getting a whole line
-		    return
-		}
-		if {[eof $sock]} {
-		    Httpd_SockClose $sock 1 ""
-		    return
-		}
-	    }
-	    default {
-		Httpd_Error $sock 404 "$state ?? [expr {[eof $sock] ? "EOF" : ""}]"
+	    } else {
+		Httpd_Error $sock 400 $line
 	    }
 	}
-    } elseif {![eof $sock]} {
+	0,mime	{
+	    if {$data(proto) == "POST"} {
+		fconfigure $sock  -translation {binary crlf}
+		if {[info exists data(mime,content-length)]} {
+		    set data(count) $data(mime,content-length)
 
-	# TclHttpd used to read all the post data here and
-	# blindly merge it with the query data from the URL.
-	# For compatibility, this is postponed until either
-	# Url_DecodeQuery is called or Httpd_GetPostData is called.
+		    # There is a strange case of POST with no
+		    # content-length.  We dispatch on that, but
+		    # it is up to the URL domain to read until EOF.
+		}
+		if {$data(version) >= 1.1 && [info exists data(mime,expect)]} {
+		    if {$data(mime,expect) == "100-continue"} {
+			puts $sock "100 Continue HTTP/1.1\n"
+			flush $sock
+		    } else {
+			Httpd_Error $sock 419 $data(mime,expect)
+		    }
+		}
+	    }
 
-	fileevent $sock readable {}
-	set ::env(HTTP_CHANNEL) $sock
-	Url_PostHook $sock $data(count)
-	Url_Dispatch $sock
-    } else {
-	Httpd_SockClose $sock 1 "broken connection during post data"
+	    # TclHttpd used to read all the post data here and
+	    # blindly merge it with the query data from the URL.
+	    # For compatibility, this is postponed until either
+	    # Url_DecodeQuery is called or Httpd_GetPostData is called.
+
+	    fileevent $sock readable {}
+	    set ::env(HTTP_CHANNEL) $sock
+	    if {[info exist data(count)]} {
+		Url_PostHook $sock $data(count)
+	    }
+	    Url_Dispatch $sock
+	}
+	-1,* {
+	    if {[fblocked $sock]} {
+		# Blocked before getting a whole line
+		return
+	    }
+	    if {[eof $sock]} {
+		Httpd_SockClose $sock 1 ""
+		return
+	    }
+	}
+	default {
+	    Httpd_Error $sock 404 "$state ?? [expr {[eof $sock] ? "EOF" : ""}]"
+	}
     }
 }
 
