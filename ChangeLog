@@ -1,3 +1,43 @@
+2000-09-19  Brent Welch <welch@ajubasolutions.com>
+
+	* lib/auth.tcl:
+	Made consistent assignments to:
+	data(session), data(remote_user), and data(auth_type)
+	so that any Url Domain can count on these.
+	* lib/counter.tcl:
+	Re-wrote this to be a thin layer over the Standard Tcl Library
+	stats module.
+	* lib/doc.tcl:
+	Added procedure headers throughout.  Changed Doc(tmlSuffix) var to
+	Doc(tmlExt), and added Doc(htmlExt) (either ".html" or ".htm").
+	Streamlined the DocFallback somewhat, and fixed a lingering issue
+	when you have a cachable index.tml page.  Previously it wouldn't
+	be cached unless you asked for the index.html page explicitly,
+	which didn't work right for DocDirectory.
+	* lib/httpd.tcl:
+	Added procedure headers throughout.  Added
+	Httpd_CompletionCallback so Url_Dispatch can register a
+	domain-sepcific callback when a request completes.
+	Added calls to monitor the service time of requests.
+	Documented the elements of the data() array.
+	    Removed data(ssl), data(code).
+	Added better catching around the routines that generate
+	replies in case the socket goes bad.
+	* lib/url.tcl:
+	Generalized Url_PrefixInstall to take option, value pairs.  This
+	is done in a backwards compatible way.  The new signature is:
+		Url_PrefixInstall prefix domainHandler args
+	If args is a single word, it is treated as the "thread" option.
+	Otherwise it is an option, value list of:
+		-thread		boolean
+		-callback	command
+	Where the callback is made when the URL request has completed.
+	If thread-dispatch is requested, the server uses a worker thread
+	if Tcl supports it and the server is configured for it.
+	* lib/srvui.tcl:
+	* lib/status.tcl:
+	Switched to use new counters.
+
 2000-09-13  Brent Welch <welch@ajubasolutions.com>
 
 	* lib/httpd.tcl:
