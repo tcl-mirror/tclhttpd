@@ -92,22 +92,4 @@ The <b>AuthGroupFile</b> file "group" has this format:
      encrypted  input  string.   The  first two characters of the
      return value are the salt itself.
 </pre>
-<b>Examples:</b>
-<br>
-To be able to run the examples you have to create the files
-/usr/local/htaccess/passwd and /usr/local/htaccess/group.
-Following links point to precompiled files for <a href=htaccess/win32/>Win32</a> 
-and <a href=htaccess/unix/>Unix</a>. 
-The password for a user is identical to its username.<br>
-
-<a href=noawe/>Deny access to a host</a>  This is a .htaccess example that
-denies access to noawe.sun.com. <br>
-
-<a href=auth/>Webmaster</a> Access is allowed to anyone in the group webmaster.<br>
-
-<a href=bydir/>Tcl97</a> It only allows the user tcl97.<br>
-
-<a href=multiple/>Multiple</a> Example with multiple "require group" and/or 
-"require user" entries in a .htaccess file.
-<br>
 [mypage::footer]
