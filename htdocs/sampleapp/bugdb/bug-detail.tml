@@ -2,7 +2,7 @@
 {/sampleapp/bugdb/default.css screen} {} ]
 [Doc_Dynamic]
 
-[html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database &gt; Report A Bug}]
+[html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database &gt; Bug Details}]
 
 [bugdb::bug-details [ncgi::value bug] Application OS Priority \
 Assigned Summary Description Date Status]
@@ -15,7 +15,7 @@ Assigned Summary Description Date Status]
 
 <h2>$Summary</h2>
 
-<form action="#" method="post">
+<form action="bug-detail-update.tml" method="post">
 
 <p>
     <label for="date" class="text">Date Entered:</label>
@@ -90,7 +90,7 @@ Assigned Summary Description Date Status]
 </p>
 
 <p>
-    <input type="button" value="Submit" class="button" />
+    <input type="submit" value="Submit" class="button" />
     <input type="reset" value="Clear Form" class="button" />
 </p>
 
