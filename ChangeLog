@@ -1,3 +1,8 @@
+2000-10-02  Brent Welch <welch@ajubasolutions.com>
+    
+	* lib/counter.tcl: Fixed secsPerMinute initialization.
+	* lib/status.tcl: Added use of stats::htmlHistDisplayRow
+
 2000-09-29  Brent Welch <welch@ajubasolutions.com>
     
 	* lib/debug.tcl: Fixed /debug/pvalue to properly sort things
