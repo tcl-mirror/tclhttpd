@@ -14,3 +14,7 @@ This is done by the default "thread main" script, which is by default
 bin/httpdthread.tcl
 If you run with "-debug 1" you'll get feedback as the code here is loaded.
 Otherwise you only see any errors raised during the process.
+
+The file dodirs.tcl will source files from any subdirectory of custom/
+which contains a file called startup.tcl.  Can be used to modularise
+customisations.
