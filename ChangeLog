@@ -1,3 +1,8 @@
+2004-04-21 Colin McCormack <colin@chinix.com>
+	* lib/session.tcl: added optional MD5 long session IDs,
+	cookie sessions, persistent sessions.
+	* sampleapps/session/: added demo for sessions.
+
 2004-04-19 Brent Welch <welch@panasas.com>
         * Various doc updates.
         Moved learn/self.tml to templates/self.tml
