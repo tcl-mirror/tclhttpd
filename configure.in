@@ -24,6 +24,7 @@ AC_SUBST(CONFIGDIR)
 PACKAGE=tclhttpd
 
 ALTPACKAGE1=crypt
+ALTPACKAGE2=limit
 
 MAJOR_VERSION=2
 MINOR_VERSION=3
@@ -37,6 +38,7 @@ SERVER_ROOT='$(prefix)/$(PACKAGE)'
 
 AC_SUBST(PACKAGE)
 AC_SUBST(ALTPACKAGE1)
+AC_SUBST(ALTPACKAGE2)
 AC_SUBST(VERSION)
 AC_SUBST(WIN_VERSION)
 AC_SUBST(SERVER_ROOT)
@@ -250,10 +252,12 @@ case "`uname -s`" in
 	    SHLIB_LD_LIBS="\"`cygpath -w ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\" ${TCL_SHLIB_LD_LIBS}"
 	    eval "${PACKAGE}_LIB_FILE=${PACKAGE}${SHARED_LIB_SUFFIX}"
 	    eval "${ALTPACKAGE1}_LIB_FILE=${ALTPACKAGE1}${SHARED_LIB_SUFFIX}"
+	    eval "${ALTPACKAGE2}_LIB_FILE=${ALTPACKAGE2}${SHARED_LIB_SUFFIX}"
 	    RANLIB=:
 	else
 	    eval "${PACKAGE}_LIB_FILE=${PACKAGE}${UNSHARED_LIB_SUFFIX}"
 	    eval "${ALTPACKAGE1}_LIB_FILE=${ALTPACKAGE1}${UNSHARED_LIB_SUFFIX}"
+	    eval "${ALTPACKAGE2}_LIB_FILE=${ALTPACKAGE2}${UNSHARED_LIB_SUFFIX}"
 	fi
 	;;
     *)
@@ -261,10 +265,12 @@ case "`uname -s`" in
 	    SHLIB_LD_LIBS="${TCL_STUB_LIB_SPEC} ${CRYPT_LIB}"
 	    eval "${PACKAGE}_LIB_FILE=lib${PACKAGE}${SHARED_LIB_SUFFIX}"
 	    eval "${ALTPACKAGE1}_LIB_FILE=lib${ALTPACKAGE1}${SHARED_LIB_SUFFIX}"
+	    eval "${ALTPACKAGE2}_LIB_FILE=lib${ALTPACKAGE2}${SHARED_LIB_SUFFIX}"
 	    RANLIB=:
 	else
 	    eval "${PACKAGE}_LIB_FILE=lib${PACKAGE}${UNSHARED_LIB_SUFFIX}"
 	    eval "${ALTPACKAGE1}_LIB_FILE=lib${ALTPACKAGE1}${UNSHARED_LIB_SUFFIX}"
+	    eval "${ALTPACKAGE2}_LIB_FILE=lib${ALTPACKAGE2}${UNSHARED_LIB_SUFFIX}"
 	fi
 	;;
 esac
@@ -276,6 +282,7 @@ AC_SUBST(SHARED_BUILD)
 # Change the name from exampeA_LIB_FILE to match your package name.
 #--------------------------------------------------------------------
 
+AC_SUBST(limit_LIB_FILE)
 AC_SUBST(crypt_LIB_FILE)
 AC_SUBST(SHLIB_LD_LIBS)
 
@@ -293,4 +300,4 @@ SC_PROG_TCLSH
 # Finally, substitute all of the various values into the Makefile.
 #--------------------------------------------------------------------
 
-AC_OUTPUT([Makefile crypt_pkgIndex.tcl])
+AC_OUTPUT([Makefile pkgIndex.tcl])

@@ -7,9 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.7 2000/02/13 05:36:31 wart Exp $
-
-# TEMPORARY:  Values for the dist target.
+# RCS: @(#) $Id: Makefile.in,v 1.8 2000/02/16 02:48:57 wart Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -21,6 +19,7 @@
 # library that we are building.
 #========================================================================
 
+#lib_BINARIES=$(crypt_LIB_FILE) $(limit_LIB_FILE)
 lib_BINARIES=$(crypt_LIB_FILE)
 BINARIES=$(lib_BINARIES)
 
@@ -29,8 +28,9 @@ BINARIES=$(lib_BINARIES)
 # This will be used when a dist target is added to the Makefile.
 #========================================================================
 
+limit_SOURCES = src/limit.c
 crypt_SOURCES = src/crypt.c src/cryptLib.c
-SOURCES = $(crypt_SOURCES)
+SOURCES = $(crypt_SOURCES) $(limit_SOURCES)
 
 #========================================================================
 # Enumerate the names of the object files included in this package.
@@ -45,6 +45,7 @@ SOURCES = $(crypt_SOURCES)
 #========================================================================
 
 CRYPT_OBJS = @CRYPT_OBJS@
+limit_OBJECTS =  limit.$(OBJEXT)
 crypt_OBJECTS =  crypt.$(OBJEXT) $(CRYPT_OBJS)
 OBJECTS = $(crypt_OBJECTS)
 
@@ -55,6 +56,9 @@ OBJECTS = $(crypt_OBJECTS)
 # the rule for building the library, so we can refer to both the list of 
 # objects and the library itself in a platform-independent manner.
 #========================================================================
+
+limit_LIB_FILE = @limit_LIB_FILE@
+$(limit_LIB_FILE)_OBJECTS = $(limit_OBJECTS)
 
 crypt_LIB_FILE = @crypt_LIB_FILE@
 $(crypt_LIB_FILE)_OBJECTS = $(crypt_OBJECTS)
@@ -256,7 +260,8 @@ DESTDIR =
 
 pkgdatadir = $(datadir)/@PACKAGE@@VERSION@
 pkglibdir = $(prefix)/lib/@PACKAGE@@VERSION@
-altpkg1libdir = $(libdir)/@ALTPACKAGE1@@VERSION@
+altpkglibdir = $(libdir)/tclhttpdlib@VERSION@
+altpkg2libdir = $(libdir)/@ALTPACKAGE2@@VERSION@
 pkgincludedir = $(includedir)/@PACKAGE@@VERSION@
 SERVER_ROOT = @SERVER_ROOT@
 htdocsdir = $(SERVER_ROOT)/htdocs
@@ -396,6 +401,11 @@ $(crypt_LIB_FILE): $(crypt_OBJECTS)
 	@MAKE_LIB@
 	$(RANLIB) $(crypt_LIB_FILE)
 
+$(limit_LIB_FILE): $(limit_OBJECTS)
+	-rm -f $(limit_LIB_FILE)
+	@MAKE_LIB@
+	$(RANLIB) $(limit_LIB_FILE)
+
 #========================================================================
 # We need to enumerate the list of .c to .o lines here.
 # Unfortunately, there does not seem to be any other way to do this
@@ -409,6 +419,9 @@ $(crypt_LIB_FILE): $(crypt_OBJECTS)
 # exampleA.$(OBJEXT): $(srcdir)/src/win/exampleA.c
 # 	$(COMPILE) -c `@CYGPATH@ $(srcdir)/src/win/exampleA.c` -o $@
 #========================================================================
+
+limit.$(OBJEXT): $(srcdir)/src/limit.c
+	$(COMPILE) -c `@CYGPATH@ $(srcdir)/src/limit.c` -o $@
 
 crypt.$(OBJEXT): $(srcdir)/src/crypt.c
 	$(COMPILE) -c `@CYGPATH@ $(srcdir)/src/crypt.c` -o $@
@@ -446,7 +459,7 @@ install-htdocs:
 install-doc:
 
 installdirs:
-	$(mkinstalldirs) $(pkglibdir) $(altpkg1libdir) $(prefix)/bin $(htdocsdir)
+	$(mkinstalldirs) $(pkglibdir) $(altpkglibdir) $(prefix)/bin $(htdocsdir)
 
 clean:  
 	-test -z "$(BINARIES)" || rm -f $(BINARIES)
@@ -496,7 +509,7 @@ install-lib-binaries: installdirs
 	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
 	  else :; fi; \
 	done
-	$(INSTALL_SCRIPT) crypt_pkgIndex.tcl $(altpkg1libdir)/pkgIndex.tcl
+	$(INSTALL_SCRIPT) pkgIndex.tcl $(altpkglibdir)/pkgIndex.tcl
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \
