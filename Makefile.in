@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.12 2000/04/20 23:48:55 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.13 2000/04/26 01:20:50 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -137,6 +137,7 @@ POST_UNINSTALL = :
 
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
+WIN_VERSION = @WIN_VERSION@
 CC = @CC@
 CFLAGS_DEBUG = @CFLAGS_DEBUG@
 CFLAGS_DEFAULT = @CFLAGS_DEFAULT@

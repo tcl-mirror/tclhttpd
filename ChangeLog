@@ -1,5 +1,7 @@
 2000-04-25  Brent Welch <welch@scriptics.com>
 
+	* Makefile.in: fixes for make dist and make install
+	* htdocs/*.tml: various clean up for new html:: proc names
 	* lib/cgi.tcl: Nuked reference to Httpd(fcopy)
 
 2000-04-24  Brent Welch <welch@scriptics.com>
