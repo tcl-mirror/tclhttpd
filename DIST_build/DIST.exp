@@ -1,6 +1,9 @@
 # Expect script to drive DIST, and handle the CVS password prompting.
 
-foreach f [glob -nocomplain ~/scratch/* ~/dist/tclhttpd3.4* ~/dist/tclhttpd34* ~/tmp/tclhttpd3.4-dist] {
+set v 3.4.1
+set vv 341
+
+foreach f [glob -nocomplain ~/scratch/* ~/dist/tclhttpd$v* ~/dist/tclhttpd$vv* ~/tmp/tclhttpd$v-dist] {
   puts "Removing $f"
   file delete -force $f
 }
@@ -28,8 +31,8 @@ expect {
 
 puts "Unzipping package into ~/tmp"
 cd ~/tmp
-exec gunzip < ~/dist/tclhttpd3.4-dist.tar.gz | tar xf -
-cd tclhttpd3.4-dist
+exec gunzip < ~/dist/tclhttpd$v-dist.tar.gz | tar xf -
+cd tclhttpd$v-dist
 set timeout 0
 spawn make 
 interact
