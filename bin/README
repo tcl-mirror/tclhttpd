@@ -1,6 +1,9 @@
 httpd.tcl	- Sample startup script.  To run a server on port 8015, just do:
 	wish8.0 httpd.tcl -debug
 
+thttpd.tcl	- Sample startup script that uses the thread extension.
+thread.rc	- RC file that works with thttpd.tcl
+
 tclhttpd.etc.init	- This is a Solaris startup script:
 		/etc/init.d/tclhttpd
 		You'd install this and make appropriate symbolic links

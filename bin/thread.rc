@@ -1,0 +1,120 @@
+# tclhttpd.rc
+#
+# This is the default configuration file for TclHttpd, the Tcl Web Server
+
+# The Config array is set from the command line options or
+# from defaults defined in httpd
+# You can set them here, but then they smash any command-line values
+
+# Config Array
+# Element	Default
+# host		[info hostname]
+# port		8015
+# debug		0
+# docRoot	[file join $home htdocs]
+# ipaddr	{}
+# webmaster	webmaster@[info hostname]
+# uid		50
+# gid		100
+
+# Core modules
+package require httpd           ;# Protocol stack
+package require html            ;# Simple html generation
+package require url		;# URL dispatching
+package require counter         ;# Statistics
+package require mtype           ;# Mime content types
+package require utils           ;# junk
+
+#  Not strictly required, but nearly always used
+package require auth            ;# Basic authentication
+package require log             ;# Standard loggin
+
+# When debugging, a command reader is helpful
+if {$Config(debug)} {
+    if {[catch {package require stdin}]} {
+	puts "No command loop available"
+	set debug 0
+    }
+}
+
+# This automatically uses Tk for image maps and
+# a simple control panel.  If you have a Tcl-only shell,
+# then image maps hits are done differently and you
+# don't get a control panel.
+# You may need to tweak
+# this if your Tcl shell can dynamically load Tk
+# because tk_version won't be defined, but it could be.
+
+if [info exists tk_version] {
+    # Use a Tk canvas for imagemap hit detection
+    package require ismaptk
+    # Display Tk control panel
+    package require srvui
+} else {
+    # Do imagemap hit detection in pure Tcl code
+    package require ismaptcl
+}
+
+# This initializes some state, but doesn't start the server yet.
+# Do this before loading the configuraiton file.
+
+Httpd_Init
+
+catch {package require Thread}
+if {![catch {package require threadmgr}]} {
+    puts "Threads enabled"
+    Thread_Init 3
+}
+
+# These packages are required for "normal" web servers
+
+
+package require doc		;# Basic file URLS
+package require include		;# Server side includes
+package require cgi		;# Standard CGI
+package require dirlist		;# Directory listings
+
+# These packages are for special things built right into the server
+
+package require direct		;# Application Direct URLs
+package require status		;# Built in status counters
+package require mail		;# Crude email support
+package require admin		;# Url-based administration
+package require session		;# Session state module (better Safe-Tcl)
+package require debug		;# Debug utilites
+
+# This is currently broken
+if {0} {
+    package require safetcl	;# External process running safetcl shells
+}
+
+# These packages are for the SNMP demo application
+
+if {[catch {
+    package require snmp       ;# SNMP form creation
+    package require Tnm        ;# Low level network stuff
+}]} {
+    puts "No SNMP support"
+}
+
+# For information about these calls, see htdocs/reference.html
+
+Doc_Root		$Config(docRoot)
+Doc_IndexFile		index.{tml,html,shtml,thtml,htm,subst}
+Doc_PublicHtml		public_html
+Cgi_Directory		/cgi-bin
+Status_Url		/status
+Debug_Url		/debug
+Mail_Url		/mail
+Admin_Url		/admin
+Doc_TemplateInterp	{}
+Doc_CheckTemplates	1
+Doc_TemplateLibrary	[file join $Config(docRoot) libtml]
+Doc_ErrorPage		/error.html
+Doc_NotFoundPage	/notfound.html
+Doc_Webmaster		$Config(webmaster)
+if {[catch {
+    Auth_AccessFile	.htaccess       ;# Enable Basic Auth
+} err]} {
+    puts "No Basic Authentication support: $err"
+}
