@@ -1,3 +1,7 @@
+2004-05-05 Brent Welch <welch@panasas.com>
+        * Various doc updates
+        * lib/digest.tcl: fixed use of the md5 package
+
 2004-05-01 Colin McCormack <colin@chinix.com>
 	* lib/session.tcl: added a facility to destroy a session cookie.
 	Added type name to session cookie name
