@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.54 2004/06/14 06:09:06 coldstore Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.55 2004/06/30 12:52:24 coldstore Exp $
 
 package provide httpd::doc 1.1
 
@@ -318,6 +318,9 @@ proc DocDomain {prefix directory sock suffix} {
     # The pathlist has been checked and URL decoded by
     # DocAccess, so we ignore the suffix and recompute it.
 
+    if {![info exists data(pathlist)]} {
+	set data(pathlist) [Url_PathCheck $data(suffix)]
+    }
     set pathlist $data(pathlist)
     set suffix [join $pathlist /]
 
@@ -390,6 +393,10 @@ proc Doc_Return {prefix path suffix sock} {
 	    }
 
 	    return [DirList_Directory $prefix $path $suffix $sock]
+	}
+ 
+	link { 
+	    return [Doc_Return $prefix [file readlink $path] $suffix $sock] 
 	}
 
 	default {

@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: subst.tcl,v 1.7 2004/04/15 01:41:33 coldstore Exp $
+# RCS: @(#) $Id: subst.tcl,v 1.8 2004/06/30 12:52:24 coldstore Exp $
 
 package provide httpd::subst 1.0
 
@@ -125,9 +125,11 @@ proc Subst_File {path {interp {}}} {
     global Subst
 
     switch [file type $path] {
-	file -
-	link {
+	file {
 	    return [uplevel 1 [list SubstFile $path $interp]]
+	}
+	link {
+	    return [uplevel 1 [list Subst_File [file readlink $path] $interp]]
 	}
 	directory {
 	    return [uplevel 1 [list SubstFile [file join $path index.tml] $interp]]

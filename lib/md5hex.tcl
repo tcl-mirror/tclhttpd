@@ -8,7 +8,7 @@ package provide httpd::md5hex 1.0
 
 if {[package vcompare [package present md5] 2.0] > -1} {
     # we have md5 v2 - it needs to be told to return hex
-    interp alias {} md5hex {} ::md5::md5 --hex --
+    interp alias {} md5hex {} ::md5::md5 -hex --
 } else {
     # we have md5 v1 - it returns hex anyway
     interp alias {} md5hex {} ::md5::md5
