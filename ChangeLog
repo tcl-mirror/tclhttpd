@@ -1,5 +1,6 @@
 2004-05-09 Colin McCormack <colin@chinix.com>
 	* lib/mail.tcl: fixed config bug for mailserver
+	* lib/log.tcl: made log check for gzip, per sf [949730]
 
 2004-05-06 Colin McCormack <colin@chinix.com>
 	* lib/mail.tcl: new mail facility using tcllib's smtp client
