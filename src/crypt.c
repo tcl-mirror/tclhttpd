@@ -60,7 +60,7 @@ Crypt_Cmd(dummy, interp, argc, argv)
 		" password salt\"", (char *) NULL);
 	return TCL_ERROR;
     }
-    result = crypt(argv[1], argv[2]);
+    result = (char *)crypt(argv[1], argv[2]);
     Tcl_SetResult(interp, result, TCL_STATIC);
     return TCL_OK;
 }

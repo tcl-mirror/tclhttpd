@@ -191,18 +191,14 @@ AC_SUBST(SHLIB_CFLAGS)
 AC_SUBST(SHLIB_LDFLAGS)
 
 #--------------------------------------------------------------------
-# Look for the crypt function in the crypt library on Linux systems.
+# Find out where we should get the crypt() function
 #--------------------------------------------------------------------
 
-case "'uname -s'" in 
-    Linux)
-	AC_CHECK_LIB(crypt, crypt, CRYPT_LIB=-lcrypt)
-	;;
-    *)
-	CRYPT_LIB=
-	;;
-esac
+AC_CHECK_FUNC(crypt, , [
+    AC_CHECK_LIB(crypt, crypt, CRYPT_LIB=-lcrypt, CRYPT_OBJS=cryptLib.${OBJEXT})
+])
 
+AC_SUBST(CRYPT_OBJS)
 
 #--------------------------------------------------------------------
 # Set the default compiler switches based on the --enable-symbols 

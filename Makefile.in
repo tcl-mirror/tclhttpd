@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.5 2000/02/12 23:42:49 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.6 2000/02/13 00:03:24 wart Exp $
 
 # TEMPORARY:  Values for the dist target.
 
@@ -38,9 +38,14 @@ SOURCES = $(crypt_SOURCES)
 # most cases these object files will correspond to the source files
 # above.
 #
+# CRYPT_OBJS is the name of the object files needed to provide the
+# crypt() C function.  Most unix platforms already have it in a standard
+# library.  Windows doesn't, so we need to account for that possibility
+# here.
 #========================================================================
 
-crypt_OBJECTS =  crypt.$(OBJEXT) cryptLib.${OBJEXT}
+CRYPT_OBJS = @CRYPT_OBJS@
+crypt_OBJECTS =  crypt.$(OBJEXT) $(CRYPT_OBJS)
 OBJECTS = $(crypt_OBJECTS)
 
 #========================================================================
