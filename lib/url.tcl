@@ -59,77 +59,80 @@ proc Url_Dispatch {sock} {
     catch {after cancel $data(cancel)}
     set url $data(url)
 
-    # Do access control first
-
-    foreach hook $Url(accessHooks) {
-	set code [catch {eval $hook [list $sock $url]} result]
-	switch -- $result {
-	    ok		{ break }
-	    denied	{ return }
-	    skip	{ continue }
-	    default	{
-		if {$code} {
-puts stderr "$hook $result"
-		}
-	    }
-	}
-    }
-
-    # Dispatch to cached handler for the URL, if any
-
     CountName $url hit
-    if {(![info exists data(query)] || ([string length $data(query)] == 0)) &&
-	    ([Httpd_PostDataSize $sock] == 0) && [info exists UrlCache($url)]} {
-	
-	# Look aside into a command cache based on URLs.
-	# This is used to avoid processing long URLs, and to
-	# deal with redirects from one URL to another.
-	# If the URL is handled in a worker thread, then there
-	# will not be an entry in the UrlCache of this dispatch thread.
+    if {[catch {
 
-	Count UrlCacheHit
-	set code [catch { eval $UrlCache($url) {$sock} } error]
-	if {$code == 0} {
-	    return
+	# INLINE VERSION OF Url_PrefixMatch
+
+	if {![regexp ^($Url(prefixset))(.*) $url x prefix suffix] ||
+		([string length $suffix] && ![string match /* $suffix])} {
+	    # Fall back and assume it is under the root
+	    regexp ^(/)(.*) $url x prefix suffix
 	}
-	# Upon error, drop the command cache and fall through to
-	# common error handling
 
-	catch {Url_UnCache $sock}
-    } else {
-	set code [catch {
+	# END INLINE
 
-	    # Prefix match the URL to get a domain handler
-	    # Fast check on domain prefixes with regexp
-	    # Check that the suffix starts with /, otherwise the prefix
-	    # is not a complete component.  E.g., "/tcl" vs "/tclhttpd"
-	    # where /tcl is a domain prefix but /tclhttpd is a directory
-	    # in the / domain.
+	# Do access control before dispatch,
+	# but after prefix/suffix determination
 
-	    if {![regexp ^($Url(prefixset))(.*) $url x prefix suffix] ||
-		    ([string length $suffix] && ![string match /* $suffix])} {
-		# Fall back and assume it is under the root
-		regexp ^(/)(.*) $url x prefix suffix
+	set data(prefix) $prefix
+	set data(suffix) $suffix
+	foreach hook $Url(accessHooks) {
+	    switch -- [eval $hook [list $sock $url]] {
+		ok		{ break }
+		denied	{ return }
+		skip	{ continue }
 	    }
+	}
 
-	    # Invoke the URL domain handler either in this main thread
-	    # or in a worker thread
+	# Invoke the URL domain handler either in this main thread
+	# or in a worker thread
 
-	    if {$Url(thread,$prefix)} {
-		Count UrlToThread
-		Thread_Dispatch $sock \
-			[concat $Url(command,$prefix) [list $sock $suffix]]
-	    } else {
-		Count UrlEval
-		eval $Url(command,$prefix) [list $sock $suffix]
-	    }
-	} error]
-    }
-
-    if {$code != 0} {
+	if {$Url(thread,$prefix)} {
+	    Count UrlToThread
+	    Thread_Dispatch $sock \
+		    [concat $Url(command,$prefix) [list $sock $suffix]]
+	} else {
+	    Count UrlEval
+	    eval $Url(command,$prefix) [list $sock $suffix]
+	}
+    } error]} {
 	global errorInfo
 	global errorCode
 	Url_Unwind $sock $errorInfo $errorCode
+    }
+}
+
+# Url_PrefixMatch
+#	Match the domain prefix of a URL
+#
+# Arguments
+#	url	The input URL
+#	suffixVar	Output variable, the suffix
+#	prefixVar	Output variable, the prefix
+#
+# Results
+#	Fills in prefix and suffix result variables
+
+proc Url_PrefixMatch {url prefixVar suffixVar} {
+    global Url
+    upvar 1 $prefixVar prefix
+    upvar 1 $suffixVar suffix
+
+    # Prefix match the URL to get a domain handler
+    # Fast check on domain prefixes with regexp
+    # Check that the suffix starts with /, otherwise the prefix
+    # is not a complete component.  E.g., "/tcl" vs "/tclhttpd"
+    # where /tcl is a domain prefix but /tclhttpd is a directory
+    # in the / domain.
+
+    # IF YOU CHANGE THIS  - FIX in-line CODE IN URL_DISPATCH
+
+    if {![info exist Url(prefixset)] ||
+	    ![regexp ^($Url(prefixset))(.*) $url x prefix suffix] ||
+	    ([string length $suffix] && ![string match /* $suffix])} {
+	# Fall back and assume it is under the root
+	regexp ^(/)(.*) $url x prefix suffix
     }
 }
 
@@ -298,12 +301,12 @@ proc UrlSort {a b} {
 #	sock	The socket for the current connection.
 #
 # Side Effects:
-#	Caches the command used to handle the URL
+#	None - used to "Caches the command used to handle the URL"
 
 proc Url_Handle {cmd sock} {
-    upvar #0 Httpd$sock data
-    global UrlCache
-    set UrlCache($data(url)) $cmd
+#    upvar #0 Httpd$sock data
+#    global UrlCache
+#    set UrlCache($data(url)) $cmd
     eval $cmd [list $sock]
 }
 

@@ -8,9 +8,8 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded admin 1.0 [list source [file join $dir admin.tcl]]
+package ifneeded admin 2.0 [list source [file join $dir admin.tcl]]
 package ifneeded auth 1.0 [list source [file join $dir auth.tcl]]
-package ifneeded base64 1.0 [list source [file join $dir base64.tcl]]
 package ifneeded cgi 1.1 [list source [file join $dir cgi.tcl]]
 package ifneeded counter 1.0 [list source [file join $dir counter.tcl]]
 package ifneeded debug 1.0 [list source [file join $dir debug.tcl]]

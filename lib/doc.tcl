@@ -45,10 +45,10 @@ proc Doc_Root {{real {}}} {
 #			The default is true to handle long-running templates
 
 proc Doc_AddRoot {virtual directory {inThread 1}} {
-    # Run documents in a thread in case templates have 
-    # long-running code embedded in them.
-
+    global Doc
+    set Doc(root,$virtual) $directory
     Url_PrefixInstall $virtual [list DocDomain $virtual $directory] $inThread
+    Url_AccessInstall DocAccessHook
 }
 
 # Define the index file for a directory
@@ -157,9 +157,16 @@ proc Doc_Virtual {sock curfile virtual} {
 	}
 	return $homedir/$Doc(homedir)/[join [lrange $list 1 end] /]
     }
+
+    # Try to hook up the pathname under the appropriate document root
+
     if {[regexp ^/ $virtual]} {
-	set list [lrange [split $virtual /] 1 end]
-	return [eval {file join $Doc(root)} $list]
+	Url_PrefixMatch $virtual prefix suffix
+	if {[info exist Doc(root,$prefix)]} {
+	    return [file join $Doc(root,$prefix) $suffix]
+	} else {
+	    return [file join $Doc(root,/) [string trimleft $virtual /]]
+	}
     }
     return {}
 }
@@ -168,21 +175,70 @@ proc Doc_File {sock curfile npath} {
     return [file join [file dirname $curfile] $npath]
 }
 
+# DocAccessHook
+#
+#	Access handle for Doc domains.
+#	This looks for special files in the file system that
+#	determine access control.  This is registered via
+#	Url_AccessInstall
+#
+# Arguments:
+#	sock	Client connection
+#	url	The full URL. We realy need the prefix/suffix, which
+#		is stored for us in the connection state
+#
+# Results:
+#	"denied", in which case an authorization challenge or
+#	not found error has been returned.  Otherwise "skip"
+#	which means other access checkers could be run, but
+# 	most likely access will be granted.
+
+proc DocAccessHook {sock url} {
+    global Doc
+    upvar #0 Httpd$sock data
+
+    # Make sure the path doesn't sneak out via ..
+    # This turns the URL suffix into a list of pathname components
+
+    if {[catch {Url_PathCheck $data(suffix)} data(pathlist)]} {
+	Doc_NotFound $sock
+	return denied
+    }
+
+    # Figure out the directory corresponding to the domain, taking
+    # into account other document roots.
+
+    if {[info exist Doc(root,$data(prefix))]} {
+	set directory $Doc(root,$data(prefix))
+    } else {
+	set directory [file join $Doc(root,/) [string trimleft $data(prefix)]]
+    }
+
+    # Look for .htaccess and .tclaccess files along the path
+    # If you wanted to have a time-limited cache of these
+    # cookies you could save the cost of probing the file system
+    # for these files on each URL.
+
+    set cookie [Auth_Check $sock $directory $data(pathlist)]
+
+    # Finally, check access
+
+    if {![Auth_Verify $sock $cookie]} {
+	return denied
+    } else {
+	return skip
+    }
+}
+
 # Main handler for Doc domains (i.e. file systems)
 # This looks around for a file and, if found, uses DocHandle
-# to return the contents.  The call to DocHandle is cached
-# by Url_Handle for future accesses to this url.
+# to return the contents.
 
 proc DocDomain {virtual directory sock suffix} {
     global Doc
     upvar #0 Httpd$sock data
 
-    # Make sure the path doesn't sneak out via ..
-
-    if {[catch {Url_PathCheck $suffix} pathlist]} {
-	Doc_NotFound $sock
-	return
-    }
+    set pathlist $data(pathlist)
 
     # Check for personal home pages
 
@@ -196,22 +252,18 @@ proc DocDomain {virtual directory sock suffix} {
 	set pathlist [lrange $pathlist 1 end]
     }
 
-    # Look for .htaccess files along the path
-
-    set cookie [Auth_Check $sock $directory $pathlist]
-
     # Handle existing files
 
-    set path [eval {file join $directory} $pathlist]
+    set path [file join $directory $suffix]
     if {[file exists $path]} {
 	Incr Doc(hit,$data(url))
-	Url_Handle [list DocHandle $path $suffix $cookie] $sock
+	DocHandle $path $suffix $sock
 	return
     }
 
     # Try to find an alternate.
 
-    if {![DocFallback $path $suffix $cookie $sock]} {
+    if {![DocFallback $path $suffix $sock]} {
 	# Couldn't find anything.
 	# check for cgi script in the middle of the path
 	Cgi_Domain $virtual $directory $sock $suffix
@@ -221,7 +273,7 @@ proc DocDomain {virtual directory sock suffix} {
 # DocFallback does "content negotation" if a file isn't found
 # look around for files with different suffixes but the same root.
 
-proc DocFallback {path suffix cookie sock} {
+proc DocFallback {path suffix sock} {
     set root [file root $path]
     if {[string match */ $root]} {
 	# Input is something like /a/b/.xyz
@@ -248,12 +300,12 @@ proc DocFallback {path suffix cookie sock} {
 	# Another hack for templates.  If the .html is not found,
 	# and the .tml exists, ask for .html so the template is
 	# processed and cached as the .html file.
+
 	global Doc
 	if {[string compare $Doc(tmlSuffix) [file extension $npath]] == 0} {
-	    # More HACKs
-	    if {![Auth_Verify $sock $cookie]} {
-		return 1	;# appropriate response already generated
-	    }
+	    
+	    # Note - there used to be a call to Auth_Verify here, dunno why
+
 	    Doc_text/html [file root $npath].html $suffix $sock
 	    return 1
 	}
@@ -331,18 +383,15 @@ proc DocChoose {accept choices} {
 
 # Handle a document URL.  Dispatch to the mime type handler, if defined.
 
-proc DocHandle {path suffix cookie sock} {
+proc DocHandle {path suffix sock} {
     upvar #0 Httpd$sock data
-    if {![Auth_Verify $sock $cookie]} {
-	return	;# appropriate response already generated
-    }
     if {[file isdirectory $path]} {
 	if {[string length $data(url)] && ![regexp /$ $data(url)]} {
 	    # Insist on the trailing slash
 	    Httpd_RedirectDir $sock
 	    return
 	}
-	DocDirectory $path $suffix $cookie $sock
+	DocDirectory $path $suffix $sock
     } elseif {[file readable $path]} {
 	set cmd Doc_[Mtype $path]
 	if {![iscommand $cmd]} {
@@ -356,7 +405,7 @@ proc DocHandle {path suffix cookie sock} {
 	# the file's name changed.
 
 	Url_UnCache $sock
-	if {![DocFallback $path $suffix $cookie $sock]} {
+	if {![DocFallback $path $suffix $sock]} {
 	    Doc_NotFound $sock
 	}
     }
@@ -365,7 +414,7 @@ proc DocHandle {path suffix cookie sock} {
 # For directories, return the newest file that matches
 # the index file pattern.
 
-proc DocDirectory {path suffix cookie sock} {
+proc DocDirectory {path suffix sock} {
     upvar #0 Httpd$sock data
     global Doc tcl_platform
 
@@ -389,7 +438,7 @@ proc DocDirectory {path suffix cookie sock} {
 	    }
 	}
 	# Don't cache translation this to avoid latching onto the wrong file
-	return [DocHandle $newest $suffix $cookie $sock]
+	return [DocHandle $newest $suffix $sock]
     }
 
     Httpd_ReturnData $sock text/html [DirList $path $data(url)]

@@ -105,6 +105,9 @@ proc Auth_VerifyCallback {sock realm callback} {
 	Httpd_RequestAuth $sock Basic $realm
 	return 0
     } else {
+	global env
+	set env(REMOTE_USER) $user
+	set env(AUTH_TYPE) Basic
 	return 1
     }
 }
