@@ -26,7 +26,7 @@ UNIX:
 
 1) Test preconditions
 	tclsh8.3
-	package require tcllib 0.6
+	package require tcllib 0.7
 
 2) If you can do the above, then you should be able to run the
 server directly from this distribution directory without bothering

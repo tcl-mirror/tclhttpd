@@ -1,3 +1,12 @@
+2000-10-12  Brent Welch <welch@ajubasolutions.com>
+    
+	* lib/httpd.tcl: Added Httpd_ReadPostDataAsync that is
+	a thin layer over Httpd_GetPostDataAsync
+	* lib/url.tcl: Added the -readpost option to Url_PrefixInstall.
+	This option is actually *on* by default and it causes TclHttpd
+	to read all the post data using Httpd_GetPostDataAsync before
+	dispatching to the Url domain implementation.
+
 2000-10-09  Brent Welch <welch@ajubasolutions.com>
     
 	* lib/direct.tcl: Fixed parameter passing when there are multiple
