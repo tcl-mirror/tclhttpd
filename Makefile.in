@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.26.6.2 2002/09/03 22:44:55 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.26.6.3 2002/10/29 22:45:05 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -257,14 +257,20 @@ depend:
 # name from "exampleA" to your package's name.
 #========================================================================
 
+# NOTE - MAKE_LIB can't work here, because it wants to reference
+# tclhttpd_LIB_OBJECTS, but we need to make two extensions.
+# So, we directly jam in the MAKE_SHARED_LIB macro results, but
+# only the Unix variant.  These extensions don't apply to Windows anyway
+
 $(crypt_LIB_FILE): $(crypt_OBJECTS)
 	-rm -f $(crypt_LIB_FILE)
-	@MAKE_LIB@
+	${SHLIB_LD} -o $@ $(limit_OBJECTS) ${SHLIB_LDFLAGS} ${SHLIB_LD_LIBS}
+
 	$(RANLIB) $(crypt_LIB_FILE)
 
 $(limit_LIB_FILE): $(limit_OBJECTS)
 	-rm -f $(limit_LIB_FILE)
-	@MAKE_LIB@
+	${SHLIB_LD} -o $@ $(crypt_OBJECTS) ${SHLIB_LDFLAGS} ${SHLIB_LD_LIBS}
 	$(RANLIB) $(limit_LIB_FILE)
 
 #========================================================================

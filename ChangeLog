@@ -1,4 +1,9 @@
 2002-10-28  Brent Welch <welch@panasas.com>
+        * Makefile.in: MAKE_LIB doesn't work for building two different
+          extensions, so I fixed that.  The Makefile is now Unix-specific
+          for the limit and crypt .so files, which is OK.  These now build.
+
+2002-10-28  Brent Welch <welch@panasas.com>
         * bin/httpdthread.tcl: Fixed loading of custom code.
         * Bumped version to 3.4.3
 
