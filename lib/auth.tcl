@@ -67,17 +67,21 @@ proc Auth_Verify {sock cookie} {
     return $ok
 }
 
-# AuthVerifyTcl - 
-proc AuthVerifyTcl {sock file} {
+# Auth_VerifyCallback -- 
+#
+#	Check for a Basic authorization string, and use a callback
+#	to verify the password
+#
+# Arguments:
+#	sock		Handle on the client connection
+#	realm		Realm for basic authentication.  This appears
+#			in the password prompt from the browser.
+#	callback	Tcl command to check the password.  This gets
+#			as arguments the username and password.  It should
+#			return 1 or 0, 1 for success.
+
+proc Auth_VerifyCallback {sock realm callback} {
     upvar #0 Httpd$sock data
-
-
-    # The file contains definitions for the "realm" variable
-    # and the "callback" script value.
-
-    set realm Realm
-    set callback AuthNullCallback
-    catch {source $file}
 
     if ![info exists data(mime,authorization)] {
 	set ok 0
@@ -102,6 +106,34 @@ proc AuthVerifyTcl {sock file} {
 	return 1
     }
 }
+
+# AuthVerifyTcl --
+#
+#	"Tcl" verification uses a .tclaccess file that defines the
+#	realm and callback to use to check the password.
+#
+# Arguments:
+#	sock	Handle on the client connection
+#	file	Tcl source file that contains set commands for
+#		realm and callback
+#
+# Results:
+#	1 for success, 0 for access denied.
+
+proc AuthVerifyTcl {sock file} {
+    upvar #0 Httpd$sock data
+
+
+    # The file contains definitions for the "realm" variable
+    # and the "callback" script value.
+
+    set realm Realm
+    set callback AuthNullCallback
+    catch {source $file}
+
+    return [Auth_VerifyCallback $sock $realm $callback]
+}
+
 proc AuthNullCallback {sock realm user pass} {
     upvar #0 Httpd$sock data
     global auth
