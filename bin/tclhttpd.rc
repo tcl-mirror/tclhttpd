@@ -2,6 +2,21 @@
 #
 # This is the default configuration file for TclHttpd, the Tcl Web Server
 
+# The Config array is set from the command line options or
+# from defaults defined in httpd
+# You can set them here, but then they smash any command-line values
+
+# Config Array
+# Element	Default
+# host		[info hostname]
+# port		8015
+# debug		0
+# docRoot	[file join $home htdocs]
+# ipaddr	{}
+# webmaster	webmaster@[info hostname]
+# uid		50
+# gid		100
+
 # These packages are required for "normal" web servers
 
 package require doc		;# Basic file URLS
@@ -34,7 +49,7 @@ if {[catch {
 
 # For information about these calls, see htdocs/reference.html
 
-Doc_Root		$docRoot
+Doc_Root		$Config(docRoot)
 Doc_IndexFile		index.{tml,html,shtml,thtml,htm,subst}
 Doc_PublicHtml		public_html
 Cgi_Directory		/cgi-bin
@@ -44,16 +59,16 @@ Mail_Url		/mail
 Admin_Url		/admin
 Doc_TemplateInterp	{}
 Doc_CheckTemplates	1
-Doc_TemplateLibrary	[file join $docRoot libtml]
+Doc_TemplateLibrary	[file join $Config(docRoot) libtml]
 Doc_ErrorPage		/error.html
 Doc_NotFoundPage	/notfound.html
-Doc_Webmaster		$webmaster
+Doc_Webmaster		$Config(webmaster)
 if {[catch {
     Auth_AccessFile	.htaccess       ;# Enable Basic Auth
 } err]} {
     puts "No Basic Authentication support: $err"
 }
 
-Log_SetFile		/tmp/log${port}_
+Log_SetFile		/tmp/log$Config(port)_
 Log_FlushMinutes	1
 
