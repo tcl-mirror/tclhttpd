@@ -4,4 +4,11 @@
 
 [html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database &gt; Bug Details}]
 
+
+<ul>
+[html::foreach {name value} [bugdb::bug-details [ncgi::value bug] ] {
+    <li>$name: $value</li>
+}]
+</ul>
+
 [html-strict::foot]
