@@ -8,6 +8,9 @@
 	the Httpd_Suspend funciton.
 	* certs/README.ssl:  Added documentation about creating self-signed
 	certificates.
+	* lib/version.tcl: Tweaked date stamp in version
+	* bin/httpdthread.tcl: Added package require httpd::version to
+	fix htdocs/templates/index.tml example
 	* Applied tclhttpd-3-1-0 CVS tag.
 
 2000-08-02  Brent Welch <welch@scriptics.com>
