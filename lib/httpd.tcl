@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.49 2000/08/02 07:06:52 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.50 2000/08/02 07:14:47 welch Exp $
 
 package provide httpd 1.3
 
@@ -29,9 +29,9 @@ package provide httpd 1.3
 # that confused the use of tcl_findLibrary because by loading
 # just version.tcl Tcl thought we had the whole package.  So
 # we split it out, but require it here so users of httpd don't
-# have to worry about httpd_version
+# have to worry about httpd::version
 
-package require httpd_version
+package require httpd::version
 
 # initialize all the global data
 
