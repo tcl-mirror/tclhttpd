@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.58 2004/10/28 20:49:26 wart Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.59 2004/10/28 22:10:47 wart Exp $
 #
 # \
 exec tclsh "$0" ${1+"$@"}
@@ -345,8 +345,10 @@ if {$Config(daemon)} {
         }
     } else {
         Stderr "Could not fork into the background:"
-        Stderr "    One of either Expect or Tclx must be available."
-        Stderr "    Running in foreground instead."
+        Stderr "    Either install one of Expect or Tclx, or try running"
+        Stderr "    tclhttpd in non-daemon mode."
+        Httpd_Shutdown
+        exit 1
     }
 }
     
