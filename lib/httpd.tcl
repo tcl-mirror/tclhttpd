@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.56 2000/09/22 05:39:28 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.57 2000/09/22 21:15:19 welch Exp $
 
 package provide httpd 1.5
 
@@ -964,10 +964,10 @@ proc HttpdDoCallback {sock {errmsg {}}} {
 # 	Outputs header lines
 
 proc HttpdRespondHeader {sock type close size {code 200}} {
-    global Httpd Httpd_Errors
+    global Httpd
     upvar #0 Httpd$sock data
 
-    append reply "HTTP/$data(version) $code $Httpd_Errors($code)" \n
+    append reply "HTTP/$data(version) $code [HttpdErrorString $code]" \n
     append reply "Date: [HttpdDate [clock seconds]]" \n
     append reply "Server: $Httpd(server)\n"
 
@@ -981,6 +981,28 @@ proc HttpdRespondHeader {sock type close size {code 200}} {
 	append reply "Content-Length: $size" \n
     }
     puts -nonewline $sock $reply
+}
+
+# HttpdErrorString --
+#
+#	Map from an error code to a meaningful string.
+#
+# Arguments:
+#	code	An HTTP error code, e.g., 200 or 404
+#
+# Results:
+#	An error string, e.g. "Data follows" or "File Not Found"
+#
+# Side Effects:
+# 	None
+
+proc HttpdErrorString { code } {
+    global Httpd_Errors
+    if {[info exist Httpd_Errors($code)]} {
+	return $Httpd_Errors($code)
+    } else {
+	return "Error $code"
+    }
 }
 
 # Httpd_SetCookie
@@ -1219,11 +1241,11 @@ proc Httpd_Error {sock code {detail ""}} {
     }
 
     upvar #0 Httpd$sock data
-    global Httpd Httpd_Errors Httpd_ErrorFormat
+    global Httpd Httpd_ErrorFormat
 
     Count errors
     append data(url) ""
-    set message [format $Httpd_ErrorFormat $code $Httpd_Errors($code)  $data(url)]
+    set message [format $Httpd_ErrorFormat $code [HttpdErrorString $code] $data(url)]
     append message <br>$detail
     if {$code == 500} {
 	append message "<h2>Tcl Call Trace</h2>"
