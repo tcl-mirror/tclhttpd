@@ -11,6 +11,10 @@
 # bgerror is called instead of the command callback to fcopy.  This
 # causes file descriptor leaks, so don't use 8.0b1 for real servers.
 #
+# For async operation, such as long-lasting server-side operations use
+# Httpd_Suspend.
+#
+# Matt Newman (c) 1999 Novadigm Inc.
 # Stephen Uhler / Brent Welch (c) 1997 Sun Microsystems
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -55,6 +59,9 @@ array set Httpd_EnvMap {
     QUERY_STRING	query
     REQUEST_METHOD	proto
     HTTP_COOKIE         mime,cookie
+    HTTP_FORWARDED      mime,forwarded
+    HTTP_HOST           mime,host
+    HTTP_PROXY_CONNECTION mime,proxy-connection
 }
 
 # Httpd_Init
@@ -103,6 +110,21 @@ proc Httpd_Init {} {
     # We always have the counter module and mimetyes
     Counter_Init
     Mtype_ReadTypes [file join $Httpd(library) mime.types]
+
+    # SSL Support - These are just the run-time defaults
+    set Httpd(SSL_REQUEST) 0    ;# don't request a cert
+    set Httpd(SSL_REQUIRE) 0    ;# don't require a cert
+    # File containing Server Certificate
+    set Httpd(SSL_CERTFILE) $Httpd(library)/server.pem
+    set Httpd(SSL_KEYFILE) ""
+    # Dir/File containing CA's
+    set Httpd(SSL_CADIR) $Httpd(library)
+    set Httpd(SSL_CAFILE) server.pem
+    # For SSL2/3 + RSA you need RSA-enabled versions of OpenSSL
+    set Httpd(USE_SSL2) 1
+    set Httpd(USE_SSL3) 1
+    set Httpd(USE_TLS1) 0
+    set Httpd(SSL_CIPHERS) ""        ;# use defaults
 }
 
 # Httpd_Server
@@ -117,8 +139,10 @@ proc Httpd_Init {} {
 #
 # This sets up a callback to HttpdAccept for new connections.
 
-proc Httpd_Server {{port 80} {name {}} {ipaddr {}}} {
+proc Httpd_Server {{port 80} {name {}} {ipaddr {}} {type http}} {
     global Httpd
+
+	puts stdout "Httpd_Server $port $name $ipaddr $type"
 
     if {![info exists Httpd(initialized)]} {
 	Httpd_Init
@@ -130,14 +154,32 @@ proc Httpd_Server {{port 80} {name {}} {ipaddr {}}} {
     if {[string length $name] == 0} {
 	set Httpd(name) [info hostname]
     }
-    set cmd [list socket -server HttpdAccept]
+    if {$type == "https"} {
+	    package require tls
+        set cmd [list tls::socket -server [list HttpdAccept [list $type $name $port]]]
+        lappend cmd -request $Httpd(SSL_REQUEST) \
+	    -require $Httpd(SSL_REQUEST) \
+	    -ssl2 $Httpd(USE_SSL2) \
+	    -ssl3 $Httpd(USE_SSL3) \
+	    -tls1 $Httpd(USE_TLS1) \
+	    -cipher $Httpd(SSL_CIPHERS) \
+	    -cadir $Httpd(SSL_CADIR) \
+	    -cafile $Httpd(SSL_CAFILE) \
+	    -certfile $Httpd(SSL_CERTFILE) \
+	    -keyfile $Httpd(SSL_KEYFILE)
+    } else {
+        set cmd [list socket -server [list HttpdAccept \
+			[list $type $name $port]]]
+    }
     if {[string length $ipaddr] != 0} {
-	lappend cmd -myaddr $ipaddr
+        lappend cmd -myaddr $ipaddr
     }
     lappend cmd $port
     if {[catch $cmd Httpd(listen)]} {
-	return -code error "$Httpd(name):$port $Httpd(listen)"
+        return -code error "$Httpd(name):$port $Httpd(listen)\ncmd=$cmd"
     }
+	puts stdout "cmd: $cmd"
+    Counter_Reset accepts
 }
 
 # Kill the server gracefully
@@ -170,13 +212,21 @@ proc Httpd_RegisterShutdown {cmd} {
 # kept in Httpd$sock, (e.g., Httpdsock6), and upvar is used to
 # create a local "data" alias for this global array.
 
-proc HttpdAccept {sock ipaddr port} {
+proc HttpdAccept {self sock ipaddr port} {
     global Httpd
+	puts stdout "httpdAccept $self $sock $ipaddr $port"
     upvar #0 Httpd$sock data
+
 
     Count accepts
     Count sockets
+    set data(self) $self
     set data(ipaddr) $ipaddr
+    if {[lindex $self 0] == "https"} {
+	set data(ssl) 1
+	tls::handshake $sock
+	set data(cert) [tls::status $sock]
+    }
     HttpdReset $sock $Httpd(maxused)
 }
 
@@ -196,11 +246,18 @@ proc HttpdReset {sock {left {}}} {
     } else {
 	set left [incr data(left) -1]
     }
-    flush $sock
+    if {[catch {
+	flush $sock
+    } err]} {
+	Httpd_SockClose $sock 1 $err
+	return
+    }
+
     set ipaddr $data(ipaddr)
+    set self $data(self)
     unset data
     array set data [list state start linemode 1 version 0 \
-	    left $left ipaddr $ipaddr]
+	    left $left ipaddr $ipaddr self $self]
     # Close the socket if it is not reused within a timeout
     set data(cancel) [after $Httpd(timeout1) \
 	[list Httpd_SockClose $sock 1 ""]]
@@ -244,6 +301,8 @@ proc HttpdRead {sock} {
 	    1,start	{
 		if {[regexp {^([^ ]+) +([^?]+)\??([^ ]*) +HTTP/(1.[01])} \
 			$line x data(proto) data(url) data(query) data(version)]} {
+
+                    if {0} {
 		    # Strip leading http://server.
 		    # We check and discard proxy requests here, too.
 
@@ -255,6 +314,7 @@ proc HttpdRead {sock} {
 			    return
 			}
 			regsub {^http://([^/]+)} $data(url) {} data(url)
+		    }
 		    }
 		    set data(state) mime
 		    set data(line) $line
@@ -311,10 +371,16 @@ proc HttpdRead {sock} {
 			    Httpd_Error $sock 419 $data(mime,expect)
 			}
 		    }
-		    fconfigure $sock  -translation {binary crlf}
+		    if {$data(count) == 0} {
+			# reenter
+			return
+                    } else {
+		        fconfigure $sock  -translation {binary crlf}
+		    }
 		} elseif {$data(proto) != "POST"}  {
 		    # Dispatch upon blank line after headers
-		    fileevent $sock readable {}
+		    # fileevent $sock readable {}
+		    set ::env(HTTP_CHANNEL) $sock
 		    Url_Dispatch $sock
 	        } else {
 		    Httpd_Error $sock 411 "Confusing mime headers"
@@ -477,6 +543,14 @@ proc HttpdClose {sock} {
 	    Count connclose
 	    set close 1
 	}
+    } elseif {[info exists data(mime,proxy-connection)]} {
+	if {[string tolower $data(mime,proxy-connection)] == "keep-alive"} {
+	    Count keepalive
+	    set close 0
+	} else {
+	    Count connclose
+	    set close 1
+	}
     } elseif {$data(version) >= 1.1} {
 	Count http1.1
     	set close 0
@@ -573,17 +647,22 @@ proc HttpdSetCookie {sock} {
 # Side Effects:
 #	Sends the file contents back as the reply.
 
-proc Httpd_ReturnFile {sock type path} {
+proc Httpd_ReturnFile {sock type path {offset 0}} {
     global Httpd
     upvar #0 Httpd$sock data
 
     if {[Thread_Respond $sock \
-	    [list Httpd_ReturnFile $sock $type $path]]} {
+	    [list Httpd_ReturnFile $sock $type $path $offset]]} {
 	return
     }
 
     Count urlreply
     set data(file_size) [file size $path]
+    # Some files have a duality, when the client sees X bytes but the
+    # file is really X + n bytes (the first n bytes reserved for server
+    # side accounting information.
+    incr data(file_size) -$offset
+
     set close [HttpdClose $sock]
     HttpdRespondHeader $sock $type $close $data(file_size) 200
     HttpdSetCookie $sock
@@ -592,8 +671,12 @@ proc Httpd_ReturnFile {sock type path} {
     if {$data(proto) != "HEAD"} {
 	set in [open $path]		;# checking should already be done
 	fconfigure $in -translation binary -blocking 1
+	if {$offset != 0} {
+	    seek $in $offset
+	}
 	fconfigure $sock -translation binary -blocking $Httpd(sockblock)
 	set data(infile) $in
+	Httpd_Suspend $sock 0
 	if {$Httpd(fcopy)} {
 	    fcopy $in $sock -command [list HttpdCopyDone $in $sock $close]
 	} else {
@@ -618,17 +701,19 @@ proc Httpd_ReturnFile {sock type path} {
 # Side Effects:
 #	Send the data down the socket
 
-proc Httpd_ReturnData {sock type content {code 200}} {
+proc Httpd_ReturnData {sock type content {code 200} {close 0}} {
     global Httpd Httpd_Errors
     upvar #0 Httpd$sock data
 
     if {[Thread_Respond $sock \
-	    [list Httpd_ReturnData $sock $type $content $code]]} {
+	    [list Httpd_ReturnData $sock $type $content $code $close]]} {
 	return
     }
 
     Count urlreply
-    set close [HttpdClose $sock]
+    if {$close == 0} {
+    	set close [HttpdClose $sock]
+    }
     HttpdRespondHeader $sock $type $close [string length $content] $code
     HttpdSetCookie $sock
     puts $sock ""
@@ -803,17 +888,31 @@ proc Httpd_Redirect {newurl sock} {
 
 proc Httpd_RedirectSelf {newurl sock} {
     global Httpd
-    Httpd_Redirect [Httpd_SelfUrl $newurl] $sock
+    # Httpd_Redirect [Httpd_SelfUrl $newurl] $sock
+    Httpd_Redirect $newurl $sock
     return $newurl
 }
 
 # Create an absolute URL for this server
 
-proc Httpd_SelfUrl {url} {
-    global Httpd
-    set newurl http://$Httpd(name)
-    if {$Httpd(port) != 80} {
-	append newurl :$Httpd(port)
+proc Httpd_SelfUrl {url {sock ""}} {
+    global Httpd env
+    if {$sock == ""} {
+	set sock $env(HTTP_CHANNEL)
+    }
+    upvar #0 Httpd$sock data
+
+    set type [lindex $data(self) 0]
+    set name [lindex $data(self) 1]
+    set port [lindex $data(self) 2]
+    if {[info exists data(mime,host)]} {
+	# use in preference to our "true" name
+	# the client might not have a DNS entry for use
+	set name $data(mime,host)
+    }
+    set newurl $type://$name
+    if {$port != 80} {
+	append newurl :$port
     }
     append newurl $url
 }
@@ -824,11 +923,12 @@ proc Httpd_SelfUrl {url} {
 proc Httpd_RedirectDir {sock} {
     global Httpd
     upvar #0 Httpd$sock data
-    set url http://$Httpd(name)
-    if {$Httpd(port) != 80} {
-	append url :$Httpd(port)
-    }
-    Httpd_Redirect $url$data(url)/ $sock
+    # set url http://$Httpd(name)
+    # if {$Httpd(port) != 80} {
+    # 	append url :$Httpd(port)
+    #    }
+    # Httpd_Redirect $url$data(url)/ $sock
+    Httpd_Redirect $data(url)/ $sock
 }
 
 set HttpdAuthorizationFormat {
@@ -935,3 +1035,74 @@ proc HttpdCookieLog {sock what} {
 	catch { puts $Httpd(cookie_log) $result ; flush $Httpd(cookie_log)}
     }
 }
+
+# Suspend Wire Callback - for async transactions
+# Use HttpdReset once you are back in business
+proc Httpd_Suspend {sock {timeout ""}} {
+    global Httpd
+    upvar #0 Httpd$sock data
+
+    fileevent $sock readable {}
+    fileevent $sock writable {}
+
+    if {[info exists data(cancel)]} {
+	after cancel $data(cancel)
+    }
+    if {$timeout == ""} {
+	set timeout $Httpd(timeout2)
+    }
+    if {$timeout != 0} {
+	set data(cancel) [after $timeout [list HttpdCancel $sock]]
+    }
+}
+
+#
+# Pair two fd's - typically for tunnelling
+# Close both if either one closes (or gets an error)
+#
+proc Httpd_Pair {sock fd} {
+    global Httpd
+    upvar #0 Httpd$sock data
+
+    syslog debug "HTTP: Pairing $sock and $fd"
+
+    fileevent $sock readable {}
+    fileevent $sock writable {}
+
+    if {[info exists data(cancel)]} {
+	after cancel $data(cancel)
+	unset data(cancel)
+    }
+    fconfigure $sock -translation binary -blocking 0
+    fconfigure $fd -translation binary -blocking 0
+
+    fileevent $sock readable [list HttpdReflect $sock $fd]
+    fileevent $fd readable [list HttpdReflect $fd $sock]
+}
+
+proc HttpdReflect {in out} {
+    global Httpd
+    if {[catch {
+	set buf [read $in $Httpd(bufsize)]
+	puts -nonewline $out $buf
+	flush $out
+	set buflen [string length $buf]
+	if {$buflen > 0} {
+	    syslog debug "Tunnel: $in -> $out ($buflen bytes)" 
+	}
+    } oops]} {
+	Log $in Tunnel "Error: $oops"
+    } elseif {![eof $in]} {
+	return 1
+    } else {
+	syslog debug "Tunnel: $in EOF"
+    }
+    fileevent $in readable {}
+    fileevent $out readable {}
+    catch {flush $in}
+    catch {flush $out}
+    catch {close $in}
+    catch {close $out}
+    return 0
+}
+
