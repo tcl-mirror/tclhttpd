@@ -1,3 +1,12 @@
+2004-06-18 Brent Welch <welch@panasas.com>
+        * bin/httpd.tcl: Fixed stacktrace caused by -? command line arg
+            Added "wm withdraw ."  if Config(gui) is false
+            Removed "package require md5 1"
+        * lib/md5hex.tcl: new file to provide md5hex shim function
+        * lib/digest.tcl, lib/session.tcl: these now
+            package require httpd::md5hex
+        * lib/version.tcl: changed version to "3.5.2 CVS"
+
 2004-06-15 Brent Welch <welch@panasas.com>
         * lib/digest.tcl: Added "package require md5 1"
         * lib/utils.tcl: Removed "package present md5"

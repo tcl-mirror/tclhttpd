@@ -28,6 +28,7 @@ package ifneeded httpd 1.7 "
 	package ifneeded httpd::log 1.1 \[list source \[file join [list $dir] log.tcl\]\]
 	package ifneeded httpd::logstd 1.0 \[list source \[file join [list $dir] logstd.tcl\]\]
 	package ifneeded httpd::mail 1.0 \[list source \[file join [list $dir] mail.tcl\]\]
+	package ifneeded httpd::md5hex 1.0 \[list source \[file join [list $dir] md5hex.tcl\]\]
 	package ifneeded httpd::mtype 1.1 \[list source \[file join [list $dir] mtype.tcl\]\]
 	package ifneeded httpd::opentrace 1.0 \[list source \[file join [list $dir] open.tcl\]\]
 	package ifneeded httpd::passcheck 1.0 \[list source \[file join [list $dir] passcheck.tcl\]\]

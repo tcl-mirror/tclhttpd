@@ -40,7 +40,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.11 2004/05/27 01:25:19 coldstore Exp $
+# RCS: @(#) $Id: session.tcl,v 1.12 2004/06/18 16:03:42 welch Exp $
 
 package provide httpd::session 1.0
 
@@ -64,7 +64,7 @@ if {![info exists Session(dir)]} {
 # if an MD5 package is available, we use it to make
 # an unforgeable session ID, otherwise default to 
 # the old 4-digit session ID
-if {($Session(short) == 1) || [catch {package require md5}]} {
+if {($Session(short) == 1) || [catch {package require httpd::md5hex}]} {
     # we have no usable md5 or have elected short session IDs
     proc SessionGenId {} {
 	return [randomx]

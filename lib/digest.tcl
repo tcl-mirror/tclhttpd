@@ -11,24 +11,10 @@
 # Copyright 2004 Colin McCormack.  colin@chinix.com
 # Licensed on terms identical to tclhttpd's license.
 
-package provide httpd::digest 1.0
-
 package require base64
+package require httpd::md5hex
 
-# Tcllib 1.6 has inconsistencies with md5 1.4.3 and 2.0.0,
-# and requiring 1.0 cures later conflicts with 2.0
-package require md5 1
-
-# If the above issue is sorted out, then
-# we can run with whatever version is available
-# by making an aliased wrapper
-if {[package vcompare [package present md5] 2.0] > -1} {
-    # we have md5 v2 - it needs to be told to return hex
-    interp alias {} md5hex {} ::md5::md5 --hex --
-} else {
-    # we have md5 v1 - it returns hex anyway
-    interp alias {} md5hex {} ::md5::md5
-}
+package provide httpd::digest 1.0
 
 # generate private key
 if {[catch {package require Random}]} {

@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.55 2004/05/19 05:44:28 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.56 2004/06/18 16:03:42 welch Exp $
 #
 # \
 exec tclsh "$0" ${1+"$@"}
@@ -85,11 +85,8 @@ if {![info exist Config(lib)]} {
 set auto_path [concat [list $Config(lib)] $auto_path]
 
 # Search around for the Standard Tcl Library
-# We used to require "tcllib", but that now causes complaints
-# Tcllib 1.6 has inconsistencies with md5 1.4.3 and 2.0.0,
-# and requiring 1.0 cures later conflicts with 2.0
 
-if {![catch {package require md5 1}]} {
+if {![catch {package require ncgi}]} {
     # Already available in environment
 } elseif {[file exist [file join $home ../tcllib]]} {
     lappend auto_path [file join $home ../tcllib]
@@ -192,9 +189,13 @@ set CommandLineOptions [list \
         [list gui.arg           [cget gui]      {flag for launching the user interface}] \
         [list mail.arg           [cget MailServer]      {Mail Servers for sending email from tclhttpd}] \
     ]
-array set Config [cmdline::getoptions argv $CommandLineOptions \
+if {[catch {
+  array set Config [cmdline::getoptions argv $CommandLineOptions \
     "usage: httpd.tcl options:"]
-
+} err]} {
+  Stderr $err
+  exit 1
+}
 if {[string length $Config(library)]} {
     lappend auto_path $Config(library)
 }
@@ -330,9 +331,13 @@ Log_Flush
 
 # Start up the user interface and event loop.
 
-if {[info exists tk_version] && $Config(gui)} {
+if {[info exists tk_version]} {
+  if {$Config(gui)} {
     package require httpd::srvui
     SrvUI_Init "Tcl HTTPD $Httpd(version)"
+  } else {
+    wm withdraw .
+  }
 }
 Stderr $startup
 if {$Config(debug)} {
