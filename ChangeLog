@@ -1,3 +1,14 @@
+2000-04-24  Brent Welch <welch@scriptics.com>
+
+	* configure.in: Fixed laundering of crypt and limit version numbers
+	on windows, where of course the macro to use is NODOT_VERSION
+	as opposed to WIN_VERSION...
+	* bin/httpd.tcl: Fixed -debug 1 starup under Wish to open the console.
+	* lib/httpd.tcl: Fixed bug in closing keep-alive sockets that was
+	introduced in the 4/21 putback.
+	* lib/status.tcl: Fixed doc hit display
+	* lib/srvui.tcl: Fixed home page counter
+
 2000-04-21  Brent Welch <welch@scriptics.com>
 
 	* lib/httpd.tcl: The server now drains the socket if the Domain
@@ -12,7 +23,7 @@
 	PARTS LIST ALERT.  This affects the libcrypt.1.0.so, liblimit.1.0.so
 	and the directories lib/crypt1.0 and lib/limit1.0
 	* pkgIndex.tcl.in: Removed incorrect hardwired version number.
-	* bin/httpd.tcl: Added Httpd_Name and Httpd_Protocol to go with the
+	* lib/httpd.tcl: Added Httpd_Name and Httpd_Protocol to go with the
 	existing Httpd_Port that return the server name, protocol (http or
 	https), and the port associated with a particular connection.
 	* htdocs/forms: General clean up of the CGI forms here.  Added

@@ -38,7 +38,7 @@ CRYPT_VERSION="1.0"
 WIN_CRYPT_VERSION=`echo ${CRYPT_VERSION} | sed -e 's/\.//g'`
 LIMIT_PACKAGE=limit
 LIMIT_VERSION="1.0"
-WIN_LIMIT_VERSION=`echo ${CRYPT_VERSION} | sed -e 's/\.//g'`
+WIN_LIMIT_VERSION=`echo ${LIMIT_VERSION} | sed -e 's/\.//g'`
 
 AC_ARG_WITH(serverroot, [ --with-serverroot=DIR         Location of where to install the server document tree], SERVER_ROOT=${withval}, SERVER_ROOT='$(prefix)/$(PACKAGE)')
 
@@ -312,8 +312,8 @@ AC_SUBST(SHARED_BUILD)
 
 # Hack to map from the TclHttpd version number that got automatically
 # sucked up by the SHARED_LIB_SUFFIX macro
-crypt_LIB_FILE=`echo $crypt_LIB_FILE | sed -e "s/$VERSION/$CRYPT_VERSION/" | sed -e "s/$WIN_VERSION/$WIN_CRYPT_VERSION/"`
-limit_LIB_FILE=`echo $limit_LIB_FILE | sed -e "s/$VERSION/$LIMIT_VERSION/" | sed -e "s/$WIN_VERSION/$WIN_LIMIT_VERSION/"`
+crypt_LIB_FILE=`echo $crypt_LIB_FILE | sed -e "s/$VERSION/$CRYPT_VERSION/" | sed -e "s/$NODOT_VERSION/$WIN_CRYPT_VERSION/"`
+limit_LIB_FILE=`echo $limit_LIB_FILE | sed -e "s/$VERSION/$LIMIT_VERSION/" | sed -e "s/$NODOT_VERSION/$WIN_LIMIT_VERSION/"`
 AC_SUBST(limit_LIB_FILE)
 AC_SUBST(crypt_LIB_FILE)
 AC_SUBST(SHLIB_LD_LIBS)
