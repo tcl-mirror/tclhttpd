@@ -1,5 +1,11 @@
 2002-09-03  Brent Welch <welch@panasas.com>
         * (In the tclhttpd-3-4-rel branch).
+        * lib/dirlist.tcl: Fixing bug where a ../* in the dirlist form
+          could leak filenames (but not contents) outside the URL tree.
+        * htdocs/.tml: plugged silly memory leak (lappend to unused var)
+
+2002-09-03  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch).
         * bin/httpdthread.tcl: Fixed custom code loader to skip pkgIndex.tcl
         files.
         * htdocs/index.html: Fixed a few errors pointed out by Larry Virden
