@@ -3,8 +3,23 @@
 
 # Fetch a document many times, simultaneously
 
+switch $tcl_platform(platform) {
+    unix {
+	set null_path /dev/null
+    }
+    windows {
+	set null_path NUL
+    }
+}
+puts "Calibrating clock clicks"
+set start [clock clicks]
+after 2000
+set end [clock clicks]
+set rate [expr {($end - $start) / 2.0}]
+puts $rate
+
 proc Spray {server port count args} {
-    global max finish done start total null
+    global max finish done start total null null_path
     set max $count
     set done 0
     set total 0
@@ -23,7 +38,7 @@ proc Spray {server port count args} {
     	puts $s "Accept: */*"
 	puts $s ""
 	flush $s
-	set null [open /dev/null w]
+	set null [open $null_path w]
 	if {[info commands fcopy] == "fcopy"} {
 	    fcopy $s $null -command [list CopyDone $s $null]
 	} else {
@@ -35,12 +50,13 @@ proc Spray {server port count args} {
 }
 
 proc Report {max} {
-    global start total
-    set us [expr { [clock clicks] - $start}]
-    puts "[expr $us/1000]ms $total bytes $max fetches"
-    puts "[expr $us/$max/1000.0] ms/fetch"
-    puts "[expr $total/($us/1000000.0)] bytes/sec"
-    puts "[expr $max/($us/1000000.0)] fetches/sec"
+    global start total rate
+    set sec [expr {(([clock clicks] - $start) / $rate)}]
+    set msec [expr {$sec * 1000.}]
+    puts "$sec sec $total bytes $max fetches"
+    puts "[expr $msec/$max] ms/fetch"
+    puts "[expr $total/$sec] bytes/sec"
+    puts "[expr $max/$sec] fetches/sec"
     puts "[expr $total/$max] bytes/fetch"
 }
 # file-event handler
@@ -65,7 +81,7 @@ proc CopyDone {s null {bytes 0} {error {}}} {
 }
 
 proc Iterate {server port count args} {
-    global max finish done start total
+    global max finish done start total null_path
     set countOrig $count
     set total 0
     puts "Starting $count fetches"
@@ -85,7 +101,7 @@ proc Iterate {server port count args} {
     	puts $s "Accept: */*"
 	puts $s ""
 	flush $s
-	set null [open /dev/null w]
+	set null [open $null_path w]
 	if {[info commands fcopy] == "fcopy"} {
 	    fcopy $s $null -command [list CopyDone $s $null]
 	} else {
