@@ -6,9 +6,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: mtype.tcl,v 1.4 2000/08/02 07:06:53 welch Exp $
+# RCS: @(#) $Id: mtype.tcl,v 1.4.6.1 2002/08/28 02:43:06 welch Exp $
 
-package provide httpd::mtype 1.0
+package provide httpd::mtype 1.1
 
 # Convert the file suffix into a mime type
 
@@ -29,7 +29,6 @@ proc Mtype {path} {
 proc Mtype_ReadTypes {file} {
     global MimeType
 
-    catch {unset MimeType}
     array set MimeType {
 	{}	text/plain
 	.txt	text/plain
@@ -65,3 +64,16 @@ proc Mtype_ReadTypes {file} {
     close $in
 }
 
+proc Mtype_Add {suffix type} {
+    global MimeType
+
+    set suffix [string trimleft $suffix .]
+    set MimeType([string tolower .$suffix]) $type
+}
+
+proc Mtype_Reset {} {
+    global MimeType
+    if {[info exist MimeType]} {
+        unset MimeType
+    }
+}
