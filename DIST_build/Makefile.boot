@@ -8,7 +8,7 @@ TCL_VERSION=8.3.4
 TCL = tcl$(TCL_VERSION)
 TK = tk$(TCL_VERSION)
 THREAD = thread2.4
-TCLLIB = tcllib1.3
+TCLLIB = tcllib-1.3
 HTTPD = tclhttpd3.4
 
 # Edit MODULES if you don't want to build something.
@@ -16,7 +16,7 @@ HTTPD = tclhttpd3.4
 MODULES = $(THREAD) $(TCLLIB) $(HTTPD)
 ALL_MODULES = $(TCL) $(MODULES)
 
-all: config make install
+all: config make-tcl make-modules install
 
 # PREFIX - this defines the root of the installation directory
 # EXEC_PREFIX - typically a sub-directory of PREFIX used to
