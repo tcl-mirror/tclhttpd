@@ -61,8 +61,14 @@ Crypt_Cmd(dummy, interp, argc, argv)
 	return TCL_ERROR;
     }
     result = (char *)crypt(argv[1], argv[2]);
-    Tcl_SetResult(interp, result, TCL_STATIC);
-    return TCL_OK;
+    if (result == NULL) {
+	/* an error has occurred */
+	Tcl_SetResult(interp, "crypt error", TCL_STATIC);
+	return TCL_ERROR;
+    } else {
+	Tcl_SetResult(interp, result, TCL_STATIC);
+	return TCL_OK;
+    }
 }
 
 /*
