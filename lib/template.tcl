@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: template.tcl,v 1.14 2004/06/13 09:50:13 coldstore Exp $
+# RCS: @(#) $Id: template.tcl,v 1.15 2004/06/13 15:05:11 coldstore Exp $
 
 package provide httpd::template 1.0
 
@@ -408,7 +408,7 @@ proc Template_Try {sock path prefix suffix} {
     if {![file exists $template]} {
 	# special case, x.tml generates x.html
 	set root [file root $path]
-	set ext .html
+	set ext $Template(htmlExt)
 	set template ${root}$Template(tmlExt)
 	
 	if {([file extension $path] != $Template(htmlExt))
@@ -484,7 +484,7 @@ proc Template_Choose {accept choices} {
 		# our candidate is a .tml file - strip the tml
 		if {[file extension [file root $hit]] == ""} {
 		    # we're about to offer a .tml - as an .html
-		    return "[file root $hit].html"
+		    return "[file root $hit]$Template($htmlExt)"
 		} else {
 		    # strip the .tml and return for redirection
 		    return [file root $hit]
