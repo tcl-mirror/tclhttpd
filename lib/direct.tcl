@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.13 2000/10/09 19:00:21 welch Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.14 2000/10/10 05:58:31 welch Exp $
 
 package provide httpd::direct 1.1
 
@@ -124,7 +124,18 @@ proc Direct_MarshallArguments {prefix suffix} {
 		lappend cmd {}
 	    }
 	} else {
-	    lappend cmd [ncgi::value $arg]
+	    
+	    # The original semantics for Direct URLS is that if there
+	    # is only a single value for a parameter, then no list
+	    # structure is added.  Otherwise the parameter gets a list
+	    # of all values.
+
+	    set vlist [ncgi::valueList $arg]
+	    if {[llength $vlist] == 1} {
+		lappend cmd [ncgi::value $arg]
+	    } else {
+		lappend cmd $vlist
+	    }
 	}
     }
     if [info exists needargs] {
