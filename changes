@@ -370,4 +370,6 @@ htdocs/guestbook	Added simple guestbook example.
 
 .htaccess, .tclaccess	Oops, added all these missing files to the distribution.
 
+htdocs/book	Added HTML version of book chapter on TclHttpd.
+
 ----------------- released 2.2 June 18, 1999 ------------------
