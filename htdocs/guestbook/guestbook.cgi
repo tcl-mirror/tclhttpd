@@ -23,7 +23,7 @@ if {![file exists $datafile]} {
 } else {
 	puts "The following folks have registered in my GuestBook."
 	P 
-	Link Register ../forms/newguest.html
+	Link Register newguest.html
 	H2 Guests
 #	catch {source $datafile}
 	source $datafile
