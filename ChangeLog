@@ -1,8 +1,10 @@
 2001-01-31  Brent Welch <welch@ajubasolutions.com>
 
-	* bin/upload.tcl: Added a file upload domain handler.
+	* lib/upload.tcl: Added a file upload domain handler.
 	Check out the definition of Upload_Url, which registers
 	the domain, and UploadTest, which is the sample callback.
+	* lib/cgi.tcl: Added binary translation to the pipe used
+	to send POST data to a CGI script.
 
 2001-01-26  Brent Welch <welch@ajubasolutions.com>
 
