@@ -356,7 +356,7 @@ proc DocDirectory {path suffix cookie sock} {
     # Just set indexpat to "index.tml" or "index.html"
 
     set npath [file join $path $Doc(indexpat)]
-    if {[info exist tcl_platform(iswrapped)]} {
+    if {[info exist tcl_platform(isWrapped)] && $tcl_platform(isWrapped)} {
 	set newest $npath
     } else {
 	set newest [DocLatest [glob -nocomplain $npath]]
