@@ -8,51 +8,13 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.14.2.1 2002/08/31 06:36:11 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.14.2.2 2002/08/31 06:53:59 welch Exp $
 
 package provide httpd::debug 1.0
 
-namespace eval httpd::debug {
-	
-	variable enabled
-	set enabled 0
-
-}
-
-
 proc Debug_Url {dir} {
-	variable enabled
-	
-	if { $enabled } {
-    	Direct_Url $dir Debug
-	}
+    Direct_Url $dir Debug
 }
-
-# Debug/enable --
-#
-#	Enable or disable debugging in tclhttpd.
-#
-# Arguments:
-#       boolean  0: disable debugging 
-#                1: enable debugging	
-#
-# Results:
-#	Returns HTML code that displays result
-#       Disabling removes the /debug URL.
-#       You have to restart tclhttpd for the
-#       next debug session. 
-
-proc Debug/enable { boolean } {
-	variable enabled
-	
-	set enabled $boolean
-	if { ! $enabled } {
-		Direct_UrlRemove Debug
-		set html "<title>Debugging disabled</title>\n
-				<h1> Debugging disabled</h1>"
-		return $html
-	}
-}  
 
 # Debug/source --
 #
@@ -93,7 +55,7 @@ proc Debug/source {source {thread main}} {
 		}
 	    }
 	    default {
-		    Thread_Send $thread [list source $file]
+                Thread_Send $thread [list source $file]
 	    }
 	}
     } result]
@@ -382,3 +344,16 @@ proc Debug/showproc {proc} {
     }
     return [list proc $proc $alist [info body $proc]]
 }
+
+# Debug/disable --
+#
+#	Disable debugging in tclhttpd.
+#
+# Side Effects:
+#       Removes the /debug URL
+
+proc Debug/disable {} {
+    Direct_UrlRemove Debug
+    return "<title>Debugging disabled</title>\n
+                    <h1> Debugging disabled</h1>"
+}  

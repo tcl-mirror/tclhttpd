@@ -15,8 +15,6 @@ has e.g. several useful URLs that let you examine variable values and other inte
 <br><br>
 The /debug URLs are:
 <br><br>
-/debug/enable?boolean=&lt;value&gt;
-<br><br>
 /debug/source?source=&lt;value&gt;&amp;thread=&lt;value&gt;
 <br><br>
 /debug/package?package=&lt;value&gt;
@@ -36,6 +34,8 @@ The /debug URLs are:
 /debug/dbg?host=&lt;value&gt;&amp;port=&lt;value&gt;
 <br><br>
 /debug/showproc?showproc=&lt;value&gt;
+<br><br>
+/debug/disable
 <br><br>
 For more specific information about the calls see the debug module.
 <p>
