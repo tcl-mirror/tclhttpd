@@ -1,3 +1,9 @@
+2002-09-11  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch).
+        * lib/dirlist.tcl: added in the Dir_ShowListings,
+        Dir_HideListings, and Dir_IsHidden api that got
+        dropped when I merged in additions by Melissa Chawla.
+
 2002-09-03  Brent Welch <welch@panasas.com>
         * (In the tclhttpd-3-4-rel branch).
         * lib/dirlist.tcl: Fixing bug where a ../* in the dirlist form

@@ -7,10 +7,69 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: dirlist.tcl,v 1.7.6.1 2002/09/04 03:10:45 welch Exp $
+# RCS: @(#) $Id: dirlist.tcl,v 1.7.6.2 2002/09/11 18:15:01 welch Exp $
 
-package provide httpd::dirlist 1.0
+package provide httpd::dirlist 1.1
  
+# Dir_HideListings --
+#
+#	If a directory is viewed, hide the directory listing.
+#
+# Arguments:
+#	None
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	From now on, directory listings are hidden.
+
+proc Dir_HideListings {} {
+    global Doc
+    set Doc(HideDirListing) 1
+    return
+}
+
+# Dir_ShowListings --
+#
+#	If a directory is viewed, show the directory listing.
+#
+# Arguments:
+#	None
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	From now on, directory listings can be shown.
+
+proc Dir_ShowListings {} {
+    global Doc
+    set Doc(HideDirListing) 0
+    return
+}
+
+# Dir_ListingIsHidden --
+#
+#	Tell whether directory listings are currently hidden.
+#
+# Arguments:
+#	None
+#
+# Results:
+#	Returns 1 if listings are hidden, otherwise 0.
+#
+# Side Effects:
+#	None
+
+proc Dir_ListingIsHidden {} {
+    global Doc
+    return $Doc(HideDirListing)
+}
+
+# By default, directory listings are shown.
+Dir_ShowListings
+
 proc DirListForm {dir urlpath {sort name} {pattern *}} {
     set what [DirListTerm]
     set namecheck ""

@@ -83,6 +83,7 @@ pages is implemented in the htdocs/libtml/mypage.tcl file.
 }]
 <li><a HREF="/xyzzy">Sample missing page</a>
 <li><a HREF="/debug/raise?message=This+page+raises+errors!">A page that raises an error</a>
+<li><a HREF="images">A directory listing page</a>
 </ul>
 
 <h2>Sample GuestBook</h2>
