@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: subst.tcl,v 1.6 2004/04/14 00:07:32 coldstore Exp $
+# RCS: @(#) $Id: subst.tcl,v 1.7 2004/04/15 01:41:33 coldstore Exp $
 
 package provide httpd::subst 1.0
 
@@ -118,7 +118,7 @@ proc SubstFile {path {interp {}}} {
 #
 # Subst a file or directory in an interpreter context.
 # As SubstFile except that a path which is a directory is evaluated
-# by evaluating a file $path/dir.tml, and returning that as the substituted
+# by evaluating a file $path/index.tml, and returning that as the substituted
 # value of the $path directory.
 #
 proc Subst_File {path {interp {}}} {
@@ -130,7 +130,7 @@ proc Subst_File {path {interp {}}} {
 	    return [uplevel 1 [list SubstFile $path $interp]]
 	}
 	directory {
-	    return [uplevel 1 [list SubstFile [file join $path dir.tml] $interp]]
+	    return [uplevel 1 [list SubstFile [file join $path index.tml] $interp]]
 	}
 	default {
 	    error "Can't process [file type $path] files."
