@@ -2,6 +2,7 @@
 	* lib/upload.tcl: implemented -maxfiles, -maxbytes
 	and -totalbytes options to Upload_Url.
 	* debian/ added support for Debian daemon package
+	* sampleapp/upload - simple file upload and delete app
 
 2004-04-17 Brent Welch <welch@panasas.com>
         * Various doc updates.
