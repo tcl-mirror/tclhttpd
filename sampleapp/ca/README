@@ -1,0 +1,18 @@
+Simplistic CA.
+
+OVERVIEW
+========
+
+Provides just enough openssl interface to create a self-signed CA and a create and sign a server certificate.
+
+INSTALLATION
+===========
+
+The file ca.tcl should be copied to the custom directory, and the definition of CA array edited to suit your site preferences.
+
+It is important that your configuration file should not provide valid tls/SSL options, so that the standard tls startup fails.  Setting SSL_CAFILE and SSL_CADIR to "" should be enough.
+
+OPERATION
+=========
+
+We intervene at custom load time, which is after tls initialization has been attempted by the startup script.  It is necessary that the system tls startup fails, so we can start our own.
