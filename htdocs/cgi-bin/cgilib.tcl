@@ -35,11 +35,15 @@ proc Cgi_Query {} {
 		[string length $env(CONTENT_LENGTH)] != 0} {
 	    set query [read stdin $env(CONTENT_LENGTH)]
 	} else {
-	    gets stdin query
+	    fconfigure stdin -blocking 0
+	    if {[gets stdin query] < 0} {
+		set query ""
+	    }
 	}
     } else {
 	set query $env(QUERY_STRING)
     }
+    set env(ALT_QUERY_STRING) $query
     return $query
 }
 proc CgiDecode {str} {
@@ -50,6 +54,38 @@ proc CgiDecode {str} {
     # Replace the format commands with their result
     return [subst $str]
 }
+# do x-www-urlencoded character mapping
+# The spec says: "non-alphanumeric characters are replaced by '%HH'"
+ 
+for {set i 1} {$i <= 256} {incr i} {
+    set c [format %c $i]
+    if {![string match \[a-zA-Z0-9\] $c]} {
+        set UrlEncodeMap($c) %[format %.2x $i]
+    }
+}
+ 
+# These are handled specially
+array set UrlEncodeMap {
+    " " +   \n %0d%0a
+}
+ 
+# 1 leave alphanumerics characters alone
+# 2 Convert every other character to an array lookup
+# 3 Escape constructs that are "special" to the tcl parser
+# 4 "subst" the result, doing all the array substitutions
+ 
+proc CgiEncode {string} {
+    global UrlEncodeMap 
+    regsub -all \[^a-zA-Z0-9\] $string {$UrlEncodeMap(&)} string
+    regsub -all \n $string {\\n} string
+    regsub -all \t $string {\\t} string
+    regsub -all {[][{})\\]\)} $string {\\&} string
+    return [subst $string]
+}
+proc Url_Encode {string} {
+    CgiEncode $string
+}
+ 
 proc Cgi_Value {key} {
     global cgi
     if [info exists cgi($key)] {
@@ -145,4 +181,27 @@ proc Counter {filename} {
     puts $out $number
     close $out
     return $number
+}
+
+# Empty --
+#
+#	Return true if the variable doesn't exist or is an empty string
+
+proc Empty {varname} {
+    upvar 1 $varname var
+    return [expr {![info exist var] || [string length $var] == 0}]
+}
+
+# Cgi_SubstFile --
+# Use a file as a template
+
+proc Cgi_SubstFile {path} {
+    if {[catch {open $path} in]} {
+	puts "<pre>Cgi_SubstFile: $path: $in</pre>"
+    } else {
+	set X [read $in]
+	close $in
+	puts [uplevel 1 [list subst $X]]
+    }
+    flush stdout
 }
