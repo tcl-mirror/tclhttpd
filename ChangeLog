@@ -2,7 +2,8 @@
         * tclhttpd.spec:  Improved rpm spec file for Fedora.
         * bin/httpd.tcl:
         * bin/tclhttpd.rc:  Add -daemon command line option for
-        starting tclhttpd in the background.
+        starting tclhttpd in the background if either tclx or expect
+        are available.
 
 2004-10-22 Colin McCormack <colin@sharedtech.dyndns.org>
 	* lib/*.tcl: added braces around all [if] conditionals - for speed
