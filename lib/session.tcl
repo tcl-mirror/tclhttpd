@@ -40,9 +40,42 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.4 2003/10/08 05:47:40 coldstore Exp $
+# RCS: @(#) $Id: session.tcl,v 1.5 2004/04/20 14:02:31 coldstore Exp $
 
 package provide httpd::session 1.0
+
+# use long session IDs
+if {![info exists Session(short)]} {
+    Session(short) 0
+}
+
+# how long do session cookies last?
+if {![info exists Session(expires)]} {
+    set Session(expires) "now + 10 years"	;# should be long enough
+}
+
+# create a directory for saved sessions
+if {![info exists Session(dir)]} {
+    set Session(dir) [file join [Doc_Root] .sessions]
+}
+if {![file exists $Session(dir)]} {
+    mkdir $Session(dir)
+}
+
+# if an MD5 package is available, we use it to make
+# an unforgeable session ID, otherwise default to 
+# the old 4-digit session ID
+if {($Session(short) == 1) || [catch {package require md5}]} {
+    # we have no usable md5 or have elected short session IDs
+    proc SessionGenId {id} {
+	return [randomx]
+    }
+} else {
+    # generate a long and unforgeable session id
+    proc SessionGenId {id} {
+	return [::md5::md5 -hex [randomx]]
+    }
+}
 
 proc Session_Authorized {id} {
     upvar #0 Session:$id session
@@ -58,6 +91,7 @@ proc SessionAuthorizedAliases {interp id} {
     interp alias $interp require {} Session_Require $id
     interp alias $interp exit {} Session_Destroy $id
 }
+
 proc Session_Require {id tag} {
     upvar #0 Session:$id session
     if ![info exists session(init)] {
@@ -86,7 +120,7 @@ proc Session_Create {type {isSafe 1}} {
 
     # Pick a unique session id, create the interpreter and global state.
 
-    while {[info globals *[set id [randomx]]*] != ""} {}
+    while {[info globals *[set id [SessionGenId]]*] != ""} {}
     Session_CreateWithID $type $id $isSafe
 }
 
@@ -170,10 +204,119 @@ proc Session_Destroy {id} {
     if {[info exists session]} {
 	interp delete $session(interp)
 	unset session
+
+	global Session
+	set sfile [file join $Session(dir) ${id}.sess]
+	if {[file exists $sfile]} {
+	    # delete the session save file
+	    file delete $sfile
+	}
+
 	return 1
     } else {
     	return 0
     }
+}
+
+
+# Find the correct session, and return the proper interp or error.
+# This is identical to Session_Match, but uses cookies to store
+# session id.
+# If the session is "new", then create a new one.
+# - query: optional alist containing the form and/or url query
+# - type:  The type of this session
+# - error_name:  The variable holding the error result (if any)
+
+proc Session_Cookie {{querylist {}} {type {}} {error_name error} {isSafe 1}} {
+    upvar $error_name error
+    global Httpd
+
+    # fetch cookies pertaining to session
+    set old 0
+    foreach {key var} {session session session_sequence sequence} {
+	set x [Cookie_GetSock $Httpd(currentSocket) $key]
+	if {$x != ""} {
+	    incr old
+	    lappend querylist $var [lindex $x 0]
+	}
+    }
+
+    # try to find an existing or saved session
+    set error ""
+    array set query $querylist
+    set id [Session_Match [array get query] $type error $isSafe]
+
+    # we must have lost the old session. lose the cookies and try again
+    if {$error == "Session: Invalid session id."} {
+	set query(session) new
+	set id [Session_Match [array get query] $type error $isSafe]
+	set old 0
+    }
+
+    # set the session cookies
+    if {!$old} {
+	global Session
+	upvar #0 Session:$id session
+
+	foreach {key var} {session id
+	    session_sequence session(sequence)
+	    session_type session(type)} {
+	    if {[info exists $var]} {
+		Cookie_Set -expires $Session(expires) -path / -name $key -value [set $var]
+	    }
+	}
+    }
+
+    # we accept an additional session_cmd argument to manipulate sessions
+    if {[info exists query(session_cmd)]} {
+	switch $query(session_cmd) {
+	    save {
+		Session_Save $id
+	    }
+	}
+    }
+
+    return $id
+}
+
+# Save session state in a file under $Session(dir),
+# for later reconstruction
+proc Session_Save {id} {
+    # see if there's a session to be instantiated
+    global Session
+    upvar #0 Session:$id session
+
+    # create a session save file, write state
+    set sfile [file join $Session(dir) ${id}.sess]
+    set fd [open $sfile w]
+    puts $fd $session(type)
+    puts $fd [interp issafe interp$id]
+    puts $fd [array get session]
+
+    # add Self Vars
+    set vars {}
+    set arrays {}
+    foreach sv [interp eval $session(interp) info vars] {
+	switch -regexp -- $sv {
+	    tcl_* -
+	    env -
+	    errorCode -
+	    errorInfo -
+	    arg[cv] -
+	    auto_* {}
+	    default {
+		if {[array exists $sv]} {
+		    lappend arrays $sv [interp eval $session(interp) array get $sv]
+		} else {
+		    lappend vars $sv [interp eval $session(interp) set $sv]
+		}
+	    }
+	}
+    }
+    puts $fd $vars
+    puts $fd $arrays
+	
+    close $fd
 }
 
 # Find the correct session, and return the proper interp or error.
@@ -198,17 +341,41 @@ proc Session_Match {querylist {type {}} {error_name error} {isSafe 1}} {
     	return {}
     }
 
-    if {$query(session) == "new"} {
-        set query(session) [Session_Create $type $isSafe]
-    } elseif {[regexp "kill(.+)" $query(session) x id]} {
+    set id $query(session)
+    if {$id == "new"} {
+	set id [Session_Create $type $isSafe]
+    } elseif {[regexp "kill(.+)" $id x id]} {
 	Session_Destroy $id
-        set query(session) [Session_Create $type $isSafe]
+	set id [Session_Create $type $isSafe]
+    } elseif {[regexp "save(.+)" $id x id]} {
+	Session_Save $id
     }
 
-    upvar #0 Session:$query(session) session
+    upvar #0 Session:$id session
     if {![array exists session]} {
-    	set error "Session: Invalid session id."
-    	return {}
+	# see if there's a session to be instantiated
+	global Session
+
+	set sfile [file join $Session(dir) ${id}.sess]
+	if {[file exists $sfile]} {
+	    # open a session save file, read state
+	    set fd [open $sfile r]
+	    foreach {type isSafe sarray vars arrays} [split [read $fd] \n] break
+	    close $fd
+
+	    # create the interpreter
+	    Session_CreateWithID $type $id $isSafe
+	    array set session $sarray	;# set session vars
+	    foreach {var val} $vars {
+		interp eval $session(interp) [list set $var $val]
+	    }
+	    foreach {var val} $arrays {
+		interp eval $session(interp) [list array set $var $val]
+	    }
+	} else {
+	    set error "Session: Invalid session id."
+	    return {}
+	}
     }
 
     if {$type != {} && $type != $session(type)} {
@@ -234,7 +401,7 @@ proc Session_Match {querylist {type {}} {error_name error} {isSafe 1}} {
 
     set session(current) [clock seconds]
     incr session(count)
-    return $query(session)
+    return $id
 }
 
 # Import variables from a global array into the local scope.
