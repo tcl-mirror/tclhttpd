@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: template.tcl,v 1.3 2003/03/28 08:03:56 coldstore Exp $
+# RCS: @(#) $Id: template.tcl,v 1.4 2003/10/19 03:17:20 coldstore Exp $
 
 package provide httpd::template 1.0
 
@@ -300,6 +300,12 @@ proc TemplateInstantiate {sock template htmlfile suffix dynamicVar {interp {}}} 
     # Process the template itself
 
     set code [catch {Subst_File $template $interp} html]
+
+    if {$code != 0} {
+	# pass errors up - specifically Redirect return code
+	global errorCode errorInfo
+	return -code $code -errorcode $errorCode -errorinfo$errorInfo
+    }
 
     # Save return cookies, if any
     Cookie_Save $interp $sock
