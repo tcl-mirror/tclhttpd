@@ -9,16 +9,12 @@ proc bugdb::insert {Application OS Priority Assigned Summary Description} {
     # set date
     set date [clock format [clock seconds] ]
 
-    # Substitute for characters that break the HTML
-    set safe_summary [special-chars $Summary]
-    set safe_description [special-chars $Description]
-
     # Open the db
     mk::file open bugdb ../sampleapp/bugdb/bugdb.mk
 
     set result [catch {mk::row append bugdb.bugs Application "$Application" OS "$OS" \
-    Priority "$Priority" Assigned "$Assigned" Summary "$safe_summary" \
-    Description "$safe_description" date "$date" Status "New"} msg]
+    Priority "$Priority" Assigned "$Assigned" Summary "[special-chars $Summary]" \
+    Description "[special-chars $Description]" date "$date" Status "New"} msg]
 
     mk::file commit bugdb
 
@@ -92,17 +88,13 @@ proc bugdb::update {Bug Status Application OS Priority Assigned Summary Descript
     # set date for last updated field
     set date_updated [clock format [clock seconds] ]
     
-    # Substitute for characters that break the HTML
-    set safe_summary [special-chars $Summary]
-    set safe_description [special-chars $Description]
-
     # Open the db
     mk::file open bugdb ../sampleapp/bugdb/bugdb.mk
 
     # Update the db
     mk::set bugdb.bugs!$Bug Status "$Status" Application "$Application" \
-    OS "$OS" Priority "$Priority" Assigned "$Assigned" Summary "$safe_summary" \
-    Description "$safe_description" Updated "$date_updated"
+    OS "$OS" Priority "$Priority" Assigned "$Assigned" Summary "[special-chars $Summary]" \
+    Description "[special-chars $Description]" Updated "$date_updated"
 
     # Close the db
     mk::file close bugdb
