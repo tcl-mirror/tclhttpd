@@ -14,7 +14,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: fallback.tcl,v 1.4 2004/04/28 08:38:07 coldstore Exp $
+# RCS: @(#) $Id: fallback.tcl,v 1.5 2004/06/12 04:51:08 coldstore Exp $
 
 package provide httpd::fallback 1.0
 
@@ -69,61 +69,50 @@ proc Fallback_Try {virtual path suffix sock} {
     # Most browsers say */*, but they may provide some ordering info, too.
 
     # First generate a list of candidate files by ignoring extension
+    global Template
     set ok {}
     foreach choice [glob -nocomplain $root.*] {
-	
-	# Filter on the exclude patterns, and make sure that we
 	# don't let "foo.html.old" match for "foo.html"
+	# but let foo.*.tml match for foo.*
+	if {[string equal $root [file root $choice]]
+	    || [string equal [file extension $choice] $Template(tmlExt)]} {
 
-	if {[string compare [file root $choice] $root] == 0 &&
-		![FallbackExclude $choice]} {
-	    lappend ok $choice
+	    # Filter on the exclude patterns
+	    if {![FallbackExclude $choice]} {
+		lappend ok $choice
+	    }
 	}
     }
 
-    # Now we pick the best file from the ones that matched.
-    set npath [FallbackChoose [Mtype_Accept $sock] $ok]
-    if {[string length $npath] == 0 || [string compare $path $npath] == 0} {
-
-	# not found or still trying one we cannot use
-
+    # Now we pick the best file from the files and templates that matched
+    set npath [Template_Choose [Mtype_Accept $sock] $ok]
+    if {[string length $npath] == 0} {
+	# there was no viable alternative
+	return 0
+    } elseif {[string compare $path $npath] == 0} {
+	# the best alternative was the original path requested
+	# this is bogus - we shouldn't be called if there's a match
 	return 0
     } else {
-	# A file matched, but has a different extension to that requested
+	# A file matched with a different extension to that requested
 
-	# Another hack for templates.  If the requested .html is not found,
-	# and the .tml exists, ask for .html so the template is
-	# processed and cached as the .html file.
-
-	global Template
-	if {[string compare $Template(tmlExt) [file extension $npath]] == 0} {
-	    Doc_text/html [file root $npath]$Template(htmlExt) $suffix $sock
-	    return 1
-	}
-
-	# No template matched the request, so redirect_to/offer our best match.
+	# Redirect_to/offer our best match.
 	# Redirect so we don't mask spelling errors like john.osterhoot
 
-	set new [file extension $npath]
-	set old [file extension $suffix]
-	if {[string length $old] == 0} { 
-	    append suffix $new
+	set new [file extension $npath]	;# candidate extension
+	set old [file extension $suffix]	;# requested extension
+	if {[string length $old] == 0} {
+	    append suffix $new	;# client request was without extension
 	} else {
+	    # client requested foo.$old, we're offering foo.$new
 	    # Watch out for specials in $old, like .html)
-
-	    regsub -all {[][$^|().*+?\\]} $old {\\&} old
-	    regsub $old\$ $suffix $new suffix
+	    regsub -all {[][$^|().*+?\\]} $old {\\&} old ;# quote special chars
+	    regsub $old\$ $suffix $new suffix	;# substitute $new for $old
 	}
 
-	# Preserve query data when bouncing among pages.
-
-	upvar #0 Httpd$sock data
-	set url $virtual/[string trimleft $suffix /~]
-	if {[info exist data(query)] && [string length $data(query)]} {
-	    append url ? $data(query)
-	}
-
-	Redirect_Self $url	;# offer what we have to the client
+	# Offer what we have to the client, preserving query data
+	Redirect_QuerySelf $virtual/[string trimleft $suffix /~] ;# offer what we have to the client
+	return 1
     }
 }
 
@@ -149,39 +138,4 @@ proc FallbackExclude {name} {
 	}
     }
     return 0
-}
-
-# FallbackChoose --
-#
-# Choose based first on the order of things in the Accept type list,
-# then on the newest file that matches a given accept pattern.
-#
-# Arguments:
-#	accept	The results of Mtype_Accept
-#	choices	The list of matching file names.
-#
-# Results:
-#	Name of the newest file whose mime type is most acceptable
-#	to client browser.
-#
-# Side Effects:
-#	None
-
-proc FallbackChoose {accept choices} {
-    foreach t [split $accept ,] {
-	regsub {;.*} $t {} t	;# Nuke quality parameters
-	set t [string trim [string tolower $t]]
-	set hits {}
-	foreach f $choices {
-	    set type [Mtype $f]	;# mime-type for f's file extension
-	    if {[string match $t $type]} {
-		lappend hits $f	;# this file provides a matching mime type
-	    }
-	}
-	set result [file_latest $hits]	;# latest file matching mime type $t
-	if {[string length $result]} {
-	    return $result
-	}
-    }
-    return {}
 }
