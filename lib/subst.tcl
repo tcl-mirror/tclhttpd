@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: subst.tcl,v 1.4 2004/02/25 04:29:34 coldstore Exp $
+# RCS: @(#) $Id: subst.tcl,v 1.5 2004/02/25 04:36:17 coldstore Exp $
 
 package provide httpd::subst 1.0
 
@@ -70,7 +70,7 @@ if {![info exists Subst(templateScope)]} {
     set Subst(templateScope) 0
 }
 
-# Subst_File --
+# SubstFile --
 #
 # Subst a file in an interpreter context.  If no interp is given, use the
 # current interp.  If using the current interp, use the scope
@@ -86,7 +86,7 @@ if {![info exists Subst(templateScope)]} {
 # Side Effects:
 #	None
 
-proc Subst_File {path {interp {}}} {
+proc SubstFile {path {interp {}}} {
     global Subst
 
     set in [open $path]
@@ -112,6 +112,29 @@ proc Subst_File {path {interp {}}} {
         set result [$hook $result]
     }
     return $result
+}
+
+# Subst_File --
+#
+# Subst a file or directory in an interpreter context.
+# As SubstFile except that a path which is a directory is evaluated
+# by evaluating a file $path/dir.tml, and returning that as the substituted
+# value of the $path directory.
+#
+proc Subst_File {path {interp {}}} {
+    global Subst
+
+    switch [file type $path] {
+	file {
+	    return [uplevel 1 SubstFile $path $interp]
+	}
+	directory {
+	    return [uplevel 1 SubstFile [file join $path dir.tml] $interp]
+	}
+	default {
+	    error "Can't process [file type $path] files."
+	}
+    }
 }
 
 # Subst_Install

@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: template.tcl,v 1.7 2004/02/25 04:29:34 coldstore Exp $
+# RCS: @(#) $Id: template.tcl,v 1.8 2004/02/25 04:36:17 coldstore Exp $
 
 package provide httpd::template 1.0
 
@@ -19,6 +19,10 @@ package require httpd::cookie
 if {![info exists Template(tmlExt)]} {
     set Template(tmlExt) .tml
 }
+if {![info exists Template(env)]} {
+    set Template(env) 1
+}
+
 if {![info exists Template(htmlExt)]} {
     switch $tcl_platform(platform) {
 	windows { set Template(htmlExt) .htm }
@@ -233,7 +237,9 @@ proc TemplateInstantiate {sock template htmlfile suffix dynamicVar {interp {}}} 
     ]]]
 
     # Populate the global "env" array similarly to the CGI environment
-    Cgi_SetEnvInterp $sock $filename $interp
+    if {$Template(env)} {
+	Cgi_SetEnvInterp $sock $filename $interp
+    }
 
     # Check query data.
 
@@ -386,6 +392,16 @@ proc TemplateCheck {sock template htmlfile} {
 	    return 1
 	}
     }
+
+    # make index.html regeneration depend upon the whole directory's
+    # modification time, not just the modification time of index.tml
+    global dirlist
+    if {[file root [file tail $htmlfile]] == [file root $dirlist(indexpat)]} {
+	if {[file mtime [file dirname $htmlfile]] > $mtime} {
+	    return 1
+	}
+    }
+
     return [expr {[file mtime $template] > $mtime}]
 }
 
