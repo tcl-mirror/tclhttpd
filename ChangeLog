@@ -1,3 +1,6 @@
+2004-07-08 Colin McCormack <colin@chinix.com>
+        * lib/config.tcl: fixed bug in config file rewrite
+
 2004-06-30 Colin McCormack <colin@chinix.com>
         * lib/doc.tcl: fixed sf [977562] Url_AccessInstallPrepend crashes
 	DocDomain with suggested patch.
