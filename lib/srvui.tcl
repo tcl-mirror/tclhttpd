@@ -16,7 +16,12 @@ proc SrvUI_Init {title} {
     wm title . $Httpd(name):$Httpd(port)
     wm protocol . WM_DELETE_WINDOW {Httpd_Shutdown; exit}
     wm iconname . $Httpd(name):$Httpd(port)
-    message .msg -text "$title\n$Httpd(name):$Httpd(port)\n$Doc(root)" -aspect 1000
+	set msgText "$title\n$Httpd(name):$Httpd(port)"
+    if {[info exists Httpd(https_listen)]} {
+    	append msgText "\n$Httpd(name):$Httpd(https_port) (Secure Server)"
+    }
+    append msgText "\n$Doc(root)"
+    message .msg -text $msgText -aspect 1000
     grid .msg -columnspan 2 -sticky news
 
     foreach {counter label} {
