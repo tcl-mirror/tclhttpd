@@ -88,6 +88,24 @@ Summary Description Date Status Updated} {
     return
 }
 
-proc bugdb::update {} {
-    return OK
+proc bugdb::update {Bug Status Application OS Priority Assigned Summary Description} {
+    # set date for last updated field
+    set date_updated [clock format [clock seconds] ]
+    
+    # Substitute for characters that break the HTML
+    regsub -all {"} $Summary {\&quot;} safe_summary
+    regsub -all {"} $Description {\&quot;} safe_description
+
+    # Open the db
+    mk::file open bugdb ../sampleapp/bugdb/bugdb.mk
+
+    # Update the db
+    mk::set bugdb.bugs!$Bug Status "$Status" Application "$Application" \
+    OS "$OS" Priority "$Priority" Assigned "$Assigned" Summary "$Summary" \
+    Description "$Description" Updated "$date_updated"
+
+    # Close the db
+    mk::file close bugdb
+
+    return
 }
