@@ -1,3 +1,7 @@
+2005-01-02 Colin McCormack <colin@sharedtech.dyndns.org>
+	* lib/cookie.tcl Cookie_Unset - was using 'name' instead of
+	'$name' to remove cookies.
+
 2004-12-12 Colin McCormack <colin@sharedtech.dyndns.org>
 	* lib/doc.tcl: patched Doc_GetPath to use [file normalize], as
 	per sourceforge bug #1083423
