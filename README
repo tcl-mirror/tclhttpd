@@ -4,8 +4,8 @@ Brent is now at Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 2.1.7
-Last update: Sun Dec  6 21:51:04 PST 1998
+Version: 2.2.1
+Last update: Fri Jul  2 12:08:56 PDT 1999
 
 It requires Tcl7.5 and Tk4.1, or higher.
 It works with the latest 8.0 release.
