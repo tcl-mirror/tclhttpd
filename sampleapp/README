@@ -3,8 +3,9 @@ as sample applications.
 
 addnode - this lets you add URLs and annotates for them
 
-bugdb - this is a simple bug database that uses MetaKit.
-        You'll need to use tclkit (which embeds MetaKit) to run this.
+bugdb - This is a simple bug database that uses MetaKit. The MetaKit
+        library (Mk4tcl) is required to run this application, or you 
+	can use Tclkit (which embeds MetaKit).
 
 ddehack - This is a little server that I ran on a Windows box so I
         could control the Netscape running there via DDE.  So, an
