@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.9 2000/02/16 03:29:16 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.10 2000/04/19 00:46:12 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -78,159 +78,10 @@ GENERIC_HDRS=
 
 BUILD_LIMIT = @BUILD_LIMIT@
 
+# DISTDIR and DEST are used when creating distributions
+
 DISTDIR=/tmp/
 DEST=${DISTDIR}/tclhttpd${VERSION}
-
-HTDOCS_FILES = \
-	error.html \
-	.tml \
-	access/auth/.htaccess \
-	access/auth/hello.txt \
-	access/.htaccess \
-	access/README.txt \
-	access/bydir/.htaccess \
-	access/bydir/README.txt \
-	access/bydir/user.cgi \
-	access/bytcl/.tclaccess \
-	access/noawe/.htaccess \
-	access/session/.tclaccess \
-	access/session/page.auth \
-	hacks.html \
-	include.shtml \
-	index.html \
-	license.terms \
-	notfound.html \
-	register.html \
-	book/TCLHTTPD-1.gif \
-	book/TCLHTTPD-2.gif \
-	book/TCLHTTPD.css \
-	book/TCLHTTPD.html \
-	cgi-bin/big.cgi \
-	cgi-bin/cgilib.tcl \
-	cgi-bin/cwd.cgi \
-	cgi-bin/debugee.cgi \
-	cgi-bin/env \
-	cgi-bin/env.cgi \
-	cgi-bin/err0.cgi \
-	cgi-bin/err1.cgi \
-	cgi-bin/err2.cgi \
-	cgi-bin/flip.cgi \
-	cgi-bin/junk \
-	cgi-bin/junk.exe \
-	cgi-bin/prodebug.tcl \
-	cgi-bin/redirect.cgi \
-	cgi-bin/sleep.cgi \
-	cgi-bin/tclIndex \
-	cgi-bin/test.cgi \
-	cgi-bin/user.cgi \
-	forms/file.html \
-	forms/form1.html \
-	forms/index.html \
-	forms/posttest.html \
-	guestbook/guestbook.cgi \
-	guestbook/newguest.cgi \
-	guestbook/newguest.html \
-	images/Blue.gif \
-	images/Red.gif \
-	images/ScripticsLogo1.gif \
-	images/TclPro200.gif \
-	images/lake.gif \
-	images/lake.map \
-	images/logo125.gif \
-	images/ppt1.gif \
-	images/ppt2.gif \
-	images/ppt3.gif \
-	images/ppt4.gif \
-	images/ppt5.gif \
-	images/pwrdLogo100.gif \
-	images/pwrdLogo150.gif \
-	images/pwrdLogo175.gif \
-	images/pwrdLogo200.gif \
-	images/pwrdLogo75.gif \
-	images/setup.gif \
-	images/tcl89.gif \
-	include/footer.html \
-	java/Auth.class \
-	java/Getpass.class \
-	java/Helper.class \
-	java/MD5.class \
-	java/README \
-	java/ServerDemo.class \
-	java/ServerDemo.html \
-	java/auth.js \
-	java/test.html \
-	libtml/faq.tcl \
-	libtml/form.tcl \
-	libtml/htmlutils.tcl \
-	libtml/pkgIndex.tcl \
-	libtml/ss_survey.tcl \
-	libtml/sunscript.tcl \
-	manual/htdig.html \
-	manual/reference.html \
-	manual/stdin.html \
-	map/bush.html \
-	map/index.html \
-	map/mapdefault.html \
-	map/surfer.html \
-	snmp/browser/end.snmp \
-	snmp/browser/README \
-	snmp/browser/browser.snmp \
-	snmp/browser/browser2.snmp \
-	snmp/browser/control.snmp \
-	snmp/browser/start.html \
-	snmp/browser/table.snmp \
-	snmp/browser/title.html \
-	snmp/browser/title.snmp \
-	snmp/browser/walk.snmp \
-	snmp/browser/walker.snmp \
-	snmp/allport.snmp \
-	snmp/discover.snmp \
-	snmp/host.snmp \
-	snmp/index.html \
-	snmp/outdiscov.snmp \
-	snmp/portdetail.snmp \
-	snmp/repeat.snmp \
-	snmp/system.snmp \
-	snmp/telnet.snmp \
-	snmp/telnet_pass.snmp \
-	snmp/test_mibTable/index.html \
-	snmp/test_mibTable/README \
-	snmp/test_mibTable/table1.snmp \
-	snmp/test_mibTable/table2.snmp \
-	snmp/test_mibTable/table3.snmp \
-	snmp/test_mibTable/table4.snmp \
-	snmp/test_mibTable/test2.snmp \
-	stats/doc.tml \
-	stats/.tml \
-	stats/index.tml \
-	stats/notfound.tml \
-	templates/form.tml \
-	templates/.tml \
-	templates/index.tml \
-	templates/simple.subst
-
-HTDOCS_DIRS = \
-	access \
-	access/auth \
-	access/bydir \
-	access/bytcl \
-	access/noawe \
-	access/session \
-	book \
-	cgi-bin \
-	forms \
-	guestbook \
-	images \
-	include \
-	java \
-	libtml \
-	manual \
-	map \
-	snmp \
-	snmp/browser \
-	snmp/test_mibTable \
-	stats \
-	templates
 
 #========================================================================
 # Nothing of the variables below this line need to be changed.  Please
@@ -372,6 +223,7 @@ all: binaries libraries doc
 
 binaries: $(BINARIES)
 
+
 libraries:
 
 doc:
@@ -433,8 +285,6 @@ cryptLib.$(OBJEXT): $(srcdir)/src/cryptLib.c
 
 
 install-binaries:
-
-install-libraries: installdirs install-htdocs
 	@echo "Installing script programs in $(prefix)/bin"
 	@for i in $(srcdir)/bin/*.tcl ; do \
 	    $(INSTALL_SCRIPT) $$i $(prefix)/bin ; \
@@ -442,6 +292,8 @@ install-libraries: installdirs install-htdocs
 	@for i in $(srcdir)/bin/*.rc ; do \
 	    $(INSTALL_SCRIPT) $$i $(prefix)/bin ; \
 	done;
+
+install-libraries: installdirs install-htdocs
 	@echo "Installing script files in $(pkglibdir)"
 	@for i in $(srcdir)/lib/*.tcl ; do \
 	    $(INSTALL_SCRIPT) $$i $(pkglibdir) ; \
@@ -449,14 +301,8 @@ install-libraries: installdirs install-htdocs
 	$(INSTALL_SCRIPT) $(srcdir)/lib/mime.types $(pkglibdir)
 
 install-htdocs:
-	@echo "Creating skeleton htdocs tree in $(htdocsdir)"
-	@for i in $(HTDOCS_DIRS) ; do \
-	    $(mkinstalldirs) $(htdocsdir)/$$i ; \
-	done ;
-	@echo "Populating htdocs tree..."
-	@for i in $(HTDOCS_FILES) ; do \
-	    $(INSTALL_SCRIPT) $(srcdir)/htdocs/$$i $(htdocsdir)/$$i ; \
-	done;
+	@echo "Creating htdocs tree in $(htdocsdir)"
+	$(TCLSH_PROG) $(srcdir)/bin/CopyDist $(srcdir)/htdocs $(htdocsdir)
 
 install-doc:
 
@@ -525,7 +371,8 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 
 dist:
 	rm -rf $(DEST)
-	$(TCLSH_PROG) $(srcdir)/bin/CopyDist `pwd` $(DEST)
+	mkdir $(DEST)
+	$(TCLSH_PROG) $(srcdir)/bin/CopyDist $(srcdir) $(DEST)
 	(cd $(DISTDIR); tar cf - ./tclhttpd$(VERSION) | gzip > tclhttpd$(VERSION).tar.gz)
 	(cd $(DISTDIR) ; zip -9 -r -o  tclhttpd$(WIN_VERSION).zip  tclhttpd$(VERSION))
 .PHONY: all binaries clean depend distclean doc install installdirs \

@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile,v 1.13 2000/02/11 21:38:08 awb Exp $
+# RCS: @(#) $Id: Makefile,v 1.14 2000/04/19 00:46:10 welch Exp $
 
 # TEMPORARY:  Values for the dist target.
 

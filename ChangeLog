@@ -1,3 +1,27 @@
+2000-04-18  Brent Welch <welch@scriptics.com>
+	* lib/debug.tcl: Added /debug/showproc
+	* lib/doc.tcl: Integrated with ncgi:: module for page query data
+	* lib/httpd.tcl: Added Proxy_Dispatch hook
+	* lib/mime.types: Added WAP types
+	* lib/status.tcl: Removed hardwired use of /status
+	* lib/thread.tcl: Switched to use new Thread package
+	* htdocs: Changed most .html files into .tml templates
+	* htdocs/libtml/form.tcl: Removed this and replaced with uses
+	of tcllib html:: module.
+
+2000-04-03  Brent Welch  <welch@scriptics.com>
+
+	* lib/httpd.tcl: Fixed accesshook "denied" case where the catch
+	inside Url_Dispatch was catching an early return.  This caused
+	an extra error reply after the 403 reply that was already generated.
+	Fixes bug 4741
+	* lib/include.tcl: Added support for the "exec" command in
+	server side includes.
+	* lib/log.tcl:  Added "file mkdir" to Log_SetFile so it will create
+	the log directory if it doesn't exist.  This is wrapped in a catch,
+	as are half the lines of code in this procedure, so logging silently
+	fails if it cannot open the log file for some reason.
+
 2000-03-27  Brent Welch  <welch@scriptics.com>
 
 	* lib/version.tcl: updated the date in the 3.0.0 version string
