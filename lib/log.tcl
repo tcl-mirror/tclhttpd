@@ -1,29 +1,22 @@
 # log.tcl
-# Logging module for the Http server
-# This starts a new log file each day with Log_SetFile
-# It also maintains an error log file that is always appeneded to
-# so it grows over time even when you restart the server.
+#
+#	This is a file-based logging module for TclHttpd.
+#
+#	This starts a new log file each day with Log_SetFile
+#	It also maintains an error log file that is always appeneded to
+#	so it grows over time even when you restart the server.
 #
 # Stephen Uhler / Brent Welch (c) 1997 Sun Microsystems
 # Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: log.tcl,v 1.8 2000/08/02 07:06:53 welch Exp $
+# RCS: @(#) $Id: log.tcl,v 1.9 2000/09/25 22:48:22 welch Exp $
 
-package provide httpd::log 1.0
+package provide httpd::log 1.1
+package require httpd::logstd 1.0
 
 # log an Httpd transaction
-
-###################################################
-# Logging stuff for "standard" format
-#  ip - - [date -tmz] "GET path HTTP/1.0" code bytes referrer agent
-
-# Use IP address, or domain name?
-# Default is IP address, because looking up names is expensive
-if {![info exists Log(lognames)]} {
-    set Log(lognames) 0
-}
 
 # This program is used to compress log files
 if {![info exists Log(compressProg)]} {
@@ -41,6 +34,26 @@ if {![info exist Log(debug_log)]} {
 }
 
 
+# Log --
+#
+#	Log information about the activity of TclHttpd.  There are two kinds of
+#	log entries.  One "normal" entry that goes into its own log, one line
+#	for each HTTP transaction.  All other log records are appended to an
+#	error log file.
+#
+# Arguments:
+#	sock	The client connection.
+#	reason	If "Close", then this is the normal completion of a request.
+#		Otherwise, this is some error tag and the record goes to
+#		the error log.
+#	args	Additional information to put into the logs.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Writes data to the log files.
+
 proc Log {sock reason args} {
     global Log
     upvar #0 Httpd$sock data
@@ -51,24 +64,10 @@ proc Log {sock reason args} {
     switch -- $reason {
 	"Close" {
 	    set now [clock seconds]
-	    if {$Log(lognames)} {
-		# This is expensive, but low-volume sites may not care too much
-		if {[catch {append result [Httpd_Peername $sock]}]} {
-		    append result [LogValue data(ipaddr)]
-		}
-	    } else {
-		append result	[LogValue data(ipaddr)]
+	    set result [LogStandardData $sock $now]
+	    if {[catch {puts $Log(log_fd) $result} err]} {
+		set urk !
 	    }
-	    append result { } [LogValue data(mime,auth-user)]
-	    append result { } [LogValue data(mime,username)]
-	    append result { } \[[clock format $now -format %d/%h/%Y:%T] -0700\]
-	    append result { } \"[LogValue data(line)]\"
-	    append result { } [LogValue data(code)]
-	    append result { } [LogValue data(file_size)]
-	    append result { } \"[LogValue data(mime,referer)]\"
-	    append result { } \"[LogValue data(mime,user-agent)]\"
-	    append result { } \"[LogValue data(mime,cookie)]\"
-	    catch {puts $Log(log_fd) $result}
 	    if {$Log(flushInterval) == 0} {
 		catch {flush $Log(log_fd)}
 	    }
@@ -139,16 +138,19 @@ proc Log_Configure args {
     return {}
 }
 
-proc LogValue {var} {
-    upvar $var data
-    if {[info exists data]} {
-	return $data
-    } else {
-       return -
-    }
-}
-
+# Log_FlushMinutes --
+#
 # Set the interval at which the logs are flushed.
+#
+# Arguments:
+#	min	The minutes between flushes.  If 0,
+#		then the log is flushed on each write.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	None
 
 proc Log_FlushMinutes {min} {
     global Log
@@ -160,6 +162,20 @@ proc Log_FlushMinutes {min} {
 
 # Log_SetFile --
 # automatically change log files every midnight
+#
+# Arguments:
+#	basename 	The name of a base filename
+#			including its directory,
+#			e.g. /logs/www
+#			This will create files like:
+#			/logs/www80_00.09.23
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Closes and opens files, creating new files
+#	each time through.
 
 proc Log_SetFile {{basename {}}} {
     global Log
@@ -192,15 +208,21 @@ proc Log_SetFile {{basename {}}} {
     # Create log directory, if neccesary, then open the log file
 
     catch {file mkdir [file dirname $Log(log_file)]}
-    catch {set Log(log_fd) [open $Log(log_file) a]}
+    if {[catch {set Log(log_fd) [open $Log(log_file) a]} err]} {
+	 Verbose $err
+    }
 
     if {[info exists lastlog]} {
 	# compress log files as we go
-	catch {exec $Log(compressProg) $lastlog &}
+	if {[catch {exec $Log(compressProg) $lastlog &} err]} {
+	    Verbose $err
+	}
     }
 
     catch {close $Log(error_fd)}
-    catch {set Log(error_fd) [open $Log(log)error a]}
+    if {[catch {set Log(error_fd) [open $Log(log)error a]} err]} {
+	Verbose $err
+    }
 
     # This debug log gets reset daily
 
@@ -211,13 +233,23 @@ proc Log_SetFile {{basename {}}} {
 
     if {[info exist Log(debug_log)] && $Log(debug_log)} {
 	set Log(debug_file) $Log(log)debug
-	catch {set Log(debug_fd) [open $Log(debug_file) w]}
+	if {[catch {set Log(debug_fd) [open $Log(debug_file) w]} err]} {
+	    Verbose $err
+	}
     }
 }
 
 # Log_Flush --
 # flush the output to the log file.  Do this periodically, rather than
 # for every transaction, for better performance
+#
+# Arguments:
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Flushes the logs to disk.
 
 proc Log_Flush {} {
     global Log
@@ -228,13 +260,3 @@ proc Log_Flush {} {
 	set Log(flushID) [after $Log(flushInterval) Log_Flush]
     }
 }
-
-# Log_Array --
-# Utility to dump an array to the log.
-
-proc Log_Array {sock a} {
-    global Log $a
-    puts $Log(error_fd) [parray $a]
-    flush $Log(error_fd)
-}
-

@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.18 2000/09/22 05:39:29 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.19 2000/09/25 22:48:23 welch Exp $
 
 package provide httpd::status 1.0
 
@@ -511,9 +511,11 @@ proc Status/all {args} {
 
     append html [stats::histHtmlDisplay urlhits \
 	    -title "Url Hits" -unit minutes \
+	    -min 0 -max 60 \
 	    -images $_status(images)]
     append html [stats::histHtmlDisplay urlhits \
 	    -title "Url Hits" -unit hours \
+	    -min 0 -max 24 \
 	    -images $_status(images)]
     append html [stats::histHtmlDisplay urlhits \
 	    -title "Url Hits" -unit days \
