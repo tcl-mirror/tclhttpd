@@ -32,6 +32,7 @@ package ifneeded httpd 1.6 "
 	package ifneeded httpd::mtype 1.1 \[list source \[file join [list $dir] mtype.tcl\]\]
 	package ifneeded httpd::opentrace 1.0 \[list source \[file join [list $dir] open.tcl\]\]
 	package ifneeded httpd::passcheck 1.0 \[list source \[file join [list $dir] passcheck.tcl\]\]
+	package ifneeded httpd::passgen 1.0 \[list source \[file join [list $dir] passgen.tcl\]\]
 	package ifneeded httpd::redirect 1.0 \[list source \[file join [list $dir] redirect.tcl\]\]
 	package ifneeded httpd::safecgio 1.0 \[list source \[file join [list $dir] safecgio.tcl\]\]
 	package ifneeded httpd::session 1.0 \[list source \[file join [list $dir] session.tcl\]\]
