@@ -42,7 +42,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.27 2000/08/23 20:39:40 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.28 2000/09/06 21:44:39 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -62,7 +62,7 @@ set home [file join [pwd] $home]
 # 2. Standalone install - look for $home/../lib/tclhttpd $home/tcllib
 # 3. Tcl package install - look for $tcl_library/../tclhttpd
 
-set v 3.1.0
+set v 3.2
 
 if {[file exist [file join $home ../lib/httpd.tcl]]} {
     # Cases 1 and 2
@@ -193,19 +193,9 @@ if {$Config(debug)} {
 
 package require httpd::version		;# For Version proc
 package require httpd::utils		;# For Stderr
-package require httpd::counter		;# Fix Httpd_Init and move to main.tcl
-package require httpd::mtype		;# Fix Httpd_Init and move to main.tcl
+package require httpd::counter		;# For Count
 
 Httpd_Init
-
-# Override the defaults wired into Httpd_Init
-# Smashing these parameters is a crock -
-# Httpd should use the config module directly
-
-foreach x {SSL_REQUEST SSL_REQUIRE SSL_CERTFILE SSL_KEYFILE
-		SSL_CADIR SSL_CAFILE USE_SSL2 USE_SSL3 USE_TLS1 SSL_CIPHERS} {
-    set Httpd($x) [cget $x]
-}
 
 # Open the listening sockets
 
@@ -213,7 +203,30 @@ Httpd_Server $Config(port) $Config(host) $Config(ipaddr)
 append startup "httpd started on port $Config(port)\n"
 
 if {![catch {package require tls}]} {
+
+    # Secure server startup, which depends on the TLS extension.
+    # Tls doesn't provide good error messages in these cases,
+    # so we check ourselves that we have the right certificates in place.
+
+    if {![file exists [cget SSL_CADIR]] && ![file exists [cget SSL_CAFILE]]} {
+	return -code error "No CA directory \"[cget SSL_CADIR]\" nor a CA file \"[cget SSL_CAFILE]\""
+    }
+    if {![file exists [cget SSL_CERTFILE]]} {
+	return -code error "Certificate  \"[cget SSL_CERTFILE]\" not found"
+    }
+
     if {[catch {
+	tls::init -request [cget SSL_REQUEST] \
+		-require [cget SSL_REQUIRE] \
+		-ssl2 [cget USE_SSL2] \
+		-ssl3 [cget USE_SSL3] \
+		-tls1 [cget USE_TLS1] \
+		-cipher [cget SSL_CIPHERS] \
+		-cadir [cget SSL_CADIR] \
+		-cafile [cget SSL_CAFILE] \
+		-certfile [cget SSL_CERTFILE] \
+		-keyfile [cget SSL_KEYFILE]
+
 	Httpd_SecureServer $Config(https_port) $Config(https_host) $Config(https_ipaddr)
 	append startup "secure httpd started on SSL port $Config(https_port)\n"
     } err]} {
@@ -241,7 +254,10 @@ catch {package require TclX}	;# From dynamically linked DLL
 catch {package require setuid}	;# TclHttpd extension
 
 if {"[info command id]" == "id"} {
+
     # Emulate TclHttpd C extension with TclX commands
+    # Setting the group before setting the user is necessary.
+
     proc setuid {uid gid} {
 	id groupid $gid
 	id userid $uid
@@ -250,7 +266,7 @@ if {"[info command id]" == "id"} {
 if ![catch {
     setuid $Config(uid) $Config(gid)
 }] {
-    Stderr "Running as user $Config(uid)"
+    Stderr "Running as user $Config(uid) group $Config(gid)"
 }
 
 # Initialize worker thread pool, if requested
@@ -276,6 +292,13 @@ if {[catch {source $Config(main)} message]} then {
     append error "\n$errorInfo"
     error $error
 }
+
+##################################
+# Load custom code so you can hack
+# TclHttpd without modifying the distributed
+# Config(main) "httpdthread.tcl" file
+##################################
+
 
 # The main thread owns the log
 

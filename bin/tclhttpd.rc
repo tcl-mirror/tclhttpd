@@ -29,6 +29,22 @@ foreach d [list \
     }
 }
 
+# library - the name of the file system directory containing
+# custom code you want to graft into TclHttpd.
+
+foreach d [list \
+	[file join [Config home] ../custom] \
+	[file join [Config home] ../tclhttpd/custom]] {
+    if {[file isdirectory $d]} {
+	Config library $d
+    }
+}
+
+# main - Main per-thread startup script.
+# The old way to customize the server was to modify this file directly.
+
+Config main		[file join [Config home] httpdthread.tcl]
+
 # uid - the server executes as the following user ID.
 # If you have TclX available, these can be user names.
 # If you use the simple "setuid" extension, this must be a number.
@@ -79,15 +95,6 @@ Config https_ipaddr	{}
 # webmaster - an email address for error mailings
 
 Config webmaster	webmaster@[info hostname]
-
-# library - additional directory to add to the auto_path
-# If you add custom code to the server, put it in this directory.
-
-Config library		[file join [Config docRoot] libtml]
-
-# main - Main per-thread startup script.
-
-Config main		[file join [Config home] httpdthread.tcl]
 
 # threads - the maximum number of worker threads to create.
 # If 0, then no threads are ever used.

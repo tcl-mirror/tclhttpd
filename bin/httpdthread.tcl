@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.7 2000/08/28 21:10:21 welch Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.8 2000/09/06 21:44:40 welch Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -26,21 +26,21 @@ package require ncgi
 package require html
 
 # Core modules
-package require httpd           ;# Protocol stack
-package require httpd::version		;# Version number
-package require httpd::url		;# URL dispatching
-package require httpd::mtype           ;# Mime types
+package require httpd          	;# Protocol stack
+package require httpd::version	;# Version number
+package require httpd::url	;# URL dispatching
+package require httpd::mtype	;# Mime types
 Mtype_ReadTypes 		[file join $Config(lib) mime.types]
-package require httpd::counter         ;# Statistics
-package require httpd::utils           ;# junk
+package require httpd::counter	;# Statistics
+package require httpd::utils	;# handy stuff like "lassign"
 
 package require httpd::redirect	;# URL redirection
-package require httpd::auth            ;# Basic authentication
-package require httpd::log             ;# Standard logging
+package require httpd::auth	;# Basic authentication
+package require httpd::log	;# Standard logging
 
 if {$Config(threads) > 0} {
     package require Thread		;# C extension
-    package require httpd::threadmgr		;# Tcl layer on top
+    package require httpd::threadmgr	;# Tcl layer on top
 }
 
 # Image maps are done either using a Tk canvas (!) or pure Tcl.
@@ -61,18 +61,15 @@ package require httpd::doc
 # your web-visible file structure.
 
 Doc_Root			$Config(docRoot)
+if {[file isdirectory [file join $Config(docRoot) libtml]]} {
+    Doc_TemplateLibrary [file join $Config(docRoot) libtml]
+}
 
 # Merge in a second file system into the URL tree.
 
 set htdocs_2 [file join [file dirname [info script]] ../htdocs_2]
 if {[file isdirectory $htdocs_2]} {
     Doc_AddRoot /addroot	$htdocs_2
-}
-
-# Merge in TclPro docs, if present
-set htdocs_2 [file join $Config(docRoot) ../../doc/html]
-if {[file isdirectory $htdocs_2]} {
-    Doc_AddRoot /tclpro	$htdocs_2
 }
 
 # Doc_TemplateInterp determines which interpreter to use when
@@ -96,11 +93,6 @@ Doc_PublicHtml			public_html
 # the HTML file, the HTML file is regenerated from the template.
 
 Doc_CheckTemplates		1
-
-# This simply adds the library to your auto_path so it can be
-# accessible to the scripts run by the template pages.
-
-Doc_TemplateLibrary		$Config(library)
 
 # Doc_ErrorPage registers a template to be used when a page raises an
 # uncaught Tcl error.  This is a crude template that is simply passed through
@@ -155,16 +147,25 @@ if {0} {
     package require httpd::safetcl	;# External process running safetcl shells
 }
 
-if {[catch {
-    # These packages are for the SNMP demo application
-    # "snmp" is a poorly-named module that generates HTML forms to view
-    #	MIB info
-    # "Tnm" is the SNMP interface from the Scotty extension
+#######################################
+# Load Custom Code
+#######################################
 
-    package require httpd::snmp
-    package require httpd::telnet
-    package require Tnm
-    Stderr "SNMP Enabled"
-}]} {
+if {[info exist Config(library)] && [string length $Config(library)]} {
+    if {![file isdirectory $Config(library)]} {
+	Stderr "Code library \"$Config(library)\" does not exist"
+    } else {
+	if {$Config(debug)} {
+	    Stderr "Loading code from $Config(library)"
+	}
+	foreach f [lsort -dictionary [glob -nocomplain [file join $Config(library) *.tcl]]] {
+	    if {[catch {source $f} err]} {
+		Stderr "$f: $err"
+	    } elseif {$Config(debug)} {
+		Stderr "Loaded [file tail $f]: $err"
+	    }
+	}
+    }
 }
+
 
