@@ -31,6 +31,7 @@ Modules with a <font color=red>*</font> are especially handy.</td></tr>
 [ManRow md5.man md5 "MD5 hash function"]
 [ManRow md5crypt.man md5crypt "MD5 crypto function"]
 [ManRow ncgi.man ngci "[X] CGI form value support"]
+[ManRow smtp.man smtp "SMTP mail transport protocol"]
 [ManRow textutil.man textutil "Text processing"]
 [ManRow uri.man uri "URL/URI formatting"]
 
