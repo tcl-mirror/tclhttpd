@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.8 2000/09/06 21:44:40 welch Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.9 2000/10/20 17:50:57 welch Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -32,6 +32,7 @@ package require httpd::url	;# URL dispatching
 package require httpd::mtype	;# Mime types
 Mtype_ReadTypes 		[file join $Config(lib) mime.types]
 package require httpd::counter	;# Statistics
+Counter_Init $Config(secs)
 package require httpd::utils	;# handy stuff like "lassign"
 
 package require httpd::redirect	;# URL redirection

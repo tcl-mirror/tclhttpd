@@ -42,7 +42,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.33 2000/10/19 22:27:20 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.34 2000/10/20 17:50:57 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -197,7 +197,7 @@ if {$Config(debug)} {
 ###################
 
 Httpd_Init
-Counter_Init $Config(secs)
+#Counter_Init $Config(secs)
 
 # Open the listening sockets
 
@@ -294,13 +294,6 @@ if {[catch {source $Config(main)} message]} then {
     append error "\n$errorInfo"
     error $error
 }
-
-##################################
-# Load custom code so you can hack
-# TclHttpd without modifying the distributed
-# Config(main) "httpdthread.tcl" file
-##################################
-
 
 # The main thread owns the log
 
