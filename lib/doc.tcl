@@ -629,6 +629,7 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	foreach c $cookie {
 	    Httpd_SetCookie $sock $c
 	}
+	interp eval $interp {uplevel #0 {unset page(set-cookie)}}
     }
 
     if {$code != 0} {
