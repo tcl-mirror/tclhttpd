@@ -5,13 +5,13 @@ AuthName WebAdmin
 AuthType Basic
 
 <Limit GET>
-order allow,deny
+order deny,allow
 deny from all
 allow from localhost
 </Limit>
 
 <Limit POST>
-order allow,deny
+order deny,allow
 deny from all
 allow from localhost
 </Limit>
