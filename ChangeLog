@@ -1,3 +1,7 @@
+2004-04-15 Jeffrey Rankin <jrankin@oneil.com>
+	* sampleapp/README: updated to state that only the MetaKit
+	lib is required to run the bugdb application.
+
 2004-04-15 Colin McCormack <colin@chinix.com>
 	* changed the file evaluated for ${template}.tml/ directory
 	to index.tml ... fewer special case filenames to remember.
