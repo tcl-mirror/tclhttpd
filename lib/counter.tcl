@@ -15,7 +15,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: counter.tcl,v 1.17 2002/08/19 05:14:39 welch Exp $
+# RCS: @(#) $Id: counter.tcl,v 1.18 2003/01/19 17:33:55 acacio Exp $
 
 # Layer ourselves on top of the Standard Tcl Library counter package.
 
@@ -90,6 +90,9 @@ proc Count {what {delta 1}} {
 }
 
 proc CountName {instance tag} {
+    if {![counter::exists $tag]} {
+	counter::init $tag
+    }
     counter::count $tag 1 $instance
 }
 
