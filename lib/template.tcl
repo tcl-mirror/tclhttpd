@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: template.tcl,v 1.16 2004/06/14 06:09:06 coldstore Exp $
+# RCS: @(#) $Id: template.tcl,v 1.17 2004/06/15 08:19:47 coldstore Exp $
 
 package provide httpd::template 1.0
 
@@ -424,7 +424,7 @@ proc Template_Try {sock path prefix suffix} {
 	
 	# ensure request was for *.htm[l]? and .tml exists
 	if {![regexp $Template(htmlMatch) [file extension $path] x ext]
-	    && ![file exists $template]} {
+	    || ![file exists $template]} {
 	    # no template found
 	    return 0
 	}

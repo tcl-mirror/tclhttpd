@@ -14,7 +14,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: fallback.tcl,v 1.6 2004/06/14 06:09:06 coldstore Exp $
+# RCS: @(#) $Id: fallback.tcl,v 1.7 2004/06/15 08:19:47 coldstore Exp $
 
 package provide httpd::fallback 1.0
 
@@ -122,7 +122,7 @@ proc Fallback_Try {virtual path suffix sock} {
 	}
 
 	# Offer alternative to the client by redirection, preserving query data
-	Redirect_QuerySelf $virtual/[string trimleft $suffix /~]
+	Redirect_QuerySelf $sock "$virtual[string trimleft $suffix /~]"
 	return 1	;# we have completely handled the request.
     }
 }
