@@ -1,3 +1,16 @@
+2000-05-10  Brent Welch <welch@scriptics.com>
+
+	* bin/httpd.tcl: Moved development script library to
+	the front of the auto_path.
+	* lib/httpd.tcl: Made the SSL handhake non-blocking. BUG 5252.
+	* lib/cgi.tcl: Changed exec of CGI script to use
+		>2 /dev/stdout (if that device exists) instead of
+		|& cat (to eliminate a process)
+	* lib/doc.tcl: Fixed ~username accesses.
+	* lib/mail.tcl: This now looks for /usr/lib/sendmail or
+	for /sbin/sendmail for those FreeBSD folks out there.
+	* lib/status.tcl: Beefed up /status/size
+
 2000-05-08  Melissa Chawla  <hershey@scriptics.com>
 
 	* lib/httpd.tcl: removed extra requirement that the caDir
