@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.20 2000/09/27 19:35:26 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.21 2000/10/02 16:29:15 welch Exp $
 
 package provide httpd::status 1.0
 
@@ -421,7 +421,7 @@ proc StatusThreadUpdate {self master} {
 }
 
 proc StatusTable {} {
-    append html "<table border>\n"
+    append html "<table bgcolor=#eeeeee>\n"
 
     set hit 0
     foreach {c label} {
@@ -505,22 +505,25 @@ proc Status/all {args} {
     append html [StatusMainTable]
     append html "<br><a href=/status/text>Text only view.</a>\n"
 
-    append html [stats::histHtmlDisplay serviceTime \
+    append html "<p>\n<table border=0 cellpadding=0 cellspacing=0>\n"
+    append html [stats::histHtmlDisplayRow serviceTime \
 	    -title "Service Time" -unit seconds \
 	    -width 1 -skip 10 -min 0 -max 400 \
 	    -images $_status(images)]
 
-    append html [stats::histHtmlDisplay urlhits \
+    append html [stats::histHtmlDisplayRow urlhits \
 	    -title "Url Hits" -unit minutes \
 	    -min 0 -max 60 \
 	    -images $_status(images)]
-    append html [stats::histHtmlDisplay urlhits \
+    append html [stats::histHtmlDisplayRow urlhits \
 	    -title "Url Hits" -unit hours \
 	    -min 0 -max 24 \
 	    -images $_status(images)]
-    append html [stats::histHtmlDisplay urlhits \
+    append html [stats::histHtmlDisplayRow urlhits \
 	    -title "Url Hits" -unit days \
 	    -images $_status(images)]
+    
+    append html </table>
     return $html
 }
 

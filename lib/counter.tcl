@@ -15,7 +15,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: counter.tcl,v 1.10 2000/09/27 19:57:13 welch Exp $
+# RCS: @(#) $Id: counter.tcl,v 1.11 2000/10/02 16:29:15 welch Exp $
 
 package provide httpd::counter 2.0
 package require stats 1.0
@@ -36,7 +36,7 @@ proc Counter_Init {{secsPerMinute 60}} {
     # urlhits is the number of requests serviced.
 
     set counterTags(urlhits) 1
-    stats::countInit urlhits -timehist secsPerMinute
+    stats::countInit urlhits -timehist $secsPerMinute
 
     # This start/stop timer is used for connection service times.
     # The linear histogram has buckets of 5 msec.
