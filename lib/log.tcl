@@ -151,7 +151,10 @@ proc LogValue {var} {
 
 proc Log_FlushMinutes {min} {
     global Log
-    set Log(flushInterval) [expr $min*60*1000]
+    set Log(flushInterval) [expr int($min*60*1000)]
+    if {[info exist Log(flushID)]} {
+	Log_Flush
+    }
 }
 
 # Log_SetFile --

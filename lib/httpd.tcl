@@ -54,7 +54,7 @@ array set Httpd_Errors {
     504 {Service Temporarily Unavailable}
 }
 # Environment variables that are extracted from the mime header
-# and passed to the CGI script.  the values are keys into the
+# by Cgi_SetEnv.  The values are keys into the
 # per-connection state array (i.e. "data")
 
 array set Httpd_EnvMap {
@@ -71,6 +71,8 @@ array set Httpd_EnvMap {
     HTTP_FORWARDED      mime,forwarded
     HTTP_HOST           mime,host
     HTTP_PROXY_CONNECTION mime,proxy-connection
+    REMOTE_USER		remote_user
+    AUTH_TYPE		auth_type
 }
 
 # Httpd_Init

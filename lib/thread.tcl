@@ -82,13 +82,16 @@ proc Thread_List {} {
 #	The ID of the created thread
 
 proc Thread_Start {} {
-    global auto_path
+    global auto_path tcl_library
     set id [Thread_Create] 
     Thread_Send $id \
 	{puts stderr "Thread  starting."}
 
-    # Set up auto_loading
+    # Set up auto_loading.  These steps may become redundent once the
+    # TclpSetLibraryPath code works correctly in threads.
 
+    Thread_Send $id \
+	[list set tcl_library $tcl_library]
     Thread_Send $id \
 	{source $tcl_library/init.tcl}
     Thread_Send $id \

@@ -105,9 +105,8 @@ proc Auth_VerifyCallback {sock realm callback} {
 	Httpd_RequestAuth $sock Basic $realm
 	return 0
     } else {
-	global env
-	set env(REMOTE_USER) $user
-	set env(AUTH_TYPE) Basic
+	set data(remote_user) $user
+	set data(auth_type) Basic
 	return 1
     }
 }
@@ -220,9 +219,8 @@ proc AuthVerifyBasic {sock file} {
     if {! $ok} {
 	Httpd_RequestAuth $sock Basic $info(name)
     } else {
-	global env
-	set env(REMOTE_USER) $user
-	set env(AUTH_TYPE) Basic
+	set data(remote_user) $user
+	set data(auth_type) Basic
     }
     return $ok
 }
