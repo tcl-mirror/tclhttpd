@@ -8,9 +8,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: compat.tcl,v 1.4 2003/04/04 04:10:54 coldstore Exp $
+# RCS: @(#) $Id: compat.tcl,v 1.5 2003/04/04 04:24:49 coldstore Exp $
 
-package provide httpd::compat 1.1
+package provide httpd::compat 3.3
 
 foreach {oldname newname} {
     Doc_Cookie	Cookie_Get
