@@ -1,3 +1,8 @@
+2000-05-01 Brent Welch <welch@scriptics.com>
+    
+	* Added Httpd_DumpHeaders to get the HTTP protocol state out
+	of a connection
+
 2000-04-28 Brent Welch <welch@scriptics.com>
     
 	* Fixed Doc_RedirectSelf to use html::resolveUrl to correctly
