@@ -94,10 +94,21 @@ build:
 build/$(PLATFORM):  build
 	mkdir build/$(PLATFORM)
 
-make:
+# We have to make and install Tcl first so that the extensions
+# can properly find the stubs library.
+
+make-tcl:
 	-pwd=`pwd`; \
 	prefix=$(PREFIX) ; \
-	for i in $(ALL_MODULES) ; do \
+        echo "Make in $$pwd/build/$(PLATFORM)/$(TCL)" ; \
+        cd $$pwd/build/$(PLATFORM)/$(TCL) ; \
+        make ; \
+        make install
+
+make-modules:
+	-pwd=`pwd`; \
+	prefix=$(PREFIX) ; \
+	for i in $(MODULES) ; do \
 	    echo "" ; \
 	    if test -f $$pwd/build/$(PLATFORM)/$$i/Makefile ; then \
 		echo "Make in $$pwd/build/$(PLATFORM)/$$i" ; \
@@ -116,7 +127,7 @@ install-force:
 	-mkdir $(EXEC_PREFIX)
 	-pwd=`pwd`; \
 	prefix=$(PREFIX) ; \
-	for i in $(ALL_MODULES) ; do \
+	for i in $(MODULES) ; do \
 	    echo "" ; \
 	    if test -f $$pwd/build/$(PLATFORM)/$$i/Makefile ; then \
 		echo "Make install for $$pwd/build/$(PLATFORM)/$$i" ; \
