@@ -234,6 +234,7 @@ proc CgiSpawn {sock script} {
 	# can keep track of how much post data is left
 
 	set more 1 
+	set buffer ""
 	while {$more > 0} {
 	    set more [Httpd_GetPostData $sock buffer 8192]
 	    puts -nonewline $fd $buffer

@@ -253,7 +253,9 @@ proc Url_DecodeQuery {query args} {
 	# that used to read all the post data for us, we read it now
 	# if it hasn't already been read
 
-	append query &
+	if {[string length $query]} {
+	    append query &
+	}
 	while {$Url(postlength) > 0} {
 	    set Url(postlength) [Httpd_GetPostData $Url(sock) query]
 	}

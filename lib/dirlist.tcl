@@ -10,29 +10,8 @@
 
 package provide dirlist 1.0
  
-proc DirList {dir urlpath} {
-    global tcl_platform
-    upvar 1 sock sock	;# DISGUSTING HACK
-    upvar #0 Httpd$sock data
-
-    set sort name
-    set pattern *
-    if [info exists data(query)] {
-	foreach {name value} [Url_DecodeQuery $data(query)] {
-	    switch $name {
-		sort {set sort $value}
-		pattern {set pattern $value}
-	    }
-	}
-    }
- 
-    if [string compare macintosh $tcl_platform(platform)] {
-	set what Directory
-	set lwhat directory
-    } else {
-	set what Folder
-	set lwhat folder
-    }
+proc DirListForm {dir urlpath {sort name} {pattern *}} {
+    set what [DirListTerm]
     set namecheck ""
     set sizecheck ""
     set numcheck ""
@@ -47,11 +26,7 @@ proc DirList {dir urlpath} {
 	    set namecheck checked
 	}
     }
-    set listing "<HTML>
-<HEAD>
-<TITLE>Listing of $what $urlpath</TITLE>
-</HEAD>
-<BODY>
+    set listing "
 <H1>Listing of $what $urlpath</H1>
 
 <form action=$urlpath>
@@ -60,14 +35,19 @@ Sort by Modify Date <input type=radio name=sort value=number $numcheck>
 or Name <input type=radio name=sort value=name $namecheck>
 or Size <input type=radio name=sort value=size $sizecheck><br>
 <input type=submit name=submit value='Again'><p>
-<PRE>
 "
+    append listing [DirListInner $dir $urlpath $sort $pattern]
+    append listing "</form>\n"
+    return $listing
+}
 
+proc DirListInner {dir urlpath sort pattern} {
+    set listing "<PRE>\n"
     set path [file split $dir]
     set list [glob -nocomplain -- [file join $dir $pattern]]
     if {[llength $path] > 1} {
 	append listing \
-	    "<A HREF=\"..\">Up to parent $lwhat</A>\n"
+	    "<A HREF=\"..\">Up to parent [string tolower [DirListTerm]]</A>\n"
     }
 
     set timeformat "%b %e, %Y %X"
@@ -136,16 +116,39 @@ or Size <input type=radio name=sort value=size $sizecheck><br>
 	    }
 	}
     } else {
-	append listing "$what is empty\n"
+	append listing "[DirListTerm] is empty\n"
     }
  
     append listing "
 </PRE>
-</FORM>
-</BODY>
-</HTML>
 "
     return $listing
+}
+
+proc DirList {dir urlpath} {
+    upvar 1 sock sock	;# DISGUSTING HACK
+    upvar #0 Httpd$sock data
+
+    set sort name
+    set pattern *
+    if [info exists data(query)] {
+	foreach {name value} [Url_DecodeQuery $data(query)] {
+	    switch $name {
+		sort {set sort $value}
+		pattern {set pattern $value}
+	    }
+	}
+    }
+
+    return "
+<HTML>
+<HEAD>
+    <TITLE>Listing of [DirListTerm] $urlpath</TITLE>
+</HEAD>
+<BODY>
+    [DirListForm $dir $urlpath $sort $pattern]
+</BODY>
+</HTML>"
 }
 
 # DirlistCompare --
@@ -179,4 +182,19 @@ proc SizeCompare {a b} {
     } else {
 	return [string compare $a $b]
     }
+}
+
+# DirListTerm --
+#
+# Return "Folder" or "Directory" as appropriate
+
+proc DirListTerm {} {
+    global tcl_platform
+ 
+    if [string compare macintosh $tcl_platform(platform)] {
+	set what Directory
+    } else {
+	set what Folder
+    }
+    return $what
 }

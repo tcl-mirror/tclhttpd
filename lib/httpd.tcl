@@ -732,6 +732,7 @@ proc Httpd_Redirect {newurl sock} {
     set message [format $HttpdRedirectFormat $newurl]
     set close [HttpdClose $sock]
     HttpdRespondHeader $sock text/html $close [string length $message] 302
+    HttpdSetCookie $sock
     puts $sock "Location: $newurl"
     puts $sock ""
     # The -nonewline is important here to work properly with
