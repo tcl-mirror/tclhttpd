@@ -1,3 +1,11 @@
+2004-08-07 Brent Welch <welch@panasas.com>
+        * certs/README.ssl: updated with notes taken while generating
+          certificates with openssl-0.9.7d
+        * lib/srvui.tcl: expose webmaster and debug passwords in the UI
+        * lib/debug.tcl: removed " " from the alphabet used to pick
+          passwords.
+        * lib/auth.tcl, lib/digest.tcl: Minor edit to a comment
+
 2004-07-18 Colin McCormack <colin@chinix.com>
         * lib/{doc,subst}.tcl: fixed handling of relative symbolic links
 

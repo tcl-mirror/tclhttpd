@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.19 2004/03/23 01:55:12 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.20 2004/08/08 02:44:48 welch Exp $
 
 package provide httpd::debug 1.0
 
@@ -30,14 +30,14 @@ proc Debug_Url {dir} {
 #       Choose and save a random password used to secure the /debug domain
 
 proc DebugSetRandomPassword {dir} {
-  set alphabet {a b c d e f g h i j k l m n o p q r s t u v w x y z 0 1 2 3 4 5 6 7 8 9 . + - = " "}
+  set alphabet {a b c d e f g h i j k l m n o p q r s t u v w x y z 0 1 2 3 4 5 6 7 8 9 . + - =}
   for {set i 0} {$i < 12} {incr i} {
     set c [lindex $alphabet [expr int(rand() * [llength $alphabet])]]
     append passwd $c
   }
   set ::DebugPassword $passwd
-  # This printf is important - it's the only way the admin
-  # knows what this password might be
+  # This lets the admin see this important password during startup.
+  # It is also displayed by the Tk srvui interface.
   Stderr "$dir user \"debug\" password \"$passwd\""
 }
 

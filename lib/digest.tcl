@@ -199,6 +199,8 @@ proc Digest_Request {sock realm file} {
 }
 
 # decode an Authentication request
+# "parts" comes from the Authorization HTTP header.
+
 proc Digest_Get {sock parts} {
     upvar #0 Httpd$sock data
     #Stderr "Digest_Get $parts"

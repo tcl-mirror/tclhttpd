@@ -29,7 +29,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.22 2004/06/15 23:33:14 coldstore Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.23 2004/08/08 02:44:48 welch Exp $
 
 package provide httpd::auth 2.0
 package require base64
@@ -92,8 +92,8 @@ proc Auth_InitCrypt {} {
 	set authdefault(user,webmaster) [crypt $webmaster_password $salt]
 	set authdefault(group,webmaster) webmaster
 	set authdefault(user,webmaster@webmaster) [Digest_Passwd webmaster webmaster $webmaster_password]
-	# This printf is important - it's the only way the admin
-	# knows what this password might be
+	# This lets the admin see this important password during startup.
+        # It is also displayed by the Tk srvui interface.
 	Stderr "User \"webmaster\" default password \"$webmaster_password\""
     }
 }

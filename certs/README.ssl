@@ -42,38 +42,70 @@ make valid certificates, but browsers will prompt users to validate the
 key when they visit your site.
 
 You'll need the "openssl" command line utility that's
-built when you build openssl.
+built when you build openssl.  Here is what I did with
+openssl-0.9.7d
 
-0. Edit the sample "openssl.cnf" file that's distributed with
-   openssl, replacing the dummy company names, etc.  Copy
-   it to an empty directory and run openssl from there.
+0. Build and install openssl.  It installs into /usr/local/ssl
+   I left the openssl.cnf file unchanged, and created a sub-directory
+   to hold all the CA (certificate authority) stuff, as
+   /usr/local/ssl/demoCA.
 
-1. generate a private key for your test CA
-   openssl genrsa -out key1.pem
-2. build a certificate request
-   openssl req -x509 -nodes -out ca.pem -key key1.pem -new
+1. Use the "misc/CA.sh" script as a front-end for the "openssl ca"
+   command, which needs to be set up correctly.
+   First, we initialize the CA:
+   misc/CA.sh -newca
 
-You've now got a CA certificate "ca.pem".
-It's "self-signed".
-Its private key is "key1.pem".
+  The -newca script does two things, approximately:
+  (If you ran misc/CA.sh -newca, then you don't need to do 1(a, b, c)
+  1(a). generate a private key for your test CA
+     cd /usr/local/ssl
+     bin/openssl genrsa -out demoCA/private/cakey.pem
 
-We'll now make a server cert and we'll use the CA cert
-we just made to sign it.
+  1(b). build a certificate request
+     bin/openssl req -x509 -nodes -out demoCA/cacert.pem -key demoCA/private/cakey.pem -new
 
-3. generate a private key for your server
-   opensl genrsa -out key2.pem
-4. build a cert request
-  openssl req -x509 -nodes -out s.pem -key key2.pem -new
-5. build the server certificate
-  openssl ca -keyfile key1.pem -cert ca.pem -in s.pem
-6. rename the output, which is something like "01.pem"
-  back to "s.pem" (it's OK to clobber the s.pem you made earlier)
+  1(c). create a serial, index.txt, and other empty directories expected
+    by the ca subcommand of openssl
 
-You've now got a server certificate "s.pem".
-Its private key is key2.pem.
+
+  You've now got a CA certificate "cacert.pem".
+  It's "self-signed".
+  Its private key is "private/cakey.pem".
+
+We'll now make a server key, certificate request,
+and we'll use the CA cert we just made to sign it
+and generate our final certificate. (I couldn't get the
+CA.sh front-end to work for me in this case, so I did
+the following commands directly.)
+
+2. generate a server key
+   bin/openssl genrsa -out key1.pem
+
+3. generate a certificate request
+   bin/openssl req -nodes -out req.pem -key key1.pem -new
+
+4. generate the server certificate
+   bin/openssl ca -keyfile demoCA/private/cakey.pem \
+        -cert demoCA/cacert.pem -in req.pem
+
+Because I didn't use "-out", the cert was generated into
+demoCA/newcerts as 01.pem (or 02.pem, ...)
+
+You've now got a server certificate "demoCA/newcerts/01.pem".
+Its private key is key1.pem.
 It's signed by your own CA.
 
 You can make any number of certs by repeating steps
-three through six again with different file names.
+two through four again with different file names.
 
+To set up tclhttpd, copy the key and the cert into the
+tclhttpd/certs subdirectory.  E.g., 
+cd /usr/local/tclhttpd-3.5.1/
+mkdir certs
+cp /usr/local/ssl/key1.pem certs/skey.pem
+cp /usr/local/ssl/demoCA/newcerts/02.pem certs/server.pem
 
+It appears that the default location for the certs directory
+is a "bin/certs", a subdirectory of the bin directory.  If
+you want to change that, edit bin/tclhttpd.rc and fix
+the SSL_CADIR setting.
