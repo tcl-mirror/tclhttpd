@@ -11,7 +11,7 @@ package provide cgi 1.1
 # init support
 
 array set Cgi {
-    timeout	60000
+    timeout	300000
     maxcgi	100
     cgi		0
     ident	0
@@ -87,7 +87,7 @@ proc Cgi_SetEnv {sock path {var env}} {
 proc Cgi_SetEnvAll {sock path extra translated var} {
     upvar #0 Httpd$sock data
     upvar #0 $var env
-    global env Httpd Httpd_EnvMap Cgi
+    global Httpd Httpd_EnvMap Cgi
 
     # we can't "unset env" or it won't get passed to the CGI script
     foreach i [array names env] {
@@ -179,7 +179,7 @@ proc CgiSpawn {sock script} {
     }
     fileevent $sock readable [list CgiCleanup $fd $sock]
     fileevent $fd readable [list CgiRead $fd $sock]
-    set data(cancel) [after $Cgi(timeout) CgiCancel $fd $sock 1]
+    set data(cancel) [after $Cgi(timeout) CgiCancel $fd $sock]
 }
 
 
