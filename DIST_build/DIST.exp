@@ -20,6 +20,11 @@ foreach f [glob -nocomplain ~/scratch/* ~/dist/tclhttpd$v* ~/dist/tclhttpd$vv* ~
 set timeout 1000
 spawn sh DIST
 expect {
+  -re "\n.*checkout aborted.*\n" {
+    send_user $expect_out(buffer)
+    send_user "CVS FAILURE"
+    exit 1
+  }
   password: {
     stty -echo
     after 200   ;# necessary to avoid echoing password

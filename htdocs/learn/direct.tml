@@ -47,7 +47,7 @@ Suppose you have this simple form:
 You can define a form handler like this:
 <pre>
 proc ::hello::/formhandler {foo} {
-  return "You entered foo=$foo"
+  return "You entered foo=\$foo"
 }
 </pre>
 

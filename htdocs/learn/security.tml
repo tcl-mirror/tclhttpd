@@ -38,7 +38,7 @@ directory somewhere.  URL domains are created with
 <tt>Url_PrefixInstall</tt>, and
 <a href=/learn/direct.tml>Application Direct URLs</a> are
 a simple kind of custom URL domain you can easily experiment with.
-For example, the <a href=/debug>/debug</a> and
+For example, the <a href=/debug/echo?foo=bar>/debug</a> and
 <a href=/status>/status</a> are Application Direct URLs
 implemented by code inside the basic server that provide
 simple debugging tools and status reporting.
@@ -95,13 +95,16 @@ The access control procedures configured for this server:
   global Httpd
   set sock $Httpd(currentSocket)
   upvar #0 Httpd$sock data
-  set html "<table border=1 cellpadding=2 cellspacing=2 align=left>\n"
+  set html "<table border=0 cellpadding=2 cellspacing=2 align=left>\n"
+  append html "<tr><td>\n"
+  append html "<table border=1 cellpadding=2 cellspacing=2 align=left>\n"
   # Used to do "array names data", but here we filter a bit
   foreach x {proto url uri prefix suffix pathlist
         self mime,host ipaddr} {
     append html "<tr><td>data($x)</td><td>$data($x)</td></tr>\n"
   }
   append html "</table>"
+  append html "</td><td>&nbsp;</td></tr></table>"
   return $html
 }]
 [MyHttpdState]

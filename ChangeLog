@@ -1,4 +1,5 @@
 2004-05-28 Brent Welch <welch@panasas.com>
+        * htdocs/learn/* - various doc updates
         * DIST_build/Makefile.boot
         * DIST_build/DIST
         Updates to use a pre-packaged thread-2.5.2 release because I'm
