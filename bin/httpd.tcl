@@ -42,7 +42,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.32 2000/09/25 22:47:35 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.33 2000/10/19 22:27:20 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -210,14 +210,14 @@ if {![catch {package require tls}]} {
     # Tls doesn't provide good error messages in these cases,
     # so we check ourselves that we have the right certificates in place.
 
-    if {![file exists [cget SSL_CADIR]] && ![file exists [cget SSL_CAFILE]]} {
-	return -code error "No CA directory \"[cget SSL_CADIR]\" nor a CA file \"[cget SSL_CAFILE]\""
-    }
-    if {![file exists [cget SSL_CERTFILE]]} {
-	return -code error "Certificate  \"[cget SSL_CERTFILE]\" not found"
-    }
-
     if {[catch {
+	if {![file exists [cget SSL_CADIR]] && ![file exists [cget SSL_CAFILE]]} {
+	    return -code error "No CA directory \"[cget SSL_CADIR]\" nor a CA file \"[cget SSL_CAFILE]\""
+	}
+	if {![file exists [cget SSL_CERTFILE]]} {
+	    return -code error "Certificate  \"[cget SSL_CERTFILE]\" not found"
+	}
+
 	tls::init -request [cget SSL_REQUEST] \
 		-require [cget SSL_REQUIRE] \
 		-ssl2 [cget USE_SSL2] \
