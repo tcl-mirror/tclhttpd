@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: thread.tcl,v 1.10 2000/08/02 07:06:54 welch Exp $
+# RCS: @(#) $Id: thread.tcl,v 1.11 2001/07/09 23:05:19 welch Exp $
 
 package provide httpd::threadmgr 1.0
 
@@ -267,6 +267,7 @@ proc Thread_Free {id} {
 	set sock [lindex $state 0]
 	set cmd [lindex $state 1]
 	upvar #0 Httpd$sock data
+	set data(master_thread) [Thread_Id]
 	Thread_SendAsync $id [list Thread_Invoke $sock [array get data] $cmd]
     } else {
 	lappend Thread(freelist) $id
@@ -351,6 +352,6 @@ proc Thread_Id {} {
 
 proc Thread_IsFree {id} {
     global Thread
-    return [expr {[lsearch $Thread(freelist) $id] <= 0}]
+    return [expr {[lsearch $Thread(freelist) $id] >= 0}]
 }
 

@@ -20,7 +20,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.42 2000/11/29 18:37:02 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.43 2001/07/09 23:05:19 welch Exp $
 
 package provide httpd::doc 1.1
 
@@ -1259,7 +1259,18 @@ proc Doc_Cookie {cookie} {
     global env
     set result ""
     if {[info exist env(HTTP_COOKIE)]} {
-	foreach pair [split $env(HTTP_COOKIE) \;] {
+	set rawcookie $env(HTTP_COOKIE)
+    } elseif {![info exist env(HTTP_COOKIE)]} {
+	# Try to find the connection
+	if {[info exists env(HTTP_CHANNEL)]} {
+	    upvar #0 Httpd$env(HTTP_CHANNEL) data
+	    if {[info exist data(mime,cookie)]} {
+		set rawcookie $data(mime,cookie)
+	    }
+	}
+    }
+    if {[info exist rawcookie]} {
+	foreach pair [split $rawcookie \;] {
 	    lassign [split [string trim $pair] =] key value
 	    if {[string compare $cookie $key] == 0} {
 		lappend result $value

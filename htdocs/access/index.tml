@@ -19,7 +19,7 @@ prompt.  The server will invoke the procedure named by
 the callback variable to check the password.
 
 <p>
-<b>Examples using .htaccess files</b>
+<b>Examples using .tclaccess files</b>
 <ul>
 <li>
 <a href=bytcl/>The first example</a> uses a .tclaccess file in the directory that
@@ -33,7 +33,7 @@ forces you to try to login twice, and then remembers that password until the ser
 I'm not sure how useful this really is.<br>
 </ul>
 
-<b>Examples using .tclaccess files</b>
+<b>Examples using .htaccess files</b>
 <p>
 To be able to run the examples you have to create the files
 /usr/local/htaccess/passwd and /usr/local/htaccess/group.

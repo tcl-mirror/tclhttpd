@@ -1,3 +1,17 @@
+2001-07-09  Brent Welch <welch@panasas.com>
+	* htdocs/access/index.tml: Fixed typo in section headers.
+	* lib/doc.tcl: Fixed Doc_Cookie to look in the connection
+	state (mime array) instead of relying on the environment variable.
+	* lib/pkgIndex.tcl: Fixed to handle spaces in directory names.
+	* lib/thread.tcl: Fixed Thread_IsFree
+
+2001-03-19  Brent Welch <welch@panasas.com>
+	* Added custom/ddehack.tcl example that I've been using to
+	integrate exmh running on Unix and Netscape running on Windows.
+
+2001-03-13  Brent Welch <welch@panasas.com>
+	* Tagged and released tclhttpd-3-3
+
 2001-03-12  Brent Welch <welch@panasas.com>
 	(Adopted from work by Piet Vloet - thanks!)
 	* lib/auth.tcl: Changes to handle multiple
