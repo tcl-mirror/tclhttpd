@@ -108,6 +108,11 @@ proc Iterate {server port count args} {
 	    fileevent $s readable [list Read $s $null]
 	}
 	vwait finish
+
+	if {($count % 1000) == 0} {
+	    puts $count
+	    update
+	}
     }
     Report $countOrig
 }
