@@ -516,6 +516,9 @@ lib/httpd.tcl	Strip leading http://server.name from incoming URLs, and filter
 lib/log.tcl	** Added cookie to log ** as an extra field.  Check your log
 		analysis programs to make sure this doesn't confuse them.
 
+htdocs/libtml/form.tcl	Fixed form::value to entity encode characters like
+		", > and < inside the quoted strings it returns.
+
 ----------------- released 2.3.4 November 28, 1999 ------------------
 
 

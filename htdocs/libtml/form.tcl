@@ -8,7 +8,10 @@ namespace eval form:: {
 
     variable qnum
 
+    # Define form element sizes
+
     variable cols	45
+    variable lines	8
 
     namespace export *
 }
@@ -48,7 +51,7 @@ proc form::select {name size choices} {
     }
     set html "<select name=\"$name\" size=$size>\n"
     foreach {v label} $choices {
-	if {[string match $current $v]} {
+	if {[string match $current $v] || ([llength $choices] <= 2)} {
 	    set SEL SELECTED
 	} else {
 	    set SEL ""
@@ -89,7 +92,11 @@ proc form::value {name} {
 	![info exist query($name)]} {
 	return "name=$name value=\"\""
     }
-    return "name=$name value=\"$query($name)\""
+    regsub -all {"} $query($name) {\&#34;} value
+    regsub -all {'} $value {\&#39;} value
+    regsub -all {<} $value {\&lt;} value
+    regsub -all {>} $value {\&gt;} value
+    return "name=$name value=\"$value\""
 }
 
 # Return a form value, or "" if the element is not defined in the query data.
@@ -139,10 +146,8 @@ proc form::radiovalue {name value} {
 
 proc form::radioset {key sep list} {
     global page
-    if {[info exist page(query)]} {
-	array set query $page(query)
-	set html "<!-- radioset $key $page(query) -->\n"
-    }
+    array set query $page(query)
+    set html "<!-- radioset $key $page(query) -->\n"
     foreach {v label} $list {
 	if {![form::empty $key] &&
 		[string match $v $query($key)]} {
@@ -162,9 +167,7 @@ proc form::radioset {key sep list} {
 
 proc form::checkset {key sep list} {
     global page
-    if {[info exist page(query)]} {
-	array set query $page(query)
-    }
+    array set query $page(query)
     foreach {v label} $list {
 	if {![empty query($key)] &&
 		[lsearch $query($key) $v] >= 0} {
