@@ -964,10 +964,15 @@ proc Httpd_SelfUrl {url {sock ""}} {
 	# use in preference to our "true" name
 	# the client might not have a DNS entry for use
 	set name $data(mime,host)
-    }
-    set newurl $type://$name
-    if {$port != 80} {
-	append newurl :$port
+    	set newurl $type://$name
+    } else {
+	set newurl $type://$name
+	if {$type == "http" && $port != 80} {
+	    append newurl :$port
+        }
+	if {$type == "https" && $port != 443} {
+	    append newurl :$port
+        }
     }
     append newurl $url
 }
