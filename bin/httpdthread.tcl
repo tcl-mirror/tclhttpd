@@ -29,6 +29,10 @@ package require redirect	;# URL redirection
 package require auth            ;# Basic authentication
 package require log             ;# Standard logging
 
+if {$Config(threads) > 0} {
+    package require Thread		;# C extension
+    package require threadmgr		;# Tcl layer on top
+}
 
 # Image maps are done either using a Tk canvas (!) or pure Tcl.
 
