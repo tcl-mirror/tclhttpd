@@ -66,6 +66,7 @@ proc Log {sock reason args} {
 	    append result { } [LogValue data(file_size)]
 	    append result { } \"[LogValue data(mime,referer)]\"
 	    append result { } \"[LogValue data(mime,user-agent)]\"
+	    append result { } \"[LogValue data(mime,cookie)]\"
 	    catch {puts $Log(log_fd) $result}
 	    if {$Log(flushInterval) == 0} {
 		catch {flush $Log(log_fd)}
