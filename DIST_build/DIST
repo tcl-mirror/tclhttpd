@@ -4,7 +4,7 @@
 
 HTTPD_VERSION=3.3
 HTTPD_TAG=tclhttpd-3-3
-WIN_VERSION=321
+WIN_VERSION=33
 DISTDIR=/usr10/home/welch/dist
 SUPER_DIR=${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist
 
