@@ -373,3 +373,26 @@ htdocs/guestbook	Added simple guestbook example.
 htdocs/book	Added HTML version of book chapter on TclHttpd.
 
 ----------------- released 2.2 June 18, 1999 ------------------
+
+cgi/*.cgi	Changed to exec "tclsh8.0" instead of absolute path
+
+htdocs/guestbook/guestbook.cgi	Fixed link to newguest.html page
+
+
+cgi.tcl		Use [info nameofexecutable] to choose Tcl interpreter
+		Fixed env(SCRIPT_NAME) to deal with paths that are
+		either under ~username directories, or directories
+		added with Doc_AddRoot.
+		Fixed PATH_TRANSLATED, which was completely wrong.
+
+doc.tcl		Changes to Cgi_Domain interface to support the above.
+		Proper setup of page(url) under ~username  directories,
+		or directories added with Doc_AddRoot.
+		Hack to support applications created with TclPro Wrapper
+		so they can find default index files in DocDirectory
+
+url.tcl		Cleanup of Url_PathCheck
+
+----------------- released 2.2.1 July 7, 1999 ------------------
+
+
