@@ -21,10 +21,12 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.16 2003/10/16 01:45:48 coldstore Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.17 2004/02/08 22:14:22 coldstore Exp $
 
 package provide httpd::auth 2.0
 package require base64
+
+set Auth_DigestOnly 0;	# set this to 1 to only use Digest auth
 
 # Auth_InitCrypt --
 # Attempt to turn on the crypt feature used to store crypted passwords.
@@ -196,6 +198,31 @@ proc AuthNullCallback {sock realm user pass} {
     }
 }
 
+# AuthUserOp - see if the user is permitted to perform a requested
+# operation (PUT, GET, etc)
+# The .htaccess file is searched for the user or a group containing
+# the user, to ascertain whether the user could possibly perform
+# the op before the proffered credentials are checked.
+
+proc AuthUserOp {sock file op user} {
+    upvar #0 auth$file info
+    upvar #0 Httpd$sock data
+
+    if {[info exists info(htaccessp,require,$op,group)]} {
+	if {![AuthGroupCheck $sock $file \
+		  $info(htaccessp,require,$op,group) $user]} {
+	    return 0   ;# Not in a required group
+	}
+    }
+    if {[info exists info(htaccessp,require,$op,user)]} {
+	if {![AuthUserCheck $sock $file \
+		  $info(htaccessp,require,$op,user) $user]} { 
+	    return 0   ;# Not the required user
+	}
+    }
+    return 1
+}
+
 # AuthVerifyBasic - see if the user is granted access.
 # First domain based protection is performed. In the case the
 # user is not in the domain user based protection is performed.
@@ -206,11 +233,17 @@ proc AuthNullCallback {sock realm user pass} {
 proc AuthVerifyBasic {sock file} {
     upvar #0 auth$file info
     upvar #0 Httpd$sock data
+
+    set user ""
+
     AuthParseHtaccess $sock $file
     set op $data(proto) ;# GET, POST etc.
+    set realm $info(htaccessp,name)
 
+    # check whether the operation is controlled
     if {[info exists info(htaccessp,order,$op)]} {
 	if {! [AuthVerifyNet $sock $file $op]} {
+	    # it is controlled and network address is excluded
 	    Httpd_Error $sock 403
 	    return 0
 	}
@@ -220,50 +253,71 @@ proc AuthVerifyBasic {sock file} {
 	# No "require group .." or "require user .." in .htaccess file
 	return 1
     }
+
     set ok 0
+
+    # the operation requires a user or group - check authorization
     if {[info exists data(mime,authorization)]} {
-	set ok 1
+	# client has sent auth data
 	set parts [split $data(mime,authorization)]
 	set type [lindex $parts 0]
-	set code [lindex $parts 1]
-	if {[string compare $type Basic] != 0} {
-	    set ok 0
-	} else {
-	    set parts [split [base64::decode $code] :]
-	    set user [lindex $parts 0]
-	    set pass [lindex $parts 1]
-	    if {[info exists info(htaccessp,require,$op,group)]} {
-		if {![AuthGroupCheck $sock $file \
-			$info(htaccessp,require,$op,group) $user]} {
-		    set ok  0   ;# Not in a required group
+
+	switch -- [string tolower $type] {
+	    digest {
+		# unpack the digest request
+		Digest_Get $sock $parts
+
+		# check that the proferred user can have access
+		set user $data(digest,username)
+		set ok [AuthUserOp $sock $file $op $user]
+
+		if {$ok} {
+		    # now check the Digest credentials
+		    set ok [Digest_Request $sock $realm $file]
 		}
 	    }
-	    if {! $ok} {
-		if {[info exists info(htaccessp,require,$op,user)]} {
-		    set ok 1
-		    if {![AuthUserCheck $sock $file \
-			    $info(htaccessp,require,$op,user) $user]} { 
-			set ok  0   ;# Not the required user
+	    basic {
+		set code [lindex $parts 1]
+		set parts [split [base64::decode $code] :]
+
+		# check that the proferred user can have access
+		set user [lindex $parts 0]
+		set ok [AuthUserOp $sock $file $op $user]
+
+		if {$ok} {
+		    # now check the Basic credentials
+		    set pass [lindex $parts 1]
+		    set crypt [AuthGetPass $sock $file $user]
+		    set salt [string range $crypt 0 1]
+		    set crypt2 [crypt $pass $salt]
+		    if {[string compare $crypt $crypt2] != 0} {
+			set ok 0        ;# Not the right password
 		    }
 		}
 	    }
-	}
-	if {$ok} {
-	    set crypt [AuthGetPass $sock $file $user]
-	    set salt [string range $crypt 0 1]
-	    set crypt2 [crypt $pass $salt]
-	    if {[string compare $crypt $crypt2] != 0} {
-		set ok 0        ;# Not the right password
+	    default {
+		# this is an unknown auth method - it's not ok, we can't handle it
+		set ok 0
 	    }
 	}
     }
+
     if {! $ok} {
-	Httpd_RequestAuth $sock Basic $info(htaccessp,name)
+	# client hasn't sent auth or auth doesn't satisfy
+	global Auth_DigestOnly
+	if {!$Auth_DigestOnly && ($info(htaccessp,type) == "Basic")} {
+	    Httpd_RequestAuth $sock Basic $realm
+	} else {
+	    # make Digest the default
+	    Digest_Challenge $sock $realm $user
+	}
     } else {
-	set data(auth_type) Basic
+	# client is permitted and credentials check out
+	set data(auth_type) $type
 	set data(remote_user) $user
-	set data(session) $info(htaccessp,name),$user
+	set data(session) $realm,$user
     }
+
     return $ok
 }
 
@@ -271,7 +325,7 @@ proc AuthUserCheck  {sock file users user } {
     return [expr {[lsearch $users $user] >= 0}]
 }
 
-# Parse the AuthGroupFile.                          
+# Parse the AuthGroupFile.
 # The information is built up in the info array
 
 proc AuthGroupCheck {sock file groups user} {
@@ -316,7 +370,7 @@ proc AuthGetPass {sock file user} {
 	foreach i [array names info "user*"] {
 	    unset info($i)
 	}
-	if {[catch {open $info(htaccessp,userfile)} in]} {
+	if {[catch {open $info(htaccessp,userfile)} in err]} {
 	    return *
 	}
 	while {[gets $in line] >= 0} {
@@ -388,6 +442,7 @@ proc AuthParseHtaccess {sock file} {
 	set info(htaccessp,mtime) $mtime
 	set info(htaccessp,userfile) {}
 	set info(htaccessp,groupfile) {}
+	set info(htaccessp,name) Digest
 	if {[catch {open $file} in]} {
 	    return 1
 	}

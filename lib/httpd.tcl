@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.82 2003/12/28 03:52:36 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.83 2004/02/08 22:14:22 coldstore Exp $
 
 package provide httpd 1.6
 
@@ -601,8 +601,8 @@ proc HttpdRead {sock} {
     #	mime: we are reading the protocol headers
     # and how much was read. Note that
     # [string compare $readCount 0] maps -1 to -1, 0 to 0, and > 0 to 1
-
     set state [string compare $readCount 0],$data(state)
+
     switch -glob -- $state {
 	1,start	{
 	    if {[regexp {^([^ ]+) +([^?]+)\??([^ ]*) +HTTP/(1.[01])} \
@@ -1165,6 +1165,7 @@ proc Httpd_RemoveHeaders {sock {pattern *}} {
 proc Httpd_NoCache {sock} {
     Httpd_RemoveHeaders $sock Cache-Control
     Httpd_AddHeaders $sock Cache-Control no-cache
+    Httpd_AddHeaders $sock Expires content '-1'
 }
 
 # Httpd_Refresh
@@ -1854,6 +1855,7 @@ set HttpdAuthorizationFormat {
 #	sock	Socket connection
 #	type	usually "Basic"
 #	realm	browsers use this to cache credentials
+#	args	additional name value pairs for request
 #
 # Results:
 #	None
@@ -1861,7 +1863,7 @@ set HttpdAuthorizationFormat {
 # Side Effects:
 #	Generate an authorization challenge response.
 
-proc Httpd_RequestAuth {sock type realm} {
+proc Httpd_RequestAuth {sock type realm args} {
     upvar #0 Httpd$sock data
     global Httpd HttpdAuthorizationFormat
 
@@ -1870,9 +1872,14 @@ proc Httpd_RequestAuth {sock type realm} {
 	return
     }
 
+    set additional ""
+    foreach {name value} $args {
+	append additional ", " ${name}=$value
+    }
+
     set close [HttpdCloseP $sock]
     HttpdRespondHeader $sock text/html $close [string length $HttpdAuthorizationFormat] 401
-    puts $sock "Www-Authenticate: $type realm=\"$realm\""
+    puts $sock "Www-Authenticate: $type realm=\"$realm\" $additional"
     puts $sock ""
     puts -nonewline $sock $HttpdAuthorizationFormat
     Httpd_SockClose $sock $close
