@@ -51,5 +51,14 @@ proc bugdb::bug-list {} {
 }
 
 proc bugdb::bug-details {bug} {
-    return $bug
+
+    # Open the db
+    mk::file open bugdb ../sampleapp/bugdb/bugdb.mk
+
+    set row [mk::get bugdb.bugs!$bug]
+
+    # Close the db
+    mk::file close bugdb
+
+    return $row
 }
