@@ -145,6 +145,19 @@ proc Url_PrefixInstall {prefix command} {
     }
     set Url(command,$prefix) $command
 }
+
+# Undo a prefix registration
+
+proc Url_PrefixRemove {prefix} {
+    global Url
+
+    # Delete the prefix from the regular expression used to match URLs
+
+    set list [split $Url(prefixset) |]
+    ldelete list $prefix
+    set Url(prefixset) [join [lsort -command UrlSort $list] |]
+}
+
 # Sort the prefixes so the longest one is first
 proc UrlSort {a b} {
     set la [string length $a]
