@@ -1,4 +1,7 @@
 2000-04-18  Brent Welch <welch@scriptics.com>
+	* lib/doc.tcl, lib/url.tcl: Fixed POST data to templates
+
+2000-04-18  Brent Welch <welch@scriptics.com>
 	* lib/debug.tcl: Added /debug/showproc
 	* lib/doc.tcl: Integrated with ncgi:: module for page query data
 	* lib/httpd.tcl: Added Proxy_Dispatch hook
