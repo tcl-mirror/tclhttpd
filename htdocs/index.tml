@@ -35,7 +35,7 @@ Safe-Tcl control scripts, download logging information, and otherwise
 debug the Tcl part of the application without restarting the hosting
 application. 
 <p>
-The <a HREF="http://www.scriptics.com/tclhttpd/server.html">white
+The <a HREF="http://www.tcl.tk/software/tclhttpd/server.html">white
 paper</a> presents a case for an embedded web server from more of a
 business angle. These pages document the technical specifications of
 the server.

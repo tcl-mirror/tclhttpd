@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.26.6.1 2002/08/19 04:19:41 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.26.6.2 2002/09/03 22:44:55 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -313,14 +313,6 @@ install-htdocs:
 	@echo "Creating htdocs tree in $(htdocsdir)"
 	-chmod 755 `@CYGPATH@ $(srcdir)/htdocs/cgi-bin/*.cgi`
 	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/bin/CopyDist` `@CYGPATH@ $(srcdir)/htdocs` `@CYGPATH@ $(htdocsdir)`
-	-$(mkinstalldirs) $(htdocsdir)/links
-	@echo "Copying some READMEs into $(htdocsdir)/links"
-	$(INSTALL_DATA) $(srcdir)/README $(htdocsdir)/links/README.txt
-	$(INSTALL_DATA) $(srcdir)/certs/README.ssl $(htdocsdir)/links/README.ssl.txt
-	$(INSTALL_DATA) $(srcdir)/WHATSNEW $(htdocsdir)/links/WHATSNEW.txt
-	$(INSTALL_DATA) $(srcdir)/INSTALL $(htdocsdir)/links/INSTALL.txt
-	@echo "Copying license.terms into $(htdocsdir)"
-	$(INSTALL_DATA) $(srcdir)/license.terms $(htdocsdir)/license.terms
 
 install-custom:
 	@echo "Adding custom code in $(customdir)"

@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.11 2001/07/12 01:12:21 welch Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.11.6.1 2002/09/03 22:45:02 welch Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -163,7 +163,9 @@ if {[info exist Config(library)] && [string length $Config(library)]} {
 	    Stderr "Loading code from $Config(library)"
 	}
 	foreach f [lsort -dictionary [glob -nocomplain [file join $Config(library) *.tcl]]] {
-	    if {[catch {source $f} err]} {
+            if {[string compare $f "pkgIndex.tcl"]} {
+              continue
+            } elseif {[catch {source $f} err]} {
 		Stderr "$f: $err"
 	    } elseif {$Config(debug)} {
 		Stderr "Loaded [file tail $f]: $err"

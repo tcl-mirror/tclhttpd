@@ -1,7 +1,7 @@
 # Expect script to drive DIST, and handle the CVS password prompting.
 
-set v 3.4.1
-set vv 341
+set v 3.4.2
+set vv 342
 
 foreach f [glob -nocomplain ~/scratch/* ~/dist/tclhttpd$v* ~/dist/tclhttpd$vv* ~/tmp/tclhttpd$v-dist] {
   puts "Removing $f"
