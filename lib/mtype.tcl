@@ -14,9 +14,12 @@ package provide mtype 1.0
 proc Mtype {path} {
     global MimeType
 
-    set type text/plain
-    catch {set type $MimeType([string tolower [file extension $path]])}
-    return $type
+    set ext [string tolower [file extension $path]]
+    if {[info exist MimeType($ext)]} {
+	return $MimeType($ext)
+    } else {
+	return text/plain
+    }
 }
 
 # Read a mime types file into the mimeType array.
@@ -31,6 +34,7 @@ proc Mtype_ReadTypes {file} {
 	.txt	text/plain
 	.htm	text/html
 	.html	text/html
+	.tml	application/x-tcl-template
 	.gif	image/gif
 	.thtml	application/x-safetcl
 	.shtml	application/x-server-include

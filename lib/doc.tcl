@@ -167,7 +167,7 @@ proc Doc_Virtual {sock curfile virtual} {
     if {[regexp ^/ $virtual]} {
 	Url_PrefixMatch $virtual prefix suffix
 	if {[info exist Doc(root,$prefix)]} {
-	    return [file join $Doc(root,$prefix) $suffix]
+	    return [file join $Doc(root,$prefix) [string trimleft $suffix /]]
 	} else {
 	    return [file join $Doc(root,/) [string trimleft $virtual /]]
 	}
@@ -215,7 +215,7 @@ proc DocAccessHook {sock url} {
     if {[info exist Doc(root,$data(prefix))]} {
 	set directory $Doc(root,$data(prefix))
     } else {
-	set directory [file join $Doc(root,/) [string trimleft $data(prefix)]]
+	set directory [file join $Doc(root,/) [string trimleft $data(prefix) /]]
     }
 
     # Look for .htaccess and .tclaccess files along the path
@@ -259,7 +259,7 @@ proc DocDomain {virtual directory sock suffix} {
 
     # Handle existing files
 
-    set path [file join $directory $suffix]
+    set path [file join $directory [string trimleft $suffix /]]
     if {[file exists $path]} {
 	Incr Doc(hit,$data(url))
 	DocHandle $path $suffix $sock
