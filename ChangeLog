@@ -1,3 +1,14 @@
+2000-08-26  Brent Welch <welch@scriptics.com>
+	* doc/httpd.1:
+	Added this man page for TclPro 1.4
+	* Makefile.in:
+	Added man page, README, tclhttpd.etc.init to set of files
+	that are installed.
+	* htdocs/license.terms:
+	Changed Scriptics to Ajuba
+	* htdocs/index.html:
+	Conditionally link to TclPro files
+
 2000-08-25  Brent Welch <welch@scriptics.com>
 
 	* lib/imagemap.tcl: Fixed typo inexpression in imagemap.tcl

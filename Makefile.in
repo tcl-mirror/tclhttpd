@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.21 2000/08/23 20:39:25 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.22 2000/08/27 07:19:36 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -298,8 +298,10 @@ install-binaries:
 	@for i in $(srcdir)/bin/*.rc ; do \
 	    $(INSTALL_DATA) $$i $(prefix)/bin ; \
 	done;
+	@echo "Installing sample boot script"
+	$(INSTALL_DATA) $(srcdir)/bin/tclhttpd.etc.init $(SERVER_ROOT)
 
-install-libraries: installdirs install-htdocs
+install-libraries: installdirs 
 	@echo "Installing script files in $(pkglibdir)"
 	@for i in $(srcdir)/lib/*.tcl ; do \
 	    $(INSTALL_SCRIPT) $$i $(pkglibdir) ; \
@@ -310,8 +312,14 @@ install-htdocs:
 	@echo "Creating htdocs tree in $(htdocsdir)"
 	-chmod 755 `@CYGPATH@ $(srcdir)/htdocs/cgi-bin/*.cgi`
 	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/bin/CopyDist` `@CYGPATH@ $(srcdir)/htdocs` `@CYGPATH@ $(htdocsdir)`
+	-ln -s ../../doc/html $(htdocsdir)/tclpro
 
-install-doc:
+install-doc: install-htdocs
+	@echo "Installing man page"
+	$(INSTALL_DATA) $(srcdir)/doc/httpd.1 $(mandir)/man1/httpd.1
+	@echo "Installing README"
+	$(INSTALL_DATA) $(srcdir)/README $(SERVER_ROOT)
+	$(INSTALL_DATA) $(srcdir)/README_custom $(SERVER_ROOT)
 
 installdirs:
 	$(mkinstalldirs) $(pkglibdir) $(cryptlibdir) $(prefix)/bin $(htdocsdir)
