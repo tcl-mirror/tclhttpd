@@ -85,6 +85,8 @@ if {![catch {package require base64 2.0}]} {
 	[glob -nocomplain [file join $home ../../tcllib*]]] 0]
     if {[file exist [file join $cvs modules]]} {
 	lappend auto_path [file join $cvs modules]
+    } elseif {[file exist [file join $cvs pkgIndex.tcl]]} {
+	lappend auto_path $cvs
     } else {
 	error "Cannot find Standard Tcl Library in auto_path:\n[join $auto_path \n]"
     }
