@@ -1,8 +1,6 @@
 #!/bin/sh
 # \
-#exec /usr/local/bin/tclsh8.0 "$0" ${1+"$@"}
-# \
-exec /usr/local/bin/tclsh8.0 "$0" ${1+"$@"}
+exec tclsh8.0 "$0" ${1+"$@"}
 
 if {[info commands "unsupported0"] == "unsupported0"} {
     rename unsupported0 copychannel

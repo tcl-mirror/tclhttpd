@@ -1,6 +1,6 @@
 #!/bin/sh
 # \
-exec /usr/local/bin/tclsh8.0 "$0" ${1+"$@"}
+exec tclsh8.0 "$0" ${1+"$@"}
 
 source [file join [file dirname [info script]] cgilib.tcl]
 
