@@ -12,7 +12,7 @@ TCL_VERSION=8.3.2
 TCL_DIST=/home/hobbs/dist/tcl${TCL_VERSION}.tar.gz
 
 TCLLIB_VERSION=0.7
-TCLLIB_DIST=/home/welch/cvs/pro1.4/tcllib/tcllib${TCLLIB_VERSION}.tar.gz
+TCLLIB_DIST=/home/welch/cvs/ajuba3/tcllib/tcllib${TCLLIB_VERSION}.tar.gz
 
 THREAD_VERSION=2.1
 THREAD_WIN_VERSION=21
