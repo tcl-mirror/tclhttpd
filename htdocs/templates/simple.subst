@@ -11,7 +11,7 @@
 
 <h1>Tcl-based Templates</h1>
 <h2>The time is [clock format [clock seconds]]</h2>
-The counters in the server are: [Html_ValueList counter]
+The counters in the server are: [html::tableFromArray counter]
 
 </Body>
 </Html>

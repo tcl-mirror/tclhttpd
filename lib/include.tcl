@@ -21,6 +21,7 @@
 # objects.
 
 package provide include 1.0
+package require html
 
 # Global state for this module
 # maxdepth controls recursively included files.
@@ -74,10 +75,10 @@ proc IncludeInner {sock path command params depth} {
 # utility to extract the file name specified from the include parameters
 
 proc IncludeFile {sock op path params} {
-    if {[Html_ExtractParam $params virtual orig]} {
+    if {[html::extractParam $params virtual orig]} {
 	set key virtual
 	set npath [Doc_Virtual $sock $path $orig]
-    } elseif {[Html_ExtractParam $params file orig]} {
+    } elseif {[html::extractParam $params file orig]} {
 	set key file
 	set npath [Doc_File $sock $path $orig]
     } else {
@@ -119,7 +120,7 @@ proc include_include {sock path params depth} {
 proc include_echo {sock path params args} {
     global env
     set var ""
-    if {[Html_ExtractParam $params var]} {
+    if {[html::extractParam $params var]} {
 	if {[info exists env($var)]} {
 	    return $env($var)
 	} else {
@@ -145,7 +146,7 @@ proc include_fsize {sock path params args} {
 
 proc include_exec {sock path params args} {
     set cmd ""
-    if {[Html_ExtractParam $params cmd]} {
+    if {[html::extractParam $params cmd]} {
 	if {[catch {eval exec $cmd} result]} {
 	    regsub -all -- --> $result {} result
 	    return "<!-- $cmd error: $result  -->\n"
