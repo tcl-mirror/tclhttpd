@@ -14,9 +14,9 @@ TCL_DIST=/home/hobbs/dist/tcl${TCL_VERSION}.tar.gz
 TCLLIB_VERSION=0.8
 TCLLIB_DIST=/home/welch/cvs/ajuba3/tcllib/tcllib${TCLLIB_VERSION}.tar.gz
 
-THREAD_VERSION=2.1
-THREAD_WIN_VERSION=21
-THREAD_TAG=thread-2-1
+THREAD_VERSION=2.2
+THREAD_WIN_VERSION=22
+THREAD_TAG=thread-2-2
 
 SCRATCH=/home/welch/scratch
 mkdir ${SCRATCH}

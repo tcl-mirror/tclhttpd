@@ -7,7 +7,7 @@
 TCL_VERSION=8.3.2
 TCL = tcl$(TCL_VERSION)
 TK = tk$(TCL_VERSION)
-THREAD = thread2.1
+THREAD = thread2.2
 TCLLIB = tcllib0.8
 HTTPD = tclhttpd3.2.1
 
