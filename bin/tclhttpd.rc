@@ -1,0 +1,59 @@
+# tclhttpd.rc
+#
+# This is the default configuration file for TclHttpd, the Tcl Web Server
+
+# These packages are required for "normal" web servers
+
+package require doc		;# Basic file URLS
+package require include		;# Server side includes
+package require cgi		;# Standard CGI
+package require dirlist		;# Directory listings
+
+# These packages are for special things built right into the server
+
+package require direct		;# Application Direct URLs
+package require status		;# Built in status counters
+package require mail		;# Crude email support
+package require admin		;# Url-based administration
+package require session		;# Session state module (better Safe-Tcl)
+package require debug		;# Debug utilites
+
+# This is currently broken
+if {0} {
+    package require safetcl	;# External process running safetcl shells
+}
+
+# These packages are for the SNMP demo application
+
+if {[catch {
+    package require snmp       ;# SNMP form creation
+    package require Tnm        ;# Low level network stuff
+}]} {
+    puts "No SNMP support"
+}
+
+# For information about these calls, see htdocs/reference.html
+
+Doc_Root		$docRoot
+Doc_IndexFile		index.{tml,html,shtml,thtml,htm,subst}
+Doc_PublicHtml		public_html
+Cgi_Directory		/cgi-bin
+Status_Url		/status
+Debug_Url		/debug
+Mail_Url		/mail
+Admin_Url		/admin
+Doc_TemplateInterp	{}
+Doc_CheckTemplates	1
+Doc_TemplateLibrary	[file join $docRoot libtml]
+Doc_ErrorPage		/error.html
+Doc_NotFoundPage	/notfound.html
+Doc_Webmaster		$webmaster
+if {[catch {
+    Auth_AccessFile	.htaccess       ;# Enable Basic Auth
+} err]} {
+    puts "No Basic Authentication support: $err"
+}
+
+Log_SetFile		/tmp/log${port}_
+Log_FlushMinutes	1
+
