@@ -1,3 +1,39 @@
+2000-03-27  Brent Welch  <welch@scriptics.com>
+
+	* lib/version.tcl: updated the date in the 3.0.0 version string
+	* lib/thread.tcl: Removed Thread_Disable and replaced it with
+	Thread_Enabled, a boolean function that is used by other modules
+	to see if thread were enabled when the server started.  Also
+	fixed a bug with undefined Url(postlength)
+	* lib/url.tcl: Changed Url_PrefixInstall to check Thread_Enabled
+	before deciding that a URL domain should be handled in a thread.
+	This makes it easier to stub out the thread module, if necessary.
+	Fixed bug in Url_PrefixRemove in the case that the prefix contained
+	regexp special characters.
+	* lib/config.tcl Added module to manage the configuration options
+	stored in the tclhttpd.rc file.
+	* bin/tclhttpd.rc: Major re-wack so this only contains configuration
+	parameters in a stylized Tcl script.  This file is sourced very
+	early, before command line arguments are processed, in order to
+	establish a baseline configuration.
+	* bin/main.tcl: Added this new file, which has the bulk of the
+	application initialization code in it - all except actually
+	opening the server sockets and the main loop and some other details.
+	* bin/httpd.tcl - Major re-wack to use both tclhttpd.rc and main.tcl
+
+	Also moved a bunch of files into subdirectories:
+	* bin/mini: The variations on the 250-line mini httpd
+	* bin/test: Scripts that test the server.  These are not standard
+	Tcl test suite files, which will appear someday in the main tests
+	directory, hence the different location.
+	* bin/util: Random scripts, like crypting passwords and such.
+
+	Htdocs changes
+	* htdocs/access/null: New directory to test out AuthNullCallback,
+	which implements a funky bootstrapped password registry
+	* htdocs/access/bytcl: Changed this to illustrate password checking
+	callbacks more clearly
+
 2000-03-22  Brent Welch  <welch@scriptics.com>
 	
 	* lib/doc.tcl  Created DocAccessHook and moved authentication
@@ -39,3 +75,6 @@
 	"base64" namespace (version 2.0 of the package).
 
 
+(Please see the "changes" file for a slightly higher-level view
+of the changes that goes back much farther and is organized by
+TclHttpd releases.)
