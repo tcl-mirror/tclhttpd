@@ -380,7 +380,10 @@ proc Url_DecodeQuery_multipart/form-data {query qualifiers} {
 
     # Filter query into a list
     # Protect Tcl special characters
-    regsub -all {([\\{}])} $query {\\\\\\1} query
+    # regsub -all {([\\{}])} $query {\\\\\\1} query
+    regsub -all {(\\)} $query {\\\\\\1} query
+    regsub -all {({)}  $query {\\\\\\2} query
+    regsub -all {(})}  $query {\\\\\\3} query
     regsub -all -- "(\r?\n?--)?$options(boundary)\r?\n?" $query "\} \{" data
     set data [subst -nocommands -novariables "\{$data\}"]
 
@@ -394,7 +397,10 @@ proc Url_DecodeQuery_multipart/form-data {query qualifiers} {
 	set headers {}
 	set elementData {}
 	# Protect Tcl special characters
-	regsub -all {([\\{}])} $element {\\\\\\1} element
+	# regsub -all {([\\{}])} $element {\\\\\\1} element
+    regsub -all {(\\)} $element {\\\\\\1} element
+    regsub -all {({)}  $element {\\\\\\2} element
+    regsub -all {(})}  $element {\\\\\\3} element
 	regsub \r?\n\r?\n $element "\} \{" element
 
 	foreach {headers elementData} [subst -nocommands -novariables "\{$element\}"] break
@@ -414,6 +420,10 @@ proc Url_DecodeQuery_multipart/form-data {query qualifiers} {
 
 		set headerName [string tolower $headerName]
 		foreach {major minor quals} [Url_DecodeMIMEField $headerData] break
+		# restore Tcl special characters
+	    regsub -all {(\\\\\\1)} $quals {\\} quals
+	    regsub -all {(\\\\\\2)} $quals {\{} quals
+	    regsub -all {(\\\\\\3)} $quals {\}} quals
 
 		switch -glob -- [string compare content-disposition $headerName],[string compare form-data $major] {
 
@@ -445,6 +455,10 @@ proc Url_DecodeQuery_multipart/form-data {query qualifiers} {
 		break
 	    }
 	}
+	# restore Tcl special characters
+	regsub -all {(\\\\\\1)} $elementData {\\} elementData
+	regsub -all {(\\\\\\2)} $elementData {\{} elementData
+	regsub -all {(\\\\\\3)} $elementData {\}} elementData
 	lappend result $parameterName [list $headerList $elementData]
     }
 
