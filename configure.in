@@ -9,6 +9,9 @@
 
 AC_INIT(bin/httpd.tcl)
 
+AC_CONFIG_AUX_DIR(config)
+CONFIGDIR=${srcdir}/config
+AC_SUBST(CONFIGDIR)
 
 #--------------------------------------------------------------------
 # __CHANGE__
