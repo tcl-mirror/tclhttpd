@@ -2,7 +2,7 @@
 # Brent Welch (c) 1996 Sun Microsystems
 # Brent Welch (c) 1998-2000 Ajuba Solutions
 #
-# RCS: @(#) $Id: safecgio.tcl,v 1.5 2000/08/02 07:06:54 welch Exp $
+# RCS: @(#) $Id: safecgio.tcl,v 1.6 2003/10/08 05:47:40 coldstore Exp $
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
@@ -23,7 +23,7 @@ package provide httpd::safecgio 1.0
 
 proc SafeCGI_Server {port} {
     if {[catch {socket -server SafeCGI_Accept $port} oops]} {
-	catch {puts stderr "SafeCGI_Server: $oops"}
+	Stderr "SafeCGI_Server: $oops"
 	exit 1
     }
 }
@@ -208,5 +208,5 @@ proc SafeCGI_Close {interp chan} {
 
     proc bgerror {msg} {
 	global errorInfo
-	catch {puts stderr $errorInfo}
+	Stderr $errorInfo
     }

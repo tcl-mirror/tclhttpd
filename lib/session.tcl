@@ -40,7 +40,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.3 2000/08/02 07:06:54 welch Exp $
+# RCS: @(#) $Id: session.tcl,v 1.4 2003/10/08 05:47:40 coldstore Exp $
 
 package provide httpd::session 1.0
 
@@ -157,7 +157,7 @@ proc Session_Reap {age {type .*}} {
 	set old [expr {[clock seconds] - $age}]
 	if {[regexp -- $type $session(type)] && $session(current) < $old} {
 	    catch {interp delete $session(interp)}
-	    puts stderr "Reaping session $id"
+	    Stderr "Reaping session $id"
 	    unset session
 	}
     }

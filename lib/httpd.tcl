@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.76 2003/09/27 02:20:26 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.77 2003/10/08 05:47:40 coldstore Exp $
 
 package provide httpd 1.6
 
@@ -1966,7 +1966,7 @@ proc Httpd_RequestComplete {sock} {
 
 	set msg "[clock format [clock seconds]]\n$errorInfo"
 	if [catch {Log nosock bgerror $msg}] {
-	    catch {puts stderr $msg}
+	    Stderr $msg
 	}
     }
 

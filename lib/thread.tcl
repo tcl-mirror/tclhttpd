@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: thread.tcl,v 1.13 2002/08/19 05:14:39 welch Exp $
+# RCS: @(#) $Id: thread.tcl,v 1.14 2003/10/08 05:47:40 coldstore Exp $
 
 package provide httpd::threadmgr 1.0
 
@@ -106,7 +106,7 @@ proc Thread_Start {} {
     global auto_path tcl_library
     set id [Thread_Create] 
     Thread_Send $id \
-	{catch {puts stderr "Thread  starting."}}
+	{Stderr "Thread  starting."}
 
     # Set up auto_loading.  These steps may become redundent once the
     # TclpSetLibraryPath code works correctly in threads.

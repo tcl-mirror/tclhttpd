@@ -28,7 +28,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: sendsock.tcl,v 1.2 2000/08/02 07:06:54 welch Exp $
+# RCS: @(#) $Id: sendsock.tcl,v 1.3 2003/10/08 05:47:40 coldstore Exp $
 
 package provide httpd::eval 1.0
 
@@ -43,11 +43,11 @@ package provide httpd::eval 1.0
 
 proc Eval_Server {port {interp {}} {openCmd EvalOpenProc}} {
 	socket -server [list EvalAccept $interp $openCmd] $port
-	puts stderr "Warning: Eval Server running on port $port"
+	Stderr "Warning: Eval Server running on port $port"
 }
 proc Eval_ServerLocal {port {interp {}} {openCmd EvalOpenProc}} {
 	socket -server [list EvalAccept $interp $openCmd] -myaddr localhost $port
-	puts stderr "Warning: Eval Server running on port $port"
+	Stderr "Warning: Eval Server running on port $port"
 }
 proc EvalAccept {interp openCmd newsock addr port} {
 	global eval
