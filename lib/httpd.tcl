@@ -977,6 +977,13 @@ proc Httpd_SelfUrl {url {sock ""}} {
     append newurl $url
 }
 
+# Return the port for the server
+proc Httpd_Port {sock} {
+    upvar #0 Httpd$sock data
+    set port [lindex $data(self) 2]
+	return $port
+}
+
 # Generate a redirect because the trailing slash isn't present
 # on a URL that corresponds to a directory.
 

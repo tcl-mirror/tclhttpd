@@ -155,7 +155,8 @@ proc Cgi_SetEnvAll {sock path extra url var} {
     }
     set env(REQUEST_URI) [Httpd_SelfUrl $data(uri)]
     set env(GATEWAY_INTERFACE) "CGI/1.1"
-    set env(SERVER_PORT) $Httpd(port)
+    # set env(SERVER_PORT) $Httpd(port)
+    set env(SERVER_PORT) [Httpd_Port $sock]
     set env(SERVER_NAME) $Httpd(name)
     set env(SERVER_SOFTWARE) $Httpd(server)
     set env(SERVER_PROTOCOL) HTTP/1.0
