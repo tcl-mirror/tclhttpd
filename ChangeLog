@@ -1,3 +1,7 @@
+2004-04-15 Colin McCormack <colin@chinix.com>
+	* lib/upload.tcl: handle redirect and suspend from upload
+	domain
+	
 2004-04-15 Jeffrey Rankin <jrankin@oneil.com>
 	* sampleapp/README: updated to state that only the MetaKit
 	lib is required to run the bugdb application.
