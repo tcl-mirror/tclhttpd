@@ -1,3 +1,6 @@
+2004-05-09 Colin McCormack <colin@chinix.com>
+	* lib/mail.tcl: fixed config bug for mailserver
+
 2004-05-06 Colin McCormack <colin@chinix.com>
 	* lib/mail.tcl: new mail facility using tcllib's smtp client
 	* bin/httpd.tcl, bin/tclhttpd.rc: -mail option for mail server

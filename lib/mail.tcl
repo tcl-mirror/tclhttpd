@@ -9,14 +9,15 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: mail.tcl,v 1.12 2004/05/06 09:35:07 coldstore Exp $
+# RCS: @(#) $Id: mail.tcl,v 1.13 2004/05/09 05:46:42 coldstore Exp $
 
 package provide httpd::mail 1.0
 
 # If we have no configured mail server, we can't send mail
-if {![info exists Config(MailServer)] || ($Config(MailServer) == {})} {
+if {![info exists Config(mail)] || ($Config(mail) == {})} {
     return
 }
+set Mail(server) $Config(mail)
 
 package require smtp
 package require mime
@@ -49,7 +50,7 @@ proc Mail_Send {recipients subject from type body} {
     set result [smtp::sendmessage $token \
 		    -recipients $recipients \
 		    -originator $from \
-		    -servers $::Config(MailServer)]
+		    -servers $Mail(mail)]
     mime::finalize $token
     return $result
 }
