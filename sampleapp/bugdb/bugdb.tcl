@@ -55,7 +55,7 @@ proc bugdb::bug-list {} {
 }
 
 proc bugdb::bug-details {bug Application OS Priority Assigned \
-Summary Description Date Status} {
+Summary Description Date Status Updated} {
 
     upvar 1 $Application my_application
     upvar 1 $OS my_os
@@ -65,6 +65,7 @@ Summary Description Date Status} {
     upvar 1 $Description my_description
     upvar 1 $Date my_date
     upvar 1 $Status my_status
+    upvar 1 $Updated my_updated
 
     # Open the db
     mk::file open bugdb ../sampleapp/bugdb/bugdb.mk
@@ -82,6 +83,7 @@ Summary Description Date Status} {
     set my_description [lindex $row 11]
     set my_date [lindex $row 13]
     set my_status [lindex $row 15]
+    set my_updated [lindex $row 17]
 
     return
 }
