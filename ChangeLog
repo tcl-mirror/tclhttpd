@@ -1,3 +1,11 @@
+2000-09-21  Brent Welch <welch@ajubasolutions.com>
+	* lib/counter.tcl: Added secsPerMinute parameter to Counter_Init
+	* lib/httpd.tcl:
+	* bin/httpd.tcl: moved Counter_Init call to here from Httpd_Init.
+	Added -secs command line argument to set secsPerMinute.
+	* bin/tclhttpd.rc: Added secsPerMinute .rc file setting.
+	* lib/status.tcl:  Minor cleanup of histogram calls.
+
 2000-09-20  Brent Welch <welch@ajubasolutions.com>
 	* lib/counter.tcl: Fixed Counter_CheckPoint
 	* lib/MakeIndex: Fixed this to create the specially-constructed
