@@ -3,27 +3,16 @@
 # You must run the CONFIG script first.
 
 PWD=`pwd`
-PLATFORM=solaris
-HTTPD_VERSION=3.0.0
-PREFIX=/usr/local/tclhttpd${HTTPD_VERSION}
+PLATFORM=linux
+HTTPD_VERSION=3.0.1
+PREFIX=/home/welch/install
 
-cd ../tcl8.3.1/unix/${PLATFORM}
-make
-make install
-cd ${PWD}
+(cd ../tcl8.3.1/unix/${PLATFORM} ; make ; make install)
 
-cd ../thread2.0/unix/${PLATFORM}
-make
-make install
-cd ${PWD}
+(cd ../thread2.0/unix/${PLATFORM} ; make ; make install)
 
-cd ../tclhttpd3.0.0/build/${PLATFORM}
-make
-make install
-cd ${PWD}
+( cd ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM} ; make ; make install)
 
-cd ../tcllib0.4
-./install.sh ${PREFIX}
-cd ${PWD}
+( cd ../tcllib0.4 ; ./install.sh ${PREFIX} )
 
 

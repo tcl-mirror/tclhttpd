@@ -9,35 +9,38 @@ TCLLIB_VERSION=0.4
 THREAD_VERSION=2.0
 
 PWD=`pwd`
-PLATFORM=solaris
+PLATFORM=linux
+echo "pwd=${PWD}"
 
 # PREFIX is the root of the installation tree
 # EXEC_PREFIX is where the binaries and DLLs go.
 
-PREFIX=/usr/local/tclhttpd${HTTPD_VERSION}
-EXEC_PREFIX=/usr/local/tclhttpd${HTTPD_VERSION}/${PLATFORM}
+PREFIX=/home/welch/install
+EXEC_PREFIX=/home/welch/install/linux-thread
+
+echo "configure for tcl${TCL_VERSION}"
 
 mkdir ../tcl${TCL_VERSION}/unix/${PLATFORM}
-cd ../tcl${TCL_VERSION}/unix/${PLATFORM}
-sh ../configure --enable-gcc --enable-threads --enable-symbols \
+(cd ../tcl${TCL_VERSION}/unix/${PLATFORM} ; sh ../configure --enable-gcc --enable-threads --enable-symbols \
 	--prefix=${PREFIX} \
-	--exec-prefix=${EXEC_PREFIX}
-cd ${PWD}
+	--exec-prefix=${EXEC_PREFIX})
+
+echo ""
+echo "configure for thread${THREAD_VERSION}"
 
 mkdir ../thread${THREAD_VERSION}/unix/${PLATFORM}
-cd ../thread${THREAD_VERSION}/unix/${PLATFORM}
-sh ../configure --enable-gcc --enable-threads --enable-symbols \
+(cd ../thread${THREAD_VERSION}/unix/${PLATFORM} ; sh ../../configure --enable-gcc --enable-threads --enable-symbols \
 	--prefix=${PREFIX} \
 	--exec-prefix=${EXEC_PREFIX} \
-	--with-tcl=../../../tcl${TCL_VERSION}/unix/${PLATFORM}
-cd ${PWD}
+	--with-tcl=../../../tcl${TCL_VERSION}/unix/${PLATFORM} )
+
+echo ""
+echo "configure for tclhttpd${HTTPD_VERSION}"
 
 mkdir ../tclhttpd${HTTPD_VERSION}/build
 mkdir ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM}
-cd ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM}
-sh ../../configure --enable-gcc --enable-threads --enable-symbols \
+( cd ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM} ; sh ../../configure --enable-gcc --enable-threads --enable-symbols \
 	--prefix=${PREFIX} \
 	--exec-prefix=${EXEC_PREFIX} \
-	--with-tcl=../../../tcl${TCL_VERSION}/unix/${PLATFORM}
-cd ${PWD}
+	--with-tcl=../../../tcl${TCL_VERSION}/unix/${PLATFORM} )
 
