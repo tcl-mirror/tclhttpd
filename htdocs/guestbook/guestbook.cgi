@@ -1,6 +1,6 @@
 #!/bin/sh
 # \
-exec tclsh "$0" ${1+"$@"}
+exec tclsh8.3 "$0" ${1+"$@"}
 
 # Implement a simple guestbook page.
 # The set of visitors is kept in a simple database.

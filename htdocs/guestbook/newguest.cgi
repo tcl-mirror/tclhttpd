@@ -1,6 +1,6 @@
 #!/bin/sh
 # \
-exec tclsh "$0" ${1+"$@"}
+exec tclsh8.3 "$0" ${1+"$@"}
 
 set dir [file dirname [info script]]
 lappend auto_path $dir [file join $dir ../cgi-bin]
