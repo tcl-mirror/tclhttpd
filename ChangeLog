@@ -1,3 +1,12 @@
+2004-06-15 Brent Welch <welch@panasas.com>
+        * lib/digest.tcl: Added "package require md5 1"
+        * lib/utils.tcl: Removed "package present md5"
+          because this messes up any system that loads utils.tcl but
+          does not load digest.tcl  The little "md5hex" function
+          is local to digest.tcl now.  This is a slightly different
+          fix than proposed by Colin, but I'd rather keep inter-package
+          dependencies local, so you only need md5 if you need digest.
+
 2004-06-16 Colin McCormack <colin@chinix.com>
 	* Fixed problem with virtual hosts and md5 tcllib bugfix.
 

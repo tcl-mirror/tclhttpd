@@ -14,7 +14,21 @@
 package provide httpd::digest 1.0
 
 package require base64
-package require md5
+
+# Tcllib 1.6 has inconsistencies with md5 1.4.3 and 2.0.0,
+# and requiring 1.0 cures later conflicts with 2.0
+package require md5 1
+
+# If the above issue is sorted out, then
+# we can run with whatever version is available
+# by making an aliased wrapper
+if {[package vcompare [package present md5] 2.0] > -1} {
+    # we have md5 v2 - it needs to be told to return hex
+    interp alias {} md5hex {} ::md5::md5 --hex --
+} else {
+    # we have md5 v1 - it returns hex anyway
+    interp alias {} md5hex {} ::md5::md5
+}
 
 # generate private key
 if {[catch {package require Random}]} {
@@ -27,12 +41,12 @@ if {[catch {package require Random}]} {
     # cvs -d:pserver:anonymous@cvs.tclsoap.sourceforge.net:/cvsroot/tclsoap co Random
 
     # generate a random seed
-    if {[file exists /dev/random]} {
+    if {[catch {
 	# try for hardware support
 	set r [open /dev/random]
 	binary scan [read $r 4] I seed
 	close $r
-    } else {
+    }]} {
 	set seed [clock clicks]
     }
     expr {isaac_srand($seed)}	;# seed random
