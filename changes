@@ -323,6 +323,9 @@ httpd.tcl	Fix broken call to Log in Httpd_Shutdown
 		Added Httpd_SetCookie, which you can use to set a cookie
 		during a subsequent Httpd_ReturnFile, Httpd_ReturnData.
 
+		Fixed bug in HTTP/1.1 handling with Expect: header
+		and the Continue response.
+
 log.tcl		Made it possible to not log anything if you never call
 		Log_SetFile.  You can still call Log and Log_Flush.
 
