@@ -397,7 +397,8 @@ proc HttpdRead {sock} {
 		    [list HttpdCancel $sock]]
 	    } else {
 		# Could check for FTP requests, here...
-		Httpd_Error $sock 400 $line
+		Log $sock HttpError $line
+		Httpd_SockClose $sock 1
 	    }
 	}
 	0,start {

@@ -99,7 +99,11 @@ if {![info exists Doc(templateInterp)]} {
 proc Doc_TemplateLibrary {dir} {
     global Doc auto_path
     set Doc(templateLibrary) $dir
-    lappendOnce auto_path $dir
+    if {$Doc(templateInterp) != {}} {
+	interp eval $Doc(templateInterp) [list lappendOnce ::auto_path $dir]
+    } else {
+	lappendOnce auto_path $dir
+    }
 }
 
 # Enable URLS of the form ~user/a/b/c and map those to
