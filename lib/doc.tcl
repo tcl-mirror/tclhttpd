@@ -585,8 +585,14 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 
     # Check query data
     # steve: 5/8/98: Add multipart document upload handling
+    # If there is out-standing (i.e., unread) post data, then
+    # calling Url_DecodeQuery will automatcally read it
+    # and append to data(query)
 
-    if {[info exists data(query)] && [string length $data(query)]} {
+    if {[Httpd_PostDataSize $sock] > 0 && ![info exists data(query)]} {
+	set data(query) {}
+    }
+    if {[info exist data(query)]} {
 	set queryType application/x-www-urlencoded
 	set qualifiers {}
 	catch {
@@ -613,7 +619,7 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 
     # Process the template itself
 
-    set html [DocSubst $template $interp]
+    set code [catch {DocSubst $template $interp} html]
 
     # Save return cookies, if any
 
@@ -623,6 +629,11 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	foreach c $cookie {
 	    Httpd_SetCookie $sock $c
 	}
+    }
+
+    if {$code != 0} {
+	global errorCode errorInfo
+	return -code $code -errorcode $errorCode -errorinfo $errorInfo
     }
 
     set dynamic [interp eval $interp {uplevel #0 {set page(dynamic)}}]
