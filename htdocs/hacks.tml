@@ -13,7 +13,7 @@ restarting.
 <input type="submit" name="submit" value="Reload Source"><input type="text" name="source">
 </form>
 <p>
-<form action=/debug/parray method=post>
+<form action=/debug/pvalue method=post>
 <input type="submit" name="submit" value="Print Array"><input type="text" name="aname">
 </form>
 

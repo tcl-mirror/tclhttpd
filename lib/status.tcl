@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.24 2000/10/20 17:51:26 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.25 2001/03/13 06:17:51 welch Exp $
 
 package provide httpd::status 1.0
 
@@ -32,6 +32,25 @@ proc Status_Url {dir {imgdir /images}} {
 
 proc Status/hello {args} {return hello}
 
+# StatusHeader --
+#
+#       Standard HTML header for status pages.
+#
+# Arguments:
+#       title - also used as <h1>
+#
+# Results:
+#       Html for head and <body>
+
+proc StatusHeader {title} {
+    return "<html><head>
+    <title>$title</title>
+    </head>
+    <body bgcolor=white text=black>
+    <h1>$title</h1>
+"
+}
+
 # Status/threads --
 #
 #	Show the list of threads running in the server.
@@ -43,7 +62,7 @@ proc Status/hello {args} {return hello}
 #	Returns the list of threads running in the server.
 
 proc Status/threads {args} {
-    append html "<h2>Thread List</h2>\n"
+    append html [StatusHeader "Thread List"]
     append html [StatusMenu]\n
     if {[catch {Thread_List} x]} {
 	append html "No thread support\n"
@@ -104,7 +123,7 @@ proc StatusMenu {} {
 proc Status/doc {{pattern *} {sort number}} {
     global _status
     set result ""
-    append result "<h1>Document Hits</h1>\n"
+    append result [StatusHeader "Document Hits"]
     append result [StatusMenu]
     append result [StatusSortForm $_status(dir)/doc "Hit Count" $pattern $sort]
     append result [StatusPrintArray [counter::get hit -histVar] * $sort Hits Url]
@@ -125,7 +144,7 @@ proc Status/doc {{pattern *} {sort number}} {
 proc Status/domain {{pattern *} {sort number}} {
     global _status
     set result ""
-    append result "<h1>Domain Hits</h1>\n"
+    append result [StatusHeader "Domain Hits"]
     append result [StatusMenu]
     append result [StatusSortForm $_status(dir)/domain "Hit Count" $pattern $sort]
     append result [StatusPrintArray [counter::get domainHit -histVar] * $sort Hits Domain]
@@ -193,7 +212,7 @@ proc StatusSortName {a b} {
 proc Status/notfound {{pattern *} {sort number}} {
     global Doc Referer _status
     set result ""
-    append result "<h1>Documents Not Found</h1>\n"
+    append result [StatusHeader "Documents Not Found"]
     append result [StatusMenu]
     append result [StatusSortForm $_status(dir)/notfound "Hit Count" $pattern $sort]
     append result [StatusPrintNotFound $pattern $sort]
@@ -243,7 +262,7 @@ proc Status/notfound/reset {args} {
     global Referer
     counter::reset notfound
     catch {unset Referer}
-    return "<h1>Reset Notfound Counters</h1>"
+    return [StatusHeader "Reset Notfound Counters"]
 }
 
 # Status/size --
@@ -258,7 +277,7 @@ proc Status/notfound/reset {args} {
 
 proc Status/size {args} {
     global StatusDataSize StatusCodeSize
-    append top_html "<h1>Memory Size</h1>\n"
+    append top_html [StatusHeader "Memory Size"]
     append top_html [StatusMenu]\n
     append html [Status/datasize]\n
     append html [Status/codesize]\n
@@ -284,7 +303,7 @@ proc Status/datasize {{ns ::}} {
 	values	0
 	bytes	0
     }
-    set html "<h2>Data Size</h2>"
+    append html [StatusHeader "Data Size"]
     append html [StatusDataSize $ns]
     append top_html "<h2>Total Data Size</h2>\n
 	Num Variables $StatusDataSize(vars)<br>\n\
@@ -342,7 +361,7 @@ proc Status/codesize {{ns ::}} {
 	procs	0
 	bytes	0
     }
-    set html "<h2>Code Size</h2>"
+    set html [StatusHeader "Code Size"]
     append html [StatusCodeSize $ns]
     append top_html "<h2>Total Code Size</h2>\n
 	Num Procs $StatusCodeSize(procs)<br>\n\
@@ -521,8 +540,7 @@ proc StatusTclPower {{align left}} {
 
 proc Status/all {args} {
     global _status page
-    set html "<html><head><title>Tcl HTTPD Status</title></head>\n"
-    append html "<body><h1>Tcl HTTPD Status</h1>\n"
+    set html [StatusHeader "Tcl HTTPD Status"]
     append html [StatusMenu]
     append html [StatusTclPower left]
     append html [StatusMainTable]
@@ -562,8 +580,7 @@ proc Status/all {args} {
 
 proc Status/text {args} {
     global _status
-    set html "<title>Tcl HTTPD Status</title>\n"
-    append html "<body><h1>Tcl HTTPD Status</h1>\n"
+    set html [StatusHeader "Tcl HTTPD Status"]
     append html [StatusMenu]
     append html [StatusTclPower left]
     append html [StatusMainTable]

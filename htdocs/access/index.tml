@@ -1,35 +1,135 @@
 [mypage::header "Access Control Schemes"]
 <ul>
-<li><a href=auth/>Apache-style .htaccess</a> This depends on /usr/local/htaccess/passwd
-and /usr/local/htaccess/group.  It will allow access to anyone in the "webmaster" group.
-Since you probably don't have these files, you cannot get in.
-The passwd file has this format:
+<li><b>Apache-style .htaccess.</b>
+<br>This depends on the files 
+<ul><li>   .htaccess, 
+    <li>/usr/local/htaccess/passwd
+    <li>/usr/local/htaccess/group.<br>
+</ul>
+<br>
+Description of the <b>.htaccess</b> file:
+<br>
+<br>
+Each line begins with a keyword with one or more arguments. A keyword is case insensitive.
+Also comment lines, a line starting with an asterix (#), and "empty" lines are allowed.
 <pre>
-username: encrypted_password
-postit:XosCXE6SpAem2
+KEYWORDS for .htaccess
+
+AuthType             &lt;type&gt;
+                     Authentication mechanism
+                     type  ::  Basic|TCL
+
+AuthName             &lt;name&gt;
+                     Text displayed in password prompt from the browser
+                     name  ::  &lt;ASCII&gt;
+
+AuthUserFile         &lt;filename&gt;
+                     Reference to user file, inclusive path (See below)
+
+AuthGroupFile        &lt;filename&gt;
+                     Reference to group file, inclusive path (See below)
+
+Limit                &lt;op&gt;
+                     List of operations     
+                     op    ::  "GET|POST|.."
+
+/Limit
+
+Following Keywords should be enclosed by the keywords "Limit" and "/Limit":
+Require, Order, Deny, Allow
+
+# USER and/or GROUP protection
+Require              &lt;key value&gt;
+                     key   ::  "user|group"
+                     value ::  "&lt;username&gt;|&lt;groupname&gt;"
+                     "value" must be specified in the AuthUserFile or AuthGroupFile
+
+# NETWORK BASED PROTECTION
+In the case "allow" and/or "deny" is specified, order must be specified too!
+Order                &lt;value,value&gt;
+                     value ::  "allow|deny"
+
+Deny                 &lt;args&gt;
+                     args  ::  "\\\[from] {fully qualified network}* | all"
+
+Allow                &lt;args&gt;
+                     args  ::  "\\\[from] {fully qualified network}* | all
+
 </pre>
-The group file has this format:
+The <b>AuthUserfile</b> file "passwd" has this format:
 <pre>
-groupname: member, member2, member3
-webmaster: postit
+&lt;username&gt;:&lt;encrypted_password&gt;
+..</pre>The generation of encrypted passwords is support by the tcl package "crypt".
+On unix you can copy e.g. an entry from the "passwd"/"shadow" file to the
+AuthUserFile.
+<br>
+<br>
+The <b>AuthGroupFile</b> file "group" has this format:
+<pre>
+&lt;groupname&gt;:&lt;member&gt;,&lt;member2&gt;,&lt;member3&gt;
+..
 </pre>
+<pre>Notes:
+- At the moment of this writing a crypt library for Win32 is included in 
+  tclpro1.4.1 and is not part of Tclhttpd.
+- How to create an AuthUserFile entry?
+  Start a tcl shell and load the crypt package:
+  tclsh
+  % package require crypt
+  % crypt &lt;password&gt; &lt;salt&gt;
+  
+  For further understanding I copied following text from the
+  crypt.3c man page:
 
-<li><a href=bydir/>Apache-style .htaccess</a> This also depends on /usr/local/htaccess/passwd
-and /usr/local/htaccess/group.  It allows members of the tcl97 group.
+     password is the input string to encrypt, for instance,  a  user's
+     typed  password.   Only the first eight characters are used;
+     the rest are ignored.  salt is a two-character string chosen
+     from  the  set \\\[a-zA-Z0-9./]; this string is used to perturb
+     the hashing algorithm in one of 4096 different  ways,  after
+     which  the  input  string  is  used as the key to repeatedly
+     encrypt a constant string.  The returned value points to the
+     encrypted  input  string.   The  first two characters of the
+     return value are the salt itself.
+</pre>
+<b>Examples:</b>
+<br>
+To be able to run the examples you have to create the files
+/usr/local/htaccess/passwd and /usr/local/htaccess/group.
+Following links point to precompiled files for <a href=htaccess/win32/>Win32</a> 
+and <a href=htaccess/unix/>Unix</a>. 
+The password for a user is identical to its username.<br>
 
-<li><a href=bytcl/>.tclaccess</a>  This uses a .tclaccess file in the directory that
+<a href=noawe/>Deny access to a host</a>  This is a .htaccess example that
+denies access to noawe.sun.com. <br>
+
+<a href=auth/>Webmaster</a> Access is allowed to anyone in the group webmaster.<br>
+
+<a href=bydir/>Tcl97</a> It only allows the user tcl97.<br>
+
+<a href=multiple/>Multiple</a> Example with multiple "require group" and/or 
+"require user" entries in a .htaccess file.
+<br>
+<br>
+
+<li><b>Tclhttpd-based .tclaccess.</b>
+<br>
+Access is controlled by a .tclaccess file 
+in which the realm -  text in password prompt from the browser -  and callback 
+procedure may be specified. Fallback is available (realm: Realm; Callback: AuthNullCallback).
+<br>
+<br>
+<b>Examples:</b>
+<br>
+<a href=bytcl/>The first example</a> uses a .tclaccess file in the directory that
 specifies a Tcl procedure to run to check the password.  Try "tclhttpd" and "I love Tcl",
 then check out <a href=/debug/showproc?proc=MyPasswordChecker>MyPasswordChecker</a> to
-see how easy this can be.
+see how easy this can be.<br>
 
-<li><a href=noawe/>Deny access to a host</a>  This is another .htaccess example that
-denies access to noawe.sun.com.
-
-<li><a href=null/>Funky auto-login mechanism</a>  This uses the AuthNullCallback procedure that
+<a href=null/>Funky auto-login mechanism</a>  This uses the AuthNullCallback procedure that
 forces you to try to login twice, and then remembers that password until the server restarts.
-I'm not sure how useful this really is.
+I'm not sure how useful this really is.<br>
 
-<li><a href=null/>More AuthNullCallback</a>  Another example from an ancient demo.
+<a href=session/>More AuthNullCallback</a>  Another example from an ancient demo.
 </ul>
 
 [mypage::footer]

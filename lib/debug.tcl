@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.12 2000/09/29 22:53:12 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.13 2001/03/13 06:17:51 welch Exp $
 
 package provide httpd::debug 1.0
 
@@ -20,7 +20,7 @@ proc Debug_Url {dir} {
 #
 #	Source the file into a server thread.  First look for the file to
 #	source in the dir specified by Httpd(library).  If not found, use the
-#	dir in Doc(templateLibrary).
+#	dir in Doc(templateLibrary) or Config(lib).
 #
 # Arguments:
 #	source	the file to source
@@ -29,11 +29,14 @@ proc Debug_Url {dir} {
 #	Returns HTML code that displays result of loading the file.
 
 proc Debug/source {source {thread main}} {
-    global Httpd Doc
+    global Httpd Doc Config
     set source [file tail $source]
     set dirlist $Httpd(library)
     if {[info exists Doc(templateLibrary)]} {
 	lappend dirlist $Doc(templateLibrary)
+    }
+    if {[info exists Config(lib)]} {
+	lappend dirlist $Config(lib)
     }
     foreach dir $dirlist {
 	set file [file join $dir $source]

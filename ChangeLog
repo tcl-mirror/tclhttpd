@@ -1,3 +1,20 @@
+2001-03-12  Brent Welch <welch@panasas.com>
+	(Adopted from work by Piet Vloet - thanks!)
+	* lib/auth.tcl: Changes to handle multiple
+	group and user specifications in .htaccess files.
+	* htdocs/access/index.html: Updated docs 
+	* htdocs/access/multiple: New tests
+	* htaccess: sample group and password files.
+
+2001-03-12  Brent Welch <welch@panasas.com>
+
+	* ChangeLog:
+	* htdocs/x/hacks.tml: Switched from debug/parray to debug/pvalue,
+	which is more general.  It takes a pattern of variables to print.
+	* lib/status.tcl: Added StatusHeader procedure
+	* lib/debug.tcl: Added check for Config(lib) directory
+	to set of places used by /debug/source
+
 2001-02-16  Brent Welch <welch@panasas.com>
 
 	* ChangeLog:
