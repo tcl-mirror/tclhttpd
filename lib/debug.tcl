@@ -4,10 +4,10 @@
 # 	Tcl procedures of the form Debug/hello implement URLS
 #	of the form /debug/hello
 #
-# Copyright (c) 1998-2000 by Scriptics Corporation.
+# Copyright (c) 1998-2000 by Ajuba Solutions.
 # All rights reserved.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.7 2000/06/08 18:11:56 hershey Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.8 2000/06/16 16:52:22 hershey Exp $
 
 package provide debug 1.0
 

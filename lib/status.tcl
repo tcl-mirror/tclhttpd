@@ -5,11 +5,11 @@
 #	of the form /status/hello
 #
 # Brent Welch (c) Copyright 1997 Sun Microsystems, Inc.
-# Copyright 1998 Scriptics Corporation.
+# Copyright (c) 1998-2000 by Ajuba Solutions
+# All rights reserved.
 #
-# See the file "license.terms" for information on usage and redistribution
-# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
-#
+# RCS: @(#) $Id: status.tcl,v 1.13 2000/06/16 16:52:22 hershey Exp $
+
 package provide status 1.1
 
 proc Status_Url {dir {imgdir /images}} {
@@ -19,7 +19,27 @@ proc Status_Url {dir {imgdir /images}} {
     Direct_Url $dir Status
 }
 
+# Status/hello --
+#
+#	Show the string "hello".
+#
+# Arguments:
+#	args	arguments are ignored.
+#
+# Results:
+#	Returns the string "hello".
+
 proc Status/hello {args} {return hello}
+
+# Status/threads --
+#
+#	Show the list of threads running in the server.
+#
+# Arguments:
+#	args	arguments are ignored.
+#
+# Results:
+#	Returns the list of threads running in the server.
 
 proc Status/threads {args} {
     append html "<h2>Thread List</h2>\n"
@@ -62,6 +82,18 @@ proc StatusMenu {} {
     append html "</p>\n"
     return $html
 }
+
+# Status/doc --
+#
+#	Show the number of hits for documents matching the pattern.
+#
+# Arguments:
+#	pattern	(optional) the glob pattern of the URL to report on.
+#	sort	(optional) how to sort the output.  If the default "number" is
+#		not given, output is sorted by url alphabetically.
+#
+# Results:
+#	Returns HTML code that displays document hit info.
 
 proc Status/doc {{pattern *} {sort number}} {
     global _status
@@ -120,6 +152,19 @@ proc StatusSortName {a b} {
     return [string compare $1 $2]
 }
 
+# Status/notfound --
+#
+#	Show the number of hits for nonexistent documents matching the pattern.
+#
+# Arguments:
+#	pattern	(optional) the glob pattern of the URL to report on.
+#	sort	(optional) how to sort the output.  If the default "number" is
+#		not given, output is sorted by url alphabetically.
+#
+# Results:
+#	Returns HTML code that displays document hit info for docs that were
+#	not found.
+
 proc Status/notfound {{pattern *} {sort number}} {
     global Doc Referer _status
     set result ""
@@ -128,6 +173,7 @@ proc Status/notfound {{pattern *} {sort number}} {
     append result [StatusSortForm $_status(dir)/notfound "Hit Count" $pattern $sort]
     append result [StatusPrintNotFound $pattern $sort]
 }
+
 proc StatusPrintNotFound {{pattern *} {sort number}} {
     global Doc Referer _status
     append result <pre>\n
@@ -159,6 +205,17 @@ proc StatusPrintNotFound {{pattern *} {sort number}} {
 #    append result "<a href=$_status(dir)/notfound/reset>Reset counters</a>"
     return $result
 }
+
+# Status/notfound/reset --
+#
+#	Reset the number of hits for nonexistent documents to 0.
+#
+# Arguments:
+#	args	arguments are ignored.
+#
+# Results:
+#	Returns HTML code that confirms that the reset occurred.
+
 proc Status/notfound/reset {args} {
     global Doc Referer
     foreach i [array names Doc notfound,*] {
@@ -167,6 +224,17 @@ proc Status/notfound/reset {args} {
     catch {unset Referer}
     return "<h1>Reset Notfound Counters</h1>"
 }
+
+# Status/size --
+#
+#	Show both the code size and data size.
+#
+# Arguments:
+#	args	arguments are ignored.
+#
+# Results:
+#	Returns HTML.
+
 proc Status/size {args} {
     global StatusDataSize StatusCodeSize
     append top_html "<h1>Memory Size</h1>\n"
@@ -177,6 +245,17 @@ proc Status/size {args} {
     append top_html "Bytes [expr $StatusDataSize(bytes) + $StatusCodeSize(bytes)]"
     return $top_html$html
 }
+
+# Status/datasize --
+#
+#	Show the data size for the entire server or for a particular namespace.
+#
+# Arguments:
+#	ns	(optional) if given, show the data size for this namespace
+#
+# Results:
+#	Returns HTML.
+
 proc Status/datasize {{ns ::}} {
     global StatusDataSize
     array set StatusDataSize {
@@ -226,6 +305,16 @@ proc StatusDataSize {ns} {
     return $html
 }
 
+# Status/codesize --
+#
+#	Show the code size for the entire server or for a particular namespace.
+#
+# Arguments:
+#	ns	(optional) if given, show the code size for this namespace
+#
+# Results:
+#	Returns HTML.
+
 proc Status/codesize {{ns ::}} {
     global StatusCodeSize
     array set StatusCodeSize {
@@ -261,7 +350,8 @@ proc StatusCodeSize {{ns ::}} {
     append html "</ul>"
 }
 
-# StatusMainTable
+# StatusMainTable --
+#
 #	Display the main status counters. This gathers information
 #	from worker threads, if possible.
 #
@@ -396,6 +486,16 @@ proc StatusTclPower {{align left}} {
     set html "<img src=$_status(images)/pwrdLogo150.gif align=$align width=97 height=150>\n"
 }
 
+# Status/all --
+#
+#	Show the page hist per minute, hour, and day using images.
+#
+# Arguments:
+#	args	arguments are ignored
+#
+# Results:
+#	Returns HTML.
+
 proc Status/all {args} {
     global CntMinuteurlhits CntHoururlhits CntDayurlhits counter
     set html "<html><head><title>Tcl HTTPD Status</title></head>\n"
@@ -411,6 +511,17 @@ proc Status/all {args} {
     }
     return $html
 }
+
+# Status/text --
+#
+#	Show the page hist per minute, hour, and day in text format.
+#
+# Arguments:
+#	args	arguments are ignored
+#
+# Results:
+#	Returns HTML.
+
 proc Status/text {args} {
     global CntMinuteurlhits CntHoururlhits CntDayurlhits counter _status
     set html "<title>Tcl HTTPD Status</title>\n"
@@ -429,9 +540,30 @@ proc Status/text {args} {
     return $html
 }
 
+# Status/ --
+#
+#	Same as Status/all.
+#
+# Arguments:
+#	args	arguments are ignored
+#
+# Results:
+#	Returns HTML.
+
 proc Status/ {args} {
     eval Status/all $args
 }
+
+# Status --
+#
+#	Same as Status/all.
+#
+# Arguments:
+#	args	arguments are ignored
+#
+# Results:
+#	Returns HTML.
+
 proc Status {args} {
     eval Status/all $args
 }
