@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: template.tcl,v 1.11 2004/04/29 01:20:25 coldstore Exp $
+# RCS: @(#) $Id: template.tcl,v 1.12 2004/04/29 01:23:50 coldstore Exp $
 
 package provide httpd::template 1.0
 
@@ -160,13 +160,15 @@ proc Doc_text/html {path suffix sock} {
 	    # Do the subst and cache the result in the .html file
 	    set html [TemplateInstantiate $sock $template $path $suffix dynamic \
 		    $Template(templateInterp)]
+
+	    # If the content type was set, use it.  Otherwise, use the default.
+	    if {[info exists data(contentType)]} {
+		set ctype $data(contentType)
+	    } else {
+		set ctype "text/html"
+	    }
+
 	    if {$dynamic} {
-		# If the content type was set, use it.  Otherwise, use the default.
-		if {[info exists data(contentType)]} {
-		    set ctype $data(contentType)
-		} else {
-		    set ctype "text/html"
-		}
 		return [Httpd_ReturnData $sock $ctype $html]
 	    }
 	}
