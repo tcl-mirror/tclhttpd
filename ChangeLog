@@ -1,11 +1,13 @@
 2000-04-24  Brent Welch <welch@scriptics.com>
 
+	* bin/README_custom: Added read-me about customizing TclHttpd
 	* configure.in: Fixed laundering of crypt and limit version numbers
 	on windows, where of course the macro to use is NODOT_VERSION
 	as opposed to WIN_VERSION...
 	* bin/httpd.tcl: Fixed -debug 1 starup under Wish to open the console.
 	* lib/httpd.tcl: Fixed bug in closing keep-alive sockets that was
-	introduced in the 4/21 putback.
+	introduced in the 4/21 putback.  Improved handling of bogus
+	data inbetween keep-alive requiests.
 	* lib/status.tcl: Fixed doc hit display
 	* lib/srvui.tcl: Fixed home page counter
 
