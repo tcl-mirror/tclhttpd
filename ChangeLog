@@ -1,3 +1,9 @@
+2003-10-10  Brent Welch <welch@panasas.com>
+        * lib/httpd.tcl: fixes for logging of static files based on
+        changes suggestedby David Zolli.
+        * lib/logstd.tcl: introduced Log(cookie) to control if the
+        cookie value is appended to the log.
+
 2003-9-27  Colin McCormack <colin@field.medicine.adelaide.edu.au>
         * lib/httpd.tcl: HTML armour default error output
         * htdocs/admin htdocs/debug htdocs/status:

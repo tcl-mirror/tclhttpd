@@ -7,12 +7,17 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: logstd.tcl,v 1.3 2001/07/12 01:12:21 welch Exp $
+# RCS: @(#) $Id: logstd.tcl,v 1.4 2003/10/11 06:50:00 welch Exp $
 
 # Use IP address, or domain name?
 # Default is IP address, because looking up names is expensive
 if {![info exists Log(lognames)]} {
     set Log(lognames) 0
+}
+
+# If true, we append cookie values to the log
+if {![info exists Log(cookie)]} {
+    set Log(cookie) 0
 }
 
 # LogStandardData --
@@ -112,7 +117,10 @@ proc LogStandardList {sock now} {
     lappend result filesize [LogValue data(file_size)]
     lappend result referer [LogValue data(mime,referer)]
     lappend result useragent [LogValue data(mime,user-agent)]
-    lappend result cookie [LogValue data(mime,cookie)]
+    if {$Log(cookie)} {
+      # This field is not always present in logs
+      lappend result cookie [LogValue data(mime,cookie)]
+    }
     return $result
 }
 

@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.77 2003/10/08 05:47:40 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.78 2003/10/11 06:50:00 welch Exp $
 
 package provide httpd 1.6
 
@@ -1254,6 +1254,11 @@ proc Httpd_ReturnFile {sock type path {offset 0}} {
 	return
     }
 
+    # Set file size early so it gets into all log records
+
+    set data(file_size) [file size $path]
+    set data(code) 200
+
     Count urlreply
     if {[info exists data(mime,if-modified-since)]} {
         # No need for complicated date comparison, if they're identical then 304.
@@ -1262,7 +1267,6 @@ proc Httpd_ReturnFile {sock type path {offset 0}} {
             return
         }
     } 
-    set data(file_size) [file size $path]
 
     # Some files have a duality, when the client sees X bytes but the
     # file is really X + n bytes (the first n bytes reserved for server
@@ -1374,8 +1378,6 @@ proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
 }
 
 # HttpdCopyDone -- this is used with fcopy when the copy completes.
-# Note that tcl8.0b1 had a bug in that errors during fcopy called
-# bgerror instead of this routine, which causes leaks.  Don't use b1.
 #
 # Arguments:
 #	in	Input channel, typically a file
@@ -1391,6 +1393,11 @@ proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
 #	See Httpd_SockClose
 
 proc HttpdCopyDone {in sock close bytes {error {}}} {
+    if {$error == ""} {
+        # This special value signals a normal close,
+        # and triggers a log record so static files are counted
+        set error Close
+    }
     Httpd_SockClose $sock $close $error
 }
 
