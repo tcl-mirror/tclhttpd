@@ -47,26 +47,33 @@ if {"$tcl_platform(platform)" == "windows"} {
 # after the program name.
 
 proc Cgi_Directory {virtual {directory {}}} {
+    global Cgi
     if {[string length $directory] == 0} {
 	set directory [Doc_Virtual {} {} $virtual]
     }
-    Url_PrefixInstall $virtual [list Cgi_Domain $directory]
+    Url_PrefixInstall $virtual [list Cgi_Domain $virtual $directory]
 }
 
 # Cgi_Domain is called from Url_Dispatch for URLs inside cgi-bin directories.
 
-proc Cgi_Domain {directory sock suffix} {
+proc Cgi_Domain {virtual directory sock suffix} {
     global Cgi env
     # Check the path and then find the part beyond the program name.
     if [catch {Url_PathCheck $suffix} pathlist] {
 	Doc_NotFound $sock
 	return
     }
+
+    # url is the logical name as viewed by a browser
+    # path is a physical file system name as viewd by the server
+
+    set url [string trimright $virtual /]
     set path $directory
     set i 0
     foreach component $pathlist {
 	incr i
 	set path [file join $path $component]
+	append url /$component
 	if {[file isfile $path]} {
 #	    if {[file executable $path]} {
 		# Don't bother testing execute permission here,
@@ -79,21 +86,24 @@ proc Cgi_Domain {directory sock suffix} {
 	    return
 	}
     }
-    if ![info exists extra] {
+    if {![info exists extra]} {
 	# Didn't find an executable file
 	Httpd_Error $sock 403
 	return
+    } elseif {[llength $extra]} {
+	set extra /[join $extra /]
     }
-    # The CGI needs the script, the extra part after the program name,
+
+    # The CGI needs the server-relative url of the script,
+    # the extra part after the program name,
     # and the translated version of the whole pathname.
 
-    Url_Handle [list CgiHandle $path /[join $extra /] \
-	    [eval {file join $directory} $pathlist]] $sock
+    Url_Handle [list CgiHandle $url $extra $path] $sock
 }
 
-proc CgiHandle {path extra translated sock} {
+proc CgiHandle {url extra path sock} {
     global Doc env
-    Cgi_SetEnvAll $sock $path $extra $translated env
+    Cgi_SetEnvAll $sock $path $extra $url env
     CgiSpawn $sock $path
 }
 
@@ -101,7 +111,8 @@ proc CgiHandle {path extra translated sock} {
 # the name of a cgi script, and the Doc module finds a .cgi file
 
 proc Doc_application/x-cgi {path suffix sock} {
-    Url_Handle [list CgiHandle $path {} $path] $sock
+    upvar #0 Httpd$sock data
+    Url_Handle [list CgiHandle $data(url) {} $path] $sock
 }
 
 # Set the environment for the cgi scripts.  This is passed implicitly to
@@ -109,10 +120,11 @@ proc Doc_application/x-cgi {path suffix sock} {
 
 proc Cgi_SetEnv {sock path {var env}} {
     upvar 1 $var env
-    Cgi_SetEnvAll $sock $path {} $path env
+    upvar #0 Httpd$sock data
+    Cgi_SetEnvAll $sock $path {} $data(url) env
 }
 
-proc Cgi_SetEnvAll {sock path extra translated var} {
+proc Cgi_SetEnvAll {sock path extra url var} {
     upvar #0 Httpd$sock data
     upvar 1 $var env
     global Httpd Httpd_EnvMap Cgi
@@ -144,9 +156,9 @@ proc Cgi_SetEnvAll {sock path extra translated var} {
     set env(SERVER_SOFTWARE) $Httpd(server)
     set env(SERVER_PROTOCOL) HTTP/1.0
     set env(REMOTE_ADDR) $data(ipaddr)
-    set env(SCRIPT_NAME) [string range $path [string length [Doc_Root]] end]
+    set env(SCRIPT_NAME) $url
     set env(PATH_INFO) $extra
-    set env(PATH_TRANSLATED) $translated
+    set env(PATH_TRANSLATED) [string trimright [Doc_Root] /]/[string trimleft $extra /]
     set env(DOCUMENT_ROOT) [Doc_Root]
     set env(HOME) [Doc_Root]
 

@@ -182,6 +182,9 @@ proc Url_PathCheck {urlsuffix} {
     global Url
     set pathlist ""
     foreach part  [split $urlsuffix /] {
+	if {[string length $part] == 0} {
+	    continue
+	}
 	set part [Url_Decode $part]
 	# Disallow Mac and UNIX path separators in components
 	if {[regexp $Url(fsSep) $part]} {

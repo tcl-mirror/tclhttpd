@@ -38,7 +38,7 @@ proc Doc_Root {{real {}}} {
 # Add a file system to the virtual document hierarchy
 
 proc Doc_AddRoot {virtual directory} {
-    Url_PrefixInstall $virtual [list DocDomain $directory]
+    Url_PrefixInstall $virtual [list DocDomain $virtual $directory]
 }
 
 # Define the index file for a directory
@@ -163,7 +163,7 @@ proc Doc_File {sock curfile npath} {
 # to return the contents.  The call to DocHandle is cached
 # by Url_Handle for future accesses to this url.
 
-proc DocDomain {directory sock suffix} {
+proc DocDomain {virtual directory sock suffix} {
     global Doc
     upvar #0 Httpd$sock data
 
@@ -204,7 +204,7 @@ proc DocDomain {directory sock suffix} {
     if {![DocFallback $path $suffix $cookie $sock]} {
 	# Couldn't find anything.
 	# check for cgi script in the middle of the path
-	Cgi_Domain $directory $sock $suffix
+	Cgi_Domain $virtual $directory $sock $suffix
     }
 }
 
@@ -549,24 +549,20 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     # Populate the global "page" array with state about this page
 
     set root ""
-    set prefix ""
     foreach d $dirs {
 	append root ../
-	append prefix /$d
     }
     if {[string length $htmlfile]} {
-	set url $prefix/[file tail $htmlfile]
 	set filename $htmlfile
 	set dynamic 0
     } else {
-	set url $prefix/[file tail $template]
 	set filename $template
 	set dynamic 1
     }
     interp eval $interp {uplevel #0 {catch {unset page}}}
 
     interp eval $interp [list uplevel #0 [list array set page [list \
-	url		$url 		\
+	url		$data(url)	\
 	template 	$template	\
 	filename	$filename	\
 	root		$root		\
