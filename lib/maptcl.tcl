@@ -15,7 +15,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: maptcl.tcl,v 1.3 2000/08/02 07:06:53 welch Exp $
+# RCS: @(#) $Id: maptcl.tcl,v 1.4 2000/08/26 05:38:05 build Exp $
 
 package provide httpd::ismaptcl 1.0
 
@@ -55,7 +55,7 @@ proc MapRead {file} {
     set types circle|default|point|poly|rect
     append exp {[ 	]*(} $types {)[ 	]+([^	}
     append exp \n { ]+)[ 	]*([^} \n\r {]*)} \[\n\r]+
-    regsub -nocase -all $exp $data "\[MapInsert $cookie \\1 {\\2} {\\3}]" cmd
+    regsub -nocase -all $exp $data "\[MapInsert [list $cookie] \\1 {\\2} {\\3}]" cmd
     upvar #0 $cookie map
     catch {unset map}
     subst $cmd

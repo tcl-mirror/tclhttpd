@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: maptk.tcl,v 1.3 2000/08/02 07:06:53 welch Exp $
+# RCS: @(#) $Id: maptk.tcl,v 1.4 2000/08/26 05:38:05 build Exp $
 
 package provide httpd::ismaptk 1.0
 
@@ -58,7 +58,7 @@ proc MapRead {file} {
     set types circle|default|point|poly|rect
     append exp {[ 	]*(} $types {)[ 	]+([^	}
     append exp \n { ]+)[ 	]*([^} \n\r {]*)} \[\n\r]+
-    regsub -nocase -all $exp $data "\[MapInsert $can \\1 {\\2} {\\3}]" cmd
+    regsub -nocase -all $exp $data "\[MapInsert [list $can] \\1 {\\2} {\\3}]" cmd
     $can lower default
     set tags [$can itemconfigure default -tags]
     $can itemconfigure default -tags [lindex $tags 0]
