@@ -1,5 +1,6 @@
-2000-10-18  Brent Welch <welch@ajubasolutions.com>
+2000-10-19  Brent Welch <welch@ajubasolutions.com>
     
+	* bin/httpd.tcl: Fixed error handling around SSL startup.
 	* lib/httpd.tcl: Fixed Httpd_Suspend/Httpd_Resume usage that
 	was added to Httpd_ReadPostDataAsync (The Httpd_Resume was omitted)
 	* Tagged and released 3.2
