@@ -4,7 +4,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: utils.tcl,v 1.10 2004/05/27 01:25:19 coldstore Exp $
+# RCS: @(#) $Id: utils.tcl,v 1.11 2004/06/15 23:33:14 coldstore Exp $
 
 package provide httpd::utils 1.0
 
@@ -610,6 +610,7 @@ proc lambda {argl body} {K [info level 0] [proc [info level 0] $argl $body]}
 # and requiring 1.0 cures later conflicts with 2.0
 # we run with whatever version is available
 # by making an aliased wrapper
+package require md5
 if {[package vcompare [package present md5] 2.0] > -1} {
     # we have md5 v2 - it needs to be told to return hex
     interp alias {} md5hex {} ::md5::md5 --hex --

@@ -29,10 +29,11 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.21 2004/06/12 02:29:59 coldstore Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.22 2004/06/15 23:33:14 coldstore Exp $
 
 package provide httpd::auth 2.0
 package require base64
+package require httpd::digest
 
 set Auth_DigestOnly 0;	# set this to 1 to only use Digest auth
 
