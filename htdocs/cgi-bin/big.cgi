@@ -20,6 +20,9 @@ puts "Content-Length: [file size $path]"
 puts ""
 fconfigure $in -translation binary
 fconfigure stdout -translation binary
+
+# Delay to simulate slow CGI
+after 1000
 copychannel $in stdout
 close $in
 exit 0
