@@ -8,7 +8,8 @@ platform for web application development."]
 
 <p>
 The Tcl-Httpd is a pure Tcl implementation of a Web server (HTTP/1.0).
-It runs as a Tcl script on top of <a href=http://www.scriptics.com/software/download.html>Tcl 8.3</a>.
+It runs as a Tcl script on top of
+<a href=http://dev.scriptics.com/software/tcltk/>Tcl 8.3</a>.
 <p>
 <small>
 If you install the Standard Tcl Library with your Tcl 8.0 or later release you can probably
