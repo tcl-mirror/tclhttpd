@@ -8,12 +8,43 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.17 2003/05/01 23:38:49 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.18 2004/03/23 01:16:54 welch Exp $
 
 package provide httpd::debug 1.0
 
+# Debug_Url
+#
+#       Use this to register the URL prefix that corresponds to
+#       the debug URLs implemented by this module
+#
+# Arguments:
+#	dir	The URL prefix
+
 proc Debug_Url {dir} {
     Direct_Url $dir Debug
+    DebugSetRandomPassword $dir
+}
+
+# DebugSetRandomPassword
+#
+#       Choose and save a random password used to secure the /debug domain
+
+proc DebugSetRandomPassword {dir} {
+  set alphabet {a b c d e f g h i j k l m n o p q r s t u v w x y z 0 1 2 3 4 5 6 7 8 9 . + - = " "}
+  for {set i 0} {$i < 12} {incr i} {
+    set c [lindex $alphabet [expr int(rand() * [llength $alphabet])]]
+    append passwd $c
+  }
+  Stderr "$dir user \"debug\" password \"$passwd\""
+  set ::DebugPassword $passwd
+}
+
+# DebugCheckRandomPassword
+#
+#       Check that the input matches the random password
+
+proc DebugCheckRandomPassword {input} {
+  return [expr {[string compare $::DebugPassword $input] == 0}]
 }
 
 # Debug/source --

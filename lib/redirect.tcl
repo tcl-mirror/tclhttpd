@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: redirect.tcl,v 1.4 2002/08/15 13:13:30 coldstore Exp $
+# RCS: @(#) $Id: redirect.tcl,v 1.5 2004/03/23 01:16:54 welch Exp $
 
 package provide httpd::redirect 1.0
 
@@ -164,7 +164,7 @@ proc RedirectAccess {sock url} {
     if {[info exist RedirectSelf($url)]} {
 	
 	# Note - this is not an "internal" redirect, but in this case
-	# the serever simply qualifies the url with its own name
+	# the server simply qualifies the url with its own name
 
 	Httpd_RedirectSelf $RedirectSelf($url) $sock
 	return denied
