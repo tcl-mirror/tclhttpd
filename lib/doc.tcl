@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.58 2004/10/22 08:32:56 coldstore Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.59 2004/12/11 13:22:40 coldstore Exp $
 
 package require uri
 
@@ -109,7 +109,7 @@ proc Doc_RegisterRoot {virtual directory} {
 	return -code error \
 		"Doc_RegisterRoot will not change an existing url to directory mapping"
     }
-    set Doc(root,$virtual) $directory
+    set Doc(root,$virtual) [file normalize $directory]
 }
 
 # Doc_Include
@@ -509,7 +509,7 @@ proc Doc_GetPath {sock {file ""}} {
 
     # Start at the Doc_AddRoot point
     if {[info exist Doc(root,$data(prefix))]} {
-	set root $Doc(root,$data(prefix))
+	set root [file normalize $Doc(root,$data(prefix))]
 
 	# always start in the rootdir
 	set dirs $Doc(root)

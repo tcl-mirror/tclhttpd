@@ -1,3 +1,7 @@
+2004-12-12 Colin McCormack <colin@sharedtech.dyndns.org>
+	* lib/doc.tcl: patched Doc_GetPath to use [file normalize], as
+	per sourceforge bug #1083423
+	
 2004-11-27 Colin McCormack <colin@sharedtech.dyndns.org>
 	* renamed custom/dodirs.tcl to custom/zzzdodirs.tcl to place
 	directories after files in custom library load
