@@ -2,6 +2,7 @@
 	(Adopted from work by Piet Vloet - thanks!)
 	* lib/auth.tcl: Changes to handle multiple
 	group and user specifications in .htaccess files.
+	Also changed Auth_AccessFile to Auth_InitCrypt
 	* htdocs/access/index.html: Updated docs 
 	* htdocs/access/multiple: New tests
 	* htaccess: sample group and password files.
@@ -9,6 +10,7 @@
 2001-03-12  Brent Welch <welch@panasas.com>
 
 	* ChangeLog:
+	* bin/httpdthread.tcl: Updated to Auth_InitCrypt from Auth_AccessFile.
 	* htdocs/x/hacks.tml: Switched from debug/parray to debug/pvalue,
 	which is more general.  It takes a pattern of variables to print.
 	* lib/status.tcl: Added StatusHeader procedure

@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.9 2000/10/20 17:50:57 welch Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.10 2001/03/13 06:23:01 welch Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -138,7 +138,7 @@ package require httpd::redirect	;# Url redirection tables
 Redirect_Init			/redirect
 
 if {[catch {
-    Auth_AccessFile	.htaccess       ;# Enable Basic Auth
+    Auth_InitCrypt			;# Probe for crypt module
 } err]} {
     catch {puts "No .htaccess support: $err"}
 }
