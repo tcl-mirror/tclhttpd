@@ -410,21 +410,34 @@ proc Url_PostHook {sock length} {
 proc Url_DecodeQuery {query args} {
     global Url
 
+    Url_ReadPost $Url(sock) query
+    eval {Url_DecodeQueryOnly $query} $args
+}
+
+proc Url_ReadPost {sock varname} {
+    upvar 1 $varname query
+    global Url
+
+    append query ""
     if {[info exist Url(postlength)] && ($Url(postlength) > 0)} {
 	
 	# For compatibility with older versions of the Httpd module
 	# that used to read all the post data for us, we read it now
 	# if it hasn't already been read
 
+	set result $Url(postlength)
 	if {[string length $query]} {
+	    # This merges query data from the GET/POST URL
 	    append query &
 	}
 	while {$Url(postlength) > 0} {
-	    set Url(postlength) [Httpd_GetPostData $Url(sock) query]
+	    set Url(postlength) [Httpd_GetPostData $sock query]
 	}
 	unset Url(postlength)
+	return $result
+    } else {
+	return 0
     }
-    eval {Url_DecodeQueryOnly $query} $args
 }
 
 proc Url_DecodeQueryOnly {query args} {

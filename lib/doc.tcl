@@ -671,7 +671,9 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	# ncgi::value can be used to get the data.  This replaces
 	# the old Url_DecodeQuery interface.
 
-	# TODO - us Url backdoor to read the query data here.
+	# Read and append the pending post data to data(query).
+
+	Url_ReadPost $sock data(query)
 
 	interp eval $interp [list ncgi::reset $data(query) $type]
 	interp eval $interp [list ncgi::parse]
