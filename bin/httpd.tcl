@@ -42,7 +42,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.26 2000/08/02 07:25:50 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.27 2000/08/23 20:39:40 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -243,8 +243,8 @@ catch {package require setuid}	;# TclHttpd extension
 if {"[info command id]" == "id"} {
     # Emulate TclHttpd C extension with TclX commands
     proc setuid {uid gid} {
-	id userid $uid
 	id groupid $gid
+	id userid $uid
     }
 }
 if ![catch {
