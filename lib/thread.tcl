@@ -13,8 +13,6 @@ package provide threadmgr 1.0
 if {[catch {package require Thread}]} {
     if {[info commands testthread] == "testthread"} {
 	proc thread args {eval testthread $args}
-    } else {
-	puts stderr "No thread support"
     }
 }
 
