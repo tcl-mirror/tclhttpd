@@ -1,6 +1,8 @@
 2003-10-16 Colin McCormack <colin@field.medicine.adelaide.edu.au>
         * lib/{auth,passcheck,tclcrypt}.tcl: added pure tcl crypt
         as a fallback for installations lacking the compiled version
+        * htdocs/htaccess/: added tools for maintenance of .htaccess
+        authentication files, group and passwords.
 
 2003-10-10  Brent Welch <welch@panasas.com>
         * lib/httpd.tcl: fixes for logging of static files based on

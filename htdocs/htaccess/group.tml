@@ -1,0 +1,64 @@
+[html::author "Colin McCormack"]
+[mypage::header "group editor"]
+[
+ set file [ncgi::value file]
+ return [validation::parseFile $file groups]
+]
+
+[
+ # write file if necessary
+ set group [ncgi::value group]
+
+ if {$group != ""} {
+     if {[ncgi::value action] == "Del"} {
+	 catch {unset groups($group)}
+     } else {
+	 set groups($group) [ncgi::value people]
+     }
+
+     # save the file if necessary
+     validation::writefile $file groups
+
+     return "<p>Updated [ncgi::value file]"
+ } else {
+     return "<p>Read [ncgi::value file]"
+ }
+]
+
+[
+ ncgi::setValue group ""
+ ncgi::setValue people ""
+ ncgi::setValue action 0
+ catch {unset html}
+ 
+ foreach {key value} [array get groups] {
+     append html [subst {
+	 <form action="$page(url)" method=POST>
+	 <input type=hidden name=file  value="[html::quoteFormValue $file]">
+	 <input type=hidden name=group value="[html::quoteFormValue $key]">
+	 <input type=submit value="[html::quoteFormValue $key]">
+	 <input type=text name=people value="[html::quoteFormValue $value]">
+	 <input type=checkbox name=action value=Del>Del
+	 </form>
+     }]
+ }
+ 
+ append html [subst {
+     <form action="$page(url)" method=POST>
+     <input type=hidden name=file  value="[html::quoteFormValue $file]">
+     <input type=text name=group value="">
+     <input type=text name=people value="">
+     <input type=submit name=action value=Add>
+     </form>
+ }]
+
+ return $html
+]
+<p><a href="index.html">Return to htaccess editor</a></p>
+[
+ unset html
+ #ncgi::setValue debug 1
+ return [::validation::debug groups]
+]
+
+[mypage::footer]
