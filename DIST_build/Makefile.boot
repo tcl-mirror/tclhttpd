@@ -39,6 +39,7 @@ ARCH=unix
 
 #PLATFORM=solaris-sparc
 PLATFORM=linux-ix86
+#PLATFORM=freebsd-ix86
 #PLATFORM=win32-ix86
 #PLATFORM=irix-mips
 #PLATFORM=hpux-parisc
@@ -85,47 +86,8 @@ config-modules:
 		    --exec-prefix=$$exec_prefix \
 		    $(CONFIG_FLAGS) \
 		    --with-tcl=$$pwd/build/$(PLATFORM)/$(TCL) \
-		    --with-tcl-include=$$pwd/$(TCL)/generic; \
-	    else \
-		echo "Skipping configure in $$i" ; \
-	    fi ; \
-	    echo "" ; \
-	done;
-
-config: build/$(PLATFORM) config-tcl config-modules
-
-config-tcl:
-	@echo "$(TCL) configure"
-	-pwd=`pwd`; \
-	prefix=$(PREFIX) ; \
-	exec_prefix=$(EXEC_PREFIX) ; \
-        i=$(TCL) ; \
-        mkdir $$pwd/build/$(PLATFORM)/$$i ; \
-        cd $$pwd/build/$(PLATFORM)/$$i ; \
-        path=$$pwd/$$i/$(ARCH)/configure ; \
-        echo "Configuring in build/$(PLATFORM)/$$i" ; \
-        sh $$path --prefix=$$prefix \
-            --exec-prefix=$$exec_prefix \
-            $(CONFIG_FLAGS) \
-            --with-tcl=$$pwd/build/$(PLATFORM)/$(TCL); \
-
-config-modules:
-	@echo "Running configure prefix=$(PREFIX)"
-	-pwd=`pwd`; \
-	prefix=$(PREFIX) ; \
-	exec_prefix=$(EXEC_PREFIX) ; \
-	for i in $(MODULES) ; do \
-	    echo "" ; \
-	    mkdir $$pwd/build/$(PLATFORM)/$$i ; \
-	    cd $$pwd/build/$(PLATFORM)/$$i ; \
-            path=$$pwd/$$i/configure ; \
-	    if test -f $$path ; then \
-		echo "Configuring in build/$(PLATFORM)/$$i" ; \
-		sh $$path --prefix=$$prefix \
-		    --exec-prefix=$$exec_prefix \
-		    $(CONFIG_FLAGS) \
-		    --with-tcl=$$pwd/build/$(PLATFORM)/$(TCL) \
-		    --with-tcl-include=$$pwd/$(TCL)/generic; \
+		    --with-tcl-include=$$pwd/$(TCL)/generic \
+		    --with-tclinclude=$$pwd/$(TCL)/generic; \
 	    else \
 		echo "Skipping configure in $$i" ; \
 	    fi ; \
@@ -199,6 +161,9 @@ solaris:
 
 linux:
 	make PLATFORM=linux-ix86 ARCH=unix config make install
+
+freebsd:
+	make PLATFORM=freebsd-ix86 ARCH=unix config make install
 
 win:
 	make PLATFORM=win32-ix86 ARCH=win config make install
