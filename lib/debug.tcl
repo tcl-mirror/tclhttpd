@@ -1,19 +1,31 @@
-# deubg.tcl --
+# debug.tcl --
 #
 #	Application-direct URLs to help debugg the server.
-# 	Tcl procedures of the form debug/hello implement URLS
+# 	Tcl procedures of the form Debug/hello implement URLS
 #	of the form /debug/hello
 #
-# Brent Welch (c) Copyright 1998 Scriptics Corporation.
+# Copyright (c) 1998-2000 by Scriptics Corporation.
+# All rights reserved.
 #
-# See the file "license.terms" for information on usage and redistribution
-# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
-#
+# RCS: @(#) $Id: debug.tcl,v 1.7 2000/06/08 18:11:56 hershey Exp $
+
 package provide debug 1.0
 
 proc Debug_Url {dir} {
     Direct_Url $dir Debug
 }
+
+# Debug/source --
+#
+#	Source the file into a server thread.  First look for the file to
+#	source in the dir specified by Httpd(library).  If not found, use the
+#	dir in Doc(templateLibrary).
+#
+# Arguments:
+#	source	the file to source
+#
+# Results:
+#	Returns HTML code that displays result of loading the file.
 
 proc Debug/source {source {thread main}} {
     global Httpd Doc
@@ -55,9 +67,17 @@ proc Debug/source {source {thread main}} {
     return $html
 }
 
-# steve: 24/11/97: reload a package
- 
-proc Debug/package name {
+# Debug/package --
+#
+#	Forget, delete, and the reload a package into the server.
+#
+# Arguments:
+#	name	the package to reload.
+#
+# Results:
+#	Returns HTML code that displays the result of reloading the package.
+
+proc Debug/package {name} {
     if {[catch {
 	package forget $name
 	catch {namespace delete $name}
@@ -82,6 +102,19 @@ Version $result of package \"$name\" has been (re)loaded.
     return $html
 }
  
+# Debug/pvalue --
+#
+#	Generate HTML code that displays the contents of all existing arrays
+#	and variables that match the glob pattern.
+#
+# Arguments:
+#	aname	the (fully qualified) glob pattern to match against existing
+#		arrays and variables.
+#
+# Results:
+#	Returns HTML code that displays the contents of the arrays and
+#	variables that match the glob pattern.
+
 proc Debug/pvalue {aname} {
     set html "<title>$aname</title>\n"
     append html [DebugValue $aname]
@@ -105,6 +138,16 @@ proc DebugValue {aname} {
     return $html
 }
 
+# Debug/parray --
+#
+#	Generate HTML code that displays 
+#
+# Arguments:
+#	aname	the name of the array whose contents will appear.
+#
+# Results:
+#	Returns HTML code that displays 
+
 proc Debug/parray {aname} {
     global $aname
     set html "<title>Array $aname</title>\n"
@@ -113,12 +156,52 @@ proc Debug/parray {aname} {
     return $html
 }
 
+# Debug/raise --
+#
+#	Generate HTML code that causes the Tcl error specified by args to be thrown.
+#
+# Arguments:
+#	args	(optional) the error string to throw.
+#
+# Side Effects:
+#	An error is thrown.
+#
+# Results:
+#	none.
+
 proc Debug/raise {args} {
     error $args
 }
-proc Debug/goof {args} {
+
+# Debug/goof --
+#
+#	Generate HTML code that causes the Tcl error: "can't read "goof": no
+#	such variable".
+#
+# Arguments:
+#	none.
+#
+# Side Effects:
+#	An error is thrown.
+#
+# Results:
+#	None.
+
+proc Debug/goof {} {
     set goof
+    return
 }
+
+# Debug/after --
+#
+#	Generate HTML code that displays info regarding after events existing
+#	on the server.
+#
+# Arguments:
+#	none.
+#
+# Results:
+#	Returns HTML.
 
 proc Debug/after {} {
     global tcl_version
@@ -136,6 +219,18 @@ proc Debug/after {} {
     return $html
 }
 
+# Debug/echo --
+#
+#	Generate HTML code that displays the attributes and values posted to
+#	the URL.
+#
+# Arguments:
+#	title	(optional) title to display
+#	args	an even number of attrbutes and values to be displayed.
+#
+# Results:
+#	Returns HTML.
+
 proc Debug/echo {title args} {
     set html "<title>$title</title>\n"
     append html "<H1>$title</H1>\n"
@@ -146,6 +241,20 @@ proc Debug/echo {title args} {
     append html </table>
     return $html
 }
+
+# Debug/errorInfo --
+#
+#	Generate HTML code that displays a title, some errorInfo, and the
+#	contents of (the env) array.
+#
+# Arguments:
+#	title		(optional) page title to display
+#	errorInfo	(optional) error data to display
+#	env		(optional) the name of an array to display
+#
+# Results:
+#	Returns HTML.
+
 proc Debug/errorInfo {title errorInfo {env {no environment}}} {
     set html "<title>$title</title>\n"
     append html "<H1>$title</H1>\n"
@@ -164,7 +273,18 @@ proc Debug/errorInfo {title errorInfo {env {no environment}}} {
     return $html
 }
 
-proc Debug/dbg {{host sage} {port 5000}} {
+# Debug/dbg --
+#
+#	Initiate a connection with the tcldebugger.
+#
+# Arguments:
+#	host	the host where the debugger is running
+#	port	the port on which the debugger is listening
+#
+# Results:
+#	Returns the result of initiating the connection in HTML.
+
+proc Debug/dbg {host port} {
     global debug_init Httpd
     if {![info exist debug_init]} {
 	if {[info command debugger_init] == ""} {
@@ -173,10 +293,19 @@ proc Debug/dbg {{host sage} {port 5000}} {
 	debugger_init $host $port
 	set debug_init "$host $port"
 	return "Contacted TclPro debugger at $host:$port"
-    } else {
-	return "Already connected to tclPro at $debug_init"
     }
+    return "Already connected to tclPro at $debug_init"
 }
+
+# Debug/showproc --
+#
+#	Generate HTML code that displays the args and body of a proc.
+#
+# Arguments:
+#	proc	the name of the procedure
+#
+# Results:
+#	Returns HTML.
 
 proc Debug/showproc {proc} {
     global Debug/showproc
