@@ -1,0 +1,18 @@
+[html-strict::head {TclHttpd &gt; Sample Apps &gt; Bug Database} \
+{/sampleapp/bugdb/default.css screen} {} ]
+[Doc_Dynamic]
+
+[html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database &gt; Report A Bug}]
+
+<p>Form Values:</p>
+
+<ul>
+    <li>[ncgi::value Application]</li>
+    <li>[ncgi::value OS]</li>
+    <li>[ncgi::value Priority]</li>
+    <li>[ncgi::value Assigned]</li>
+    <li>[ncgi::value Summary]</li>
+    <li>[ncgi::value Description]</li>
+</ul>
+
+[html-strict::foot]

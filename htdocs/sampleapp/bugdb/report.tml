@@ -35,7 +35,7 @@
 
 <p>
     <label for="Assigned" class="text">Assigned To:</label>
-    <select name="Priority" id="Priority">
+    <select name="Assigned" id="Assigned">
 	[html::foreach option $assigned_options {
             <option>$option</option>
 	}]
