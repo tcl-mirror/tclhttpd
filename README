@@ -45,14 +45,17 @@ VERSION SUMMARY
 
 Version 3.4.1 fixes CGI POST forms on Windows, a typo in upload.tcl
 and the lib/pkgIndex.tcl.  It also disallows the ability to retrieve
-.tml, .tclaccess, and .htaccess files.  These simple new APIs crept
-in: Url_AccessInstallPrepend, Url_AccessUnInstall, Mtype_Add, Mtype_Reset.
+.tml, .tclaccess, and .htaccess files.  These simple new APIs crept in:
+  Url_AccessInstallPrepend, Url_AccessUnInstall
+  Mtype_Add, Mtype_Reset
+  Direct_UrlRemove
 
 Version 3.4 has several updates to the Doc, Upload, and Thread modules
 done by Melissa Chawla of Panasas. Please see the ChangeLog for details.
 There is also a small modification to support If-Modified-Since optimization
 in Httpd_ReturnFile contributed by Brian Meagher.  Don Porter contributed
 virtual host support, so you can support several sites with one server.
+Please see README.virthost for details
 
 Version 3.3.1 was just a cleanup of the installation files and
 configure scripts. (acruz)
