@@ -88,6 +88,7 @@ array set Httpd_EnvMap {
 # sockblock:	blocking mode value for sockets (normally this should be 0)
 # timeout1:	Time before the server closes a kept-alive socket (msecs)
 # timeout2:	Time before the server kills an in-progress transaction.  (msecs)
+# timeout3:	Time allowed to drain extra post data
 # version:	The version number.
 # maxused:	Max number of transactions per socket (keep alive)
 #
@@ -102,6 +103,7 @@ proc Httpd_Init {} {
     array set Httpd {
 	timeout1	120000
 	timeout2	120000
+	timeout3	2000
 	server		"Tcl-Webserver/"
 	initialized 	1
 	shutdown	""
@@ -116,11 +118,6 @@ proc Httpd_Init {} {
     append Httpd(server) $Httpd(version)
     if {[info commands "unsupported0"] == "unsupported0"} {
 	rename unsupported0 copychannel
-    }
-    if {[info commands "copychannel"] == "copychannel"} {
-	set Httpd(fcopy) 0
-    } else {
-	set Httpd(fcopy) 1
     }
     # We always have the counter module and mimetyes
     Counter_Init
@@ -305,7 +302,9 @@ proc HttpdReset {sock {left {}}} {
 	Httpd_SockClose $sock 1 $err
 	return
     }
-
+    if {[info exists data(cancel)]} {
+	after cancel $data(cancel)
+    }
     set ipaddr $data(ipaddr)
     set self $data(self)
     if {[Httpd_Protocol $sock] == "https"} {
@@ -388,8 +387,12 @@ proc HttpdRead {sock} {
 		set data(state) mime
 		set data(line) $line
 		CountHist urlhits
+
 		# Limit the time allowed to serve this request
-		catch {after cancel $data(cancel)}
+
+		if {[info exists data(cancel)]} {
+		    after cancel $data(cancel)
+		}
 		set data(cancel) [after $Httpd(timeout2) \
 		    [list HttpdCancel $sock]]
 	    } else {
@@ -427,33 +430,39 @@ proc HttpdRead {sock} {
 	0,mime	{
 	    if {$data(proto) == "POST"} {
 		fconfigure $sock  -translation {binary crlf}
-		if {[info exists data(mime,content-length)]} {
-		    set data(count) $data(mime,content-length)
-
-		    # There is a strange case of POST with no
-		    # content-length.  We dispatch on that, but
-		    # it is up to the URL domain to read until EOF.
+		if {![info exists data(mime,content-length)]} {
+		    Httpd_Error $sock 411 $data(mime,expect)
+		    return
 		}
+		set data(count) $data(mime,content-length)
 		if {$data(version) >= 1.1 && [info exists data(mime,expect)]} {
 		    if {$data(mime,expect) == "100-continue"} {
 			puts $sock "100 Continue HTTP/1.1\n"
 			flush $sock
 		    } else {
 			Httpd_Error $sock 419 $data(mime,expect)
+			return
 		    }
 		}
+
+		# Facilitate a backdoor hook between Url_DecodeQuery
+		# where it will read the post data on behalf of the
+		# domain handler in the case where the domain handler
+		# doesn't use an Httpd call to read the post data itself.
+
+		Url_PostHook $sock $data(count)
+	    } else {
+		set data(count) 0
 	    }
 
-	    # TclHttpd used to read all the post data here and
-	    # blindly merge it with the query data from the URL.
-	    # For compatibility, this is postponed until either
-	    # Url_DecodeQuery is called or Httpd_GetPostData is called.
+	    # Disabling this fileevent makes it possible to use
+	    # http::geturl in domain handlers reliably
 
 	    fileevent $sock readable {}
+
+	    # The use of HTTP_CHANNEL is a disgusting hack.
+
 	    set ::env(HTTP_CHANNEL) $sock
-	    if {[info exist data(count)]} {
-		Url_PostHook $sock $data(count)
-	    }
 
 	    # Do a different dispatch for proxies.  By default, no proxy.
 
@@ -494,9 +503,6 @@ proc HttpdRead {sock} {
 proc Httpd_PostDataSize {sock} {
     upvar #0 Httpd$sock data
 
-    if {![info exist data(count)]} {
-	return 0
-    }
     return $data(count)
 }
 
@@ -514,9 +520,6 @@ proc Httpd_GetPostData {sock varName {size -1}} {
     upvar #0 Httpd$sock data
     upvar 1 $varName buffer
 
-    if {![info exist data(count)] || $data(count) == 0} {
-	return 0
-    }
     if {$size < 0 || $size > $data(count)} {
 	set size $data(count)
     }
@@ -526,7 +529,102 @@ proc Httpd_GetPostData {sock varName {size -1}} {
     if {[eof $sock]} {
 	set data(count) 0
     }
+    if {$data(count) == 0} {
+	Url_PostHook $sock 0
+    }
     return $data(count)
+}
+
+# Httpd_GetPostDataAsync --
+#
+#	Read the POST data into a Tcl variable, but do it in the
+#	background so the server doesn't block on the socket.
+#
+# Arguments:
+#	sock	Client connection
+#	varName	Name of buffer variable to append post data to.  This
+#		must be a global or fully scoped namespace variable, or
+#		this can be the empty string, in which case the data
+#		is discarded.
+#	cmd	Callback to make when the post data has been read.
+#		It is called like this:
+#		cmd $sock $varName $errorString
+#		Where the errorString is only passed if an error occurred.
+#
+# Side Effects:
+#	This schedules a readable fileevent to read all the POST data
+#	asynchronously.  The data is appened to the named variable.
+#	The callback is made 
+
+proc Httpd_GetPostDataAsync {sock varName cmd} {
+    fileevent $sock readable [list HttpdReadPost $sock $varName $cmd]
+    return
+}
+
+proc HttpdReadPost {sock varName cmd} {
+    global Httpd
+    upvar #0 Httpd$sock data
+
+    # Ensure that the variable, if specified, exists by appending "" to it
+
+    if {[string length $varName]} {
+	upvar #0 $varName buffer
+	append buffer ""
+    }
+
+    if {[eof $sock]} {
+	if {$data(count)} {
+	    set doneMsg "Short read: got [string length $buffer] bytes,\
+		expected $data(count) more bytes"
+	} else {
+	    set doneMsg ""
+	}
+    } else {
+	set toRead [expr {$data(count) > $Httpd(bufsize) ? \
+		$Httpd(bufsize) : $data(count)}]
+	if {[catch {read $sock $toRead} block]} {
+	    set doneMsg $block
+	} else {
+	    if {[info exist buffer]} {
+		append buffer $block
+	    }
+	    set data(count) [expr {$data(count) - [string length $block]}]
+	    if {$data(count) == 0} {
+		set doneMsg ""
+	    }
+	}
+    }
+    if {[info exist doneMsg]} {
+	Url_PostHook $sock 0
+	eval $cmd [list $sock $varName $doneMsg]
+	catch {fileevent $sock readable {}}
+    }
+}
+
+# Httpd_CopyPostData --
+#
+#	Copy the POST data to a channel and make a callback when that
+#	has completed.
+#
+# Arguments:
+#	sock	Client connection
+#	channel	Channel, e.g., to a local file or to a proxy socket.
+#	cmd	Callback to make when the post data has been read.
+#		It is called like this:
+#		    cmd $sock $channel $bytes $errorString
+#		Bytes is the number of bytes transferred by fcopy.
+#		errorString is only passed if an error occurred,
+#		otherwise it is an empty string
+#
+# Side Effects:
+#	This uses fcopy to transfer the data from the socket to the channel.
+
+proc Httpd_CopyPostData {sock channel cmd} {
+    upvar #0 Httpd$sock data
+    fcopy $sock $channel -size $data(count) \
+    	-command [concat $cmd $sock $channel]
+    Url_PostHook $sock 0
+    return
 }
 
 # Httpd_GetPostChannel --
@@ -543,64 +641,25 @@ proc Httpd_GetPostChannel {sock sizeName} {
     upvar #0 Httpd$sock data
     upvar 1 $sizeName size
 
-    if {![info exist data(count)]} {
+    if {$data(count) == 0} {
 	error "no post data"
     }
     set size $data(count)
     return $sock
 }
 
-# HttpdPostData --
-# This accepts the post data.  There may be a conflict between
-# query data in the url and post data - you choose:
-# combine: use both sources of information
-# getwins: only the URL query data is used (like Apache)
-# postwins: only the POST query data is used
-
-set Httpd(postget) combine
-
-proc HttpdPostData {sock postdata} {
-    global Httpd
-    upvar #0 Httpd$sock data
-
-    if {! [info exists data(postlength)]} {
-	# First read of post data
-	set data(postlength) [string length $postdata]
-	if {[info exists data(query)] && [string length $data(query)]} {
-	    switch $Httpd(postget) {
-		combine {
-		    append data(query) &$postdata
-		}
-		getwins {
-		    # This is what apache does - ignore the post data.
-		    unset data(postlength)
-		}
-		postwins {
-		    # Ignore the URL query data
-		    set data(query) $postdata
-		}
-	    }
-	} else {
-	    set data(query) $postdata
-	}
-    } else {
-	append data(query) $postdata
-	incr data(postlength) [string length $postdata]
-    }
-    set data(count) [expr {$data(mime,content-length) - $data(postlength)}]
-    if {$data(count) == 0} {
-	return 1
-    } else {
-	return 0
-    }
-}
-
 # The following are several routines that return replies
 
-# See if we should close the socket
-#  sock:  the connection handle
+# HttpdCloseP --
+#	See if we should close the socket
+#
+# Arguments:
+#	sock	the connection handle
+#
+# Results:
+#	1 if the connection should be closed now, 0 if keep-alive
 
-proc HttpdClose {sock} {
+proc HttpdCloseP {sock} {
     upvar #0 Httpd$sock data
 
     if {[info exists data(mime,connection)]} {
@@ -635,7 +694,7 @@ proc HttpdClose {sock} {
     return $close
 }
 
-# HttpdRespondHeader
+# HttpdRespondHeader --
 #
 #	Utility routine for outputting response headers for normal data Does
 #	not output the end of header markers so additional header lines can be
@@ -644,7 +703,7 @@ proc HttpdClose {sock} {
 # Arguments:
 #	sock	The connection handle
 #	type	The mime type of this response
-#	close	If true, signal connection close headers.  See HttpdClose
+#	close	If true, signal connection close headers.  See HttpdCloseP
 #	size	The size "in bytes" of the response
 #	code	The return code - defualts to 200
 #
@@ -726,12 +785,14 @@ proc Httpd_ReturnFile {sock type path {offset 0}} {
 
     Count urlreply
     set data(file_size) [file size $path]
+
     # Some files have a duality, when the client sees X bytes but the
     # file is really X + n bytes (the first n bytes reserved for server
     # side accounting information.
+
     incr data(file_size) -$offset
 
-    set close [HttpdClose $sock]
+    set close [HttpdCloseP $sock]
     HttpdRespondHeader $sock $type $close $data(file_size) 200
     HttpdSetCookie $sock
     puts $sock "Last-Modified: [HttpdDate [file mtime $path]]"
@@ -745,14 +806,7 @@ proc Httpd_ReturnFile {sock type path {offset 0}} {
 	fconfigure $sock -translation binary -blocking $Httpd(sockblock)
 	set data(infile) $in
 	Httpd_Suspend $sock 0
-	if {$Httpd(fcopy)} {
-	    fcopy $in $sock -command [list HttpdCopyDone $in $sock $close]
-	} else {
-	    if [HttpdCopy $in $sock $close] {
-		# More to copy
-		fileevent $sock writable [list HttpdCopy $in $sock $close]
-	    }
-	}
+	fcopy $in $sock -command [list HttpdCopyDone $in $sock $close]
     } else {
 	Httpd_SockClose $sock $close
     }
@@ -780,7 +834,7 @@ proc Httpd_ReturnData {sock type content {code 200} {close 0}} {
 
     Count urlreply
     if {$close == 0} {
-    	set close [HttpdClose $sock]
+    	set close [HttpdCloseP $sock]
     }
     HttpdRespondHeader $sock $type $close [string length $content] $code
     HttpdSetCookie $sock
@@ -816,7 +870,7 @@ proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
     }
 
     Count urlreply
-    set close [HttpdClose $sock]
+    set close [HttpdCloseP $sock]
     HttpdRespondHeader $sock $type $close [string length $content] $code
     HttpdSetCookie $sock
     puts $sock "Last-Modified: [HttpdDate $date]"
@@ -828,38 +882,11 @@ proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
     Httpd_SockClose $sock $close
 }
 
-# HttpdCopy -- 
-# utility used in bulk transfer with unsupported0 (a.k.a. copychannel)
-# If this returns 1, the caller should schedule another read event
-# to copy the remaining data.
-
-proc HttpdCopy {in sock close} {
-    global Httpd
-    if [catch {
-	    if {[info exists Httpd(copytest)] && $Httpd(copytest)} {
-		# 8.0 handles binary read/puts
-		puts -nonewline $sock [read $in $Httpd(bufsize)]
-	    } else {
-		copychannel $in $sock $Httpd(bufsize)
-	    }
-    } oops] {
-	Log $sock CopyError $oops
-	Httpd_SockClose $sock 1 "copychannel error"
-	return 0
-    }
-    if [eof $in] {
-	Httpd_SockClose $sock $close
-	return 0
-    }
-    return 1
-}
-
 # HttpdCopyDone -- this is used with fcopy when the copy completes.
 # Note that tcl8.0b1 had a bug in that errors during fcopy called
 # bgerror instead of this routine, which causes leaks.  Don't use b1.
 
 proc HttpdCopyDone {in sock close bytes {error {}}} {
-    catch {close $in}
     Httpd_SockClose $sock $close
 }
 
@@ -898,7 +925,7 @@ proc Httpd_Error {sock code {detail ""}} {
     if {[info exists data(code)]} {
 	set detail "OLDCODE $code $detail"
     }
-    if [info exists data(infile)] {
+    if {[info exists data(infile)]} {
 	set detail "BUSY $detail"
     }
     set data(code) $code
@@ -911,7 +938,7 @@ proc Httpd_Error {sock code {detail ""}} {
 	}
     }
     Log $sock Error $code $data(url) $detail
-    if [info exists data(infile)] {
+    if {[info exists data(infile)]} {
 	# We've already started a reply, so just bail out
 	Httpd_SockClose $sock 1
 	return
@@ -947,7 +974,7 @@ proc Httpd_Redirect {newurl sock} {
     }
 
     set message [format $HttpdRedirectFormat $newurl]
-    set close [HttpdClose $sock]
+    set close [HttpdCloseP $sock]
     HttpdRespondHeader $sock text/html $close [string length $message] 302
     HttpdSetCookie $sock
     puts $sock "Location: $newurl"
@@ -1058,7 +1085,7 @@ proc Httpd_RequestAuth {sock type realm} {
 	return
     }
 
-    set close [HttpdClose $sock]
+    set close [HttpdCloseP $sock]
     HttpdRespondHeader $sock text/html $close [string length $HttpdAuthorizationFormat] 401
     puts $sock "Www-Authenticate: $type realm=\"$realm\""
     puts $sock ""
@@ -1072,31 +1099,69 @@ proc HttpdDate {seconds} {
     return [clock format $seconds -format {%a, %d %b %Y %T GMT} -gmt true]
 }
 
-
-# Close a socket.  We'll use this for keep-alives some day.
+# Httpd_SockClose --
+#	"Close" a connection, although the socket might actually
+#	remain open for a keep-alive connection.
+#	This means the HTTP transaction is fully complete.
+#
+# Arguments:
+#	sock	Identifies the client connection
+#	closeit	1 if the socket should close no matter what
+#	message	Logging message.  If this is "Close", which is the default,
+#		then an entry is made to the standard log.  Otherwise
+#		an entry is made to the debug log.
+#
+# Side Effects:
+#	Cleans up all state associated with the connection, including
+#	after events for timeouts, the data array, and fileevents.
 
 proc Httpd_SockClose {sock closeit {message Close}} {
+    global Httpd
     upvar #0 Httpd$sock data
 
     if {[string length $message]} {
 	Log $sock $message
     }
     Count connections -1
-    if [info exists data(cancel)] {
-	after cancel $data(cancel)
+    if {[info exist data(infile)]} {
+
+	# Close file or CGI pipe.  Still need catch because of CGI pipe.
+
+	catch {close $data(infile)}
     }
-    catch {close $data(infile)}
     if {$closeit} {
-	Count sockets -1
-	if [catch {close $sock} err] {
-	    Log $sock CloseError $err
+	if {$data(count) > 0} {
+
+	    # There is unread POST data.  To ensure that the client
+	    # can read our reply properly, we must read this data.
+	    # The empty variable name causes us to discard the POST data.
+
+	    if {[info exists data(cancel)]} {
+		after cancel $data(cancel)
+	    }
+	    set data(cancel) [after $Httpd(timeout3) \
+		[list HttpdCloseFinal $sock]]
+
+	    Httpd_GetPostDataAsync $sock "" HttpdCloseFinal
+	} else {
+	    HttpdCloseFinal $sock
 	}
-	unset data
     } else {
 	HttpdReset $sock
     }
 }
 
+proc HttpdCloseFinal {sock args} {
+    upvar #0 Httpd$sock data
+    Count sockets -1
+    if {[info exists data(cancel)]} {
+	after cancel $data(cancel)
+    }
+    if {[catch {close $sock} err]} {
+	Log $sock CloseError $err
+    }
+    unset data
+}
 
 # server specific version of bgerror - indent to hide from indexer
 
@@ -1147,6 +1212,7 @@ proc Httpd_Suspend {sock {timeout ""}} {
 
     if {[info exists data(cancel)]} {
 	after cancel $data(cancel)
+	unset data(cancel)
     }
     if {$timeout == ""} {
 	set timeout $Httpd(timeout2)
@@ -1166,13 +1232,8 @@ proc Httpd_Pair {sock fd} {
 
     syslog debug "HTTP: Pairing $sock and $fd"
 
-    fileevent $sock readable {}
-    fileevent $sock writable {}
+    Httpd_Suspend $sock 0
 
-    if {[info exists data(cancel)]} {
-	after cancel $data(cancel)
-	unset data(cancel)
-    }
     fconfigure $sock -translation binary -blocking 0
     fconfigure $fd -translation binary -blocking 0
 
