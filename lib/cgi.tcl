@@ -25,7 +25,7 @@ array set Cgi {
     maxcgi	100
     cgi		0
     ident	0
-    env-pass	{PATH LD_LIBRARY_PATH}
+    env-pass	{PATH LD_LIBRARY_PATH TZ}
 }
 if {"$tcl_platform(platform)" == "windows"} {
 
