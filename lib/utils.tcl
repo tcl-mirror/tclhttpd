@@ -4,7 +4,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: utils.tcl,v 1.5 2000/08/02 07:06:55 welch Exp $
+# RCS: @(#) $Id: utils.tcl,v 1.6 2000/09/06 21:45:44 welch Exp $
 
 package provide httpd::utils 1.0
 
@@ -13,11 +13,11 @@ package provide httpd::utils 1.0
 proc Stderr {string} {
     catch {puts stderr $string}
 }
+
 # iscommand - returns true if the command is defined  or lives in auto_index.
 
 proc iscommand {name} {
-    global auto_index
-    expr {([info command $name] == $name) || [info exists auto_index($name)]}
+    expr {([string length [info command $name]] > 0) || [auto_load $name]}
 }
 
 # lappendOnce - add to a list if not already there
@@ -442,8 +442,8 @@ proc ChopLine {line {limit 72}} {
 #	Returns 0 or 1.
 
 proc boolean value {
-    if {!([regsub {^(1|yes|true|on)$} $value 1 value] || \
-	  [regsub {^(0|no|false|off)$} $value 0 value])} {
+    if {!([regsub -nocase {^(1|yes|true|on)$} $value 1 value] || \
+	  [regsub -nocase {^(0|no|false|off)$} $value 0 value])} {
 	error "boolean value expected"
     }
     return $value

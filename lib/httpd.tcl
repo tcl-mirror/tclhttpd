@@ -21,9 +21,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.51 2000/08/02 07:25:53 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.52 2000/09/06 21:45:44 welch Exp $
 
-package provide httpd 1.3
+package provide httpd 1.4
 
 # initialize all the global data
 
@@ -113,29 +113,7 @@ proc Httpd_Init {} {
     # TODO - move these OUT of this file and into the main startup code
 
     Counter_Init
-    Mtype_ReadTypes [file join $Httpd(library) mime.types]
 
-    # SSL Support - These are just the run-time defaults
-
-    set Httpd(SSL_REQUEST) 1    ;# dot request a cert
-    set Httpd(SSL_REQUIRE) 0    ;# don't require a cert
-
-    # File containing Server Certificate
-
-    set Httpd(SSL_CERTFILE) $Httpd(library)/server.pem
-    set Httpd(SSL_KEYFILE) ""
-
-    # Dir/File containing CA's
-
-    set Httpd(SSL_CADIR) $Httpd(library)
-    set Httpd(SSL_CAFILE) server.pem
-
-    # For SSL2/3 + RSA you need RSA-enabled versions of OpenSSL
-
-    set Httpd(USE_SSL2) 1
-    set Httpd(USE_SSL3) 1
-    set Httpd(USE_TLS1) 0
-    set Httpd(SSL_CIPHERS) ""        ;# use defaults
 }
 
 # Httpd_Server --
@@ -217,25 +195,12 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
     }
     package require tls
 
-    if {![file exists $Httpd(SSL_CADIR)] && ![file exists $Httpd(SSL_CAFILE)]} {
-	return -code error "Need a CA directory or a CA file: \
-		file \"$Httpd(SSL_CAFILE)\" not found"
-    }
-    if {![file exists $Httpd(SSL_CERTFILE)]} {
-	return -code error "Certificate  \"$Httpd(SSL_CERTFILE)\" not found"
-    }
+    # This now depends on a call to tls::init being made elsewhere, typically
+    # in the main startup script.  That call sets all the various SSL parameters
+    # based on the server's configuration file.
+
     set cmd [list tls::socket -server [list HttpdAccept \
 	    [list https $name $port]]]
-    lappend cmd -request $Httpd(SSL_REQUEST) \
-	    -require $Httpd(SSL_REQUIRE) \
-	    -ssl2 $Httpd(USE_SSL2) \
-	    -ssl3 $Httpd(USE_SSL3) \
-	    -tls1 $Httpd(USE_TLS1) \
-	    -cipher $Httpd(SSL_CIPHERS) \
-	    -cadir $Httpd(SSL_CADIR) \
-	    -cafile $Httpd(SSL_CAFILE) \
-	    -certfile $Httpd(SSL_CERTFILE) \
-	    -keyfile $Httpd(SSL_KEYFILE)
     if {[string length $ipaddr] != 0} {
         lappend cmd -myaddr $ipaddr
     }

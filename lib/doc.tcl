@@ -20,9 +20,11 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.37 2000/09/02 00:40:45 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.38 2000/09/06 21:45:43 welch Exp $
 
-package provide httpd::doc 1.0
+package provide httpd::doc 1.1
+
+package require uri
 
 # Query or set the physical pathname of the document root
 proc Doc_Root {{real {}}} {
@@ -858,7 +860,7 @@ proc Doc_Redirect {newurl} {
 proc Doc_RedirectSelf {newurl} {
     set thispage [ncgi::urlStub]
     set thisurl [Httpd_SelfUrl $thispage]
-    set newurl [html::resolveUrl $thisurl $newurl]
+    set newurl [uri::resolve $thisurl $newurl]
     Doc_Redirect $newurl
 }
 

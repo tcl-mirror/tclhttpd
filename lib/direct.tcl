@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.8 2000/08/02 07:06:52 welch Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.9 2000/09/06 21:45:43 welch Exp $
 
 package provide httpd::direct 1.0
 
@@ -99,11 +99,8 @@ proc DirectDomain {prefix sock suffix} {
     }
     set cmd $prefix$suffix
     if {![iscommand $cmd]} {
-	Httpd_Error $sock 403
+	Doc_NotFound $sock
 	return
-    }
-    if {[string length [info command $cmd]] == 0} {
-	auto_load $cmd
     }
     # "Cache hit" is a misnomer, but this is how things are counted
     Count cachehit,$Direct($prefix)$suffix
