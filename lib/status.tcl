@@ -18,6 +18,11 @@ proc Status_Url {dir} {
 
 proc Status/hello {args} {return hello}
 
+proc Status/threads {args} {
+    set html "<h2>Thread List</h2>\n"
+    append html [Thread_List] 
+}
+
 proc StatusSortForm {action label {pattern *} {sort number}} {
     if {[string compare $sort "number"] == 0} {
 	set numcheck checked
@@ -33,7 +38,20 @@ proc StatusSortForm {action label {pattern *} {sort number}} {
 }
 
 proc StatusMenu {} {
-    set html "<p><a href=/status/>Status</a> |<a href=/status/doc>Doc hits</a> | <a href=/status/notfound>Doc misses</a><p>"
+    set sep ""
+    set html "<p>\n"
+    foreach {url label} {
+	/status/	Status
+	/status/doc	"Doc hits"
+	/status/notfound	"Doc misses"
+	/status/threads	"Threads"
+	/status/after	"After Queue"
+    } {
+	append html "$sep<a href=$url>$label</a>\n"
+	set sep " | "
+    }
+    append html "</p>\n"
+    return $html
 }
 
 proc Status/doc {{pattern *} {sort number}} {
@@ -43,19 +61,11 @@ proc Status/doc {{pattern *} {sort number}} {
     append result [StatusSortForm /status/doc "Hit Count" $pattern $sort]
     append result [StatusPrintHits $pattern $sort]
 }
-proc StatusPrintHits {{pattern *} {sort number}} {
-    global counter cachehit
-    catch {unset cachehit}
-    foreach {name value} [array get counter cachehit,$pattern] {
-	regsub {cachehit,} $name {} name
-	if { ! [catch {expr {$value + 0}}]} {
-	    set cachehit($name) $value
-	}
-    }
-    append result [StatusPrintArray cachehit * $sort Hits Url]
+proc StatusPrintHits {aname {pattern *} {sort number}} {
+    append result [StatusPrintArray hits * $sort Hits Url]
 }
 proc StatusPrintArray {aname pattern sort col1 col2} {
-    upvar 1 $aname a
+    upvar #0 counter$aname a
     set result ""
     append result <pre>\n
     append result [format "%6s %s\n" $col1 $col2]
@@ -185,9 +195,20 @@ proc Status/codesize {args} {
 		Num Procs $np<br>\n\
 		Code Bytes $size"
 }
+
+# StatusMainTable
+#	Display the main status counters. This gathers information
+#	from worker threads, if possible.
+#
+# Arguments
+#	None
+#
+# Results
+#	Html
+
 proc StatusMainTable {} {
-    global Httpd Doc counter status tcl_patchLevel tcl_platform
-    global counter_reset
+    global Httpd Doc status tcl_patchLevel tcl_platform Thread
+    global counter counter_reset
     set html "<H1>$Httpd(name):$Httpd(port)</h1>\n"
     append html "<H2>Server Info</h2>"
     append html "<table border=0>"
@@ -208,36 +229,86 @@ proc StatusMainTable {} {
     append html </table>
 
     append html "<br><br><br>\n"
+
+    append html "<p>[StatusTable counter counter_reset]<p>\n"
+
+    # Per thread stats
+
+    set self [Thread_Id]
+    foreach id [lsort -integer [Thread_List]] {
+	if {$id == $self} {
+	    continue
+	}
+	append html "<h4>Thread $id</h4>\n"
+	global counter_thread_$id
+	if {[Thread_IsFree $id]} {
+	    array set counter_thread_$id [Thread_Send $id {array get ::counter}]
+	} else {
+	    # Use cached version of the other threads counters,
+	    # but update our stats for next time.
+	    append html "<i>busy, using cached values</i>\n"
+	    Thread_SendAsync $id [list StatusThreadUpdate $id $self]
+	}
+	if {[info exist counter_thread_$id]} {
+	    append html [StatusTable counter_thread_$id]
+	}
+    }
+    return $html
+}
+
+proc StatusThreadUpdate {self master} {
+    Thread_SendAsync $master [list array set ::counter_thread_$self \
+	[array get ::counter]]
+}
+
+proc StatusTable {aname {reset_name {}}} {
+    upvar #0 $aname counter
+    upvar #0 $reset_name counter_reset
     append html "<table border>\n"
 
-    append html "<tr><th>Counter</th><th>N</th><th>Reset Date</th></tr>\n"
+    set hit 0
     foreach {c label} {
 	    urlhits "URL Requests"
+	    Url_Dispatch "URL Dispatch"
+	    UrlToThread "Thread Dispatch"
+	    UrlEval "Direct Dispatch"
+	    UrlCacheHit "UrlCache eval"
 	    urlreply "URL Replies"
 	    cachehit,/ "Home Page Hits"
 	    accepts "Total Connections"
 	    keepalive "KeepAlive Requests"
 	    http1.0 "OneShot Connections"
 	    http1.1 "Http1.1 Connections"
+	    threads "Worker Threads"
 	    sockets "Open Sockets"
 	    cgihits "CGI Hits"
 	    tclhits "Tcl Safe-CGIO Hits"
 	    maphits "Image Map Hits"
 	    cancel	"Timeouts"
+	    notfound	"Not Found"
 	    errors	"Errors"
 	    Status	"Status"
 	    } {
-	set close ""
-	if {[info exists counter($c)]} {
+	if [info exists counter($c)] {
 	    append html "<tr><td>$label</td><td>$counter($c)</td>\n"
-	    set close "</tr>\n"
+	    set hit 1
+	    if {[info exist counter_reset($c)]} {
+		append html "<td>[clock format $counter_reset($c) -format "%B %d, %Y"]</td>"
+	    }
+	    append html </tr>\n
 	}
-	if {[info exists counter_reset($c)]} {
-	    append html "<td>[clock format $counter_reset($c) -format "%B %d, %Y"]</td></tr>\n"
+    }
+    if {!$hit} {
+	foreach {name value} [array get counter] {
+	    append html "<tr><td>$name</td><td>$value</td>\n"
+	    if {[info exist counter_reset($name)]} {
+		append html "<td>[clock format $counter_reset($name) -format "%B %d, %Y"]</td>"
+	    }
+	    append html </tr>\n
 	}
-	append html $close
     }
     append html </table>\n
+
     return $html
 }
 
@@ -252,7 +323,7 @@ proc Status/all {args} {
     append html [StatusMenu]
     append html [StatusTclPower left]
     append html [StatusMainTable]
-    append html "<p><a href=/status/text>Text only view.</a>\n"
+    append html "<p>The following bar charts are created with a table of horizontal rules that may not display correctly on your browser.<br><a href=/status/text>Text only view.</a>\n"
     catch {
 	append html [StatusMinuteHist CntMinuteurlhits "Per Minute Url Hits" $counter(basetime)]
 	append html [StatusMinuteHist CntHoururlhits "Per Hour Url Hits" $counter(hour,1) hour]

@@ -35,10 +35,20 @@ proc Doc_Root {{real {}}} {
     }
 }
 
-# Add a file system to the virtual document hierarchy
+# Doc_AddRoot
+#	Add a file system to the virtual document hierarchy
+#
+# Arguments
+#	virtual		The prefix of the URL
+#	directory	The directory that corresponds to $virtual
+#	inThread	True if document handlers should run in a thread
+#			The default is true to handle long-running templates
 
-proc Doc_AddRoot {virtual directory} {
-    Url_PrefixInstall $virtual [list DocDomain $virtual $directory]
+proc Doc_AddRoot {virtual directory {inThread 1}} {
+    # Run documents in a thread in case templates have 
+    # long-running code embedded in them.
+
+    Url_PrefixInstall $virtual [list DocDomain $virtual $directory] $inThread
 }
 
 # Define the index file for a directory
@@ -402,6 +412,7 @@ proc DocLatest {files} {
 proc Doc_NotFound { sock } {
     global Doc Referer
     upvar #0 Httpd$sock data
+    Count notfound
     if {[info exists data(url)]} {
 	Url_UnCache $sock
 	Incr Doc(notfound,$data(url))

@@ -49,10 +49,13 @@ proc Counter_CheckPoint {} {
 
 proc Count {what {delta 1}} {
     global counter
-    if [catch {incr counter($what) $delta}] {
-	set counter($what) $delta
-    }
+    Incr counter($what) $delta
     return $counter($what)
+}
+
+proc CountName {what {aname {}}} {
+    upvar #0 counter$aname counter
+    Incr counter($what)
 }
 
 proc Counter_Reset {what {where 0}} {

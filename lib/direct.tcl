@@ -11,18 +11,26 @@
 
 package provide direct 1.0
 
-# Define a subtree of the URL hierarchy that is implemented by
-# direct Tcl calls.
-# virtual: The name of the subtree of the hierarchy, e.g., /device
-# prefix: The Tcl command prefix to use when constructing calls, e.g. Device
+# Direct_Url
+#	Define a subtree of the URL hierarchy that is implemented by
+#	direct Tcl calls.
+#
+# Arguments
+#	virtual The name of the subtree of the hierarchy, e.g., /device
+#	prefix	The Tcl command prefix to use when constructing calls,
+#		e.g. Device
+#	inThread	True if this should be dispatched to a thread.
+#
+# Side Effects
+#	Register a prefix
 
-proc Direct_Url {virtual {prefix {}}} {
+proc Direct_Url {virtual {prefix {}} {inThread 0}} {
     global Direct
     if {[string length $prefix] == 0} {
 	set prefix $virtual
     }
     set Direct($prefix) $virtual	;# So we can reconstruct URLs
-    Url_PrefixInstall $virtual [list DirectDomain $prefix]
+    Url_PrefixInstall $virtual [list DirectDomain $prefix] $inThread
 }
 
 # Main handler for Direct domains (i.e. tcl commands)

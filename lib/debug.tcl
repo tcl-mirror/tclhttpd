@@ -15,7 +15,7 @@ proc Debug_Url {dir} {
     Direct_Url $dir Debug
 }
 
-proc Debug/source {source} {
+proc Debug/source {source {thread main}} {
     global Httpd Doc
     set source [file tail $source]
     set dirlist $Httpd(library)
@@ -28,7 +28,21 @@ proc Debug/source {source} {
 	    break
 	}
     }
-    set error [catch {uplevel #0 [list source $file]} result]
+    set error [catch {
+	switch -- $thread {
+	    main {
+		uplevel #0 [list source $file]
+	    }
+	    all {
+		foreach id [Thread_List] {
+		    Thread_Send $id [list source $file]
+		}
+	    }
+	    default {
+		    Thread_Send $thread [list source $file]
+	    }
+	}
+    } result]
     set html "<title>Source $source</title>\n"
     if {$error} {
 	global errorInfo

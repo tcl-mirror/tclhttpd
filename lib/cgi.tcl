@@ -51,7 +51,11 @@ proc Cgi_Directory {virtual {directory {}}} {
     if {[string length $directory] == 0} {
 	set directory [Doc_Virtual {} {} $virtual]
     }
-    Url_PrefixInstall $virtual [list Cgi_Domain $virtual $directory]
+    # Set inThread to 0 to fork the CGI process directly from the main thread.
+    # Set it to 1 to dispatch it to a thread that forks.
+
+    set inThread 0
+    Url_PrefixInstall $virtual [list Cgi_Domain $virtual $directory] $inThread
 }
 
 # Cgi_Domain is called from Url_Dispatch for URLs inside cgi-bin directories.
@@ -225,7 +229,6 @@ proc CgiSpawn {sock script} {
     set data(header) 0		;# Have not read header yet
     set data(headerlist) {}	;# list of read headers
     set data(headercode) "200 data follows"	;# normal return
-
     fconfigure $fd -blocking 0
     # it might be better to look at "content length" instead.
     if {$data(proto) == "POST"} {
@@ -242,7 +245,8 @@ proc CgiSpawn {sock script} {
 	}
 	flush $fd
     }
-    fileevent $sock readable [list CgiCleanup $fd $sock]
+    # In a worker thread, this is not really a socket, hence the catch
+    catch {fileevent $sock readable [list CgiCleanup $fd $sock]}
     fileevent $fd readable [list CgiRead $fd $sock]
     set data(cancel) [after $Cgi(timeout) CgiCancel $fd $sock]
 }
@@ -295,15 +299,15 @@ proc CgiRead {fd sock} {
 
 	    if {[gets $fd line] <= 0} {
 		set data(header) 1
-		puts $sock "HTTP/1.0 $data(headercode)"
-		puts $sock "Server: $Httpd(server)"
-		puts $sock "Date: [HttpdDate [clock seconds]]"
-		puts $sock "Connection: Close"
+		append header "HTTP/1.0 $data(headercode)\n"
+		append header "Server: $Httpd(server)\n"
+		append header "Date: [HttpdDate [clock seconds]]\n"
+		append header "Connection: Close\n"
 		foreach line $data(headerlist) {
-		    puts $sock $line
+		    append header $line\n
 		}
-		puts $sock ""
-		flush $sock
+		append header "\n"
+		CgiPutHeader $sock $header
 	    } else {
 		lappend data(headerlist) $line
 		if {[regexp -nocase ^(location|uri): $line]} {
@@ -311,31 +315,85 @@ proc CgiRead {fd sock} {
 		}
 	    }
 	} else {
-	    fconfigure $fd -translation binary
-	    fconfigure $sock -translation binary
-	    if {$Httpd(fcopy)} {
-		fileevent $sock readable {}
-		fileevent $fd readable {}
-		fcopy $fd $sock -command [list CgiClose $fd $sock]
-	    } else {
-		fconfigure $sock -blocking 0
-		copychannel $fd $sock
-	    }
+	    CgiCopy $fd $sock
 	}
     } oops]} {
 	CgiCancel $fd $sock
     }
 }
 
+proc CgiPutHeader {sock header} {
+    upvar #0 Httpd$sock data
+    if {[info exist data(master_thread)] && 
+	    $data(master_thread) != [Thread_Id]} {
+
+	Thread_Send $data(master_thread) \
+	    [list CgiCopyDirect $sock $header]
+	Thread_Send $data(master_thread) \
+	    [list fconfigure $sock -translation binary]
+    } else {
+	puts -nonewline $sock $header
+    }
+
+}
+proc CgiCopy {fd sock} {
+    upvar #0 Httpd$sock data
+    global Httpd
+
+    fconfigure $fd -translation binary
+    if {[info exist data(master_thread)] && 
+	    $data(master_thread) != [Thread_Id]} {
+	# Read the data and copy it to the main thread for return.
+	# Quick and dirty until we can transfer file descriptors.
+	# The pipe is already non-blocking - read what we can
+
+	Thread_SendAsync $data(master_thread) \
+		    [list CgiCopyDirect $sock [read $fd]]
+
+	return
+    }
+
+    # Normal one-thread case - set up to copy data from pipe to socket
+
+    fconfigure $sock -translation binary
+    if {$Httpd(fcopy)} {
+	fileevent $sock readable {}
+	fileevent $fd readable {}
+	fcopy $fd $sock -command [list CgiClose $fd $sock]
+    } else {
+	fconfigure $sock -blocking 0
+	copychannel $fd $sock
+    }
+}
+
+proc CgiCopyDirect {sock block} {
+    puts -nonewline $sock $block
+    flush $sock
+}
+
 proc CgiClose {fd sock {bytes {}} {error {}}} {
     global Cgi
     upvar #0 Httpd$sock data
+
     catch {after cancel $data(cancel)}
     incr Cgi(cgi) -1
     if {![info exists data(header)]} {
 	Httpd_Error $sock 204
     } else {
-	Httpd_SockClose $sock 1
+
+	if {[info exist data(master_thread)] && 
+		$data(master_thread) != [Thread_Id]} {
+    puts stderr "Thread [Thread_Id] sending free msg to master $data(master_thread)"
+	    catch {close $fd}
+		    Thread_Send $data(master_thread) \
+			[list Httpd_SockClose $sock 1]
+		    Thread_SendAsync $data(master_thread) \
+			[list HttpdFreeThread [Thread_Id]]
+
+	} else {
+	    Httpd_SockClose $sock 1
+	}
+
     }
     if {[string length $error] > 0} {
 	Log $sock CgiClose $error

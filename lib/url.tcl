@@ -36,7 +36,7 @@
 #
 # SCCS: @(#) url.tcl 1.7 97/08/20 11:50:13
 
-package provide url 1.0
+package provide url 2.0
 
 # This pattern cannot occur inside a URL path component
 # On windows we disallow : to avoid drive-letter attacks
@@ -48,7 +48,15 @@ switch $tcl_platform(platform) {
     default	{ set Url(fsSep) / }
 }
 
-# Dispatch to a type-specific handler for a URL
+# Url_Dispatch
+#
+#	Dispatch to a type-specific handler for a URL
+#
+# Arguments
+#	sock	THe client socket connection
+#
+# Side Effects
+#	Handle the request
 
 proc Url_Dispatch {sock} {
     global Url UrlCache
@@ -56,22 +64,31 @@ proc Url_Dispatch {sock} {
 
     catch {after cancel $data(cancel)}
 
-    # Note - figure out security policy key for cache index.
-
-    regsub -nocase  {(^http://[^/]+)?} $data(url) {} url
-
     # Dispatch to cached handler for the URL, if any
 
+    set url $data(url)
+    CountName $url hit
     if {(![info exists data(query)] || ([string length $data(query)] == 0)) &&
 	    ([Httpd_PostDataSize $sock] == 0) && [info exists UrlCache($url)]} {
-	Count cachehit,$url
+	
+	# Look aside into a command cache based on URLs.
+	# This is used to avoid processing long URLs, and to
+	# deal with redirects from one URL to another.
+	# If the URL is handled in a worker thread, then there
+	# will not be an entry in the UrlCache of this dispatch thread.
+
+	Count UrlCacheHit
 	set code [catch { eval $UrlCache($url) {$sock} } error]
 	if {$code == 0} {
 	    return
 	}
+	# Upon error, drop the command cache and fall through to
+	# common error handling
+
 	catch {Url_UnCache $sock}
     } else {
 	set code [catch {
+
 	    # Prefix match the URL to get a domain handler
 	    # Fast check on domain prefixes with regexp
 	    # Check that the suffix starts with /, otherwise the prefix
@@ -84,29 +101,57 @@ proc Url_Dispatch {sock} {
 		# Fall back and assume it is under the root
 		regexp ^(/)(.*) $url x prefix suffix
 	    }
-	    eval $Url(command,$prefix) {$sock $suffix}
+
+	    # Invoke the URL domain handler either in this main thread
+	    # or in a worker thread
+
+	    if {$Url(thread,$prefix)} {
+		Count UrlToThread
+		Thread_Dispatch $sock \
+			[concat $Url(command,$prefix) [list $sock $suffix]]
+	    } else {
+		Count UrlEval
+		eval $Url(command,$prefix) {$sock $suffix}
+	    }
 	} error]
     }
 
     if {$code != 0} {
 	global errorInfo
 	global errorCode
+	Url_Unwind $sock $errorInfo $errorCode
+    }
+}
+
+# Url_Unwind
+#	Do common error handling after a URL request
+#
+# Arguments
+#	sock	The client connection
+#	ei	The errorInfo from the command
+#	ec	The errorCode from the command
+#
+# Side Effects
+#	Clean up the connection and ensure a reply
+
+proc Url_Unwind {sock ei ec} {
 
 	# URL implementations can raise an error and put redirect info
 	# into the errorCode variable, which should be of the form
 	# HTTPD_REDIRECT $newurl
 
-	set key [lindex $errorCode 0]
+	set key [lindex $ec 0]
+	set error [lindex [split $ei \n] 0]
 	if {[string match HTTPD_REDIRECT $key]} {
-	    Httpd_Redirect [lindex $errorCode 1] $sock
+	    Httpd_Redirect [lindex $ec 1] $sock
 	    return
 	}
 
-	switch -glob -- $error {
+	switch -glob -- $ei {
 	    "*can not find channel*"  {
 		Httpd_SockClose $sock 1 $error
 	    }
-	    "too many open files" {
+	    "*too many open files*" {
 		# this is lame and probably not necessary.
 		# Early bugs lead to file descriptor leaks, but
 		# these are all plugged up.
@@ -115,23 +160,31 @@ proc Url_Dispatch {sock} {
 		File_Reset
 	    } 
 	    default {
-		Doc_Error $sock $errorInfo
+		Doc_Error $sock $ei
 	    }
 	}
     }
-}
 
-# Declare that a handler exists for a point in the URL tree
-# identified by the prefix of all URLs below that point.
 
-proc Url_PrefixInstall {prefix command} {
+# Url_PrefixInstall
+#	Declare that a handler exists for a point in the URL tree
+#	identified by the prefix of all URLs below that point.
+#
+# Arguments:
+#	prefix	The leadin part of the URL, (e.., /foo/bar)
+#	command	THe Domain handler command.  This is invoked with one
+#		additional arument, $sock, that is the handle identifier
+#		A well-known state array is available at
+#		upvar #0 Httpd$sock 
+#	tothread	If true, this domain handler is run in a thread
+
+proc Url_PrefixInstall {prefix command {tothread 0}} {
     global Url
 
     # Add the url to the prefixset, which is a regular expression used
     # to pick off the prefix from the URL
-    # NOTE - ought to denature prefix to avoid regexp specials
 
-    regsub -all {([][\\().*+?$])} $prefix {\\\1} prefixquoted
+    regsub -all {([][\\().*+?$|])} $prefix {\\\1} prefixquoted
 
     if {[string compare $prefix "/"] == 0} {
 	# / is not in the prefixset because of some special cases.
@@ -149,6 +202,7 @@ proc Url_PrefixInstall {prefix command} {
     # Install the unquoted prefix so the Url dispatch works right
 
     set Url(command,$prefix) $command
+    set Url(thread,$prefix) $tothread
 }
 
 # Undo a prefix registration
@@ -181,7 +235,6 @@ proc UrlSort {a b} {
 proc Url_Handle {cmd sock} {
     upvar #0 Httpd$sock data
     global UrlCache
-    Count cachehit,$data(url)
     set UrlCache($data(url)) $cmd
     eval $cmd {$sock}
 }

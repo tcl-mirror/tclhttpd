@@ -87,6 +87,9 @@ proc Httpd_Init {} {
 	bufsize		16384
 	maxused		25
     }
+    if {![info exist Httpd(maxthreads)]} {
+	set Httpd(maxthreads) 0
+    }
     Httpd_Version
     append Httpd(server) $Httpd(version)
     if {[info commands "unsupported0"] == "unsupported0"} {
@@ -187,7 +190,7 @@ proc HttpdReset {sock {left {}}} {
 
     Count connections
 
-    # count down transations
+    # count down transactions
     if {[string length $left]} {
 	set data(left) $left
     } else {
@@ -239,8 +242,8 @@ proc HttpdRead {sock} {
 	set state [string compare $readCount 0],$data(state)
 	switch -glob -- $state {
 	    1,start	{
-		if [regexp {^([^ ]+) +([^?]+)\??([^ ]*) +HTTP/(1.[01])} \
-			$line x data(proto) data(url) data(query) data(version)] {
+		if {[regexp {^([^ ]+) +([^?]+)\??([^ ]*) +HTTP/(1.[01])} \
+			$line x data(proto) data(url) data(query) data(version)]} {
 		    # Strip leading http://server.
 		    # We check and discard proxy requests here, too.
 
@@ -276,7 +279,7 @@ proc HttpdRead {sock} {
 		# key: value
 		# MIME headers.  MIME headers may be continue with a line
 		# that starts with spaces.
-		if [regexp {^([^ :]+):[ 	]*(.*)} $line dummy key value] {
+		if {[regexp {^([^ :]+):[ 	]*(.*)} $line dummy key value]} {
 		    set key [string tolower $key]
 		    if [info exists data(mime,$key)] {
 			append data(mime,$key) ,$value
@@ -574,6 +577,11 @@ proc Httpd_ReturnFile {sock type path} {
     global Httpd
     upvar #0 Httpd$sock data
 
+    if {[Thread_Respond $sock \
+	    [list Httpd_ReturnFile $sock $type $path]]} {
+	return
+    }
+
     Count urlreply
     set data(file_size) [file size $path]
     set close [HttpdClose $sock]
@@ -599,14 +607,25 @@ proc Httpd_ReturnFile {sock type path} {
     }
 }
 
-# Httpd_ReturnData -- return data
-# type - a Content-Type
-# content - the data to return
-# code - the HTTP reply code.
+# Httpd_ReturnData
+#	Return data for a page.
+#
+# Arguments:
+#	type	a Content-Type
+#	content	the data to return
+#	code	the HTTP reply code.
+#
+# Side Effects:
+#	Send the data down the socket
 
 proc Httpd_ReturnData {sock type content {code 200}} {
     global Httpd Httpd_Errors
     upvar #0 Httpd$sock data
+
+    if {[Thread_Respond $sock \
+	    [list Httpd_ReturnData $sock $type $content $code]]} {
+	return
+    }
 
     Count urlreply
     set close [HttpdClose $sock]
@@ -620,15 +639,28 @@ proc Httpd_ReturnData {sock type content {code 200}} {
     Httpd_SockClose $sock $close
 }
 
-# Httpd_ReturnData -- return data with a Last-Modified time so
-# that proxy servers can cache it.  Or they seem to, anyway.
-# type - a Content-Type
-# content - the data to return
-# code - the HTTP reply code.
+# Httpd_ReturnCacheableData
+#	Return data with a Last-Modified time so
+#	that proxy servers can cache it.  Or they seem to, anyway.
+#
+# Arguments:
+#	sock	Client connection
+#	type	a Content-Type
+#	content	the data to return
+#	date	Modify date of the date
+#	code	the HTTP reply code.
+#
+# Side Effects:
+#	Send the data down the socket
 
 proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
     global Httpd Httpd_Errors
     upvar #0 Httpd$sock data
+
+    if {[Thread_Respond $sock \
+	    [list Httpd_ReturnCacheableData $sock $type $content $date $code]]} {
+	return
+    }
 
     Count urlreply
     set close [HttpdClose $sock]
@@ -750,6 +782,11 @@ proc Httpd_Redirect {newurl sock} {
     upvar #0 Httpd$sock data
     global Httpd Httpd_Errors HttpdRedirectFormat
 
+    if {[Thread_Respond $sock \
+	    [list Httpd_Redirect $newurl $sock]]} {
+	return
+    }
+
     set message [format $HttpdRedirectFormat $newurl]
     set close [HttpdClose $sock]
     HttpdRespondHeader $sock text/html $close [string length $message] 302
@@ -816,6 +853,11 @@ proc Httpd_RequestAuth {sock type realm} {
     upvar #0 Httpd$sock data
     global Httpd Httpd_Errors HttpdAuthorizationFormat
 
+    if {[Thread_Respond $sock \
+	    [list Httpd_RequestAuth $sock $type $realm]]} {
+	return
+    }
+
     set close [HttpdClose $sock]
     HttpdRespondHeader $sock text/html $close [string length $HttpdAuthorizationFormat] 401
     puts $sock "Www-Authenticate: $type realm=\"$realm\""
@@ -879,7 +921,7 @@ proc HttpdCookieLog {sock what} {
 
 	append result { } $what
 	switch $what {
-	    Url_Dispatch {
+	    Httpd_Dispatch {
 		if {![info exist data(mime,cookie)]} {
 		    return
 		}
