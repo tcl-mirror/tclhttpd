@@ -206,6 +206,22 @@ AC_CHECK_FUNC(crypt, , [
 AC_SUBST(CRYPT_OBJS)
 
 #--------------------------------------------------------------------
+# Find out if we have the sys/resource.h header file for building
+# the limit extension
+#--------------------------------------------------------------------
+
+AC_CHECK_HEADER(sys/resource.h, BUILD_LIMIT=1, BUILD_LIMIT=0)
+
+if test "${BUILD_LIMIT}" = 1 ; then
+    LIMIT_EXTENSION='$(limit_LIB_FILE)'
+else
+    LIMIT_EXTENSION=''
+fi
+
+AC_SUBST(LIMIT_EXTENSION)
+AC_SUBST(BUILD_LIMIT)
+
+#--------------------------------------------------------------------
 # Set the default compiler switches based on the --enable-symbols 
 # option.
 #--------------------------------------------------------------------
@@ -300,4 +316,6 @@ SC_PROG_TCLSH
 # Finally, substitute all of the various values into the Makefile.
 #--------------------------------------------------------------------
 
-AC_OUTPUT([Makefile pkgIndex.tcl])
+AC_OUTPUT([Makefile \
+	crypt_pkgIndex.tcl \
+	limit_pkgIndex.tcl])
