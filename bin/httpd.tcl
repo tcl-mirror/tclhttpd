@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.52 2004/04/20 06:50:30 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.53 2004/05/06 09:34:23 coldstore Exp $
 #
 # \
 exec tclsh "$0" ${1+"$@"}
@@ -187,7 +187,8 @@ set CommandLineOptions [list \
         [list library.arg      [cget library]      {Directory list where custom packages and auto loads are}] \
         [list debug.arg	       0	        {If true, start interactive command loop}] \
         [list compat.arg       3.3	        {version compatibility to maintain}] \
-        [list gui.arg           [cget gui]      {flag for launching the user interface}]
+        [list gui.arg           [cget gui]      {flag for launching the user interface}] \
+        [list mail.arg           [cget MailServer]      {Mail Servers for sending email from tclhttpd}] \
     ]
 array set Config [cmdline::getoptions argv $CommandLineOptions \
     "usage: httpd.tcl options:"]
