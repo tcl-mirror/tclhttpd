@@ -11,7 +11,7 @@
 [html::foreach {Row Date Application OS Priority Summary Assigned} \
 [bugdb::bug-list] {
     <tr[html::if {[expr $Row%2] == 1} { class="alt"}]>
-        <td><a href="javascript:alert('Not yet implemented.');">$Row</a></td>
+        <td><a href="bug-detail.tml?bug=$Row">$Row</a></td>
         <td>$Date</td>
         <td>$Application</td>
         <td>$OS</td>
