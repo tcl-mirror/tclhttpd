@@ -61,7 +61,7 @@
  ::ncgi::setDefaultValue userfile [pwd]/htaccess/passwd
  ::ncgi::setDefaultValue groupfile [pwd]/htaccess/group
  ::ncgi::setDefaultValue name "Tclhttpd Authentication Realm"
- ::ncgi::setDefaultValue type Basic
+ ::ncgi::setDefaultValue type Digest
 
  ::ncgi::setDefaultValue order_GET allow,deny
  ::ncgi::setDefaultValue network_allow_GET ""
@@ -162,11 +162,13 @@
 	 }]
      return ${html}[html::row "Type" \
 			[html::radioSet type {&nbsp;} {
+			    digest Digest
 			    basic Basic
 			} [ncgi::value type]]]
  } else {
      # we have not been given a directory - use default
-     ::ncgi::setDefaultValue directory [file join [pwd] htdocs htaccess]
+     global Config
+     ::ncgi::setDefaultValue directory [file join $Config(docRoot) htaccess]
      set submit "Load"
      return [html::textInputRow  Directory directory]
  }
