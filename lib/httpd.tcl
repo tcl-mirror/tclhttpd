@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.74 2003/04/04 04:08:55 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.75 2003/08/29 22:04:50 welch Exp $
 
 package provide httpd 1.6
 
@@ -704,7 +704,7 @@ proc HttpdRead {sock} {
 	    unset data
 	    $i eval [list fileevent $sock readable [list HttpdRead $sock]]
 	    set tmp [$i eval [list \
-		    after {$Httpd(timeout2)} [list HttpdCancel $sock]]]
+		    after $Httpd(timeout2) [list HttpdCancel $sock]]]
 	    $i eval [list array set Httpd$sock [list cancel $tmp]]
 	}
 	0,mime	{
