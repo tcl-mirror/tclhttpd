@@ -1,0 +1,18 @@
+# This script runs make on everything in the
+# TclHttpd distribution bundle.
+# You must run the CONFIG script first.
+
+PWD=`pwd`
+PLATFORM=linux
+HTTPD_VERSION=3.0.3
+PREFIX=/home/welch/install
+
+(cd ../tcl8.3.1/unix/${PLATFORM} ; make ; make install)
+
+(cd ../thread2.0/unix/${PLATFORM} ; make ; make install)
+
+( cd ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM} ; make ; make install)
+
+( cd ../tcllib0.5 ; ./install.sh ${PREFIX} )
+
+

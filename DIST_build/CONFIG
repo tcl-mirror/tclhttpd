@@ -1,0 +1,46 @@
+# This script is for the build directory of the super
+# TclHttpd distribution bundle.
+# Edit this to run configure on all the modules with the
+# appropriate PLATFORM and PREFIX for your site
+
+HTTPD_VERSION=3.0.3
+TCL_VERSION=8.3.1
+TCLLIB_VERSION=0.5
+THREAD_VERSION=2.0
+
+PWD=`pwd`
+PLATFORM=linux
+echo "pwd=${PWD}"
+
+# PREFIX is the root of the installation tree
+# EXEC_PREFIX is where the binaries and DLLs go.
+
+PREFIX=/home/welch/test
+EXEC_PREFIX=/home/welch/test/linux-thread
+
+echo "configure for tcl${TCL_VERSION}"
+
+mkdir ../tcl${TCL_VERSION}/unix/${PLATFORM}
+(cd ../tcl${TCL_VERSION}/unix/${PLATFORM} ; sh ../configure --enable-gcc --enable-threads --enable-symbols \
+	--prefix=${PREFIX} \
+	--exec-prefix=${EXEC_PREFIX})
+
+echo ""
+echo "configure for thread${THREAD_VERSION}"
+
+mkdir ../thread${THREAD_VERSION}/unix/${PLATFORM}
+(cd ../thread${THREAD_VERSION}/unix/${PLATFORM} ; sh ../../configure --enable-gcc --enable-threads --enable-symbols \
+	--prefix=${PREFIX} \
+	--exec-prefix=${EXEC_PREFIX} \
+	--with-tcl=../../../tcl${TCL_VERSION}/unix/${PLATFORM} )
+
+echo ""
+echo "configure for tclhttpd${HTTPD_VERSION}"
+
+mkdir ../tclhttpd${HTTPD_VERSION}/build
+mkdir ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM}
+( cd ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM} ; sh ../../configure --enable-gcc --enable-threads --enable-symbols \
+	--prefix=${PREFIX} \
+	--exec-prefix=${EXEC_PREFIX} \
+	--with-tcl=../../../tcl${TCL_VERSION}/unix/${PLATFORM} )
+
