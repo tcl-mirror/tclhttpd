@@ -17,10 +17,12 @@
 #
 # SCCS: @(#) httpd.tcl 1.16 97/07/12 14:29:54
 
-
 package provide httpd 1.1
 
 # initialize all the global data
+
+# Location of this package
+set Httpd(library) [file dirname [info script]]
 
 # HTTP/1.0 error codes (the ones we use)
 array set Httpd_Errors {
@@ -242,6 +244,10 @@ proc HttpdRead {sock} {
 			$line x data(proto) data(url) data(query) data(version)] {
 		    set data(state) mime
 		    set data(line) $line
+		    set data(uri) $data(url)
+		    if {[string length $data(query)]} {
+			append data(uri) ?$data(query)
+		    }
 		    CountHist urlhits
 		    # Limit the time allowed to serve this request
 		    catch {after cancel $data(cancel)}
@@ -402,13 +408,21 @@ proc HttpdClose {sock} {
     return $close
 }
 
-# Utility routine for outputting response headers for normal data
-# Does not output the end of header markers so additional header lines can be added
-#  sock:  The connection handle
-#  type:  The mime type of this response
-#  close: If true, signal connection close headers.  See HttpdClose
-#  size:  The size "in bytes" of the response
-#  code:   The return code - defualts to 200
+# HttpdRespondHeader
+#
+#	Utility routine for outputting response headers for normal data Does
+#	not output the end of header markers so additional header lines can be
+#	added
+#
+# Arguments:
+#	sock	The connection handle
+#	type	The mime type of this response
+#	close	If true, signal connection close headers.  See HttpdClose
+#	size	The size "in bytes" of the response
+#	code	The return code - defualts to 200
+#
+# Side Effects:
+# 	Outputs header lines
 
 proc HttpdRespondHeader {sock type close size {code 200}} {
     global Httpd Httpd_Errors
@@ -427,12 +441,46 @@ proc HttpdRespondHeader {sock type close size {code 200}} {
     append reply "Content-Type: $type" \n
     append reply "Content-Length: $size" \n
     puts -nonewline $sock $reply
-
 }
 
-# Httpd_ReturnFile - return a file.
-# type - is a Content-Type
-# path - is the file pathname
+# Httpd_SetCookie
+#	Define a cookie to be used in a reply
+#	Call this before using Httpd_ReturnFile or
+#	Httpd_ReturnData
+#
+# Arguments:
+#	sock	handle on the connection
+#	cookie	Set-Cookie line
+
+proc Httpd_SetCookie {sock cookie} {
+    upvar #0 Httpd$sock data
+    lappend data(return-cookie) $cookie
+}
+
+# HttpdSetCookie
+#	Generate the Set-Cookie headers in a reply
+#	Use Httpd_SetCookie to register cookes eariler
+#
+# Arguments:
+#	sock	handle on the connection
+
+proc HttpdSetCookie {sock} {
+    upvar #0 Httpd$sock data
+    foreach item $data(return-cookie) {
+	puts $sock "Set-Cookie: $item"
+    }
+}
+
+# Httpd_ReturnFile
+#	Return a file.
+#
+# Arguments:
+#	sock	handle on the connection
+#	type	is a Content-Type
+#	path	is the file pathname
+#
+# Side Effects:
+#	Sends the file contents back as the reply.
 
 proc Httpd_ReturnFile {sock type path} {
     global Httpd
@@ -442,6 +490,7 @@ proc Httpd_ReturnFile {sock type path} {
     set data(file_size) [file size $path]
     set close [HttpdClose $sock]
     HttpdRespondHeader $sock $type $close $data(file_size) 200
+    HttpdSetCookie $sock
     puts $sock "Last-Modified: [HttpdDate [file mtime $path]]"
     puts $sock ""
     if {$data(proto) != "HEAD"} {
@@ -474,6 +523,7 @@ proc Httpd_ReturnData {sock type content {code 200}} {
     Count urlreply
     set close [HttpdClose $sock]
     HttpdRespondHeader $sock $type $close [string length $content] $code
+    HttpdSetCookie $sock
     puts $sock ""
     if {$data(proto) != "HEAD"} {
 	fconfigure $sock -translation binary -blocking $Httpd(sockblock)
@@ -495,6 +545,7 @@ proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
     Count urlreply
     set close [HttpdClose $sock]
     HttpdRespondHeader $sock $type $close [string length $content] $code
+    HttpdSetCookie $sock
     puts $sock "Last-Modified: [HttpdDate $date]"
     puts $sock ""
     if {$data(proto) != "HEAD"} {
