@@ -1,3 +1,9 @@
+2000-10-18  Brent Welch <welch@ajubasolutions.com>
+    
+	* lib/httpd.tcl: Fixed Httpd_Suspend/Httpd_Resume usage that
+	was added to Httpd_ReadPostDataAsync (The Httpd_Resume was omitted)
+	* Tagged and released 3.2
+
 2000-10-12  Brent Welch <welch@ajubasolutions.com>
     
 	* lib/httpd.tcl: Added Httpd_ReadPostDataAsync that is

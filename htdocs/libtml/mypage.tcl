@@ -102,3 +102,28 @@ proc mypage::footer {} {
     append html "</body>\n</html>\n"
     return $html
 }
+
+# mypage::README_links
+#
+#	Generate optional links to distribution README files.
+#
+# Arguments:
+#	none
+#
+# Results:
+#	HTML for some links
+
+proc mypage::README_links {} {
+    set html ""
+    foreach f [lsort [glob -nocomplain [file join [Doc_Root] links/*]]] {
+	if {[file exists $f]} {
+	    # Symlink is not broken
+	    set t [file tail $f]
+	    append html "<li><a href=/links/$t>$t</a>\n"
+	}
+    }
+    if {[string length $html]} {
+	set html <ul>$html</ul>
+    }
+    return $html
+}

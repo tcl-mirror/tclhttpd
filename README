@@ -5,18 +5,15 @@ See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 Version: 3.2
-Last Modified: Mon Sep 11 10:41:20 PDT 2000
+Last Modified: Wed Oct 18 11:06:30 PDT 2000
 
 QUICK START
 
 It requires Tcl 8.3 and the new Standard Tcl Library.
-This uses the cmdline, base64, ncgi, and html
+This uses the cmdline, base64, ncgi, html, and counter
 modules of the Standard Tcl Library. If you must, you
 can probably get by with Tcl 8.0 or later if you install
 the Standard Tcl Library.
-
-The TclPro 1.4 distribution comes with everything you need
-to run TclHttpd.
 
 The Web server runs under either tclsh or wish.
 With wish you get a simple GUI that shows some counters.
@@ -124,3 +121,11 @@ http://www.scriptics.com/tclhttpd/
 
 There is a netCVS repository on cvs.scriptics.com.
 For details, please see http://www.scriptics.com/products/tcltk/netcvs.html
+
+SourceForge
+
+I have just created a "tclhttpd" project at
+http://sourceforge.net/projects/tclhttpd/
+that will become the CVS home for TclHttpd.  See also
+http://tclhttpd.sourceforge.net/
+ftp://tclhttpd.sourceforge.net/pub/tclhttpd

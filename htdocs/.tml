@@ -35,6 +35,9 @@ mypage::contents {
 
 # These are the default colors and fonts for various HTML objects
 
+# #cc3300 is the "Tcl read"
+# #003399 is the "Tcl blue"
+
 html::init {
     body.bgcolor	white
     body.text		black

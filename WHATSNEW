@@ -1,4 +1,43 @@
-Whats new in TclHttpd
+What's new in TclHttpd
+
+3.2
+
+This adds a custom code directory that makes it easier to drop in
+your applicaton-specific code without hand-editting the bin/httpd.tcl
+and bin/httpdthread.tcl files.  Basically, all *.tcl files in the
+custom code directory are sourced towards the end of startup.
+Specify this directory with the -library command line switch,
+or with the "library" tclhttpd.rc file parameter.  By default this
+is the "custom" directory that now appears in the distribution.
+
+The Url_PrefixInstall command has been generalized to take some
+optional flags to enable some features on a per-domain basis.
+The calling sequence is backward compatible:
+    Url_PrefixInstall urlprefix tclcommand args
+where the optional args are option-value pairs:
+	-thread boolean
+		If boolean is true, and threads are enabled,
+		Then the domain handler is run in a thread.
+		The default is FALSE.
+	-readpost boolean
+		If boolean is true, then the POST data is
+		read in a non-blocking fashion before the
+		domain handler is invoked, and appears in
+		the data(query) variable.
+		The default is TRUE, so turn this off
+		if you have special post-data-reading code.
+	-command tclcommand2
+		This registers a command that is called
+		at the very end of URL processing by the
+		Httpd layer.  If the server decides to
+		time out your domain handler or the request
+		somehow aborts during processing, this
+		provides a way to learn about that.  The
+		command is called with two arguments, the
+		socket handle on the connection, and an
+		error string.  If the error string is empty,
+		no error occurred.
+		The default is no callback.
 
 3.1
 

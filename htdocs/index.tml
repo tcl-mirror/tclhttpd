@@ -41,7 +41,11 @@ business angle. These pages document the technical specifications of
 the server.
 <p>
 The server is distributed under a <a href=license.terms>copyright</a> that allows free use.
+
 <h2>See Also</h2>
+
+[mypage::README_links]
+
 <a href=http://www.scriptics.com/tclhttpd/>The main TclHttpd Information Page</a>.
 <p>
 A <a href=book/TCLHTTPD.html>Tcl Httpd Book Chapter</a> from the

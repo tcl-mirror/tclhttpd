@@ -42,8 +42,12 @@ Grab the highest version number one you can find in:
 It contains a Tcl or SH script that copies its files into peer directories
 of your Tcl script library.  For example, if your Tcl library is in
 /usr/local/tcl/tcl8.3, then it will create a directory named something like
-/usr/local/tcl/tcllib0.4.  Once these are in place, you should be able to
+/usr/local/tcl/tcllib0.7.  Once these are in place, you should be able to
 "package require tcllib" from your Tcl shell.
+
+WARNING: The Tcl package mechanism doesn't deal correctly with multiple
+versions of TclLib installed.  For best results, remove the older versions
+after you install the latest one.
 
 Now go try approach #1 again.
 
@@ -76,6 +80,12 @@ can be compiled in a compatible way.  You might be able to get around this
 by ignoring any errors from configure and doing "make -k install" to
 ignore errors about the crypt and limit extentions.  The server starts
 up and runs with or without these optional extensions.
+
+For best results, the --prefix you use with TclHttpd is exactly the
+same as the one you used when compiling and installing Tcl.  If
+Tcl is in a central location that you do not own, you might have
+to hand-edit bin/httpd.tcl to get the auto_path right.  Or, simply
+compile and install Tcl yourself in a locate you control.
 
 4. Use the CONFIG and MAKE scripts in the bundled distrubtion.
 
