@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Test Http_AddHeader</title>
+  </head>
+  [Template_Dynamic
+    set sock [Httpd_CurrentSocket]
+    #Http_RemoveHeaders $sock	;# remove any user-defined headers
+    Http_AddHeaders $sock Cache-Control no-cache	;# should prevent caching
+    Http_AddHeaders $sock Warning {199 localhost "User Warning"} ;# does nothing
+    set freq 3
+    Http_AddHeaders $sock Refresh $freq
+    return ""
+  ]
+
+  <body>
+    <h1>Test Http_AddHeader [clock format [clock scan now]]</h1>
+
+    <p>This document uses Http_AddHeader to set the http 'Cache-Control: no-cache' header in a reply</p>
+    <p>It also uses Http_AddHeader to set the http 'Refresh:' header, which causes a reload every $freq seconds</p>
+
+    <p>Here are some response headers from the <a href='ftp://ftp.isi.edu/in-notes/rfc2616.txt'>RFC 2616</a>.  I have no idea what any of them do.
+    <ul>
+      <li>Cache-Control</li>
+      <li>Accept-Ranges</li>
+      <li>Age</li>
+      <li>ETag</li>
+      <li>Location</li>
+      <li>Proxy-Authenticate</li>
+      <li>Retry-After</li>
+      <li>Server</li>
+      <li>Vary</li>
+      <li>WWW-Authenticate</li>
+      <li>Allow</li>
+      <li>Content-Encoding</li>
+      <li>Content-Language</li>
+      <li>Content-Length</li>
+      <li>Content-Location</li>
+      <li>Content-MD5</li>
+      <li>Content-Range</li>
+      <li>Content-Type</li>
+      <li>Expires</li>
+      <li>Last-Modified</li>
+  </ul>
+
+    <hr>
+    <address><a href="mailto:colin@chinix.com">Colin McCormack</a></address>
+<!-- Created: Mon Oct 27 09:50:03 EST 2003 -->
+<!-- hhmts start -->
+Last modified: Mon Oct 27 10:14:58 EST 2003
+<!-- hhmts end -->
+  </body>
+</html>
