@@ -5,7 +5,7 @@
 [html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database &gt; Report A Bug}]
 
 [bugdb::bug-details [ncgi::value bug] Application OS Priority \
-Assigned Summary Description Date]
+Assigned Summary Description Date Status]
 
 <p>
     [html::foreach {title ref} $my_navigation {
@@ -20,6 +20,17 @@ Assigned Summary Description Date]
 <p>
     <label for="date" class="text">Date Entered:</label>
     <span id="date">$Date</span>
+</p>
+
+<p>
+    <label for="Status" class="text">Status:</label>
+    <select name="Status" id="Status">
+	[html::foreach option $status_options {
+            <option[html::if {$option == $Status} { selected="selected"}]>
+	        $option
+	    </option>
+	}]
+    </select>
 </p>
 
 <p>
