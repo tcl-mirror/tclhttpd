@@ -1,5 +1,5 @@
 #!/bin/sh
-# This nasty script never generates output
+# This nasty script generates output, then hangs
 # \
 exec tclsh8.0 "$0" ${1+"$@"}
 

@@ -1,10 +1,15 @@
 #!/bin/sh
 # \
-exec tclsh8.0 "$0" ${1+"$@"}
+exec tclsh8.3 "$0" ${1+"$@"}
 
-puts "Content-Type: text/html"
-puts "Location: http://$env(SERVER_NAME):$env(SERVER_PORT)/"
-puts ""
-puts "<title>Redirect</title>"
-puts "You should get a redirect"
-exit 0
+if {[catch {
+    package require ncgi
+
+
+    ncgi::redirect http://$env(SERVER_NAME):$env(SERVER_PORT)/
+    exit 0
+}]} {
+    puts "Content-Type: text/html\n"
+    puts "<h1>CGI Error</h1>"
+    puts "<pre>$errorInfo</pre>"
+}

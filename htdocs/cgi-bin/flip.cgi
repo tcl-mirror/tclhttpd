@@ -1,17 +1,24 @@
 #!/bin/sh
 # \
-exec tclsh8.0 "$0" ${1+"$@"}
+exec tclsh8.3 "$0" ${1+"$@"}
 
-source [file join [file dirname [info script]] cgilib.tcl]
+if {[catch {
+    package require ncgi
+    package require html
 
-set bit [expr [clock clicks] & 1]
-Cgi_Header Hello
+    set bit [expr [clock clicks] & 1]
+    ncgi::header
 
-H1 "Coin Flip"
-if {$bit} {
-    puts heads
-} else {
-    puts tails
+    puts [html::head "Coin Flip"]
+    puts [html::h1 "Coin Flip"]
+    if {$bit} {
+	puts heads
+    } else {
+	puts tails
+    }
+    exit 0
+}]} {
+    puts "Content-Type: text/html\n"
+    puts "<h1>CGI Error</h1>"
+    puts "<pre>$errorInfo</pre>"
 }
-exit 0
-

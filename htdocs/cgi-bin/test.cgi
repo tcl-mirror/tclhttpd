@@ -1,27 +1,29 @@
 #!/bin/sh
 # \
-exec tclsh8.0 "$0" ${1+"$@"}
+exec tclsh8.3 "$0" ${1+"$@"}
 
-source [file join [file dirname [info script]] cgilib.tcl]
+if {[catch {
+    package require ncgi
+    package require html
 
-Cgi_Header Hello
-flush stdout
+    ncgi::header
+    html::head Hello
+    flush stdout
 
-set query [Cgi_List]
+    set query [ncgi::nvlist]
 
-H1 "Hello, World!"
-puts "<table border=1>"
-foreach {name value} $query {
-    puts "<tr><td>$name</td><td>$value</td></tr>"
+    puts [html::h1 "Hello, World!"]
+    puts [html::h2 [clock format [clock seconds]]]
+
+    puts [html::h3 "CGI Values"]
+    puts [html::tableFromList $query]
+
+    puts [html::h3 Environment]
+    puts [html::tableFromArray env]
+    flush stdout
+    exit 0
+}]} {
+    puts "Content-Type: text/html\n"
+    puts "<h1>CGI Error</h1>"
+    puts "<pre>$errorInfo</pre>"
 }
-puts </table>
-H2 [clock format [clock seconds]]
-
-H3 Environment
-puts "<table border=1>"
-foreach {name value} [array get env] {
-    puts "<tr><td>$name</td><td>$value</td></tr>"
-}
-puts </table>
-flush stdout
-exit 0

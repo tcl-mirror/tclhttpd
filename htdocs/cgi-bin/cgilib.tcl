@@ -1,5 +1,20 @@
 # cgilib.tcl
 
+# Note that these interfaces are deprecated in favor of the new
+# ncgi module that is part of the Standard Tcl Library
+#
+# This file	ncgi module
+# Cgi_Parse	ncgi::parse
+# Cgi_List	ncgi::nvlist
+# Cgi_Query	ncgi::query
+# Cgi_Decode	ncgi::decode
+# Cgi_Encode	ncgi::encode
+# Cgi_Value	ncgi::value
+# Cgi_Header	ncgi::header
+# Cgi_Redirect	ncgi::redirect
+
+# There is also a new html package in the Standard Tcl Library
+
 proc Cgi_Parse {} {
     global cgi query
     set query [Cgi_Query]
