@@ -2,7 +2,7 @@
 [mypage::header "Templates and State"]
 <b>Sample Form</b>
 <p>
-<form action=$page(url) method=GET>
+<form action=$page(url) method=POST>
 <table>
 [html::row "General Info" "<input type=text [html::formvalue data]>"]
 [html::row "Exclusive Choice" \
