@@ -40,7 +40,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.10 2004/05/01 13:50:41 coldstore Exp $
+# RCS: @(#) $Id: session.tcl,v 1.11 2004/05/27 01:25:19 coldstore Exp $
 
 package provide httpd::session 1.0
 
@@ -72,7 +72,7 @@ if {($Session(short) == 1) || [catch {package require md5}]} {
 } else {
     # generate a long and unforgeable session id
     proc SessionGenId {} {
-	return [::md5::md5 -hex [randomx]]
+	return [md5hex [randomx]]
     }
 }
 

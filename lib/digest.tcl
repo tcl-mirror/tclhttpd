@@ -44,12 +44,6 @@ if {[catch {package require Random}]} {
 }
 set DigestSecret [DigestRand]
 
-proc md5hex {what} {
-    set result [::md5::md5 -- $what]
-    binary scan $result H* result
-    return $result
-}
-
 # calculate a digest key for a given session
 proc DigestA1 {sock} {
     upvar #0 Httpd$sock data
