@@ -31,9 +31,9 @@ if {"$tcl_platform(platform)" == "windows"} {
 
     # On windows we hard-code the interpreters for various script types
 
-    set Cgi(tclsh) "Tclsh80.exe"		;# For .tcl
+    regsub wish [info nameofexecutable] tclsh Cgi(tclsh) ;# For .tcl
     set Cgi(perl) "perl.exe"			;# For .pl
-    set Cgi(cgiexe) "Tclsh80.exe"		;# For .cgi
+    set Cgi(cgiexe) $Cgi(tclsh)			;# For .cgi
 
     # More environment variables need to be passed through.
     # Windows NT Need Lib and SystemRoot so DLLs loaded by tcl are found.

@@ -350,9 +350,17 @@ proc DocHandle {path suffix cookie sock} {
 
 proc DocDirectory {path suffix cookie sock} {
     upvar #0 Httpd$sock data
-    global Doc
+    global Doc tcl_platform
+
+    # Special case because glob doesn't work in wrapped files
+    # Just set indexpat to "index.tml" or "index.html"
+
     set npath [file join $path $Doc(indexpat)]
-    set newest [DocLatest [glob -nocomplain $npath]]
+    if {[info exist tcl_platform(iswrapped)]} {
+	set newest $npath
+    } else {
+	set newest [DocLatest [glob -nocomplain $npath]]
+    }
     if {[string length $newest]} {
 	if {[string compare $Doc(tmlSuffix) [file extension $newest]] == 0} {
 	    foreach try [list [file root $newest].html [file root $newest].htm] {
