@@ -8,21 +8,10 @@
 # domain handlers correspond to files (Doc), cgi-bin directories (Cgi),
 # and things built right into the application (Direct).
 #
-# URL processing is divided into two parts.  The first time a URL is
-# requested the domain dispatch is done.  The domain handler finds the
-# object and then caches the result by calling Url_Handle with a callback
-# into a lower-level handler.  For example, Doc_Domain finds a file and
-# calls Url_Handle with a Doc_Handle callback.  The next time the URL
-# dispatcher sees a URL the lookup result of Doc_Domain is in UrlCache
-# and Doc_Handle is called directly without going through the whole
-# process done by Doc_Domain.
-#
-# URL redirection is done by sticking an appropriate handler in UrlCache.
-#
-# Authentication is done before domain dispatch via a general hook
-# mechanism.  Different authentication schemes can register a procedure
-# to be called to enforce access control before the domain handler is
-# invoked.
+# URL processing is divided into two parts: access control and
+# url implementation.  You register access hooks with
+# Url_AccessInstall, and you register URL implementations with
+# Url_PrefixInstall.
 #
 # Brent Welch (c) 1997 Sun Microsystems, 1998-2000 Scriptics Corporation.
 # See the file "license.terms" for information on usage and redistribution
@@ -30,7 +19,7 @@
 #
 # SCCS: @(#) url.tcl 1.7 97/08/20 11:50:13
 
-package provide httpd::url 1.0
+package provide httpd::url 1.1
 
 # This pattern cannot occur inside a URL path component
 # On windows we disallow : to avoid drive-letter attacks
@@ -84,10 +73,16 @@ proc Url_Dispatch {sock} {
 	set data(suffix) $suffix
 	foreach hook $Url(accessHooks) {
 	    switch -- [eval $hook [list $sock $url]] {
-		ok		{ break }
+		ok	{ break }
 		denied	{ return }
 		skip	{ continue }
 	    }
+	}
+
+	# Register a callback with the Httpd layer
+
+	if {[info exist Url(callback,$prefix)]} {
+	    Httpd_CompletionCallback $sock $Url(callback,$prefix)
 	}
 
 	# Invoke the URL domain handler either in this main thread
@@ -256,9 +251,16 @@ if {![info exist Url(accessHooks)]} {
 #		additional arument, $sock, that is the handle identifier
 #		A well-known state array is available at
 #		upvar #0 Httpd$sock 
-#	tothread	If true, this domain handler is run in a thread
+#	args	This is either a single boolean that, for backwards
+#		compatibility, indicates if the domain handler runs
+#		in a thread, or an option-value list of:
+#		-inThread boolean
+#			To indicate the domain handler runs in a thread
+#		-callback cmd
+#			A callback to make when the request completes
+#			with or without error, timeout, etc.
 
-proc Url_PrefixInstall {prefix command {tothread 0}} {
+proc Url_PrefixInstall {prefix command args} {
     global Url
 
     # Add the url to the prefixset, which is a regular expression used
@@ -283,6 +285,27 @@ proc Url_PrefixInstall {prefix command {tothread 0}} {
 
     set Url(command,$prefix) $command
 
+    # Check for options on the domain
+
+    if {[llength $args] == 1} {
+	set tothread [lindex $args 0]
+    } else {
+	set tothread 0
+	foreach {n v} $args {
+	    switch -- $n {
+		-thread {
+		    set tothread $v
+		}
+		-callback {
+		    set Url(callback,$prefix) $v
+		}
+		default {
+		    return -code error "Unknown option $n.
+			    Must be -tothread or -callback"
+		}
+	    }
+	}
+    }
     # The decision to use worker threads is done on a domain-by-domain basis
     #
     # Do the check against Thread_Enabled here instead of inside
@@ -314,6 +337,9 @@ proc Url_PrefixRemove {prefix} {
     if {[info exist Url(command,$prefix)]} {
 	unset Url(command,$prefix)
 	unset Url(thread,$prefix)
+    }
+    if {[info exist Url(callback,$prefix)]} {
+	unset Url(callback,$prefix)
     }
 }
 

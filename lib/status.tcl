@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.15 2000/08/27 07:24:43 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.16 2000/09/20 00:25:44 welch Exp $
 
 package provide httpd::status 1.0
 
@@ -109,10 +109,10 @@ proc Status/doc {{pattern *} {sort number}} {
     append result [StatusPrintHits $pattern $sort]
 }
 proc StatusPrintHits {aname {pattern *} {sort number}} {
-    append result [StatusPrintArray hit * $sort Hits Url]
+    append result [StatusPrintArray [stats::countGet hit -histVar] * $sort Hits Url]
 }
 proc StatusPrintArray {aname pattern sort col1 col2} {
-    upvar #0 counter$aname a
+    upvar #0 $aname a
     set result ""
     append result <pre>\n
     append result [format "%6s %s\n" $col1 $col2]
@@ -181,14 +181,12 @@ proc Status/notfound {{pattern *} {sort number}} {
 
 proc StatusPrintNotFound {{pattern *} {sort number}} {
     global Doc Referer _status
+    upvar #0 [stats::countGet notfound -histVar] histogram
     append result <pre>\n
     append result [format "%6s %s\n" Miss Url]
     set list {}
-    foreach i [lsort [array names Doc notfound,$pattern]] {
-	if ![catch {set Doc($i)} value] {
-	    regsub {notfound,} $i {} j
-	    lappend list [list $value $j]
-	}
+    foreach i [lsort [array names histogram $pattern]] {
+	lappend list [list $histogram($i) $i]
     }
     if [catch {lsort -index 0 -integer -decreasing $list} newlist] {
 	set newlist [lsort -command StatusSort $list]
@@ -222,10 +220,8 @@ proc StatusPrintNotFound {{pattern *} {sort number}} {
 #	Returns HTML code that confirms that the reset occurred.
 
 proc Status/notfound/reset {args} {
-    global Doc Referer
-    foreach i [array names Doc notfound,*] {
-	unset Doc($i)
-    }
+    global Referer
+    stats::countReset notfound
     catch {unset Referer}
     return "<h1>Reset Notfound Counters</h1>"
 }
@@ -368,7 +364,8 @@ proc StatusCodeSize {{ns ::}} {
 
 proc StatusMainTable {} {
     global Httpd Doc status tcl_patchLevel tcl_platform Thread
-    global counter counter_reset
+    global StatusThreadTable
+
     set html "<H1>$Httpd(name):$Httpd(port)</h1>\n"
     append html "<H2>Server Info</h2>"
     append html "<table border=0>"
@@ -390,7 +387,7 @@ proc StatusMainTable {} {
 
     append html "<br><br><br>\n"
 
-    append html "<p>[StatusTable counter counter_reset]<p>\n"
+    append html "<p>[StatusTable]<p>\n"
 
     # Per thread stats
     if {[Thread_Enabled]} {
@@ -402,16 +399,16 @@ proc StatusMainTable {} {
 	    append html "<h4>Thread $id</h4>\n"
 	    global counter_thread_$id
 	    if {[Thread_IsFree $id]} {
-		array set counter_thread_$id \
-		    [Thread_Send $id {array get ::counter}]
+		set StatusThreadTable($id) \
+		    [Thread_Send $id StatusTable]
 	    } else {
 		# Use cached version of the other threads counters,
 		# but update our stats for next time.
 		append html "<i>busy, using cached values</i>\n"
 		Thread_SendAsync $id [list StatusThreadUpdate $id $self]
 	    }
-	    if {[info exist counter_thread_$id]} {
-		append html [StatusTable counter_thread_$id]
+	    if {[info exist StatusThreadTable($id)]} {
+		append html $StatusThreadTable($id)
 	    }
 	}
     }
@@ -423,22 +420,17 @@ proc StatusThreadUpdate {self master} {
 	[array get ::counter]]
 }
 
-proc StatusTable {aname {reset_name {}}} {
-    upvar #0 $aname counter
-    upvar #0 $reset_name counter_reset
-    global counterhit
+proc StatusTable {} {
     append html "<table border>\n"
 
     set hit 0
     foreach {c label} {
 	    / "Home Page Hits"
 	    } {
-	if [info exists counterhit($c)] {
-	    append html "<tr><td>$label</td><td>$counterhit($c)</td>\n"
+	set N [stats::countGet hit -hist $c]
+	if {$N > 0} {
+	    append html "<tr><td>$label</td><td>$N</td>\n"
 	    set hit 1
-	    if {[info exist counter_reset($c)]} {
-		append html "<td>[clock format $counter_reset($c) -format "%B %d, %Y"]</td>"
-	    }
 	    append html </tr>\n
 	}
     }
@@ -463,20 +455,22 @@ proc StatusTable {aname {reset_name {}}} {
 	    errors	"Errors"
 	    Status	"Status"
 	    } {
-	if [info exists counter($c)] {
-	    append html "<tr><td>$label</td><td>$counter($c)</td>\n"
+	if {[stats::countExists $c]} {
+	    append html "<tr><td>$label</td><td>[stats::countGet $c -total]</td>\n"
 	    set hit 1
-	    if {[info exist counter_reset($c)]} {
-		append html "<td>[clock format $counter_reset($c) -format "%B %d, %Y"]</td>"
+	    set resetDate [stats::countGet $c -resetDate]
+	    if {[string length $resetDate]} {
+		append html "<td>[clock format $resetDate -format "%B %d, %Y"]</td>"
 	    }
 	    append html </tr>\n
 	}
     }
     if {!$hit} {
-	foreach {name value} [array get counter] {
-	    append html "<tr><td>$name</td><td>$value</td>\n"
-	    if {[info exist counter_reset($name)]} {
-		append html "<td>[clock format $counter_reset($name) -format "%B %d, %Y"]</td>"
+	foreach c [stats::countGet "" -allTagNames] {
+	    append html "<tr><td>$name</td><td>[stats::countGet $c -total]</td>\n"
+	    set resetDate [stats::countGet $c -resetDate]
+	    if {[string length $resetDate]} {
+		append html "<td>[clock format $resetDate -format "%B %d, %Y"]</td>"
 	    }
 	    append html </tr>\n
 	}
@@ -509,10 +503,17 @@ proc Status/all {args} {
     append html [StatusTclPower left]
     append html [StatusMainTable]
     append html "<br><a href=/status/text>Text only view.</a>\n"
+
+	append html [stats::histHtmlDisplay serviceTime \
+		-title "Service Time" -unit seconds -max 100]
+
     catch {
-	append html [StatusMinuteHist CntMinuteurlhits "Per Minute Url Hits" $counter(basetime)]
-	append html [StatusMinuteHist CntHoururlhits "Per Hour Url Hits" $counter(hour,1) hour]
-	append html [StatusMinuteHist CntDayurlhits "Per Day Url Hits" $counter(day,1) day]
+	append html [stats::histHtmlDisplay urlhits \
+		-title "Per Minute Url Hits" -unit minutes]
+	append html [stats::histHtmlDisplay urlhits \
+		-title "Hourly Url Hits" -unit hours]
+	append html [stats::histHtmlDisplay urlhits \
+		-title "Daily Url Hits" -unit days]
     }
     return $html
 }
@@ -535,12 +536,17 @@ proc Status/text {args} {
     append html [StatusTclPower left]
     append html [StatusMainTable]
     append html "<p><a href=$_status(dir)/all>Bar Chart View.</a>"
-    append html [StatusTimeText CntMinuteurlhits "Per Minute Url Hits" Min Hits $counter(basetime)]
-    if [info exists CntHoururlhits] {
-	append html [StatusTimeText CntHoururlhits "Per Hour Url Hits" Hour Hits $counter(hour,1)]
+    catch {
+	append html [stats::histHtmlDisplay serviceTime \
+		-title "Service Time" -unit seconds -max 100 -text 1]
     }
-    if [info exists CntDayurlhits] {
-	append html [StatusTimeText CntDayurlhits "Per Day Url Hits" Day Hits $counter(day,1)]
+    catch {
+	append html [stats::histHtmlDisplay hits \
+		-title "Per Minute Url Hits" -unit minutes -text 1]
+	append html [stats::histHtmlDisplay hits \
+		-title "Hourly Url Hits" -unit hours -text 1]
+	append html [stats::histHtmlDisplay hits \
+		-title "Daily Url Hits" -unit days -text 1]
     }
     return $html
 }
@@ -580,91 +586,7 @@ proc Version {} {
     return $html
 }
 
-proc StatusMinuteHist {array title time {unit minute}} {
-    global counter _status
-    upvar #0 $array data
-    if {! [info exists data]} {
-	return ""
-    }
-    regsub ^Cnt $array Age agebitName
-    upvar #0 $agebitName agebit
-
-    set total 0
-    set max 0
-    set base 100
-    foreach {name value} [array get data] {
-	setmax max $value
-    }
-    switch $unit {
-	minute	{set width 3}
-	hour	{set width 5}
-	day	{set width 5}
-    }
-    append result "<h3>$title ($max max)</h3>"
-    append result <ul>
-    append result "<h4>Starting at [clock format $time]</h4>"
-    append result "<table cellpadding=0 cellspacing=0><tr>\n"
-    set skip 0
-    append result "<td valign=top>$max</td>\n"
-    foreach t [lsort -integer [array names data]] {
-	if {!$skip && [info exists agebit($t)]} {
-
-	    # Indicate the hourly wrap-around point with a zero value.
-
-	    set skip 1
-	    set marker 1
-	} else {
-	    set marker 0
-	}
-
-	if {$unit == "hour" && ($t == $counter(mergehour))} {
-	    set marker 1
-	}
-	set value $data($t)
-	if {[catch {expr {round($value * 100.0 / $max)}} percent]} {
-	    puts "Skipping $percent"
-	    continue
-	}
-	set height [expr {$percent * $base / 100}]
-	if {$marker} {
-	    append result "<td valign=bottom><img src=$_status(images)/Red.gif height=$height width=$width XYZ></td>\n"
-#	    append result "<td valign=bottom><hr size=$height width=$width></td>\n"
-	} else {
-	    append result "<td valign=bottom><img src=$_status(images)/Blue.gif  height=$height width=$width ABC></td>\n"
-#	    append result "<td valign=bottom><hr NOSHADE size=$height width=$width></td>\n"
-	}
-    }
-    append result "</tr>"
-
-    switch $unit {
-	minute	{#do nothing}
-	hour	{
-	    append result "<tr><td> </td>"
-	    foreach t [lsort -integer [array names data]] {
-		set tag td
-		append result "<td><font size=1>[clock format $time -format %k]</font></td>"
-		incr time 3600
-	    }
-	    append result </tr>
-	}
-	day {
-	    append result "<tr><td> </td>"
-	    set skip 4
-	    set i 0
-	    foreach t [lsort -integer [array names data]] {
-		if {($i % $skip) == 0} {
-		    append result "<td colspan=$skip><font size=1>[clock format $time -format "%h %e"]</font></td>"
-		}
-		incr time [expr 3600 * 24]
-		incr i
-	    }
-	    append result </tr>
-	}
-    }
-    append result "</table>"
-    append result </ul>
-    return $result
-}
+# NOTUSED
 
 proc StatusTimeText {array title unit what time} {
     global counter

@@ -20,13 +20,27 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.38 2000/09/06 21:45:43 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.39 2000/09/20 00:25:44 welch Exp $
 
 package provide httpd::doc 1.1
 
 package require uri
 
+# Doc_Root --
+#
 # Query or set the physical pathname of the document root
+#
+# Arguments:
+#	real 	Optional.  The name of the file system directory
+#		containing the root of the URL tree.  If this is empty,
+#		then the current document root is returned instead.
+#
+# Results:
+#	The name of the directory of the document root.
+#
+# Side Effects:
+#	Sets the document root.
+
 proc Doc_Root {{real {}}} {
     global Doc
     if {[string length $real] > 0} {
@@ -45,6 +59,19 @@ proc Doc_Root {{real {}}} {
 #	directory	The directory that corresponds to $virtual
 #	inThread	True if document handlers should run in a thread
 #			The default is true to handle long-running templates
+#
+# Arguments:
+#	virtual		The URL prefix of the document tree to add.
+#	directory	The file system directory containing the doc tree.
+#	inThread 1	If true, the domain is registered to run in a thread.
+#			(The server may have threading turned off, but
+#			you can still ask for it without error.)
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets up a document URL domain and the document-based access hook.
 
 proc Doc_AddRoot {virtual directory {inThread 1}} {
     global Doc
@@ -53,17 +80,37 @@ proc Doc_AddRoot {virtual directory {inThread 1}} {
     Url_AccessInstall DocAccessHook
 }
 
-# Define the index file for a directory
+# Doc_IndexFile --
+#
+#	Define the index file for a directory
+#
+# Arguments:
+#	pat	A glob pattern for index files in a directory.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the index file glob pattern.
 
 proc Doc_IndexFile {pat} {
     global Doc
     set Doc(indexpat) $pat
 }
 
-# Set the suffix for templates
-set Doc(tmlSuffix) .tml
-
+# Doc_ExcludePat --
+#
 # Define a pattern of files names to exclude in DocFallback
+#
+# Arguments:
+#	patlist	A glob pattern of files to avoid when playing
+#		games in DocFallBack to find an alternative file.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the exclude pattern.
 
 proc Doc_ExcludePat {patlist} {
     global Doc
@@ -73,7 +120,30 @@ if {![info exists Doc(excludePat)]} {
     set Doc(excludePat) {*.bak *.swp *~}
 }
 
+# Set the file extension for templates
+
+if {![info exists Doc(tmlExt)]} {
+    set Doc(tmlExt) .tml
+}
+if {![info exists Doc(htmlExt)]} {
+    switch $tcl_platform(platform) {
+	windows { set Doc(htmlExt) .htm }
+	default { set Doc(htmlExt) .html }
+    }
+}
+
+# Doc_CheckTemplates --
+#
 # Allow or disable automatic template checking
+#
+# Arguments:
+#	how 	A boolen that enables or disables template handling.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the checkTemplates variable.
 
 proc Doc_CheckTemplates {{how 1}} {
     global Doc
@@ -83,7 +153,18 @@ if {![info exists Doc(checkTemplates)]} {
     set Doc(checkTemplates) 0
 }
 
+# Doc_TemplateInterp --
+#
 # Choose an alternate interpreter in which to process templates
+#
+# Arguments:
+#	interp	The Tcl interpreter in which to process templates.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the interpreter for all Doc domain templates.
 
 proc Doc_TemplateInterp {interp} {
     global Doc
@@ -96,7 +177,19 @@ if {![info exists Doc(templateInterp)]} {
     set Doc(templateInterp) {}
 }
 
+# Doc_TemplateLibrary --
+#
 # Define the auto_load library for template support
+#
+# Arguments:
+#	dir	The directory to add to the auto_path
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Updates the auto_path variable in the interpreter used
+#	for templates.
 
 proc Doc_TemplateLibrary {dir} {
     global Doc auto_path
@@ -108,31 +201,85 @@ proc Doc_TemplateLibrary {dir} {
     }
 }
 
+# Doc_PublicHtml --
+#
 # Enable URLS of the form ~user/a/b/c and map those to
 # a subdirectory of that users account.
+#
+# Arguments:
+#	homedir The directory under a user's home that is their
+#		personal URL root.  Defaults to public_html.
+#		If this is empty, then user home directories
+#		are disabled.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the per-user public_html directory name.
 
 proc Doc_PublicHtml {{homedir public_html}} {
     global Doc
-    set Doc(homedir) $homedir
+    if {[string length $homedir] == 0} {
+	catch {unset Doc(homedir)}
+    } else {
+	set Doc(homedir) [string trim $homedir /]
+    }
 }
 
+# Doc_NotFoundPage --
+#
 # Register a file not found error page.
-# This page always gets "subst'ed"
+# This page always gets "subst'ed, but without the fancy
+# context of the ".tml" pages.
+#
+# Arguments:
+#	virtual	The URL of the not-found page, e.g., /notfound.html
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the not-found page.
 
 proc Doc_NotFoundPage { virtual } {
     global Doc
     set Doc(page,notfound) [Doc_Virtual {} {} $virtual]
 }
 
+# Doc_ErrorPage --
+#
 # Register a server error page.
 # This page always gets "subst'ed"
+#
+# Arguments:
+#	virtual	The URL of the error page, e.g., /error.html
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the error page.
 
 proc Doc_ErrorPage { virtual } {
     global Doc
     set Doc(page,error) [Doc_Virtual {} {} $virtual]
 }
 
+# Doc_Webmaster --
+#
 # Define an email address for the webmaster
+#
+# Arguments:
+#	email 	The email of the webmaster.  If empty, the
+#		current value is returned, which is handy in
+#		web pages.
+#
+# Results:
+#	Returns the webmaster email.
+#
+# Side Effects:
+#	Sets the webmaster email.
 
 proc Doc_Webmaster {{email {}}} {
     global Doc
@@ -148,6 +295,20 @@ proc Doc_Webmaster {{email {}}} {
 
 # Doc_Virtual - return a real pathname corresponding to a 
 # "virtual" path in an include
+#
+# Arguments:
+#	sock	The client connection.
+#	curfile	The pathname of the file that contains the
+#		"virtual" URL spec.  This is used to resolve
+#		relative URLs.
+#	virtual	The URL we need the file name of.
+#
+# Results:
+#	The file name corresponding to the URL.
+#	If "" is returned, then the URL is invalid.
+#
+# Side Effects:
+#	None
 
 proc Doc_Virtual {sock curfile virtual} {
     global Doc
@@ -171,11 +332,31 @@ proc Doc_Virtual {sock curfile virtual} {
 	if {[info exist Doc(root,$prefix)]} {
 	    return [file join $Doc(root,$prefix) [string trimleft $suffix /]]
 	} else {
-	    return [file join $Doc(root,/) [string trimleft $virtual /]]
+	    # Not a document domain, so there cannot be a file behind this url.
+
+	    return {}
 	}
     }
-    return {}
+
+    # Non-absolute URL
+
+    return [file join [file dirname $curfile] $virtual]
 }
+
+# Doc_File --
+#
+#	DEPRECATED.  This is a trivial layer over file join.
+#
+# Arguments:
+#	sock	The client connection.
+#	curfile	The current file containing a file= specification.
+#	npath	The file name, which might be relative to curfile.
+#
+# Results:
+#	A file pathname.
+#
+# Side Effects:
+#	None
 
 proc Doc_File {sock curfile npath} {
     return [file join [file dirname $curfile] $npath]
@@ -236,19 +417,33 @@ proc DocAccessHook {sock url} {
     }
 }
 
+# DocDomain --
+#
 # Main handler for Doc domains (i.e. file systems)
 # This looks around for a file and, if found, uses DocHandle
 # to return the contents.
+#
+# Arguments:
+#	prefix		The URL prefix of the domain.
+#	directory	The directory containing teh domain.
+#	sock		The socket connection.
+#	suffix		The URL after the prefix.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Dispatch to the document handler that is in charge
+#	of generating an HTTP response.
 
-proc DocDomain {virtual directory sock suffix} {
+proc DocDomain {prefix directory sock suffix} {
     global Doc
     upvar #0 Httpd$sock data
 
+    # The pathlist has been checked and URL decoded by
+    # DocAccess, so we ignore the suffix and recompute it.
+
     set pathlist $data(pathlist)
-
-    # Suffix may have URL encoded things in it - this has a already
-    # been decoded into pathlist
-
     set suffix [join $pathlist /]
 
     # Check for personal home pages
@@ -272,85 +467,138 @@ proc DocDomain {virtual directory sock suffix} {
 
     set path [file join $directory [string trimleft $suffix /~]]
     if {[file exists $path]} {
-	Incr Doc(hit,$data(url))
-	DocHandle $path $suffix $sock
+	CountName $data(url) hit
+	DocHandle $prefix $path $suffix $sock
 	return
     }
 
     # Try to find an alternate.
 
-    if {![DocFallback $path $suffix $sock]} {
+    if {![DocFallback $prefix $path $suffix $sock]} {
 	# Couldn't find anything.
 	# check for cgi script in the middle of the path
-	Cgi_Domain $virtual $directory $sock $suffix
+	Cgi_Domain $prefix $directory $sock $suffix
     }
 }
 
 # DocFallback does "content negotation" if a file isn't found
 # look around for files with different suffixes but the same root.
+#
+# NOTE: This feature is probably more trouble than it is worth.
+# It was originally used to be able to choose between different
+# iamge types (e.g., .gif and .jpg), but is now also used to
+# find templates (.tml files) that correspond to .html files.
+#
+# Arguments:
+#	path	The pathname we were trying to find.
+#	suffix	The URL suffix.
+#	sock	The socket connection.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	This either triggers an HTTP redirect to switch the user
+#	to the correct file name, or it calls out to the template-aware
+#	text/html processor.
 
-proc DocFallback {path suffix sock} {
+proc DocFallback {virtual path suffix sock} {
     set root [file root $path]
     if {[string match */ $root]} {
 	# Input is something like /a/b/.xyz
 	return 0
     }
-    set ok {}
-    set accept [DocAccept $sock]
 
+    # Here we look for files indicated by any Accept headers.
+    # Most browsers say */*, but they may provide some ordering info, too.
+
+    set ok {}
     foreach choice [glob -nocomplain $root.*] {
-	if {[string compare [file root $choice] $root] != 0} {
-	    # This prevents "foo.html.old" from matching for "foo.html"
-	    continue
-	}
-	set type [Mtype $choice]
-	if {[DocMatch $accept $type] && ![DocExclude $choice]} {
+	
+	# Filter on the exclude patterns, and make sure that we
+	# don't let "foo.html.old" match for "foo.html"
+
+	if {[string compare [file root $choice] $root] == 0 &&
+		![DocExclude $choice]} {
 	    lappend ok $choice
 	}
     }
-    set npath [DocChoose $accept $ok]
+
+    # Now we pick the best file from the ones that matched.
+
+    set npath [DocChoose [DocAccept $sock] $ok]
     if {[string length $npath] == 0 || [string compare $path $npath] == 0} {
+
 	# not found or still trying one we cannot use
+
 	return 0
     } else {
+
 	# Another hack for templates.  If the .html is not found,
 	# and the .tml exists, ask for .html so the template is
 	# processed and cached as the .html file.
 
 	global Doc
-	if {[string compare $Doc(tmlSuffix) [file extension $npath]] == 0} {
-	    
-	    # Note - there used to be a call to Auth_Verify here, dunno why
-
-	    Doc_text/html [file root $npath].html $suffix $sock
+	if {[string compare $Doc(tmlExt) [file extension $npath]] == 0} {
+	    Doc_text/html [file root $npath]$Doc(htmlExt) $suffix $sock
 	    return 1
 	}
-	# Redirect so we don't propagate spelling errors like john.osterhoot
+
+	# Redirect so we don't mask spelling errors like john.osterhoot
+
 	set new [file extension $npath]
 	set old [file extension $suffix]
 	if {[string length $old] == 0} { 
 	    append suffix $new
 	} else {
 	    # Watch out for specials in $old, like .html)
+
 	    regsub -all {[][$^|().*+?\\]} $old {\\&} old
 	    regsub $old\$ $suffix $new suffix
 	}
 
-	# This next statement only works if the domain prefix is /
-	Httpd_RedirectSelf /$suffix $sock
+	Httpd_RedirectSelf $virtual/[string trimleft $suffix /~] $sock
 
 	return 1
     }
 }
 
-# These procedures compare a document type with the Accept values.
+# DocAccept --
+#
+#	This returns the Accept specification from the HTTP headers.
+#	These are a list of MIME types that the browser favors.
+#
+# Arguments:
+#	sock	The socket connection
+#
+# Results:
+#	The Accept header, or a default.
+#
+# Side Effects:
+#	None
 
 proc DocAccept {sock} {
     upvar #0 Httpd$sock data
-    set accept */*
-    catch {set accept $data(mime,accept)}
-    return $accept
+    if {![info exist data(mime,accept)]} {
+	return */*
+    } else {
+	return $data(mime,accept)
+    }
 }
+# DocMatch --
+#
+# 	This compares a document type with the Accept values.
+#
+# Arguments:
+#	accept	The results of DocAccept
+#	type	A MIME Content-Type.
+#
+# Results:
+#	1	If the content-type matches the accept spec, 0 otherwise.
+#
+# Side Effects:
+#	None
+
 proc DocMatch {accept type} {
     foreach t [split $accept ,] {
 	regsub {;.*} $t {} t	;# Nuke quality parameters
@@ -362,8 +610,19 @@ proc DocMatch {accept type} {
     return 0
 }
 
+# DocExclude --
+#
 # This is used to filter out files like "foo.bak"  and foo~
 # from the DocFallback failover code
+#
+# Arguments:
+#	name	The filename to filter.
+#
+# Results:
+#	1	If the file should be excluded, 0 otherwise.
+#
+# Side Effects:
+#	None
 
 proc DocExclude {name} {
     global Doc
@@ -375,8 +634,20 @@ proc DocExclude {name} {
     return 0
 }
 
+# DocChoose --
+#
 # Choose based first on the order of things in the Accept type list,
 # then on the newest file that matches a given accept pattern.
+#
+# Arguments:
+#	accept	The results of DocAccept
+#	choices	The list of matching file names.
+#
+# Results:
+#	The chosen file name.
+#
+# Side Effects:
+#	None
 
 proc DocChoose {accept choices} {
     foreach t [split $accept ,] {
@@ -397,18 +668,37 @@ proc DocChoose {accept choices} {
     return {}
 }
 
+# DocHandle --
+#
 # Handle a document URL.  Dispatch to the mime type handler, if defined.
+#
+# Arguments:
+#	prefix	The URL prefix of the domain.
+#	path	The file system pathname of the file.
+#	suffix	The URL suffix.
+#	sock	The socket connection.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Dispatch to the correct document handler.
 
-proc DocHandle {path suffix sock} {
+proc DocHandle {prefix path suffix sock} {
     upvar #0 Httpd$sock data
     if {[file isdirectory $path]} {
 	if {[string length $data(url)] && ![regexp /$ $data(url)]} {
+
 	    # Insist on the trailing slash
+
 	    Httpd_RedirectDir $sock
 	    return
 	}
-	DocDirectory $path $suffix $sock
+	DocDirectory $prefix $path $suffix $sock
     } elseif {[file readable $path]} {
+	
+	# Look for Tcl procedures whos name match the MIME Content-Type
+
 	set cmd Doc_[Mtype $path]
 	if {![iscommand $cmd]} {
 	    Httpd_ReturnFile $sock [Mtype $path] $path
@@ -416,21 +706,32 @@ proc DocHandle {path suffix sock} {
 	    $cmd $path $suffix $sock
 	}
     } else {
-	# Probably not found, but an old UrlCache entry might have
-	# brought us here.  We try content negotiation in case
-	# the file's name changed.
+	# Either not found, or we can find an alternate (e.g. a template).
 
-	Url_UnCache $sock
-	if {![DocFallback $path $suffix $sock]} {
+	if {![DocFallback $prefix $path $suffix $sock]} {
 	    Doc_NotFound $sock
 	}
     }
 }
 
-# For directories, return the newest file that matches
-# the index file pattern.
+# DocDirectory --
+#
+#	Handle a directory.  Look for the index file, falling back to
+#	the Directory Listing module, if necessary.
+#
+# Arguments:
+#	prefix	The URL domain prefix.
+#	path	The file system pathname of the directory.
+#	suffix	The URL suffix.
+#	sock	The socket connection.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Dispatches to the appropriate page handler.
 
-proc DocDirectory {path suffix sock} {
+proc DocDirectory {prefix path suffix sock} {
     upvar #0 Httpd$sock data
     global Doc tcl_platform
 
@@ -444,21 +745,32 @@ proc DocDirectory {path suffix sock} {
 	set newest [DocLatest [glob -nocomplain $npath]]
     }
     if {[string length $newest]} {
-	if {[string compare $Doc(tmlSuffix) [file extension $newest]] == 0} {
-	    foreach try [list [file root $newest].html [file root $newest].htm] {
-		if {[file exists $try]} {
-		    # Ask for .html so it gets generated from the template
-		    set newest $try
-		    break
-		}
-	    }
+
+	# Template hack.  Ask for the corresponding .html file in
+	# case that file should be cached when running the template.
+	# If we ask for the .tml directly then its result is never cached.
+
+	if {[string compare $Doc(tmlExt) [file extension $newest]] == 0} {
+	    set newest [file root $newest]$Doc(htmlExt)
 	}
-	# Don't cache translation this to avoid latching onto the wrong file
-	return [DocHandle $newest $suffix $sock]
+	return [DocHandle $prefix $newest $suffix $sock]
     }
 
     Httpd_ReturnData $sock text/html [DirList $path $data(url)]
 }
+
+# DocLatest --
+#
+#	Return the newest file from the list.
+#
+# Arguments:
+#	files	A list of filenames.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	The name of the newest file.
 
 proc DocLatest {files} {
     set newest {}
@@ -474,35 +786,74 @@ proc DocLatest {files} {
     return $newest
 }
 
+# Doc_NotFound --
+#
+#	Called when a page is missing.  This looks for a handler page
+#	and sets up a small amount of context for it.
+#
+# Arguments:
+#	sock	The socket connection.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Returns a page.
+
 proc Doc_NotFound { sock } {
     global Doc Referer
     upvar #0 Httpd$sock data
-    Count notfound
-    if {[info exists data(url)]} {
-	Url_UnCache $sock
-	Incr Doc(notfound,$data(url))
-	set Doc(url,notfound) $data(url)	;# For subst
-	if {[info exists data(mime,referer)]} {
-	    lappendOnce Referer($data(url)) $data(mime,referer)
-	}
-    } else {
-	set Doc(url,notfound) {}
+    CountName $data(url) notfound
+    set Doc(url,notfound) $data(url)	;# For subst
+    if {[info exists data(mime,referer)]} {
+
+	# Record the referring URL so we can track down
+	# bad links
+
+	lappendOnce Referer($data(url)) $data(mime,referer)
     }
     DocSubstSystemFile $sock notfound 404 [protect_text $Doc(url,notfound)]
 }
+
+# Doc_Error --
+#
+#	Called when an error has occurred processing the page.
+#
+# Arguments:
+#	sock	The socket connection.
+#	ei	errorInfo
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Returns a page.
+
 proc Doc_Error { sock ei } {
     global Doc
     upvar #0 Httpd$sock data
-    if {[info exists data(url)]} {
-	Url_UnCache $sock
-	Incr Doc(error,$data(url))
-	set Doc(errorUrl) $data(url)
-    } else {
-	set Doc(errorUrl) ""
-    }
+    set Doc(errorUrl) $data(url)
     set Doc(errorInfo) $ei	;# For subst
+    CountName $Doc(errorUrl) error
     DocSubstSystemFile $sock error 500 [protect_text $ei]
 }
+
+# DocSubstSystemFile --
+#
+#	Simple template processor for notfound and error pages.
+#
+# Arguments:
+#	sock	The socket connection
+#	key	Either "notfound" or "error"
+#	code	HTTP code
+#	extra 	Optional string to include in return page.
+#	interp  Interp to use for Subst.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Returns a page.
 
 proc DocSubstSystemFile {sock key code {extra {}} {interp {}}} {
     global Doc env
@@ -522,7 +873,20 @@ proc DocSubstSystemFile {sock key code {extra {}} {interp {}}} {
     }
 }
 
+# Doc_application/x-imagemap --
+#
 # this is called by DocHandle to process .map files
+#
+# Arguments:
+#	path	The file name of the .map file.
+#	suffix	The URL suffix
+#	sock	The socket connection.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Redirect to the URL indicated by the map.
 
 proc Doc_application/x-imagemap {path suffix sock} {
     upvar #0 Httpd$sock data
@@ -530,15 +894,29 @@ proc Doc_application/x-imagemap {path suffix sock} {
 	Httpd_ReturnData $sock text/plain "[parray Httpd$sock]"
 	return
     }
-   set url [Map_Lookup $path?$data(query)]
+    set url [Map_Lookup $path?$data(query)]
     Count maphits
     Httpd_Redirect $url $sock
 }
 
+# Doc_application/x-tcl-subst --
+#
 # Tcl-subst a template that mixes HTML and Tcl.
 # This subst is just done in the context of the specified
 # interpreter with not much other support.
 # See x-tcl-template for something more sophisticated
+#
+# Arguments:
+#	path	The file pathname.
+#	suffix	The URL suffix.
+#	sock	The socket connection.
+#	interp	The interp to use for subst'ing.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the env array in interp and calls Doc_Subst.
 
 proc Doc_application/x-tcl-subst {path suffix sock {interp {}}} {
     upvar #0 Httpd$sock data
@@ -548,22 +926,51 @@ proc Doc_application/x-tcl-subst {path suffix sock {interp {}}} {
     Doc_Subst $sock $path $interp
 }
 
+# Doc_application/x-tcl-template --
+#
 # Tcl-subst a template that mixes HTML and Tcl.
+#
+# Arguments:
+#	path	The file pathname.
+#	suffix	The URL suffix.
+#	sock	The socket connection.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets up the interpreter context and subst's the page,
+#	which is returned to the client.
 
 proc Doc_application/x-tcl-template {path suffix sock} {
     upvar #0 Httpd$sock data
     global Doc
 
     # This is always dynamic (ReturnData has no modification date)
-    # so the result is not cached at the remote end.
+    # so the result is not cached at the remote end, nor is a local
+    # .html file cached.
 
     return [Httpd_ReturnData $sock text/html \
 	    [DocTemplate $sock $path {} $suffix {} $Doc(templateInterp)]]
 }
 
+# Doc_text/html --
+#
 # This  supports templates.  If enabled, a check is made for the
 # corresponding template file.  If it is newer, then it is processed
 # and the result is cached in the .html file.
+#
+# Arguments:
+#	path	The file pathname.
+#	suffix	The URL suffix.
+#	sock	The socket connection.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Returns a page to the client.  May use a corresponding template
+#	to generate, and cache, the page.
 
 proc Doc_text/html {path suffix sock} {
     global Doc
@@ -571,9 +978,11 @@ proc Doc_text/html {path suffix sock} {
     if {$Doc(checkTemplates)} {
 	# See if the .html cached result is up-to-date
     
-	set template [file root $path]$Doc(tmlSuffix)
+	set template [file root $path]$Doc(tmlExt)
 	if {[file exists $template] && [DocCheckTemplate $template $path]} {
+
 	    # Do the subst and cache the result in the .html file
+
 	    set html [DocTemplate $sock $template $path $suffix dynamic \
 		    $Doc(templateInterp)]
 	    if {$dynamic} {
@@ -582,10 +991,25 @@ proc Doc_text/html {path suffix sock} {
 	}
     }
     # Use ReturnFile so remote end knows it can cache the file.
+    # This file may have been generated by DocTemplate above.
+
     return [Httpd_ReturnFile $sock text/html $path]
 }
 
+# Doc_application/x-tcl-auth --
+#
 # Like tcl-subst, but a basic authentication cookie is used for session state
+#
+# Arguments:
+#	path	The file pathname.
+#	suffix	The URL suffix.
+#	sock	The socket connection.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Returns a page to the client.
 
 proc Doc_application/x-tcl-auth {path suffix sock} {
     upvar #0 Httpd$sock data
@@ -596,9 +1020,9 @@ proc Doc_application/x-tcl-auth {path suffix sock} {
     }
     set interp [Session_Authorized $data(session)]
 
-    global env
     # Need to make everything look like a GET so the Cgi parser
     # doesn't read post data from stdin.  We've already read it.
+
     set data(proto) GET
     Cgi_SetEnv	$sock $path pass
     interp eval $interp [list uplevel #0 [list array set env [array get pass]]]
@@ -606,6 +1030,8 @@ proc Doc_application/x-tcl-auth {path suffix sock} {
     Doc_Subst $sock $path $interp
 }
 
+# DocTemplate --
+#
 # Generate a .html file from a template
 # and from any .tml files in directories leading up to the root.
 # The processing is done in the specified interpreter.
@@ -617,6 +1043,21 @@ proc Doc_application/x-tcl-auth {path suffix sock} {
 #	dynamic		If 1, then this page is dynamically generated
 #			on every fetch.  Otherwise the page has a cached
 #			static representation.
+#
+# Arguments:
+#	sock		The client socket.
+#	template	The file name of the template.
+#	htmlfile	The file name of the corresponding .html file.
+#	suffix		The URL suffix.
+#	dynamicVar	Name of var to set to dynamic property of the page.
+#	interp		The interp to use for substing.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Generates a page.  Will set up the CGI environment via the ncgi
+#	module, and will do environment variable settings.
 
 proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     upvar #0 Httpd$sock data
@@ -725,7 +1166,7 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     set path $Doc(root)
     foreach dir [concat [list {}] $dirs] {
 	set path [file join $path $dir]
-	set libfile [file join $path $Doc(tmlSuffix)]
+	set libfile [file join $path $Doc(tmlExt)]
 	if {[file exists $libfile]} {
 	    interp eval $interp [list uplevel #0 [list source $libfile]]
 	}
@@ -770,6 +1211,14 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 
 # Doc_Dynamic
 #	Supress generation of HTML cache
+#
+# Arguments:
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets the dynamic bit so the page is not cached.
 
 proc Doc_Dynamic {} {
     global page
@@ -843,19 +1292,52 @@ proc Doc_SetCookie {args} {
 # Doc_IsLinkToSelf
 #	Compare the link to the URL of the current page.
 #	If they seem to be the same thing, return 1
+#
+# Arguments:
+#	url	The URL to compare with.
+#
+# Results:
+#	1 if the input URL seems to be equivalent to the page's URL.
+#
+# Side Effects:
+#	None
 
 proc Doc_IsLinkToSelf {url} {
     global page
     return [expr {[string compare $url $page(url)] == 0}]
 }
 
+# Doc_Redirect --
+#
 # Trigger a page redirect
+#
+# Arguments:
+#	newurl	The new URL
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Raises a special error that is caught by Url_Unwind
 
 proc Doc_Redirect {newurl} {
     return -code error \
 	    -errorcode  [list HTTPD_REDIRECT $newurl] \
 	    "Redirect to $newurl"
 }
+
+# Doc_RedirectSelf --
+#
+#	Like Doc_Redirect, but to a URL that is relative to this server.
+#
+# Arguments:
+#	newurl	Server-relative URL
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	See Doc_Redirect
 
 proc Doc_RedirectSelf {newurl} {
     set thispage [ncgi::urlStub]
@@ -864,7 +1346,20 @@ proc Doc_RedirectSelf {newurl} {
     Doc_Redirect $newurl
 }
 
+# DocCheckTemplate --
+#
 # Check modify times on all templates that affect a page
+#
+# Arguments:
+#	template	The file pathname of the template.
+#	htmlfile	The file pathname of the cached .html file.
+#
+# Results:
+#	1 if the template or any dependent .tml file are newer than
+#	the cached .html file.
+#
+# Side Effects:
+#	None
 
 proc DocCheckTemplate {template htmlfile} {
     global Doc
@@ -876,13 +1371,14 @@ proc DocCheckTemplate {template htmlfile} {
     }
 
     # Look for .tml library files down the hierarchy.
+
     set rlen [llength [file split $Doc(root)]]
     set dirs [lrange [file split [file dirname $template]] $rlen end]
 
     set path $Doc(root)
     foreach dir [concat [list {}] $dirs] {
 	set path [file join $path $dir]
-	set libfile [file join $path $Doc(tmlSuffix)]
+	set libfile [file join $path $Doc(tmlExt)]
 	if {[file exists $libfile] && ([file mtime $libfile] > $mtime)} {
 	    return 1
 	}
@@ -891,7 +1387,19 @@ proc DocCheckTemplate {template htmlfile} {
 }
 
 
+# DocSubst --
+#
 # Subst a file in an interpreter context
+#
+# Arguments:
+#	path	The file pathname of the template.
+#	interp  The interpreter in which to subst.
+#
+# Results:
+#	The subst'ed page.
+#
+# Side Effects:
+#	None
 
 proc DocSubst {path {interp {}}} {
 
@@ -907,8 +1415,21 @@ proc DocSubst {path {interp {}}} {
     return $result
 }
 
+# Doc_Subst --
+#
 # Subst a file and return the result to the HTTP client.
 # Note that ReturnData has no Modification-Date so the result is not cached.
+#
+# Arguments:
+#	sock	The socket connection.
+#	path	The template file pathname.
+#	interp 	The Tcl intepreter in which to subst.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Returns a page to the client.
 
 proc Doc_Subst {sock path {interp {}}} {
     Httpd_ReturnData $sock text/html [DocSubst $path $interp]

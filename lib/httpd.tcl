@@ -21,9 +21,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.53 2000/09/13 21:50:49 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.54 2000/09/20 00:25:44 welch Exp $
 
-package provide httpd 1.4
+package provide httpd 1.5
 
 # initialize all the global data
 
@@ -43,6 +43,7 @@ array set Httpd_Errors {
     411 {Length Required}
     419 {Expectation Failed}
     500 {Server Internal Error}
+    501 {Server Busy}
     503 {Service Unavailable}
     504 {Service Temporarily Unavailable}
 }
@@ -67,6 +68,52 @@ array set Httpd_EnvMap {
     REMOTE_USER		remote_user
     AUTH_TYPE		auth_type
 }
+
+# The per-connection state is kept in the "data" array, which is
+# really an array named Httpd$sock - (note the upvar #0 trick throughout)
+# The elements of this array are documented here.  URL implementations
+# are free to hang additional state off the data array so long as they
+# do not clobber the elements documented here:
+
+# These fields are semi-public, or "well known".  There are a few
+# API's to access them, but URL implementations can rely on these:
+#
+# self		A list of protocol (http or https), name, and port that
+#		capture the server-side of the socket address
+#		Available with  Httpd_Protocol, Httpd_Name, and Httpd_Port API.
+# uri		The complete URL, including proto, servername, and query
+# proto		http or https
+# url		The URL after the server name and before the ?
+# query		The URL after the ?
+# ipaddr	The remote client's IP address
+# cert		Client certificate (The result of tls::status)
+# host		The host specified in the URL, if any (proxy case)
+# port		The port specified in the URL, if any
+# mime,*	HTTP header request lines (e.g., mime,content-type)
+# count		Content-Length
+# set-cookie	List of Set-Cookie headers to stick into the response
+#		Use Httpd_SetCookie to append to this.
+
+# prefix	(Set by Url_Dispatch to be the URL domain prefix)
+# suffix	(Set by Url_Dispatch to be the URL domain suffix)
+
+# auth_type	(Set by the auth.tcl module to "Basic", etc.)
+# remote_user	(Set by the auth.tcl to username from Basic authentication)
+# session	(Set by the auth.tcl to "realm,$username" from Basic auth)
+#		You can overwrite this session ID with something more useful
+
+# Internal fields used by this module.
+# left		The number of keep-alive connections allowed
+# cancel	AfterID of event that will terminate the connection on timeout
+# state		State of request processing
+# version	1.0 or 1.1
+# line		The current line of the HTTP request
+# mimeorder	List indicating order of MIME header lines
+# key		Current header key
+# checkNewLine	State bit for Netscape SSL newline bug hack
+# callback	Command to invoke when request has completed
+# file_size	Size of file returned by ReturnFile
+# infile	Open file used by fcopy to return a file, or CGI pipe
 
 # Httpd_Init
 #	Initialize the httpd module.  Call this early, before Httpd_Server.
@@ -290,7 +337,6 @@ proc HttpdAccept {self sock ipaddr port} {
 	# We do that by calling tls::handshake in a fileevent
 	# until it is complete, or an error occurs.
 
-	set data(ssl) 1
 	fconfigure $sock -blocking 0
 	fileevent $sock readable [list HttpdHandshake $sock]
     } else {
@@ -388,26 +434,49 @@ proc HttpdReset {sock {left {}}} {
 
     # Set up a timer to close the socket if the next request
     # is not completed soon enough.  The request has already
-    # been started, but a bad client might not finish.
+    # been started, but a bad URL domain might not finish.
 
     set data(cancel) [after $Httpd(timeout1) \
-	[list Httpd_SockClose $sock 1 ""]]
+	[list Httpd_SockClose $sock 1 "timeout"]]
     fconfigure $sock -blocking 0 -buffersize $Httpd(bufsize) \
 	-translation {auto crlf}
     fileevent $sock readable [list HttpdRead $sock]
     fileevent $sock writable {}
 }
 
+# Httpd_Peername --
+#
 # Really need to fix the core to support DNS lookups.
 # This routine is not used anywhere.
+#
+# Arguments:
+#	sock	Socket connection
+#
+# Results:
+#	The clients dns name.
+#
+# Side Effects:
+#	None
 
 proc Httpd_Peername {sock} {
     # This is expensive!
     fconfigure $sock -peername
 }
 
+# HttpdRead --
+#
 # Read request from a client.  This is the main state machine
 # for the protocol.
+#
+# Arguments:
+#	sock	Socket connection
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Reads the request from the socket and dispatches the
+#	URL request when ready.
 
 proc HttpdRead {sock} {
     global Httpd
@@ -553,6 +622,7 @@ proc HttpdRead {sock} {
 		    Httpd_Error $sock 400 "No proxy support\n$err"
 		}
 	    } else {
+		CountStart serviceTime $sock
 		Url_Dispatch $sock
 	    }
 	}
@@ -614,16 +684,7 @@ proc Httpd_GetPostData {sock varName {size -1}} {
 #	background so the server doesn't block on the socket.
 #
 # Arguments:
-#	sock	Client connection
-#	varName	Name of buffer variable to append post data to.  This
-#		must be a global or fully scoped namespace variable, or
-#		this can be the empty string, in which case the data
-#		is discarded.
-#	blockSize	Default read block size.
-#	cmd	Callback to make when the post data has been read.
-#		It is called like this:
-#		cmd $sock $varName $errorString
-#		Where the errorString is only passed if an error occurred.
+#	(Same as HttpdReadPost)
 #
 # Side Effects:
 #	This schedules a readable fileevent to read all the POST data
@@ -636,16 +697,49 @@ proc Httpd_GetPostDataAsync {sock varName blockSize cmd} {
     return
 }
 
+# HttpdReadPostGlobal --
+#
+# This fileevent callback can only access a global variable.
+# But HttpdReadPost needs to affect a local variable in its
+# caller so it can be shared with Httpd_GetPostData.
+# So, the fileevent case has an extra procedure frame.
+#
+# Arguments:
+#	(Same as HttpdReadPost)
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Accumulates POST data into the named variable
+
 proc HttpdReadPostGlobal {sock varName blockSize {cmd {}}} {
-
-    # This fileevent callback can only access a global variable.
-    # But HttpdReadPost needs to affect a local variable in its
-    # caller so it can be shared with Httpd_GetPostData.
-    # So, the fileevent case has an extra procedure frame.
-
     upvar #0 $varName buffer
     HttpdReadPost $sock buffer $blockSize $cmd
 }
+
+# HttpdReadPost --
+#
+#	The core procedure that reads post data and accumulates it
+#	into a Tcl variable.
+#
+# Arguments:
+#	sock	Client connection
+#	varName	Name of buffer variable to append post data to.  This
+#		must be a global or fully scoped namespace variable, or
+#		this can be the empty string, in which case the data
+#		is discarded.
+#	blockSize	Default read block size.
+#	cmd	Callback to make when the post data has been read.
+#		It is called like this:
+#		cmd $sock $varName $errorString
+#		Where the errorString is only passed if an error occurred.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Consumes post data and appends it to a variable.
 
 proc HttpdReadPost {sock varName blockSize {cmd {}}} {
     global Httpd
@@ -806,6 +900,49 @@ proc HttpdCloseP {sock} {
     return $close
 }
 
+# Httpd_CompletionCallback --
+#
+#	Register a procedure to be called when an HTTP request is
+#	completed, either normally or forcibly closed.  This gives a
+#	URL implementation a guaranteed callback to clean up or log
+#	requests.
+#
+# Arguments:
+#	sock	The connection handle
+#	cmd	The callback to make.  These arguments are added:
+#		sock - the connection
+#		errmsg - An empty string, or an error message.
+#
+# Side Effects:
+# 	Registers the callback
+
+proc Httpd_CompletionCallback {sock cmd} {
+    upvar #0 Httpd$sock data
+    set data(callback) $cmd
+}
+
+# HttpdDoCallback --
+#
+#	Invoke the completion callback.
+#
+# Arguments:
+#	sock	The connection handle
+#	errmsg	The empty string, or an error message.
+#
+# Side Effects:
+# 	Invokes the callback
+
+proc HttpdDoCallback {sock {errmsg {}}} {
+    upvar #0 Httpd$sock data
+    if {[info exists data(callback)]} {
+	catch {eval $data(callback) {$sock $errmsg}}
+
+	# Ensure it is only called once
+	unset data(callback)
+    }
+    CountStop serviceTime $sock
+}
+
 # HttpdRespondHeader --
 #
 #	Utility routine for outputting response headers for normal data Does
@@ -826,7 +963,6 @@ proc HttpdRespondHeader {sock type close size {code 200}} {
     global Httpd Httpd_Errors
     upvar #0 Httpd$sock data
 
-    set data(code) $code
     append reply "HTTP/$data(version) $code $Httpd_Errors($code)" \n
     append reply "Date: [HttpdDate [clock seconds]]" \n
     append reply "Server: $Httpd(server)\n"
@@ -904,23 +1040,27 @@ proc Httpd_ReturnFile {sock type path {offset 0}} {
 
     incr data(file_size) -$offset
 
-    set close [HttpdCloseP $sock]
-    HttpdRespondHeader $sock $type $close $data(file_size) 200
-    HttpdSetCookie $sock
-    puts $sock "Last-Modified: [HttpdDate [file mtime $path]]"
-    puts $sock ""
-    if {$data(proto) != "HEAD"} {
-	set in [open $path]		;# checking should already be done
-	fconfigure $in -translation binary -blocking 1
-	if {$offset != 0} {
-	    seek $in $offset
+    if {[catch {
+	set close [HttpdCloseP $sock]
+	HttpdRespondHeader $sock $type $close $data(file_size) 200
+	HttpdSetCookie $sock
+	puts $sock "Last-Modified: [HttpdDate [file mtime $path]]"
+	puts $sock ""
+	if {$data(proto) != "HEAD"} {
+	    set in [open $path]		;# checking should already be done
+	    fconfigure $in -translation binary -blocking 1
+	    if {$offset != 0} {
+		seek $in $offset
+	    }
+	    fconfigure $sock -translation binary -blocking $Httpd(sockblock)
+	    set data(infile) $in
+	    Httpd_Suspend $sock 0
+	    fcopy $in $sock -command [list HttpdCopyDone $in $sock $close]
+	} else {
+	    Httpd_SockClose $sock $close
 	}
-	fconfigure $sock -translation binary -blocking $Httpd(sockblock)
-	set data(infile) $in
-	Httpd_Suspend $sock 0
-	fcopy $in $sock -command [list HttpdCopyDone $in $sock $close]
-    } else {
-	Httpd_SockClose $sock $close
+    } err]} {
+	HttpdCloseFinal $sock $err
     }
 }
 
@@ -948,14 +1088,18 @@ proc Httpd_ReturnData {sock type content {code 200} {close 0}} {
     if {$close == 0} {
     	set close [HttpdCloseP $sock]
     }
-    HttpdRespondHeader $sock $type $close [string length $content] $code
-    HttpdSetCookie $sock
-    puts $sock ""
-    if {$data(proto) != "HEAD"} {
-	fconfigure $sock -translation binary -blocking $Httpd(sockblock)
-	puts -nonewline $sock $content
+    if {[catch {
+	HttpdRespondHeader $sock $type $close [string length $content] $code
+	HttpdSetCookie $sock
+	puts $sock ""
+	if {$data(proto) != "HEAD"} {
+	    fconfigure $sock -translation binary -blocking $Httpd(sockblock)
+	    puts -nonewline $sock $content
+	}
+	Httpd_SockClose $sock $close
+    } err]} {
+	HttpdCloseFinal $sock $err
     }
-    Httpd_SockClose $sock $close
 }
 
 # Httpd_ReturnCacheableData
@@ -983,26 +1127,54 @@ proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
 
     Count urlreply
     set close [HttpdCloseP $sock]
-    HttpdRespondHeader $sock $type $close [string length $content] $code
-    HttpdSetCookie $sock
-    puts $sock "Last-Modified: [HttpdDate $date]"
-    puts $sock ""
-    if {$data(proto) != "HEAD"} {
-	fconfigure $sock -translation binary -blocking $Httpd(sockblock)
-	puts -nonewline $sock $content
+    if {[catch {
+	HttpdRespondHeader $sock $type $close [string length $content] $code
+	HttpdSetCookie $sock
+	puts $sock "Last-Modified: [HttpdDate $date]"
+	puts $sock ""
+	if {$data(proto) != "HEAD"} {
+	    fconfigure $sock -translation binary -blocking $Httpd(sockblock)
+	    puts -nonewline $sock $content
+	}
+	Httpd_SockClose $sock $close
+    } err]} {
+	HttpdCloseFinal $sock $err
     }
-    Httpd_SockClose $sock $close
 }
 
 # HttpdCopyDone -- this is used with fcopy when the copy completes.
 # Note that tcl8.0b1 had a bug in that errors during fcopy called
 # bgerror instead of this routine, which causes leaks.  Don't use b1.
+#
+# Arguments:
+#	in	Input channel, typically a file
+#	sock	Socket connection
+#	close	If true, the socket is closed after the copy.
+#	bytes	How many bytes were copied
+#	error	Optional error string.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	See Httpd_SockClose
 
 proc HttpdCopyDone {in sock close bytes {error {}}} {
-    Httpd_SockClose $sock $close
+    Httpd_SockClose $sock $close $error
 }
 
+# HttpdCancel --
+#
 # Cancel a transaction if the client doesn't complete the request fast enough.
+#
+# Arguments:
+#	sock	Socket connection
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Terminates the connection by returning an error page.
 
 proc HttpdCancel {sock} {
     upvar #0 Httpd$sock data
@@ -1018,9 +1190,22 @@ set Httpd_ErrorFormat {
     while trying to obtain <b>%3$s</b>.
 }
 
+# Httpd_Error --
+#
 # send the error message, log it, and close the socket.
 # Note that the Doc module tries to present a more palatable
 # error display page, but falls back to this if necessary.
+#
+# Arguments:
+#	sock	Socket connection
+#	code	HTTP error code, e.g., 500
+#	detail  Optional string to append to standard error message.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Generates a HTTP response.
 
 proc Httpd_Error {sock code {detail ""}} {
 
@@ -1034,13 +1219,6 @@ proc Httpd_Error {sock code {detail ""}} {
 
     Count errors
     append data(url) ""
-    if {[info exists data(code)]} {
-	set detail "OLDCODE $code $detail"
-    }
-    if {[info exists data(infile)]} {
-	set detail "BUSY $detail"
-    }
-    set data(code) $code
     set message [format $Httpd_ErrorFormat $code $Httpd_Errors($code)  $data(url)]
     append message <br>$detail
     if {$code == 500} {
@@ -1049,6 +1227,12 @@ proc Httpd_Error {sock code {detail ""}} {
 		append message "$l: [info level $l]<br>"
 	}
     }
+    # We know something is bad here, so we make the completion callback
+    # and then unregister it so we don't get an extra call as a side
+    # effect of trying to reply.
+
+    HttpdDoCallback $sock $message
+
     Log $sock Error $code $data(url) $detail
     if {[info exists data(infile)]} {
 	# We've already started a reply, so just bail out
@@ -1074,7 +1258,19 @@ set HttpdRedirectFormat {
     </body></html>
 }
 
+# Httpd_Redirect --
+#
 # Generate a redirect reply (code 302)
+#
+# Arguments:
+#	newurl	New URL to redirect to.
+#	sock	Socket connection
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Generates an HTTP reply
 
 proc Httpd_Redirect {newurl sock} {
     upvar #0 Httpd$sock data
@@ -1100,13 +1296,38 @@ proc Httpd_Redirect {newurl sock} {
     Httpd_SockClose $sock $close
 }
 
+# Httpd_RedirectSelf --
+#
 # Generate a redirect to another URL on this server.
+#
+# Arguments:
+#	newurl	Server-relative URL to redirect to.
+#	sock	Socket connection
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Generates an HTTP reply.
 
 proc Httpd_RedirectSelf {newurl sock} {
     Httpd_Redirect [Httpd_SelfUrl $newurl $sock] $sock
 }
 
+# Httpd_SelfUrl --
+#
 # Create an absolute URL for this server
+#
+# Arguments:
+#	url	A server-relative URL on this server.
+#	sock	The current connection so we can tell if it
+#		is the regular port or the secure port.
+#
+# Results:
+#	An absolute URL.
+#
+# Side Effects:
+#	None
 
 proc Httpd_SelfUrl {url {sock ""}} {
     global Httpd env
@@ -1142,21 +1363,56 @@ proc Httpd_SelfUrl {url {sock ""}} {
     append newurl $url
 }
 
+# Httpd_Protocol --
+#
 # Return the protocol for the connection
+#
+# Arguments:
+#	sock	Socket connection
+#
+# Results:
+#	Either "http" or "https"
+#
+# Side Effects:
+#	None
 
 proc Httpd_Protocol {sock} {
     upvar #0 Httpd$sock data
     return [lindex $data(self) 0]
 }
 
+# Httpd_Name --
+#
 # Return the server name for the connection
+#
+# Arguments:
+#	sock	Socket connection
+#
+# Results:
+#	The name of the server, e.g., www.tcltk.org
+#
+# Side Effects:
+#	None
 
 proc Httpd_Name {sock} {
     upvar #0 Httpd$sock data
     return [lindex $data(self) 1]
 }
 
+# Httpd_Port --
+#
 # Return the port for the connection
+#
+# Arguments:
+#	sock	The current connection. If empty, then the
+#		regular (non-secure) port is returned.  Otherwise
+#		the port of this connection is returned.
+#
+# Results:
+#	The server's port.
+#
+# Side Effects:
+#	None
 
 proc Httpd_Port {{sock {}}} {
     if {[string length $sock]} {
@@ -1177,6 +1433,18 @@ proc Httpd_Port {{sock {}}} {
 	}
     }
 }
+# Httpd_SecurePort --
+#
+#	Return the secure port of this server
+#
+# Arguments:
+#
+# Results:
+#	The server's secure port.
+#
+# Side Effects:
+#	None
+
 proc Httpd_SecurePort {} {
 
     # Return the secure listening port
@@ -1190,8 +1458,19 @@ proc Httpd_SecurePort {} {
 }
 
 
+# Httpd_RedirectDir --
+#
 # Generate a redirect because the trailing slash isn't present
 # on a URL that corresponds to a directory.
+#
+# Arguments:
+#	sock	Socket connection
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Generate a redirect page.
 
 proc Httpd_RedirectDir {sock} {
     global Httpd
@@ -1213,9 +1492,20 @@ set HttpdAuthorizationFormat {
     </BODY></HTML>
 }
 
+# Httpd_RequestAuth --
+#
 # Generate the (401) Authorization required reply
-# type - usually "Basic"
-# realm - browsers use this to cache credentials
+#
+# Arguments:
+#	sock	Socket connection
+#	type	usually "Basic"
+#	realm	browsers use this to cache credentials
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Generate an authorization challenge response.
 
 proc Httpd_RequestAuth {sock type realm} {
     upvar #0 Httpd$sock data
@@ -1234,7 +1524,18 @@ proc Httpd_RequestAuth {sock type realm} {
     Httpd_SockClose $sock $close
 }
 
+# HttpdDate --
+#
 # generate a date string in HTTP format
+#
+# Arguments:
+#	seconds	Clock seconds value
+#
+# Results:
+#	A date string.
+#
+# Side Effects:
+#	None
 
 proc HttpdDate {seconds} {
     return [clock format $seconds -format {%a, %d %b %Y %T GMT} -gmt true]
@@ -1262,7 +1563,22 @@ proc Httpd_SockClose {sock closeit {message Close}} {
 
     if {[string length $message]} {
 	Log $sock $message
+	if {$message == "Close"} {
+
+	    # This is a normal close.  Any other message
+	    # is some sort of error.
+
+	    set message ""
+	}
     }
+    # Call back to the URL domain implementation so they are
+    # sure to see the end of all their HTTP transactions.
+    # There is a slight chance of an error reading any un-read
+    # Post data, but if the URL domain didn't want to read it,
+    # then they obviously don't care.
+
+    HttpdDoCallback $sock $message
+
     Count connections -1
     if {[info exist data(infile)]} {
 
@@ -1281,9 +1597,9 @@ proc Httpd_SockClose {sock closeit {message Close}} {
 		after cancel $data(cancel)
 	    }
 	    set data(cancel) [after $Httpd(timeout3) \
-		[list HttpdCloseFinal $sock]]
+		[list HttpdCloseFinal $sock "timeout reading extra POST data"]]
 
-	    Httpd_GetPostDataAsync $sock "" $data(count) HttpdCloseFinal
+	    Httpd_GetPostDataAsync $sock "" $data(count) HttpdReadPostDone
 	} else {
 	    HttpdCloseFinal $sock
 	}
@@ -1292,7 +1608,44 @@ proc Httpd_SockClose {sock closeit {message Close}} {
     }
 }
 
-proc HttpdCloseFinal {sock args} {
+# HttpdReadPostDone --
+#
+#	Callback is made to this when we are done cleaning up any
+#	unread post data.
+#
+# Arguments:
+#	sock	Socket connection
+#	varname	Name of variable with post data
+#	errmsg	If not empty, an error occurred on the socket.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	None here, but see HttpdCloseFinal.
+
+proc HttpdReadPostDone {sock var errmsg} {
+    HttpdCloseFinal $sock $errmsg
+}
+
+# HttpdCloseFinal --
+#
+#	Central close procedure.  All close operations should funnel
+#	through here so that the right cleanup occurs.
+#
+# Arguments:
+#	sock	Socket connection
+#	errmsg	If non-empty, then something went wrong on the socket.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Cleans up any after event associated with the connection.
+#	Closes the socket.
+#	Makes the callback to the URL domain implementation.
+
+proc HttpdCloseFinal {sock {errmsg {}}} {
     upvar #0 Httpd$sock data
     Count sockets -1
     if {[info exists data(cancel)]} {
@@ -1300,7 +1653,11 @@ proc HttpdCloseFinal {sock args} {
     }
     if {[catch {close $sock} err]} {
 	Log $sock CloseError $err
+	if {[string length $errmsg] == 0} {
+	    set errmsg $err
+	}
     }
+    HttpdDoCallback $sock $errmsg
     unset data
 }
 
@@ -1314,6 +1671,20 @@ proc HttpdCloseFinal {sock args} {
 	    catch {puts stderr $msg}
 	}
     }
+
+# HttpdCookieLog --
+#
+#	Special loggin procedure to debug cookie implementation.
+#
+# Arguments:
+#	sock	Socket connection
+#	what	What procedure is doing the logging.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Writes to the debug log.
 
 proc HttpdCookieLog {sock what} {
     global Log Httpd
@@ -1342,8 +1713,21 @@ proc HttpdCookieLog {sock what} {
     }
 }
 
+# Httpd_Suspend --
+#
 # Suspend Wire Callback - for async transactions
 # Use HttpdReset once you are back in business
+#
+# Arguments:
+#	sock	Socket connection
+#	timeout Timeout period.  After this the request is aborted.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Disables fileevents and sets up a timer.
+
 proc Httpd_Suspend {sock {timeout ""}} {
     global Httpd
     upvar #0 Httpd$sock data
@@ -1363,10 +1747,23 @@ proc Httpd_Suspend {sock {timeout ""}} {
     }
 }
 
+# Httpd_Pair --
+#
 #
 # Pair two fd's - typically for tunnelling
 # Close both if either one closes (or gets an error)
 #
+#
+# Arguments:
+#	sock	Socket connection
+#	fd	Any other I/O connection
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Sets up fileevents for proxy'ing data.
+
 proc Httpd_Pair {sock fd} {
     global Httpd
     upvar #0 Httpd$sock data
@@ -1381,6 +1778,21 @@ proc Httpd_Pair {sock fd} {
     fileevent $sock readable [list HttpdReflect $sock $fd]
     fileevent $fd readable [list HttpdReflect $fd $sock]
 }
+
+# HttpdReflect --
+#
+#	This is logically fcopy in both directions, but the core
+#	prevents us from doing that so we do it by hand.
+#
+# Arguments:
+#	in	Input channel
+#	out	Output channel
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Copy data between channels.
 
 proc HttpdReflect {in out} {
     global Httpd

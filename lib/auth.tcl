@@ -13,7 +13,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.12 2000/08/25 17:50:31 hershey Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.13 2000/09/20 00:25:44 welch Exp $
 
 package provide httpd::auth 1.0
 package require base64
@@ -106,8 +106,9 @@ proc Auth_VerifyCallback {sock realm callback} {
 	Httpd_RequestAuth $sock Basic $realm
 	return 0
     } else {
-	set data(remote_user) $user
 	set data(auth_type) Basic
+	set data(remote_user) $user
+	set data(session) $realm,$user
 	return 1
     }
 }
@@ -145,13 +146,11 @@ proc AuthNullCallback {sock realm user pass} {
     if [info exists auth($realm,$user)] {
 	switch -exact -- $auth($realm,$user) \
 	    $pass {
-		set data(session) $realm,$user
 		Stderr "Session: $data(session)"
 		return 1
 	    } \
 	    PasswordRequired {
 		set auth($realm,$user) $pass
-		set data(session) $realm,$user
 		Stderr "Session: $data(session)"
 		return 1
 	    } \
@@ -220,8 +219,9 @@ proc AuthVerifyBasic {sock file} {
     if {! $ok} {
 	Httpd_RequestAuth $sock Basic $info(name)
     } else {
-	set data(remote_user) $user
 	set data(auth_type) Basic
+	set data(remote_user) $user
+	set data(session) $info(name),$user
     }
     return $ok
 }

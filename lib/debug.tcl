@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.9 2000/08/02 07:06:52 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.10 2000/09/20 00:25:44 welch Exp $
 
 package provide httpd::debug 1.0
 
@@ -130,11 +130,21 @@ proc DebugValue {aname} {
     } elseif {[info exists var]} {
 	append html "<pre>[list set $aname $var]</pre>"
     } else {
-	append html "<ul>"
-	foreach n [uplevel #0 [list info vars $aname]] {
-	    append html [DebugValue $n]
+	# Undefined variable - see if it is a pattern.
+	# Be careful about declared but undefined procedures
+	# that used to blow the recursion stack here...
+
+	set list [uplevel #0 [list info vars $aname]]
+	if {[llength $list] == 1 &&
+		[string compare [lindex $list 0] $aname] == 0} {
+	    append html "<pre># $aname undefined</pre>"
+	} else {
+	    append html "<ul>"
+	    foreach n $list {
+		append html [DebugValue $n]
+	    }
+	    append html "</ul>"
 	}
-	append html "</ul>"
     }
     return $html
 }

@@ -6,7 +6,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: srvui.tcl,v 1.6 2000/08/02 07:06:54 welch Exp $
+# RCS: @(#) $Id: srvui.tcl,v 1.7 2000/09/20 00:25:44 welch Exp $
 
 package provide httpd::srvui 1.0
 
@@ -41,7 +41,7 @@ proc SrvUI_Init {title} {
 	    errors	"Errors"
 	    } {
 	label .l$counter -text $label
-	label .n$counter -textvariable counter($counter) -width 0
+	label .n$counter -textvariable [CountVarName $counter] -width 0
 	grid .l$counter .n$counter -sticky w
 	grid configure .n$counter -sticky e
     }

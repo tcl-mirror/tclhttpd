@@ -2,144 +2,108 @@
 #
 # Global counters and histograms
 #
+# This module was generalized and moved into the Standard Tcl Library.
+# This code is now a thin layer over that more general package.
+#
+# We pre-declare any non-simple counters (e.g., the time-based
+# histogram for urlhits, and the interval-histogram for service times)
+# and everything else defaults to a basic counter.  Once things
+# are declared, the stats::count function counts things for us.
+#
 # Brent Welch (c) 1997 Sun Microsystems
 # Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: counter.tcl,v 1.5 2000/08/02 07:06:52 welch Exp $
+# RCS: @(#) $Id: counter.tcl,v 1.6 2000/09/20 00:25:44 welch Exp $
 
-package provide httpd::counter 1.0
+package provide httpd::counter 2.0
+package require stats 1.0
 
 proc Counter_Init {} {
     global counter
-    catch {unset counter}
+    global counterTags
+    if {[info exists counter]} {
+	unset counter
+    }
+    set counter(starttime) [clock seconds]
+    
+    # The Count procedure will be self-initializing because
+    # the stats::count module is not.  The knownTags list is
+    # searched to determine if we need to initialize the counter.
+    # Predefine well known counters here.
 
-    # starttime - beginning of time
-    # basetime - base of minutes histogram
-    # mergeday - index of day histogram
-    # mergehour - index of hour histogram
+    # urlhits is the number of requests serviced.
 
-    set counter(starttime) [set counter(basetime) [clock seconds]]
-    set counter(mergeday) 0
-    set counter(mergehour) 0
+    set counterTags(urlhits) 1
+    stats::countInit urlhits -timehist 4
 
-    set counter(mergetime) [expr 60 * 60 * 1000]
-    after $counter(mergetime) CounterMergeHour
+    # This start/stop timer is used for connection service times.
+    # The bucket size is 5 millisecond
+
+    set counterTags(serviceTime) 1
+    stats::countInit serviceTime -hist 0.005
+
+    # These group counters are used for per-page hit, notfound, and error
+    # statistics.  If you auto-gen unique URLS, these are a memory leak.
+
+    foreach g {hit notfound error} {
+	stats::countInit $g -group $g
+	set counterTags($g) 1
+    }
+
+    # These are simple counters about each kind of connection event
+
+    foreach c {accepts sockets connections urlreply keepalive connclose 
+		http1.0 http1.1} {
+	stats::countInit $c
+	set counterTags($c) 1
+    }
     Httpd_RegisterShutdown Counter_CheckPoint
 }
 
-proc Counter_StartTime {} {
-    global counter
-    return $counter(starttime)
-}
-
 proc Counter_CheckPoint {} {
-    global counter CntDayurlhits CntHoururlhits CntMinuteurlhits
     global Log
     set path $Log(log)counter
     catch {file rename -force $path $path.old}
     if {![catch {open $path w} out]} {
 	puts $out \n[parray counter]
-	puts $out \n[parray CntDayurlhits]
-	puts $out \n[parray CntHoururlhits]
-	puts $out \n[parray CntMinuteurlhits]
+	puts $out \n[parray [stats::countGet urlhits -histName]]
+	puts $out \n[parray [stats::countGet urlhits -histHourName]]
+	puts $out \n[parray [stats::countGet urlhits -histDayName]]
 	close $out
     }
 }
 
 proc Count {what {delta 1}} {
-    global counter
-    Incr counter($what) $delta
-    return $counter($what)
+    global counterTags
+    if {![info exist counterTags($what)]} {
+	stats::countInit $what
+    }
+    stats::count $what $delta
 }
 
-proc CountName {what {aname {}}} {
-    upvar #0 counter$aname counter
-    Incr counter($what)
+proc CountName {instance tag} {
+    stats::count $tag 1 $instance
 }
 
-proc Counter_Reset {what {where 0}} {
-    global counter counter_reset
-    set counter($what) $where
-    set counter_reset($what) [clock seconds]
-}
-
-proc Counter_Get {{pat *}} {
-    global counter
-    array get counter $pat
+proc Counter_Reset {what args} {
+    eval {stats::countReset $what} $args
 }
 
 proc CountHist {what {delta 1}} {
-    global counter
-    upvar #0 CntMinute$what histogram
-    upvar #0 AgeMinute$what agebit
-    set minute [expr ([clock seconds] - $counter(basetime)) / 60]
-    if {[info exists histogram($minute)] && ![info exists agebit($minute)]} {
-	incr histogram($minute)
-    } else {
-	set histogram($minute) $delta
-	if [info exists agebit($minute)] {
-	    unset agebit($minute)
-	}
-    }
-    Count $what $delta
+    stats::count $what $delta
 }
 
-proc CounterMergeHour {} {
-    global counter
-
-    # Save the minutes histogram into a bucket for the last hour
-    # counter(hour,$hour) is the starting time for that hour bucket
-
-    upvar 0 counter(mergehour) hour
-    set hour [expr ($hour % 24) + 1]
-    set counter(hour,$hour) $counter(basetime)
-    set counter(basetime) [clock seconds]
-
-    foreach a [info globals CntMinute*] {
-	regexp {CntMinute(.*)} $a x what
-	upvar #0 CntHour$what hourhist
-	upvar #0 CntMinute$what histogram
-	upvar #0 AgeMinute$what agebit
-	set hourhist($hour) 0
-	foreach i [array names histogram] {
-	    if ![info exists agebit($i)] {
-		incr hourhist($hour) $histogram($i)
-	    }
-	    set agebit($i) 1
-	}
-    }
-    if {$hour >= 24} {
-	CounterMergeDay
-    }
-
-    # Set up the merge to happen on the hour
-
-    set secs [clock seconds]
-    set lasthour [clock scan [clock format $secs -format %H]]
-    set secs [expr (60 * 60) - ($secs - $lasthour)]
-    if {$secs <= 60} {
-	set secs [expr (60 * 60)]
-    }
-    after [expr $secs * 1000] CounterMergeHour
+proc CountStart {what instance} {
+    stats::countStart $what $instance
 }
-
-proc CounterMergeDay {} {
-    global counter
-
-    # Save the hours histogram into a bucket for the last day
-    # counter(day,$day) is the starting time for that day bucket
-
-    set day [incr counter(mergeday)]
-    set counter(day,$day) $counter(hour,1)
-    foreach a [info globals CntHour*] {
-	regexp {CntHour(.*)} $a x what
-	upvar #0 CntDay$what dayhist
-	upvar #0 CntHour$what hourhist
-	set dayhist($day) 0
-	for {set i 1} {$i <= 24} {incr i} {
-	    catch {incr dayhist($day) $hourhist($i)}
-	}
-    }
+proc CountStop {what instance} {
+    stats::countStop $what $instance
+}
+proc CountVarName {what} {
+    return [stats::countGet $what -totalVar]
+}
+proc Counter_StartTime {} {
+    return $stats::startTime
 }
