@@ -253,6 +253,8 @@ proc DocFallback {path suffix cookie sock} {
 	if {[string length $old] == 0} { 
 	    append suffix $new
 	} else {
+	    # Watch out for specials in $old, like .html)
+	    regsub -all {[][$^|().*+?\\]} $old {\\&} old
 	    regsub $old\$ $suffix $new suffix
 	}
 

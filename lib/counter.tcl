@@ -56,8 +56,9 @@ proc Count {what {delta 1}} {
 }
 
 proc Counter_Reset {what {where 0}} {
-    global counter
+    global counter counter_reset
     set counter($what) $where
+    set counter_reset($what) [clock seconds]
 }
 
 proc Counter_Get {{pat *}} {

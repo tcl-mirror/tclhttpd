@@ -225,9 +225,15 @@ proc StatusMainTable {} {
 	    errors	"Errors"
 	    Status	"Status"
 	    } {
+	    set close ""
 	if [info exists counter($c)] {
-	    append html "<tr><td>$label</td><td>$counter($c)</td></tr>\n"
+	    append html "<tr><td>$label</td><td>$counter($c)</td>\n"
+	    set close "</tr>\n"
 	}
+	if [info exists counter_reset($c)] {
+	    append html "<td>[clock format $counter_reset($c) -format "%M %d, %Y"]</td></tr>\n"
+	}
+	append html $close
     }
     append html </table>\n
     return $html

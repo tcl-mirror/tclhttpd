@@ -74,3 +74,14 @@ proc Admin/redirect {old new} {
     return <h1>ok</h1>
 }
 
+proc Admin/reset/counter {name} {
+    
+    # Ugh - get the socket handle in the DirectDomain procedure
+    upvar 1 sock sock
+  
+    if {![AuthVerifyBasic $sock $admin(authfile)]} {
+	return "Password Check Failed"
+    }
+
+    Counter_Reset $name
+}

@@ -54,7 +54,6 @@ proc DirectDomain {prefix sock suffix} {
 
     set valuelist {}
     if [info exists data(query)] {
-
 	# search for comma separeted pair of numbers
 	# as generated from server side map
 	#      e.g 190,202
@@ -64,11 +63,19 @@ proc DirectDomain {prefix sock suffix} {
 	    set data(query) x=$x&y=$y
 	}
 
+	# Honor content type of the query data
+
+	if {[info exist data(mime,content-type)]} {
+	    set type $data(mime,content-type)
+	} else {
+	    set type application/x-www-urlencoded
+	}
+	set valuelist [Url_DecodeQuery $data(query) -type $type]
+
 	# Parse form parameters into the cgi array
 	# If the parameter is listed twice, the array becomes a list
 	# of the values.
 
-	set valuelist [Url_DecodeQuery $data(query)]
 	foreach {name value} $valuelist {
 	    if [info exists list($name)] {
 		set cgi($name) [list $cgi($name) $value]
