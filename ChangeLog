@@ -5,6 +5,8 @@
 	data structure
 	* lib/passgen.tcl: added a random password generator for access
 	control bootstrapping
+	* bin/tclhttpd.rc: added Auth* config parameters for access
+	control
 
 2004-03-16  Jeff Hobbs  <jeffh@ActiveState.com>
 
