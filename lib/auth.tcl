@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.15 2002/08/31 07:30:43 welch Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.16 2003/10/16 01:45:48 coldstore Exp $
 
 package provide httpd::auth 2.0
 package require base64
@@ -30,7 +30,9 @@ package require base64
 # Attempt to turn on the crypt feature used to store crypted passwords.
 
 proc Auth_InitCrypt {} {
-    package require crypt
+    if {[catch {package require crypt}]} {
+	package require tclcrypt
+    }
 }
 proc Auth_AccessFile {args} {
     Stderr "Auth_AccessFile is obsolete: use Auth_InitCrypt instead"

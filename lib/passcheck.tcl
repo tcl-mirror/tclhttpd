@@ -195,8 +195,9 @@ proc ::passcheck::warning message {
 # Is better to have crypt handy  to cache passwords with more confidence. 
 if { [catch { package require crypt } ] } {
   # we provide a dummy crypt...
-  ::passcheck::warning {no crypt package available! passwords cached in cleartext!}
-  proc crypt {word salt} { return "${word}$salt" }
+  package require tclcrypt
+  #::passcheck::warning {no crypt package available! passwords cached in cleartext!}
+  #proc crypt {word salt} { return "${word}$salt" }
 }
 
 #

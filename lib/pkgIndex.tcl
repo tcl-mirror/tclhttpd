@@ -9,6 +9,7 @@ package ifneeded httpd 1.6 "
 	package ifneeded httpd::admin 1.0 \[list source \[file join [list $dir] admin.tcl\]\]
 	package ifneeded httpd::auth 2.0 \[list source \[file join [list $dir] auth.tcl\]\]
 	package ifneeded httpd::cgi 1.1 \[list source \[file join [list $dir] cgi.tcl\]\]
+	package ifneeded httpd::compat 3.3 \[list source \[file join [list $dir] compat.tcl\]\]
 	package ifneeded httpd::config 1.0 \[list source \[file join [list $dir] config.tcl\]\]
 	package ifneeded httpd::cookie 1.0 \[list source \[file join [list $dir] cookie.tcl\]\]
 	package ifneeded httpd::counter 2.0 \[list source \[file join [list $dir] counter.tcl\]\]
@@ -25,7 +26,6 @@ package ifneeded httpd 1.6 "
 	package ifneeded httpd::ismaptcl 1.0 \[list source \[file join [list $dir] maptcl.tcl\]\]
 	package ifneeded httpd::ismaptk 1.0 \[list source \[file join [list $dir] maptk.tcl\]\]
 	package ifneeded httpd::log 1.1 \[list source \[file join [list $dir] log.tcl\]\]
-	package ifneeded httpd::logproc 1.0 \[list source \[file join [list $dir] logproc.tcl\]\]
 	package ifneeded httpd::logstd 1.0 \[list source \[file join [list $dir] logstd.tcl\]\]
 	package ifneeded httpd::mail 1.0 \[list source \[file join [list $dir] mail.tcl\]\]
 	package ifneeded httpd::mtype 1.1 \[list source \[file join [list $dir] mtype.tcl\]\]
@@ -46,5 +46,5 @@ package ifneeded httpd 1.6 "
 	package ifneeded httpd::url 1.2 \[list source \[file join [list $dir] url.tcl\]\]
 	package ifneeded httpd::utils 1.0 \[list source \[file join [list $dir] utils.tcl\]\]
 	package ifneeded httpd::version 3.4 \[list source \[file join [list $dir] version.tcl\]\]
-	package ifneeded httpd::compat 3.3 \[list source \[file join [list $dir] compat.tcl\]\]
+	package ifneeded tclcrypt 1.0 \[list source \[file join [list $dir] tclcrypt.tcl\]\]
 "

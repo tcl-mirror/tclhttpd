@@ -1,3 +1,7 @@
+2003-10-16 Colin McCormack <colin@field.medicine.adelaide.edu.au>
+        * lib/{auth,passcheck,tclcrypt}.tcl: added pure tcl crypt
+        as a fallback for installations lacking the compiled version
+
 2003-10-10  Brent Welch <welch@panasas.com>
         * lib/httpd.tcl: fixes for logging of static files based on
         changes suggestedby David Zolli.
