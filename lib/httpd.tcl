@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.58 2000/09/26 06:42:44 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.59 2000/09/26 19:45:36 welch Exp $
 
 package provide httpd 1.5
 
@@ -570,7 +570,7 @@ proc HttpdRead {sock} {
 	    if {$data(proto) == "POST"} {
 		fconfigure $sock  -translation {binary crlf}
 		if {![info exists data(mime,content-length)]} {
-		    Httpd_Error $sock 411 $data(mime,expect)
+		    Httpd_Error $sock 411
 		    return
 		}
 		set data(count) $data(mime,content-length)
@@ -1502,7 +1502,11 @@ proc Httpd_SecurePort {} {
 proc Httpd_RedirectDir {sock} {
     global Httpd
     upvar #0 Httpd$sock data
-    Httpd_Redirect $data(url)/ $sock
+    set url  $data(url)/
+    if {[info exist data(query)] && [string length $data(query)]} {
+	append url ?$data(query)
+    }
+    Httpd_Redirect $url $sock
 }
 
 set HttpdAuthorizationFormat {
