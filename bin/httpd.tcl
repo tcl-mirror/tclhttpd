@@ -16,12 +16,15 @@
 # A note about the code structure:
 # httpd.tcl	This file, which is the main startup script.  It does
 #		command line processing, sets up the auto_path, and
-#		loads tclhttpd.rc and main.tcl.  This file also opens
+#		loads tclhttpd.rc and httpdthread.tcl.  This file also opens
 #		the server listening sockets and does setuid, if possible.
-# tclhttpd.rc	This has simple configuration settings like port and host
-# main.tcl	This has the bulk of the initialization code.  It is
+# tclhttpd.rc	This has configuration settings like port and host, and other
+#		server-wide calls like Url_PrefixInstall. It
+#		is sourced one time by the server during start up.
+# httpdthread.tcl	This has the bulk of the initialization code.  It is
 #		split out into its own file because it is loaded by
-#		worker threads if you are using the thread feature.
+#		by each thread: the main thread and any worker threads
+#		created by the "-threads N" command line argument.
 # ../lib	The script library that contains most of the TclHttpd
 #		implementation
 # ../tcllib	The Standard Tcl Library.  TclHttpd ships with a copy
@@ -113,7 +116,7 @@ unset tmp dir
 
 set Config(docRoot) [file join [file dirname $Config(home)] htdocs]
 set Config(library) [file join [file dirname $Config(home)] htdocs/libtml]
-set Config(main) [file join $Config(home) main.tcl]
+set Config(main) [file join $Config(home) httpdthread.tcl]
 set Config(debug) 0
 
 # The configuration bootstrap goes like this:
@@ -145,6 +148,7 @@ config::init $Config(config) Config
 package require cmdline
 array set Config [cmdline::getoptions argv [list \
         [list config.arg       [cget config]       {Configuration File}] \
+        [list main.arg         [cget main]         {Per-Thread Tcl script}] \
         [list docRoot.arg      [cget docRoot]      {Root directory for documents}] \
         [list port.arg         [cget port]         {Port number server is to listen on}] \
         [list host.arg         [cget host]         {Server name, should be fully qualified}] \
@@ -156,7 +160,6 @@ array set Config [cmdline::getoptions argv [list \
         [list uid.arg          [cget uid]          {User Id that server runs under}] \
         [list gid.arg          [cget gid]          {Group Id for caching templates}] \
         [list threads.arg      [cget threads]      {Number of worker threads (zero for non-threaded)}] \
-        [list main.arg         [cget main]         {Main Tcl startup script}] \
         [list library.arg      [cget library]      {Directory list where custom packages and auto loads are}] \
 	[list debug.arg	       0	        {If true, start interactive command loop}] \
     ] \

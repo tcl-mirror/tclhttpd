@@ -85,6 +85,10 @@ Config webmaster	webmaster@[info hostname]
 
 Config library		[file join [Config docRoot] libtml]
 
+# main - Main per-thread startup script.
+
+Config main		[file join [Config home] httpdthread.tcl]
+
 # threads - the maximum number of worker threads to create.
 # If 0, then no threads are ever used.
 

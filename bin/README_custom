@@ -1,0 +1,75 @@
+You can use TclHTTPD "out of the box" to implement a basic Web server.
+However, if you want to create your own Web application, you'll want
+to integrate your own custom Tcl code with the server.  
+
+The recommended way to do this is to create Tcl packages for your
+functionality, and then add "package require" commands plus any
+initialization calls to TclHTTPD as described below.  The package
+require commands will load your code into the server, and the
+initialization calls (e.g., Doc_Root or Cgi_Directory) set up
+the configuration of those modules.
+
+Step 1 - Create a directory for your custom Tcl code
+
+For the "package require" to work, your packages must be located
+in a file system directory known to the server.  Any directory
+that is a peer of the Tcl script library is sufficient.  For example,
+if the Tcl script library is located at
+    /usr/local/lib/tcl8.3
+    or
+    D:/tcldev/lib/tcl8.3
+Then you could create a directory named
+    /usr/local/lib/myapp
+    or
+    D:/tcldev/lib/myapp
+
+Put your own scripts there and run the Tcl "pkg_mkIndex" command over
+that directory to create the pkgIndex.tcl file there.  Now you are
+ready to run the server and load your code into it.
+
+If it is not convenient to create the directory as described above,
+you can pass in the location of your custom script directory with the
+-library pathname
+command line argument.  This directory gets added to the auto_path of
+the Tcl web server application.
+
+Step 2 - Modify the server startup code
+
+The Tcl scripts that start up the server are divided into three files.
+You will end up modifying one or more of the following files:
+
+bin/httpd.tcl
+	(Startup time)
+	This main script processes command line arguments,
+	loads the configuration file,
+	starts the Http server,
+	loads the per-thread httpdthread.tcl file,
+	and enters the event loop.
+
+	This file embodies assumptions about the installation directory
+	structure.  If you repackage TclHttpd, you'll probably have
+	to modify this file.
+
+bin/tclhttpd.rc
+	(Configuration time)
+	This script is sourced before the command line arguments are processed.
+	Its use is limited to setting simple parameters.  Typically these
+	correspond to command line arguments.
+
+bin/httpdthread.tcl
+	start up time for a worker thread, includes the main interpreter
+
+	This is the mostly likely file to modify to add your package
+	require commands and other initialization calls.
+
+Step 3 - Start the server.  If you have created copies of the configuration
+	file and per-thread startup file, you'll need to specify those
+	on the command line:
+
+	tclsh8.3 httpd.tcl -config my.rc -main mythread.tcl
+
+	or you can also create a modified copy of httpd.tcl that embeds the
+	names of the other custom files, so starting the server reduces to
+
+	tclsh8.3 myhttpd.tcl
+
