@@ -454,7 +454,7 @@ proc HttpdRespondHeader {sock type close size {code 200}} {
 
 proc Httpd_SetCookie {sock cookie} {
     upvar #0 Httpd$sock data
-    lappend data(return-cookie) $cookie
+    lappend data(set-cookie) $cookie
 }
 
 # HttpdSetCookie
@@ -466,8 +466,10 @@ proc Httpd_SetCookie {sock cookie} {
 
 proc HttpdSetCookie {sock} {
     upvar #0 Httpd$sock data
-    foreach item $data(return-cookie) {
-	puts $sock "Set-Cookie: $item"
+    if {[info exist data(set-cookie)]} {
+	foreach item $data(set-cookie) {
+	    puts $sock "Set-Cookie: $item"
+	}
     }
 }
 
