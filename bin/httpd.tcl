@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.40.2.6 2002/10/29 06:12:22 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.40.2.7 2003/04/07 05:10:26 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -302,6 +302,8 @@ if {[catch {source $Config(main)} message]} then {
     set error "Error processing main startup script \"[file nativename $Config(main)]\"."
     append error "\n$errorInfo"
     error $error
+} elseif {$Config(debug)} {
+    Stderr "Main $Config(main) ok"
 }
 
 # The main thread owns the log
