@@ -1,3 +1,18 @@
+2000-03-18  Brent Welch  <welch@scriptics.com>
+
+	* lib/url.tcl	Added Url_AccessInstall and changed Url_Dispatch
+	to call registered access control hooks before dispatching to
+	domain handlers.  Changed URL redirect scheme to not use the
+	UrlCache hack, but to use a URL access control hook.
+	* lib/redirect.tcl: Added a URL access control hook to implement
+	per-URL redirects.
+	* lib/httpd.tcl: unbroke Httpd_RedirectSelf
+	* lib/thread.tcl: fixed use of undefined procedure
+	* lib/admin.tcl: Removed most of the redirect code from here.
+	* htdocs/redirect: Added sample redirect file.  This is loaded
+	during startup and when you poke the /redirect/reload direct URL.
+	* bin/httpd.tcl: added initialization for the redirect module.
+
 2000-03-07  Melissa Chawla  <hershey@scriptics.com>
 
 	* htdocs/access/bydir/user.cgi
