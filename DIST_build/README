@@ -13,18 +13,9 @@ then you can install just that by running the install.sh script
 in the tcllib0.5 directory.
 
 If you want a clean install of everything, including a Tcl 8.3.1
-that has thread enabled, then use the CONFIG and MAKE scripts
-in the build directory.
-
-First, edit CONFIG to set the PREFIX and PLATFORM appropriately
-for your site.  PREFIX determines the installation location of
-all the software.  The PLATFORM is used to keep the binaries for
-different platforms (e.g., Linux and Solaris) partitioned.
-If you have more than one platform, you can edit CONFIG and
-change the PLATFORM variable and re-run it.
-
-To compile and install the software, edit MAKE so that the
-PLATFORM value matches what you configured.   Then run MAKE.
+that has thread enabled, then use the Makefile in the top-level directory.
+This will compile things under the build directory, segregating
+by platform into different subdirectories.
 
 More Docs
 There are a few more README-like files you should read:
@@ -49,3 +40,12 @@ http://dev.scriptics.com/lists/tcl-httpd
 Brent Welch <welch@ajubasolutions.com>	(our new identity)
 	or  <welch@scriptics.com>	(our original company name)
 
+
+SSL Note:
+
+Tcl 8.3.1 and the TLS extension (not included here) have
+some bugs.  These have been mostly fixed, but we anticipate additional
+work.  To get a stable SSL you should use either Tcl 8.3.2 (if that
+exists) or get the "core-8-3-1-branch" branch of the Tcl CVS repository
+which will become the 8.3.2 release.  You also need the latest TLS
+from our CVS repository.
