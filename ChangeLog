@@ -1,3 +1,14 @@
+2002-09-15  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch).
+        * lib/doc.tcl: ensure we don't try to cache a template result
+        when you fetch a .tml file directly.  If your template somehow
+        set page(dynamic) to 0, the server was trying to cache the result
+        using an empty filename.
+        * lib/upload.tcl: reset the Url_PostHook state and data(count) so
+        the other layers don't try to read any of the post data.
+        * lib/httpd.tcl: reset the Url_PostHook on GET requests to clear
+        any state from a previous POST request.
+
 2002-09-11  Brent Welch <welch@panasas.com>
         * (In the tclhttpd-3-4-rel branch).
         * lib/dirlist.tcl: added in the Dir_ShowListings,

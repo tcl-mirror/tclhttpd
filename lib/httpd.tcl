@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.69.2.1 2002/08/18 22:54:17 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.69.2.2 2002/09/15 20:59:35 welch Exp $
 
 package provide httpd 1.6
 
@@ -727,6 +727,7 @@ proc HttpdRead {sock} {
 
 		Url_PostHook $sock $data(count)
 	    } else {
+		Url_PostHook $sock 0    ;# Clear any left-over hook
 		set data(count) 0
 	    }
 

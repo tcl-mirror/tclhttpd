@@ -20,7 +20,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.44 2002/08/04 06:03:35 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.44.2.1 2002/09/15 20:59:35 welch Exp $
 
 package provide httpd::doc 1.1
 
@@ -1355,7 +1355,7 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     }
 
     set dynamic [interp eval $interp {uplevel #0 {set page(dynamic)}}]
-    if {!$dynamic} {
+    if {!$dynamic && [string length $htmlfile]} {
 
 	# Cache the result
 

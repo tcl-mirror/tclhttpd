@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.6.2.2 2002/08/27 05:00:55 welch Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.6.2.3 2002/09/15 20:59:35 welch Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -109,12 +109,19 @@ proc UploadDomain {dir cmd maxfiles maxbytes totalbytes sock suffix} {
     set upload(totalbytes) $totalbytes
     set upload(maxbytes) $maxbytes
     set upload(suffix) $suffix
+    set upload(count) $data(count)
 
     # These are temporary storage used when parsing the headers of each part
 
     set upload(headers) {}
     set upload(formName) {}
     set upload(formNames) {}
+
+    # Now that we are going to read the post data, clear out the
+    # hook and the data count so noone else tries to read it
+
+    Url_PostHook $sock 0
+    set data(count) 0
 
     # Accept cr-lf endings in the headers
     fconfigure $sock -trans auto
@@ -332,6 +339,14 @@ proc UploadDone {sock} {
 	eval $upload(cmd) [list $flist $vlist]
     } result
     Httpd_ReturnData $sock text/html $result
+}
+
+# This is called as the "final" completion callback to clean up
+
+proc UploadTidyUp {sock errmsg} {
+    upvar #0 Upload$sock upload
+
+    unset upload
 }
 
 # UploadTest --
