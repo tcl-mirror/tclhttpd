@@ -12,6 +12,8 @@
 	* bin/httpd.tcl:
 	Changed version number to 3.3.  Gack - the .tcl files at
 	least should be ".in" files.
+	* bin/httpd.tcl:
+	Fixed package require of TclX, which was never correct!
 
 2001-01-31  Brent Welch <welch@ajubasolutions.com>
 

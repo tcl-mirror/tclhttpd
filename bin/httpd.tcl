@@ -42,7 +42,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.37 2001/02/16 21:31:07 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.38 2001/02/16 22:20:26 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -254,8 +254,8 @@ Stderr "Running with $Config(limit) file descriptor limit"
 # Try to change UID to tclhttpd so we can write template caches
 
 # Try to get TclX, if present
-catch {load {} TclX}		;# From statically linked shell
-catch {package require TclX}	;# From dynamically linked DLL
+catch {load {} Tclx}		;# From statically linked shell
+catch {package require Tclx}	;# From dynamically linked DLL
 catch {package require setuid}	;# TclHttpd extension
 
 if {"[info command id]" == "id"} {
