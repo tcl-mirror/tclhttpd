@@ -3,10 +3,9 @@
 #	Application-direct URLs to give out status of the server.
 # 	Tcl procedures of the form Status/hello implement URLS
 #	of the form /status/hello
-#	Note also the Debug/source procedure, which you can use
-#	to get the server to reload files from its script library.
 #
 # Brent Welch (c) Copyright 1997 Sun Microsystems, Inc.
+# Copyright 1998 Scriptics Corporation.
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -15,9 +14,6 @@ package provide status 1.1
 
 proc Status_Url {dir} {
     Direct_Url $dir Status
-}
-proc Debug_Url {dir} {
-    Direct_Url $dir Debug
 }
 
 proc Status/hello {args} {return hello}
@@ -140,7 +136,7 @@ proc StatusPrintNotFound {{pattern *} {sort number}} {
 	}
     }
     append result </pre>\n
-    append result "<a href=/status/notfound/reset>Reset counters</a>"
+#    append result "<a href=/status/notfound/reset>Reset counters</a>"
     return $result
 }
 proc Status/notfound/reset {args} {
@@ -244,7 +240,7 @@ proc StatusTclPower {{align left}} {
 proc Status/all {args} {
     global CntMinuteurlhits CntHoururlhits CntDayurlhits counter
     set html "<html><head><title>Tcl HTTPD Status</title></head>\n"
-    set html "<body><h1>Tcl HTTPD Status</h1>\n"
+    append html "<body><h1>Tcl HTTPD Status</h1>\n"
     append html [StatusMenu]
     append html [StatusTclPower left]
     append html [StatusMainTable]
@@ -259,6 +255,8 @@ proc Status/all {args} {
 proc Status/text {args} {
     global CntMinuteurlhits CntHoururlhits CntDayurlhits counter
     set html "<title>Tcl HTTPD Status</title>\n"
+    append html "<body><h1>Tcl HTTPD Status</h1>\n"
+    append html [StatusMenu]
     append html [StatusTclPower left]
     append html [StatusMainTable]
     append html "<p><a href=/status/all>Bar Chart View.</a>"
@@ -275,101 +273,10 @@ proc Status/text {args} {
 proc Status/ {args} [info body Status/all]
 proc Status {args} [info body Status/all]
 
-proc Debug/source {source} {
-    global Httpd
-    set source [file tail $source]
-    set error [catch {uplevel #0 [list source [file join $Httpd(library) $source]]} result]
-    set html "<title>Source $source</title>\n"
-    if {$error} {
-	append html "<H1>Error in $source</H1>\n"
-    } else {
-	append html "<H1>Reloaded $source</H1>\n"
-    }
-    append html "<pre>$result</pre>"
-    return $html
-}
-
-# steve: 24/11/97: reload a package
- 
-proc Debug/package name {
-    if {[catch {
-	package forget $name
-	catch {namespace delete $name}
-	package require $name
-    } result]} {
-	set html "<title>Error</title>
-<H1>Error Reloading Package $name</H1>
-
-Unable to reload package \"$name\" due to:
-<PRE>
-$result
-</PRE>
-"
-    } else {
-	set html "<title>Package reloaded</title>
-<H1>Reloaded Package $name</H1>
- 
-Version $result of package \"$name\" has been (re)loaded.
-"
-    }
- 
-    return $html
-}
- 
-proc Debug/parray {aname} {
-    global $aname
-    set html "<title>Array $aname</title>\n"
-    append html "<H1>Array $aname</H1>\n"
-    append html "<pre>[parray $aname]</pre>"
-    return $html
-}
-
-proc Debug/raise {args} {
-    error $args
-}
-proc Debug/goof {args} {
-    set goof
-}
-
-proc Debug/after {} {
-    global tcl_version
-    set html "<title>After Queue</title>\n"
-    append html "<H1>After Queue</H1>\n"
-    append html "<pre>"
-    if [catch {after info} afterlist] {
-	append html "\"after info\" not supported in Tcl $tcl_version"
-    } else {
-	foreach a $afterlist {
-	    append html "$a [after info $a]\n"
-	}
-    }
-    append html </pre>
-    return $html
-}
-
-proc Debug/echo {title args} {
-    set html "<title>$title</title>\n"
-    append html "<H1>$title</H1>\n"
-    append html <dl>
-    foreach {name value} $args {
-	append html "<dt>$name<dd>$value"
-    }
-    append html </dl>
-    return $html
-}
-
 proc Version {} {
     global tcl_patchLevel Httpd
     append html "$Httpd(server)"
     append html "<br>Tcl version $tcl_patchLevel"
-    return $html
-}
-proc Debug/errorInfo {title errorInfo} {
-    set html "<title>$title</title>\n"
-    append html "<H1>$title</H1>\n"
-    append html "<p>[Version]"
-    append html "<br>Webmaster: [Doc_Webmaster]"
-    append html <pre>$errorInfo</pre>
     return $html
 }
 
