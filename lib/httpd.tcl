@@ -199,6 +199,7 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
 		-certfile $Httpd(SSL_CERTFILE) \
 		-ssl2 $Httpd(USE_SSL2) \
 		-ssl3 $Httpd(USE_SSL3) \
+		-keyfile $Httpd(SSL_KEYFILE) \
 		-cipher $Httpd(SSL_CIPHERS)
     set cmd [list tls::socket -server [list HttpdAccept [list https $name $port]]]
 	if {0} {
