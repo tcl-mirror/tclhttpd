@@ -1,0 +1,82 @@
+This file gives several installation scenarios, from the simplest to
+the more complex.  If you are familiar with older versions of TclHttpd
+you may be used to running the server right out of this directory
+without any installation at all.  That is the first option we explore.
+
+1. No Install Approach
+
+Try using the server without installing anything.
+The preconditions for this are that you have Tcl 8.3 and the
+Tcl Standard Library installed.  Test that by running tclsh8.3
+and attempting to
+	package require tcllib
+
+If you can do that, then you should be able to run the server like this:
+
+tclsh8.3 bin/httpd.tcl -port 8001
+
+Typical startup messages include:
+
+can't find package limit
+Running with default file descriptor limit
+httpd started on port 8001
+
+2. Install Tcl Standard Library
+
+If approach #1 doesn't work because you don't have the Standard Tcl Library,
+then either fetch it from ftp://ftp.scriptics.com/pub/tcl/tcllib
+or use the one that comes with the "bundled TclHttpd" distribution.
+Grab the highest version number one you can find in:
+
+	ftp://ftp.scriptics.com/pub/tcl/tcllib
+
+It contains a Tcl or SH script that copies its files into peer directories
+of your Tcl script library.  For example, if your Tcl library is in
+/usr/local/tcl/tcl8.3, then it will create a directory named something like
+/usr/local/tcl/tcllib0.4.  Once these are in place, you should be able to
+"package require tcllib" from your Tcl shell.
+
+Now go try approach #1 again.
+
+3. Configure and Make Install
+
+Try this:
+
+configure --prefix=/home/yourname/test --enable-gcc
+make install
+
+This will create a directory structure under /home/yourname/test that
+contains TclHttpd.  The install directory structure is organized a bit
+different than the distribution directory, just to keep you on your toes.
+
+To avoid errors from the above step, you'll need to have a Tcl source tree
+around so the configure can find a tclConfig.sh file, and so the
+link step for the limit and crypt extensions can find the Tcl stub libraries.
+You might need to do this:
+
+configure --prefix=/home/yourname/test --enable-gcc \
+	--with-tcl=/the/place/that/contains/tclConfig.sh
+
+In other words, specify the Tcl *build* directory so the binary extensions
+can be compiled in a compatible way.  You might be able to get around this
+by ignoring any errors from configure and doing "make -k install" to
+ignore errors about the crypt and limit extentions.  These are optional
+extensions and you can use Tcl Httpd just fine without them.
+
+4. Use the CONFIG and MAKE scripts in the bundled distrubtion.
+
+The bundled distribution includes Tcl, Tcl Httpd, the Thread extension,
+and the Standard Tcl Library.  Its "build" directory contains a CONFIG
+and MAKE script that you can modify to match your platform and choice
+of installation directory.  In particular, if you want to use the
+threading features in Tcl Httpd you need to recompile Tcl to enable
+threading.
+
+NOTE - THREADING IS NOT REQUIRED.  I've run Tcl Httpd for years without
+threads and it has served millions of URL requests on www.scriptics.com.
+Tcl has a wonderful event-driven I/O system so you can have a sophisticated
+server without threading.  However, if one of your requests blocks, then
+the whole server blocks.  Without threads, you are forced to put your
+blocking operations into CGI scripts so that the external CGI process
+blocks.  The server continues to service requests until the pipe connected
+to the CGI process produces data.

@@ -1,3 +1,15 @@
+2000-05-17  Brent Welch <welch@scriptics.com>
+
+	* Released 3.0.2
+
+	* lib/url.tcl: SECURITY FIX.  3.0.0 and 3.0.1 can leak files simply
+	by specifying an extra leading /, eg., http://localhost:8015//etc/passwd
+	will happily fetch the password file.  This bug is not present in
+	the 2.* or earlier versions of TclHttpd.  Thanks to Petrus Vloet for
+	finding this one.
+	* lib/version.tcl, various Makefiles and Configures. Changed to 3.0.2
+	* Applied rel-3-0-2 CVS tag.
+
 2000-05-13  Brent Welch <welch@scriptics.com>
 
 	* lib/include.tcl: Changed Html_ExtractParam to html::extractParam so the

@@ -4,8 +4,8 @@ Brent is now at Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 3.0.1
-Last Modified: Mon May 15 22:15:10 PDT 2000
+Version: 3.0.2
+Last Modified: Thu May 18 22:57:51 PDT 2000
 
 It requires Tcl 8.3 and the new Standard Tcl Library.
 This uses the cmdline, base64, ncgi, and html
@@ -18,13 +18,30 @@ With wish you get a simple GUI that shows some counters.
 
 For a quick test that runs a server on port 8015, do
 UNIX:
-	tclsh bin/httpd.tcl -debug 1
+
+1) Test preconditions
+	tclsh8.3
+	package require tcllib 0.4
+
+2) If you can do the above, then you should be able to run the
+server directly from this distribution directory without bothering
+to configure, make, and install it.
+
+	tclsh8.3 bin/httpd.tcl -debug 1
 Windows and Macintosh:
 	Run wish or tclsh and source bin/httpd.tcl
+
+3) If you do not have the Standard Tcl Library, then perhaps the
+easiest thing to do is get the "bundled distribution" of TclHttpd
+and use its configure, make, and make install scripts.
 
 For a complete set of command line options, do
 httpd.tcl -help
 This lets you set basic parameters like port number and server name.
+
+Version 3.0.2 fixes a serious SECURITY BUG that let 3.0.0 and 3.0.1 
+serve up any old file on your system.  That bug was not present in earlier
+versions of the server.
 
 Version 3.0.1 has minor bug fixes and (hopefully) some improvements
 in the bundled distribution.

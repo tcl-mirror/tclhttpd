@@ -3,7 +3,7 @@
 # Edit this to run configure on all the modules with the
 # appropriate PLATFORM and PREFIX for your site
 
-HTTPD_VERSION=3.0.1
+HTTPD_VERSION=3.0.2
 TCL_VERSION=8.3.1
 TCLLIB_VERSION=0.4
 THREAD_VERSION=2.0
@@ -15,8 +15,8 @@ echo "pwd=${PWD}"
 # PREFIX is the root of the installation tree
 # EXEC_PREFIX is where the binaries and DLLs go.
 
-PREFIX=/home/welch/install
-EXEC_PREFIX=/home/welch/install/linux-thread
+PREFIX=/home/welch/test
+EXEC_PREFIX=/home/welch/test/linux-thread
 
 echo "configure for tcl${TCL_VERSION}"
 
