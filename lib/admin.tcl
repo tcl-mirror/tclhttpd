@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: admin.tcl,v 1.8 2004/09/05 05:10:13 coldstore Exp $
+# RCS: @(#) $Id: admin.tcl,v 1.9 2004/10/22 03:43:06 coldstore Exp $
 
 
 package provide httpd::admin 1.0
@@ -41,7 +41,7 @@ proc Admin/redirect {old new} {
     if {$Httpd(port) != 80} {
 	append server :$Httpd(port)
     }
-    if ![regexp ^http: $new] {
+    if {![regexp ^http: $new]} {
 	set new http://$server$new
     }
 
@@ -53,7 +53,7 @@ proc Admin/redirect {old new} {
 	   Redirect_Url $old http:$server$new"
 
     Redirect_Url $old $new
-    if [info exists Doc(notfound,$old)] {
+    if {[info exists Doc(notfound,$old)]} {
 	unset Doc(notfound,$old)
     }
     return <h1>ok</h1>

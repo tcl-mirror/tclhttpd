@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.28 2004/09/05 05:10:14 coldstore Exp $
+# RCS: @(#) $Id: status.tcl,v 1.29 2004/10/22 03:43:06 coldstore Exp $
 
 package provide httpd::status 1.0
 
@@ -172,11 +172,11 @@ proc StatusPrintArray {aname pattern sort col1 col2} {
 	incr total $value
     }
     if {[string compare $sort "number"] == 0} {
-	if [catch {lsort -index 0 -integer -decreasing $list} newlist] {
+	if {[catch {lsort -index 0 -integer -decreasing $list} newlist]} {
 	    set newlist [lsort -command StatusSort $list]
 	}
     } else {
-	if [catch {lsort -index 1 -integer -decreasing $list} newlist] {
+	if {[catch {lsort -index 1 -integer -decreasing $list} newlist]} {
 	    set newlist [lsort -command StatusSortName $list]
 	}
     }
@@ -236,7 +236,7 @@ proc StatusPrintNotFound {{pattern *} {sort number}} {
     foreach i [lsort [array names histogram $pattern]] {
 	lappend list [list $histogram($i) $i]
     }
-    if [catch {lsort -index 0 -integer -decreasing $list} newlist] {
+    if {[catch {lsort -index 0 -integer -decreasing $list} newlist]} {
 	set newlist [lsort -command StatusSort $list]
     }
     foreach k $newlist {
@@ -327,7 +327,7 @@ proc StatusDataSize {ns} {
     set size 0
     foreach g [info vars ${ns}::*] {
 	incr ng
-	if [array exists $g] {
+	if {[array exists $g]} {
 	    foreach {name value} [array get $g] {
 		set size [expr {$size + [string length $name] + [string length $value]}]
 		incr nv
@@ -674,7 +674,7 @@ proc StatusTimeText {array title unit what time} {
 	# Minutes time we infer from the starting time and the agebits,
 	# which indicate minute buckets for the previous hour.
 
-	if [info exists agebit($t)] {
+	if {[info exists agebit($t)]} {
 	    set tt [expr $time - 3600]
 	} else {
 	    set tt $time
@@ -725,13 +725,13 @@ proc Doc_application/x-tcl-status {path suffix sock} {
     	lappend query($name) $value
     }
 
-    if ![info exists status(session)] {
+    if {![info exists status(session)]} {
 	set status(session) [session_create Status]
     }
 
     # Process the query data from the previous page.
 
-    if [catch {StatusProcess $session $queryList} result] {
+    if {[catch {StatusProcess $session $queryList} result]} {
 	Httpd_ReturnData $sock text/html $result
 	return
     } 

@@ -15,7 +15,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: maptcl.tcl,v 1.6 2004/09/05 05:10:14 coldstore Exp $
+# RCS: @(#) $Id: maptcl.tcl,v 1.7 2004/10/22 03:43:06 coldstore Exp $
 
 package provide httpd::ismaptcl 1.0
 package require httpd::imagemap 1.0	;# MapPointInCircle MapPointInPoly MapPointInRect
@@ -27,7 +27,7 @@ package require httpd::log	;# Log
 proc Map_Lookup {request} {
     global ImageMaps
     if {[regexp {([^?]+)\?([0-9]+),([0-9]+)} $request {} map x y]} {
-	if [catch {file mtime $map} mtime] {
+	if {[catch {file mtime $map} mtime]} {
 	    return ""
 	}
 	if {![info exists ImageMaps($map)] ||
@@ -69,7 +69,7 @@ proc MapRead {file} {
 
 proc MapInsert {cookie type href coords} {
     upvar #0 $cookie map
-    if ![info exists map] {
+    if {![info exists map]} {
 	set map(N) 0
     } else {
 	incr map(N)
@@ -98,17 +98,17 @@ proc MapHit {cookie x y} {
 	array set pgon $map($i,coords)
 	switch $map($i,type) {
 	    poly {
-		if [MapPointInPoly $x $y pgon] {
+		if {[MapPointInPoly $x $y pgon]} {
 		    return $map($i,href)
 		}
 	    }
 	    circle {
-		if [MapPointInCircle $x $y pgon] {
+		if {[MapPointInCircle $x $y pgon]} {
 		    return $map($i,href)
 		}
 	    }
 	    rect {
-		if [MapPointInRect $x $y pgon] {
+		if {[MapPointInRect $x $y pgon]} {
 		    return $map($i,href)
 		}
 	    }
@@ -122,10 +122,10 @@ proc MapHit {cookie x y} {
 	    }
 	}
     }
-    if [info exists default] {
+    if {[info exists default]} {
 	return $default
     }
-    if [info exists map(default)] {
+    if {[info exists map(default)]} {
 	return $map(default)
     }
     return {}

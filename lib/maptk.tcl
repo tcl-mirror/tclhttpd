@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: maptk.tcl,v 1.5 2004/09/05 05:10:14 coldstore Exp $
+# RCS: @(#) $Id: maptk.tcl,v 1.6 2004/10/22 03:43:06 coldstore Exp $
 
 package provide httpd::ismaptk 1.0
 
@@ -29,7 +29,7 @@ package require httpd::log	;# Log
 
 proc Map_Lookup {request} {
     if {[regexp {([^?]+)\?([0-9]+),([0-9]+)} $request {} map x y]} {
-	if [catch {file mtime $map} mtime] {
+	if {[catch {file mtime $map} mtime]} {
 	    return ""
 	}
 	if {![info exists ImageMaps($map)] ||
@@ -73,7 +73,7 @@ proc MapRead {file} {
 
 proc MapInsert {can type href coords} {
     regsub -all , $coords { } coords
-    if [catch {
+    if {[catch {
     switch -- $type {
 	default {
 	    upvar #0 $can default
@@ -102,7 +102,7 @@ proc MapInsert {can type href coords} {
 	    eval {$can create oval} $coords $coords -width 2 -fill black \
 		    -tags {$href}
 	}
-    }} err] {
+    }} err]} {
 	Log $can $href $err
     }
 }

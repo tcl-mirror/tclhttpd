@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.19 2004/09/05 05:10:13 coldstore Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.20 2004/10/22 03:43:06 coldstore Exp $
 
 package provide httpd::direct 1.1
 
@@ -139,7 +139,7 @@ proc Direct_MarshallArguments {prefix suffix} {
     set params [info args $cmdOrig]
     foreach arg $params {
 	if {[ncgi::empty $arg]} {
-	    if [info default $cmdOrig $arg value] {
+	    if {[info default $cmdOrig $arg value]} {
 		lappend cmd $value
 	    } elseif {[string compare $arg "args"] == 0} {
 		set needargs yes
@@ -161,7 +161,7 @@ proc Direct_MarshallArguments {prefix suffix} {
 	    }
 	}
     }
-    if [info exists needargs] {
+    if {[info exists needargs]} {
 	foreach {name value} [ncgi::nvlist] {
 	    if {[lsearch $params $name] < 0} {
 		lappend cmd $name $value

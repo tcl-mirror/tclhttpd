@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: include.tcl,v 1.6 2004/09/05 05:10:14 coldstore Exp $
+# RCS: @(#) $Id: include.tcl,v 1.7 2004/10/22 03:43:06 coldstore Exp $
 
 # Process server side includes.
 # Look for comments of the form:
@@ -139,7 +139,7 @@ proc include_echo {sock path params args} {
 }
 
 proc include_fsize {sock path params args} {
-    if [catch {IncludeFile $sock fsize $path $params} info] {
+    if {[catch {IncludeFile $sock fsize $path $params} info]} {
 	return $info
     }
     set key [lindex $info 0]

@@ -40,7 +40,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.15 2004/10/19 03:55:33 coldstore Exp $
+# RCS: @(#) $Id: session.tcl,v 1.16 2004/10/22 03:43:06 coldstore Exp $
 
 package provide httpd::session 1.0
 
@@ -75,7 +75,7 @@ if {($Session(short) == 1) || [catch {package require httpd::md5hex}]} {
 
 proc Session_Authorized {id} {
     upvar #0 Session:$id session
-    if ![info exists session(interp)] {
+    if {![info exists session(interp)]} {
 	set interp [SessionCreate $id]
 	SessionAuthorizedAliases $interp $id
     }
@@ -90,8 +90,8 @@ proc SessionAuthorizedAliases {interp id} {
 
 proc Session_Require {id tag} {
     upvar #0 Session:$id session
-    if ![info exists session(init)] {
-	if ![iscommand ${tag}_Init] {
+    if {![info exists session(init)]} {
+	if {![iscommand ${tag}_Init]} {
 	    set html "
 		<h4>No ${tag}_Init proc</h4>
 	    "
@@ -381,9 +381,9 @@ proc Session_Match {querylist {type {}} {error_name error} {isSafe 1}} {
 
     # Check the session informatioin provided in the query data.
 
-    if [catch {
+    if {[catch {
 	array set query $querylist
-    }] {
+    }]} {
 	Stderr "Bogus querylist\n$querylist"
     }
 

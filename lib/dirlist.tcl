@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: dirlist.tcl,v 1.12 2004/09/05 05:10:13 coldstore Exp $
+# RCS: @(#) $Id: dirlist.tcl,v 1.13 2004/10/22 03:43:06 coldstore Exp $
 
 package provide httpd::dirlist 1.1
  
@@ -277,7 +277,7 @@ proc DirList {sock dir urlpath} {
 
     set sort name
     set pattern *
-    if [info exists data(query)] {
+    if {[info exists data(query)]} {
 	foreach {name value} [Url_DecodeQuery $data(query)] {
 	    switch $name {
 		sort {set sort $value}
@@ -337,7 +337,7 @@ proc SizeCompare {a b} {
 proc DirListTerm {} {
     global tcl_platform
  
-    if [string compare macintosh $tcl_platform(platform)] {
+    if {[string compare macintosh $tcl_platform(platform)]} {
 	set what Directory
     } else {
 	set what Folder

@@ -4,7 +4,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: utils.tcl,v 1.13 2004/09/05 05:10:15 coldstore Exp $
+# RCS: @(#) $Id: utils.tcl,v 1.14 2004/10/22 03:43:06 coldstore Exp $
 
 package provide httpd::utils 1.0
 
@@ -26,7 +26,7 @@ proc iscommand {name} {
 
 proc lappendOnce {listName value} {
     upvar $listName list
-    if ![info exists list] {
+    if {![info exists list]} {
 	lappend list $value
     } else {
 	set ix [lsearch $list $value]
@@ -108,7 +108,7 @@ proc lassign-brent {varList value} {
 
 proc ldelete {varList value} {
     upvar $varList list
-    if ![info exist list] {
+    if {![info exist list]} {
 	return 0
     }
     set ix [lsearch $list $value]
@@ -312,7 +312,7 @@ proc parray {aname {pat *}} {
     foreach name [array names a $pat] {
 	setmax max [string length $name]
     }
-    if ![info exists max] {
+    if {![info exists max]} {
 	return {}
     }
     incr max [string length $aname]
@@ -417,7 +417,7 @@ proc ChopLine {line {limit 72}} {
 	set hit 0
 	for {set c $limit} {$c >= 0} {incr c -1} {
 	    set char [string index $line $c]
-	    if [regexp \[\ \t\n>/\] $char] {
+	    if {[regexp \[\ \t\n>/\] $char]} {
 		set hit 1
 		break
 	    }

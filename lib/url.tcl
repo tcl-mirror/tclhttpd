@@ -22,7 +22,6 @@
 package provide httpd::url 1.2
 
 package require httpd	;# Httpd_CompletionCallback Httpd_Error Httpd_Filter Httpd_GetPostData Httpd_ReadPostDataAsync Httpd_Redirect Httpd_RequestComplete Httpd_SockClose Httpd_Suspend
-package require httpd::auth	;# Auth_Check
 package require httpd::counter	;# Count CountName
 package require httpd::doc_error	;# Doc_Error
 package require httpd::threadmgr	;# Thread_Dispatch Thread_Enabled

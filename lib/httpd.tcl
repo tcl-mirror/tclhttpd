@@ -22,7 +22,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.88 2004/09/05 05:10:14 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.89 2004/10/22 03:43:06 coldstore Exp $
 
 package provide httpd 1.7
 
@@ -682,7 +682,7 @@ proc HttpdRead {sock} {
                 # headers from the data(mime,headername) array
 
 		set key [string tolower $key]
-		if [info exists data(mime,$key)] {
+		if {[info exists data(mime,$key)]} {
 		    append data(mime,$key) ,$value
 		} else {
 		    set data(mime,$key) $value
@@ -692,7 +692,7 @@ proc HttpdRead {sock} {
 
 	    } elseif {[regexp {^[ 	]+(.*)}  $line dummy value]} {
 		# Are there really continuation lines in the spec?
-		if [info exists data(key)] {
+		if {[info exists data(key)]} {
 		    append data(mime,$data(key)) " " $value
 		} else {
 		    Httpd_Error $sock 400 $line
@@ -1602,11 +1602,11 @@ proc Httpd_Error {sock code {detail ""}} {
 	Httpd_SockClose $sock 1
 	return
     }
-    if [catch {
+    if {[catch {
 	HttpdRespondHeader $sock text/html 1 [expr {[string length $message] + 4}] $code
 	puts $sock ""
 	puts $sock $message
-    } err] {
+    } err]} {
 	Log $sock LostSocket $data(url) $err
     }
     Httpd_SockClose $sock 1
@@ -2077,7 +2077,7 @@ proc Httpd_RequestComplete {sock} {
 	global errorInfo
 
 	set msg "[clock format [clock seconds]]\n$errorInfo"
-	if [catch {Log nosock bgerror $msg}] {
+	if {[catch {Log nosock bgerror $msg}]} {
 	    Stderr $msg
 	}
     }

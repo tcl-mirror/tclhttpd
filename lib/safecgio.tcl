@@ -2,7 +2,7 @@
 # Brent Welch (c) 1996 Sun Microsystems
 # Brent Welch (c) 1998-2000 Ajuba Solutions
 #
-# RCS: @(#) $Id: safecgio.tcl,v 1.7 2004/09/05 05:10:14 coldstore Exp $
+# RCS: @(#) $Id: safecgio.tcl,v 1.8 2004/10/22 03:43:06 coldstore Exp $
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
@@ -121,7 +121,7 @@ proc SafeCGI_Open {interp maxopen directory file {access r}} {
     if {[llength $interpState(channels,$interp)] >= $maxopen} {
 	error "couldn't open \"$file\": too many open files"
     }
-    if [regexp "^\[ \t\]*|" $file] {
+    if {[regexp "^\[ \t\]*|" $file]} {
 	error "no pipes allowed"
     }
     # Constrain the pathname to a one-component relative name
@@ -131,7 +131,7 @@ proc SafeCGI_Open {interp maxopen directory file {access r}} {
     }
     # Disallow symbolic links and other non-file types
     set path [file join $directory $file]
-    if [file exists $path] {
+    if {[file exists $path]} {
 	file lstat $path stat		;# lstat here prevents symlinks
 	if {$stat(type) != "file"} {
 	    error "couldn't open \"$file\": not a plain file"

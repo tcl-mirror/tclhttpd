@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cgi.tcl,v 1.30 2004/09/05 05:10:13 coldstore Exp $
+# RCS: @(#) $Id: cgi.tcl,v 1.31 2004/10/22 03:43:06 coldstore Exp $
 
 package provide httpd::cgi 1.1
 
@@ -81,7 +81,7 @@ proc Cgi_Domain {virtual directory sock suffix} {
     # Check the path and then find the part beyond the program name.
     # The trimleft avoids a buildup of extra / after the domain prefix.
 
-    if [catch {Url_PathCheck [string trimleft $suffix /]} pathlist] {
+    if {[catch {Url_PathCheck [string trimleft $suffix /]} pathlist]} {
 	Doc_NotFound $sock
 	return
     }
@@ -493,7 +493,7 @@ proc CgiCopyDirect {sock block} {
 proc CgiCleanup {fd sock} {
     fconfigure $sock -blocking 0 -translation auto
     set n [gets $sock line]
-    if [eof $sock] {
+    if {[eof $sock]} {
 	CgiCancel $fd $sock
     }
 }

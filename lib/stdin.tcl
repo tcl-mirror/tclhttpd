@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: stdin.tcl,v 1.4 2004/09/05 05:10:14 coldstore Exp $
+# RCS: @(#) $Id: stdin.tcl,v 1.5 2004/10/22 03:43:06 coldstore Exp $
 
 # The following is an event-driven command loop for testing with tclsh
 # with command history:
@@ -22,7 +22,7 @@ set Stdin(maxHistory) 100
 append Stdin(history) {}
 proc StdinRead {prompt} {
     global Stdin
-    if [eof stdin] {
+    if {[eof stdin]} {
 	set Stdin(Wait) 1
 	fileevent stdin readable {}
 	return

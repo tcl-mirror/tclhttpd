@@ -6,7 +6,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: mtype.tcl,v 1.8 2004/09/05 05:10:14 coldstore Exp $
+# RCS: @(#) $Id: mtype.tcl,v 1.9 2004/10/22 03:43:06 coldstore Exp $
 
 package provide httpd::mtype 1.1
 
@@ -46,20 +46,20 @@ proc Mtype_ReadTypes {file} {
 	.map	application/x-imagemap
 	.subst	application/x-tcl-subst
     }
-    if [catch {open $file} in] {
+    if {[catch {open $file} in]} {
 	return
     }
 
     while {[gets $in line] >= 0} {
-	if [regexp {^( 	)*$} $line] {
+	if {[regexp {^( 	)*$} $line]} {
 	    continue
 	}
-	if [regexp {^( 	)*#} $line] {
+	if {[regexp {^( 	)*#} $line]} {
 	    continue
 	}
-	if [regexp {([^ 	]+)[ 	]+(.+)$} $line match type rest] {
+	if {[regexp {([^ 	]+)[ 	]+(.+)$} $line match type rest]} {
 	    foreach item [split $rest] {
-		if [string length $item] {
+		if {[string length $item]} {
 		    set MimeType([string tolower .$item]) $type
 		}
 	    }
