@@ -1,3 +1,11 @@
+2002-08-26  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch)
+        * lib/cgi.tcl: Fixed POST forms on Windows so we correctly set up
+          the pipe to the subprocess and detect the header/body separator
+        * lib/upload.tcl: Nuked the CvsReadFileHeader call
+        * lib/version.tcl: Updated to 3.4.1
+        * bin/httpd.tcl.new: Deleted this cruft
+
 2002-08-18  Brent Welch <welch@panasas.com>
         * (In the tclhttpd-3-4-rel branch)
         * Applied patches for virtual hosting fixes from Don Porter

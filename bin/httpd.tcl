@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.40.2.1 2002/08/18 22:54:17 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.40.2.2 2002/08/27 05:15:29 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -136,7 +136,7 @@ set Config(debug) 0
 # 1) Look on the command line for a -config rcfile name argument
 # 2) Load this configuration file via the config module
 # 3) Process the rest of the command line arguments so the user
-#       can override things in the rc file.
+#       can override the settings in the rc file with them.
 
 set ix [lsearch $argv -config]
 if {$ix >= 0} {
