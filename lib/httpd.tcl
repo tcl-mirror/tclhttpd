@@ -22,7 +22,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.84 2004/03/23 03:07:02 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.85 2004/04/29 01:34:16 coldstore Exp $
 
 package provide httpd 1.7
 
@@ -1559,7 +1559,7 @@ proc Httpd_Error {sock code {detail ""}} {
 	return
     }
     if [catch {
-	HttpdRespondHeader $sock text/html 1 [string length $message] $code
+	HttpdRespondHeader $sock text/html 1 [expr {[string length $message] + 4}] $code
 	puts $sock ""
 	puts $sock $message
     } err] {
@@ -2108,6 +2108,7 @@ proc HttpdCookieLog {sock what} {
 #
 #	Suspend Wire Callback - for async transactions
 #	Use Httpd_Resume once you are back in business
+#	Note: global page array is not preserved over suspend
 #
 # Arguments:
 #	sock	Socket connection
