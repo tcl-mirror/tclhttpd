@@ -1,5 +1,8 @@
 # safecgio.tcl
 # Brent Welch (c) 1996 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
+#
+# RCS: @(#) $Id: safecgio.tcl,v 1.5 2000/08/02 07:06:54 welch Exp $
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
@@ -14,7 +17,7 @@
 #  Any query information, either from a POST or GET query is available
 #  as a name-value list in the "Query" variable.
 
-package provide safecgio 1.0
+package provide httpd::safecgio 1.0
 
 # start a safe CGI server 
 

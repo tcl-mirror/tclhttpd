@@ -5,11 +5,12 @@
 #	of the form /debug/hello
 #
 # Copyright (c) 1998-2000 by Ajuba Solutions.
-# All rights reserved.
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.8 2000/06/16 16:52:22 hershey Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.9 2000/08/02 07:06:52 welch Exp $
 
-package provide debug 1.0
+package provide httpd::debug 1.0
 
 proc Debug_Url {dir} {
     Direct_Url $dir Debug

@@ -25,12 +25,13 @@
 # invoked.
 #
 # Brent Welch (c) 1997 Sun Microsystems, 1998-2000 Scriptics Corporation.
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) url.tcl 1.7 97/08/20 11:50:13
+# RCS: @(#) $Id: url.tcl,v 1.28 2000/08/02 07:06:54 welch Exp $
 
-package provide url 2.0
+package provide httpd::url 1.0
 
 # This pattern cannot occur inside a URL path component
 # On windows we disallow : to avoid drive-letter attacks

@@ -1,4 +1,16 @@
-package provide opentrace 1.0
+# opentrace.tcl --
+#
+# This is a wrapper around the open command that keeps track of what
+# file (or pipe) was opened for a particular channel.  Useful for
+# debugging file descriptor leaks.
+#
+# Brent Welch (c) 1998-2000 Ajuba Solutions
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: open.tcl,v 1.2 2000/08/02 07:06:53 welch Exp $
+
+package provide httpd::opentrace 1.0
 
 if {[info commands "open-orig"] == ""} {
     rename open open-orig

@@ -1,6 +1,14 @@
 # URL-based administration
 
-package provide admin 2.0
+# Copyright
+# Brent Welch (c) 1998-2000 Ajuba Solutions
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: admin.tcl,v 1.6 2000/08/02 07:06:51 welch Exp $
+
+
+package provide httpd::admin 1.0
 
 proc Admin_Url {dir} {
     Direct_Url $dir Admin

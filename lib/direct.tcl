@@ -4,12 +4,13 @@
 # being invoked inside the server.
 #
 # Brent Welch (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) direct.tcl 1.7 97/06/26 15:10:56
+# RCS: @(#) $Id: direct.tcl,v 1.8 2000/08/02 07:06:52 welch Exp $
 
-package provide direct 1.0
+package provide httpd::direct 1.0
 
 # Direct_Url
 #	Define a subtree of the URL hierarchy that is implemented by

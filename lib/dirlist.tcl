@@ -3,12 +3,13 @@
 # Create a HTML-formatted directory listing
 #
 # Steve Ball (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) dirlist.tcl 1.6 98/02/24 15:55:02
+# RCS: @(#) $Id: dirlist.tcl,v 1.7 2000/08/02 07:06:52 welch Exp $
 
-package provide dirlist 1.0
+package provide httpd::dirlist 1.0
  
 proc DirListForm {dir urlpath {sort name} {pattern *}} {
     set what [DirListTerm]

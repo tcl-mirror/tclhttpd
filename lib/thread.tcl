@@ -1,10 +1,16 @@
 # threadmgr.tcl
 #	Wrappers around basic thread commands
-
+#
 #	"Thread" is the C-based Tcl extension
 #	"threadmgr" is the TclHttpd thread manager
+#
+# Brent Welch (c) 1998-2000 Ajuba Solutions
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: thread.tcl,v 1.10 2000/08/02 07:06:54 welch Exp $
 
-package provide threadmgr 1.0
+package provide httpd::threadmgr 1.0
 
 # The "Thread" package is implemented by a C extension.
 # We let the main .rc script do the appropriate package

@@ -11,11 +11,13 @@
 #	rect	/sunsoft/index.html 1,1 119,34
 #
 # Brent Welch (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
-# SCCS: @(#) maptcl.tcl 1.4 97/07/01 11:42:49
+#
+# RCS: @(#) $Id: maptcl.tcl,v 1.3 2000/08/02 07:06:53 welch Exp $
 
-package provide ismaptcl 1.0
+package provide httpd::ismaptcl 1.0
 
 # translate an x/y coordinate into a url
 

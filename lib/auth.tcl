@@ -9,12 +9,13 @@
 # Tcl global array named auth$filename, and upvar aliases this to "info".
 #
 # Brent Welch (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) auth.tcl 1.7 98/02/24 15:59:42
+# RCS: @(#) $Id: auth.tcl,v 1.11 2000/08/02 07:06:51 welch Exp $
 
-package provide auth 1.0
+package provide httpd::auth 1.0
 package require base64
 
 # This defines the name of the access control file

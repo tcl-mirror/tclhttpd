@@ -5,12 +5,13 @@
 # so it grows over time even when you restart the server.
 #
 # Stephen Uhler / Brent Welch (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) log.tcl 1.5 97/06/26 15:10:52
+# RCS: @(#) $Id: log.tcl,v 1.8 2000/08/02 07:06:53 welch Exp $
 
-package provide log 1.0
+package provide httpd::log 1.0
 
 # log an Httpd transaction
 

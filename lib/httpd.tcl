@@ -17,12 +17,13 @@
 # Copyright
 # Matt Newman (c) 1999 Novadigm Inc.
 # Stephen Uhler / Brent Welch (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) httpd.tcl 1.16 97/07/12 14:29:54
+# RCS: @(#) $Id: httpd.tcl,v 1.49 2000/08/02 07:06:52 welch Exp $
 
-package provide httpd 1.2
+package provide httpd 1.3
 
 # The version.tcl file used to be part of httpd package, but
 # that confused the use of tcl_findLibrary because by loading

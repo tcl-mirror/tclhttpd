@@ -2,12 +2,13 @@
 # Trivial Tk control panel for the server.
 #
 # Brent Welch  (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) srvui.tcl 1.3 97/06/26 15:10:51
+# RCS: @(#) $Id: srvui.tcl,v 1.6 2000/08/02 07:06:54 welch Exp $
 
-package provide srvui 1.0
+package provide httpd::srvui 1.0
 
 proc SrvUI_Init {title} {
     global Httpd Doc

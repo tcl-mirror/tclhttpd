@@ -1,4 +1,5 @@
-package provide demo 1.0
+package provide httpd::demo 1.0
+
 proc Demo/hello {} {
     return "<title>Hello</title><p>Hello!"
 }

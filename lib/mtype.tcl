@@ -2,12 +2,13 @@
 # Code to deal with mime types
 #
 # Brent Welch (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) mtype.tcl 1.8 97/06/26 15:10:28
+# RCS: @(#) $Id: mtype.tcl,v 1.4 2000/08/02 07:06:53 welch Exp $
 
-package provide mtype 1.0
+package provide httpd::mtype 1.0
 
 # Convert the file suffix into a mime type
 

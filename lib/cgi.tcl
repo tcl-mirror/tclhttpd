@@ -1,12 +1,13 @@
 # cgi.tcl
 # CGI support
 # Stephen Uhler / Brent Welch (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) cgi.tcl 1.15 97/07/11 16:24:41
+# RCS: @(#) $Id: cgi.tcl,v 1.20 2000/08/02 07:06:51 welch Exp $
 
-package provide cgi 1.1
+package provide httpd::cgi 1.0
 
 # Cgi parameters
 # timeout	Seconds before pipe to CGI program is closed

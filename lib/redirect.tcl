@@ -4,8 +4,13 @@
 # You can either do a single redirect (Redirect_Url)
 # or you can redirect a whole subtree elsewhere (Redirect_UrlTree)
 #
+# Brent Welch (c) 1998-2000 Ajuba Solutions
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: redirect.tcl,v 1.3 2000/08/02 07:06:54 welch Exp $
 
-package provide redirect 1.0
+package provide httpd::redirect 1.0
 
 # Redirect_Init
 #

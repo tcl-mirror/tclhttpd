@@ -1,10 +1,11 @@
 # include.tcl
 #
 # Stephen Uhler (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) include.tcl 1.6 97/06/26 15:10:38
+# RCS: @(#) $Id: include.tcl,v 1.4 2000/08/02 07:06:53 welch Exp $
 
 # Process server side includes.
 # Look for comments of the form:
@@ -20,7 +21,7 @@
 # on the included files, so they cannot be cgi scripts or other fancy
 # objects.
 
-package provide include 1.0
+package provide httpd::include 1.0
 package require html
 
 # Global state for this module

@@ -5,12 +5,13 @@
 #	of the form /status/hello
 #
 # Brent Welch (c) Copyright 1997 Sun Microsystems, Inc.
-# Copyright (c) 1998-2000 by Ajuba Solutions
-# All rights reserved.
+# Brent Welch (c) 1998-2000 Ajuba Solutions
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.13 2000/06/16 16:52:22 hershey Exp $
+# RCS: @(#) $Id: status.tcl,v 1.14 2000/08/02 07:06:54 welch Exp $
 
-package provide status 1.1
+package provide httpd::status 1.0
 
 proc Status_Url {dir {imgdir /images}} {
     global _status

@@ -3,12 +3,13 @@
 # screens as HTML pages, where the menu items are hot links.
 #
 # Stephen Uhler  (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) telnet.tcl 1.2 97/06/26 15:11:00
+# RCS: @(#) $Id: telnet.tcl,v 1.2 2000/08/02 07:06:54 welch Exp $
 
-package provide snmp 1.0
+package provide httpd::telnet 1.0
 
 # run a telnet session with the box
 # args:

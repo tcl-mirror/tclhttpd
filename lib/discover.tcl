@@ -1,12 +1,13 @@
 # Snmp discovery
 
 # Stephen Uhler  (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) discover.tcl 1.4 97/07/01 16:48:25
+# RCS: @(#) $Id: discover.tcl,v 1.2 2000/08/02 07:06:52 welch Exp $
 
-package provide snmp 1.0
+package provide httpd::snmp 1.0
 
 # Get my ip address.
  

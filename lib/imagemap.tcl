@@ -1,11 +1,13 @@
 # imagemap.tcl
 # based on imagemap.c, version 1.8
 # Brent Welch (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
-# SCCS: @(#) imagemap.tcl 1.5 97/07/01 11:41:46
+#
+# RCS: @(#) $Id: imagemap.tcl,v 1.3 2000/08/02 07:06:52 welch Exp $
 
-package provide ismaptcl 1.0
+package provide httpd::ismaptcl 1.0
 
 proc MapPointInRect {X Y coordArray} {
 	upvar $coordArray coords

@@ -16,13 +16,13 @@
 # Template processing is supported by Doc_Subst.
 #
 # Stephen Uhler / Brent Welch (c) 1997-1998 Sun Microsystems
-# Brent Welch (c) 1999 Scriptics Corporation
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) doc.tcl 1.20 97/08/05 15:02:32
+# RCS: @(#) $Id: doc.tcl,v 1.36 2000/08/02 07:06:52 welch Exp $
 
-package provide doc 1.1
+package provide httpd::doc 1.0
 
 # Query or set the physical pathname of the document root
 proc Doc_Root {{real {}}} {

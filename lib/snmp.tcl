@@ -6,12 +6,13 @@
 # and display the results.
 #
 # Stephen Uhler  (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) snmp.tcl 1.27 97/06/26 15:31:36
+# RCS: @(#) $Id: snmp.tcl,v 1.3 2000/08/02 07:06:54 welch Exp $
 
-package provide snmp 1.0
+package provide httpd::snmp 1.0
 
 # Handle .snmp templates.
 # First process the incoming form data in an SNMP specific way,

@@ -1,8 +1,12 @@
 # utils.tcl
+#
+# Brent Welch (c) 1998-2000 Ajuba Solutions
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: utils.tcl,v 1.5 2000/08/02 07:06:55 welch Exp $
 
-# SCCS: @(#) utils.tcl 1.10 97/06/26 15:10:59
-
-package provide utils 1.0
+package provide httpd::utils 1.0
 
 # Stderr - print to standard error
 

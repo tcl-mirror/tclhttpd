@@ -5,8 +5,10 @@
 # Brent Welch (c) 2000 Scriptics Corporation
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: config.tcl,v 1.2 2000/08/02 07:06:52 welch Exp $
 
-package provide config 1.0
+package provide httpd::config 1.0
 
 namespace eval config {
     

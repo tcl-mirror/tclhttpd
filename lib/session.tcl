@@ -36,12 +36,13 @@
 # the module that uses the sessions.
 #
 # Stephen Uhler  (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) session.tcl 1.8 97/07/28 13:17:43
+# RCS: @(#) $Id: session.tcl,v 1.3 2000/08/02 07:06:54 welch Exp $
 
-package provide session 1.0
+package provide httpd::session 1.0
 
 proc Session_Authorized {id} {
     upvar #0 Session:$id session

@@ -1,18 +1,18 @@
 # stdin.tcl
 #
 # (c) 1997 Sun Microsystems Laboratories (Stephen Uhler)
-
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) stdin.tcl 1.6 97/08/21 15:35:14
+# RCS: @(#) $Id: stdin.tcl,v 1.2 2000/08/02 07:06:54 welch Exp $
 
 # The following is an event-driven command loop for testing with tclsh
 # with command history:
 #	!<pattern> run 1st command matching pattern
 #	!<pattern>/xxx/yyy/ as above, but substitute yyy for xxx
 
-package provide stdin 1.1
+package provide httpd::stdin 1.1
 
 set Stdin(maxHistory) 100
 append Stdin(history) {}

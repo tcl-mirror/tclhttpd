@@ -5,11 +5,13 @@
 # This version uses a Tk canvas to do hit detection.
 #
 # Stephen Uhler (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
-# SCCS: @(#) maptk.tcl 1.6 97/07/01 11:42:51
+#
+# RCS: @(#) $Id: maptk.tcl,v 1.3 2000/08/02 07:06:53 welch Exp $
 
-package provide ismaptk 1.0
+package provide httpd::ismaptk 1.0
 
 # 	read in an image map file, and generate the appropriate canvas
 # 	# sample image map

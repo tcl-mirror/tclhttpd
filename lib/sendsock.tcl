@@ -6,6 +6,11 @@
 # the server machine first.  Or, you can use Eval_Server and implement
 # some secret handshake in the EvalOpenProc hook.
 #
+# SECURITY NOTE - This is a direct eval hole on your machine.
+# I basically never, ever use this code, but instead use the
+# debug.tcl module to respectfully ask the server to reload
+# its source files.
+#
 # The server should run
 # Eval_ServerLocal someport
 #
@@ -19,10 +24,13 @@
 # Practical Programming in Tcl and Tk
 #
 # Brent Welch (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) sendsock.tcl 1.1 97/06/26 15:11:53
+# RCS: @(#) $Id: sendsock.tcl,v 1.2 2000/08/02 07:06:54 welch Exp $
+
+package provide httpd::eval 1.0
 
 #
 # Example 37-4
@@ -35,9 +43,11 @@
 
 proc Eval_Server {port {interp {}} {openCmd EvalOpenProc}} {
 	socket -server [list EvalAccept $interp $openCmd] $port
+	puts stderr "Warning: Eval Server running on port $port"
 }
 proc Eval_ServerLocal {port {interp {}} {openCmd EvalOpenProc}} {
 	socket -server [list EvalAccept $interp $openCmd] -myaddr localhost $port
+	puts stderr "Warning: Eval Server running on port $port"
 }
 proc EvalAccept {interp openCmd newsock addr port} {
 	global eval

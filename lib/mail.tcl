@@ -5,12 +5,13 @@
 # in this file that begin with Mail.
 #
 # Brent Welch (c) 1997 Sun Microsystems
+# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# SCCS: @(#) mail.tcl 1.1 97/06/26 15:11:35
+# RCS: @(#) $Id: mail.tcl,v 1.11 2000/08/02 07:06:53 welch Exp $
 
-package provide mail 1.0
+package provide httpd::mail 1.0
 
 foreach f {/usr/lib/sendmail /usr/sbin/sendmail} {
     if {[file exists $f]} {
