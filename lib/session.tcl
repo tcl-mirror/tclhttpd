@@ -40,13 +40,13 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.5 2004/04/20 14:02:31 coldstore Exp $
+# RCS: @(#) $Id: session.tcl,v 1.6 2004/04/21 05:09:37 welch Exp $
 
 package provide httpd::session 1.0
 
 # use long session IDs
 if {![info exists Session(short)]} {
-    Session(short) 0
+    set Session(short) 0
 }
 
 # how long do session cookies last?
