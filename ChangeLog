@@ -1,3 +1,10 @@
+2000-11-13  Brent Welch <welch@ajubasolutions.com>
+
+	* lib/cgi.tcl: Added checking in CgiCancel in case
+	the connection has already gone away.  (Probably redundant)
+	* lib/httpd.tcl: Added checking to HttpdCloseFinal in case
+	the connection has already gone away.  Seemed like a bug.
+
 2000-10-30  Brent Welch <welch@ajubasolutions.com>
 
 	* lib/pkgIndex.tcl:  Fixed quoting issue when you have

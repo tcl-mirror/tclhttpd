@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cgi.tcl,v 1.21 2000/10/28 05:36:09 welch Exp $
+# RCS: @(#) $Id: cgi.tcl,v 1.22 2000/11/14 00:59:34 welch Exp $
 
 package provide httpd::cgi 1.0
 
@@ -441,7 +441,9 @@ proc CgiCleanup {fd sock} {
 proc CgiCancel {fd sock} {
     upvar #0 Httpd$sock data
 
-    Log $sock CgiCancel $data(url)
+    if {[info exist data(url)]} {
+	Log $sock CgiCancel $data(url)
+    }
     catch {exec kill [pid $fd]}
     CgiClose $fd $sock
 }
