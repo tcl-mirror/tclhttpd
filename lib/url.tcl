@@ -206,7 +206,13 @@ proc Url_PathCheck {urlsuffix} {
 
 # convert a x-www-urlencoded string into a list of name/value pairs
 
-proc Url_DecodeQuery {query} {
+proc Url_DecodeQuery {query args} {
+    array set options {-type application/x-ww-urlencoded -qualifiers {}}
+    catch {array set options $args}
+    return [Url_DecodeQuery_$options(-type) $query $options(-qualifiers)]
+}
+
+proc Url_DecodeQuery_application/x-www-urlencoded {query qualifiers} {
     regsub -all {\+} $query " " query
     set result {}
     foreach data [split $query "&="] {
@@ -215,6 +221,112 @@ proc Url_DecodeQuery {query} {
 	lappend result [subst $data]
     }
     return $result
+}
+
+proc Url_DecodeQuery_application/x-www-form-urlencoded {query qualifiers} [info body Url_DecodeQuery_application/x-www-urlencoded]
+proc Url_DecodeQuery_application/x-ww-urlencoded {query qualifiers} [info body Url_DecodeQuery_application/x-www-urlencoded]
+
+# steve: 5/8/98: This is a very crude start at parsing MIME documents
+# Return filename/content pairs
+proc Url_DecodeQuery_multipart/form-data {query qualifiers} {
+
+    array set options {}
+    catch {array set options $qualifiers}
+    if {![info exists options(boundary)]} {
+	return -code error "no boundary given for multipart document"
+    }
+
+    # Filter query into a list
+    # Protect Tcl special characters
+    regsub -all {([\\{}])} $query {\\\\\\1} query
+    regsub -all -- "(\r?\n?--)?$options(boundary)\r?\n?" $query "\} \{" data
+    set data [subst -nocommands -novariables "\{$data\}"]
+
+    # Remove first and last list elements, which will be empty
+    set data [lrange [lreplace $data end end] 1 end]
+
+    set result {}
+    foreach element $data {
+
+	# Get the headers from the element.  Look for the first empty line.
+	set headers {}
+	set elementData {}
+	# Protect Tcl special characters
+	regsub -all {([\\{}])} $element {\\\\\\1} element
+	regsub \r?\n\r?\n $element "\} \{" element
+
+	foreach {headers elementData} [subst -nocommands -novariables "\{$element\}"] break
+
+	set headerList {}
+	set parameterName {}
+	regsub -all \r $headers {} headers
+	foreach hdr [split $headers \n] {
+
+	    if {[string length $hdr]} {
+
+		set headerName {}
+		set headerData {}
+		if {![regexp {[ 	]*([^: 	]+)[ 	]*:[ 	]*(.*)} $hdr discard headerName headerData]} {
+		    return -code error "malformed MIME header \"$hdr\""
+		}
+
+		set headerName [string tolower $headerName]
+		foreach {major minor quals} [Url_DecodeMIMEField $headerData] break
+
+		switch -glob -- [string compare content-disposition $headerName],[string compare form-data $major] {
+
+		    0,0 {
+
+			# This is the name for this query parameter
+
+			catch {unset param}
+			array set param $quals
+			set parameterName $param(name)
+
+			# Include the remaining parameters, if any
+			unset param(name)
+			if {[llength [array names param]]} {
+			    lappend headerList [list $headerName $major [array get param]]
+			}
+
+		    }
+
+		    default {
+
+			lappend headerList [list $headerName $major/$minor $quals]
+
+		    }
+
+		}
+
+	    } else {
+		break
+	    }
+	}
+	lappend result $parameterName [list $headerList $elementData]
+    }
+
+    return $result
+}
+
+# Decode a MIME type
+# This could possibly move into the MIME module
+
+proc Url_DecodeMIMEField type {
+    set qualList {}
+    if {[regexp {([^;]+)[ 	]*;[ 	]*(.+)} $type discard type qualifiers]} {
+	foreach qualifier [split $qualifiers ;] {
+	    if {[regexp {[ 	]*([^=]+)="([^"]*)"} $qualifier discard name value]} {
+	    } elseif {[regexp {[ 	]*([^=]+)='([^']*)'} $qualifier discard name value]} {
+	    } elseif {[regexp {[ 	]*([^=]+)=([^ 	]*)} $qualifier discard name value]} {
+	    } else {
+		continue
+	    }
+	    lappend qualList $name $value
+	}
+    }
+    foreach {major minor} [split $type /] break
+    return [list [string trim $major] [string trim $minor] $qualList]
 }
 
 proc Url_Decode {data} {

@@ -10,8 +10,14 @@ application/dca-rft
 application/dec-dx                             
 application/mac-binhex40	hqx
 application/macwriteii
-application/msword		doc
-application/ms-powerpoint	ppt
+application/msword		doc dot
+application/ms-excel		xls xlw xla xlc xlm xlt
+application/ms-powerpoint	ppt pps pot
+application/ms-project		mpp
+application/x-msaccess		mdb
+application/x-msmetafile	wmf
+application/x-mswrite		wri
+application/x-msschedule	scd
 application/news-message-id                    
 application/news-transmission      
 application/octet-stream       bin  exe gz Z zip          
@@ -88,6 +94,7 @@ text/plain                     txt
 text/richtext                  rtx             
 text/tab-separated-values      tsv             
 text/x-setext                  etx             
+text/xml		       xml
 video/mpeg                     mpeg mpg mpe    
 video/quicktime                qt mov          
 video/x-msvideo                avi             

@@ -564,9 +564,19 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	[list array set cgienv [array get pass]]]
 
     # Check query data
+    # steve: 5/8/98: Add multipart document upload handling
 
     if {[info exists data(query)] && [string length $data(query)]} {
-	set querylist [Url_DecodeQuery $data(query)]
+	set queryType application/x-www-urlencoded
+	set qualifiers {}
+	catch {
+	    foreach {major minor qualifiers} [Url_DecodeMIMEField $data(mime,content-type)] break
+	    set queryType $major/$minor
+	}
+	set querylist [Url_DecodeQuery $data(query) -type $queryType -qualifiers $qualifiers]
+
+	interp eval $interp [list uplevel #0 [list set page(realquery) $data(query)]]
+	interp eval $interp [list uplevel #0 [list set page(querytype) $queryType]]
 	interp eval $interp [list uplevel #0 [list set page(query) $querylist]]
     }
 
