@@ -1,17 +1,7 @@
-<!Doctype HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
-<Html>
-<Head>
-<Title>Tcl Server Reference</Title>
-<!-- Author: bwelch -->
-<META HTTP-Equiv=Editor Content="SunLabs WebTk 1.0demo 3/10/97">
-</Head>
-<Body bgcolor=white text=black>
+[mypage::header "Tcl Server Reference"]
 
-
-
-<h1>Tcl Server Reference</h1>
-<h2>
 <p>
+<h2>
 <a NAME="basic">Basic Configuration</a></h2>
 <p>
 The main Tcl script consists of <code>package require</code> commands
@@ -101,11 +91,11 @@ For example, "/" is the prefix of all URLs, but you can also have a
 Tcl procedures. Basic file system service is provided by the Doc domain
 (i.e., doc.tcl), which makes a call like this: 
 <p>
-<code>Url_PrefixInstall / [list DocDomain $Doc(root)]</code> 
+<code>Url_PrefixInstall / \[list DocDomain \$Doc(root)]</code> 
 <p>
 but the CGI domain makes a call like 
 <p>
-<code>Url_PrefixInstall /cgi-bin [list CgiDomain $directory]</code>
+<code>Url_PrefixInstall /cgi-bin \[list CgiDomain \$directory]</code>
 
 <p>
 This registers a Tcl procedure that is called each time a request matches
@@ -113,14 +103,14 @@ the prefix. The longest matching prefix is used to resolve conflicts
 between prefixes like "/" and "/cgi-bin". The domain handler is invoked
 like this: 
 <p>
-<code>DocDomain $directory $sock $suffix</code> 
+<code>DocDomain \$directory \$sock \$suffix</code> 
 <p>
-The <code>$sock</code> and <code>$suffix</code> are added by <code>Url_Dispatch</code>
-when the handler is invoked. The <code>$directory</code> was defined
+The <code>\$sock</code> and <code>\$suffix</code> are added by <code>Url_Dispatch</code>
+when the handler is invoked. The <code>\$directory</code> was defined
 at the time <code>Url_PrefixInstall</code> was called. A domain handler
-can be installed with any arguments it needs. The <code>$sock</code>
+can be installed with any arguments it needs. The <code>\$sock</code>
 is the socket for the connection, and it is used in calls on the Httpd
-module to return results. The <code>$suffix</code> is the part of the
+module to return results. The <code>\$suffix</code> is the part of the
 URL after the prefix is stripped off. 
 <p>
 Sample domain handlers include <code>DocDomain</code>, <code>CgiDomain</code>,
@@ -175,10 +165,10 @@ The Doc module checks to see if a handler exists for a type before
 returning the file. If it exists, the handler is called like this:
 
 <p>
-<code>Doc_application/x-server-include $path $suffix $sock</code> 
+<code>Doc_application/x-server-include \$path \$suffix \$sock</code> 
 <p>
-The <code>$path</code> is the absolute pathname of the file. The <code>$suffix</code>
-is the URL suffix. The <code>$sock</code> is the socket handle for
+The <code>\$path</code> is the absolute pathname of the file. The <code>\$suffix</code>
+is the URL suffix. The <code>\$sock</code> is the socket handle for
 the connection. 
 <p>
 Example handlers include <code>Doc_application/x-cgi</code>, <code>Doc_application/x-imagemap</code>,
@@ -235,6 +225,4 @@ and <code>SnmpProcess</code> to handle the form data in an application-specific
 way. It then falls through to <code>Doc_Subst</code> to process the
 page in the context of the session. 
 
-</Body>
-</Html>
-
+[mypage::footer]
