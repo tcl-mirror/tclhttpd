@@ -917,9 +917,12 @@ proc Httpd_Redirect {newurl sock} {
     HttpdRespondHeader $sock text/html $close [string length $message] 302
     HttpdSetCookie $sock
     puts $sock "Location: $newurl"
+    puts $sock "URI: $newurl"
     puts $sock ""
+
     # The -nonewline is important here to work properly with
     # keep-alive connections
+
     puts -nonewline $sock $message
     Httpd_SockClose $sock $close
 }
@@ -927,10 +930,7 @@ proc Httpd_Redirect {newurl sock} {
 # Generate a redirect to another URL on this server.
 
 proc Httpd_RedirectSelf {newurl sock} {
-    global Httpd
-    # Httpd_Redirect [Httpd_SelfUrl $newurl] $sock
-    Httpd_Redirect $newurl $sock
-    return $newurl
+    Httpd_Redirect [Httpd_SelfUrl $newurl $sock] $sock
 }
 
 # Create an absolute URL for this server

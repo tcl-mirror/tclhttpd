@@ -242,7 +242,8 @@ proc Thread_Unwind {id sock datalist cmd} {
     upvar #0 Httpd$sock data
     array set data $datalist
     if {[catch $cmd err]} {
-	Url_Error $sock
+	global errorCode errorInfo
+	Url_Unwind $sock $errorInfo $errorCode
     }
     Thread_Free $id
 }

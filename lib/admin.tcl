@@ -1,40 +1,11 @@
 # URL-based administration
 
-package provide admin 1.0
+package provide admin 2.0
 
 proc Admin_Url {dir} {
     Direct_Url $dir Admin
-
-    # Load redirect file
-
-    if {[catch {Admin/redirect/reload} err]} {
-	puts stderr $err
-    }
 }
 
-proc Admin/redirect/reload {} {
-    global Doc
-    set path [file join $Doc(root) redirect]
-    if { ! [file exists $path]} {
-	return
-    }
-    source $path
-    set html "<h3>Reloaded redirect file</h3>"
-    set in [open $path]
-    append html "<table><tr><td>OLD</td><td>NEW</td></tr>"
-    while {[gets $in line] >= 0} {
-	if {[regexp ^Url_Redirect $line]} {
-	    append html <tr>
-	    foreach item [lrange $line 1 2] {
-		append html "<td>$item</td>"
-	    }
-	    append html </tr>
-	}
-    }
-    append html </table>
-    close $in
-    return $html
-}
 proc Admin/redirect {old new} {
     global Doc Httpd
     if {[string length $old] == 0} {

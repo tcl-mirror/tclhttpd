@@ -19,18 +19,12 @@
 #
 # URL redirection is done by sticking an appropriate handler in UrlCache.
 #
-# One problem with this scheme is that authentication cookies are kept
-# in the UrlCache array, so if you add authentication to a directory you
-# need to flush the UrlCache so the Doc_Domain handler does the full job
-# and detects the .htaccess file.  Once a .htaccess file is installed,
-# the Doc_Handler procedure correctly notices updates to that file.
+# Authentication is done before domain dispatch via a general hook
+# mechanism.  Different authentication schemes can register a procedure
+# to be called to enforce access control before the domain handler is
+# invoked.
 #
-# A second limitation is that references across domains via relative names
-# are not supported. I solved this problem in the Sprite file system but
-# am punting for now here.  In practice this means you should just fan
-# out the URL tree at the root, as in /cgi-bin, /status, /debug, etc.
-#
-# Brent Welch (c) 1997 Sun Microsystems
+# Brent Welch (c) 1997 Sun Microsystems, 1998-2000 Scriptics Corporation.
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
@@ -63,10 +57,26 @@ proc Url_Dispatch {sock} {
     upvar #0 Httpd$sock data
 
     catch {after cancel $data(cancel)}
+    set url $data(url)
+
+    # Do access control first
+
+    foreach hook $Url(accessHooks) {
+	set code [catch {eval $hook [list $sock $url]} result]
+	switch -- $result {
+	    ok		{ break }
+	    denied	{ return }
+	    skip	{ continue }
+	    default	{
+		if {$code} {
+puts stderr "$hook $result"
+		}
+	    }
+	}
+    }
 
     # Dispatch to cached handler for the URL, if any
 
-    set url $data(url)
     CountName $url hit
     if {(![info exists data(query)] || ([string length $data(query)] == 0)) &&
 	    ([Httpd_PostDataSize $sock] == 0) && [info exists UrlCache($url)]} {
@@ -111,7 +121,7 @@ proc Url_Dispatch {sock} {
 			[concat $Url(command,$prefix) [list $sock $suffix]]
 	    } else {
 		Count UrlEval
-		eval $Url(command,$prefix) {$sock $suffix}
+		eval $Url(command,$prefix) [list $sock $suffix]
 	    }
 	} error]
     }
@@ -136,35 +146,65 @@ proc Url_Dispatch {sock} {
 
 proc Url_Unwind {sock ei ec} {
 
-	# URL implementations can raise an error and put redirect info
-	# into the errorCode variable, which should be of the form
-	# HTTPD_REDIRECT $newurl
+    # URL implementations can raise an error and put redirect info
+    # into the errorCode variable, which should be of the form
+    # HTTPD_REDIRECT $newurl
 
-	set key [lindex $ec 0]
-	set error [lindex [split $ei \n] 0]
-	if {[string match HTTPD_REDIRECT $key]} {
-	    Httpd_Redirect [lindex $ec 1] $sock
-	    return
-	}
-
-	switch -glob -- $ei {
-	    "*can not find channel*"  {
-		Httpd_SockClose $sock 1 $error
-	    }
-	    "*too many open files*" {
-		# this is lame and probably not necessary.
-		# Early bugs lead to file descriptor leaks, but
-		# these are all plugged up.
-		Count numfiles
-		Httpd_SockClose $sock 1 $error
-		File_Reset
-	    } 
-	    default {
-		Doc_Error $sock $ei
-	    }
-	}
+    set key [lindex $ec 0]
+    set error [lindex [split $ei \n] 0]
+    if {[string match HTTPD_REDIRECT $key]} {
+	Httpd_Redirect [lindex $ec 1] $sock
+	return
     }
 
+    switch -glob -- $ei {
+	"*can not find channel*"  {
+	    Httpd_SockClose $sock 1 $error
+	}
+	"*too many open files*" {
+	    # this is lame and probably not necessary.
+	    # Early bugs lead to file descriptor leaks, but
+	    # these are all plugged up.
+	    Count numfiles
+	    Httpd_SockClose $sock 1 $error
+	    File_Reset
+	} 
+	default {
+	    Doc_Error $sock $ei
+	}
+    }
+}
+
+# Url_AccessInstall
+#
+#	Install an access check hook.
+#
+# Arguments
+#	proc	This is a command prefix that is invoked with two additional
+#		arguments to check permissions:
+#			sock	The handle on the connection
+#			url	The url being accessed
+#		The access hook should return:
+#			"ok"	Meaning access is allowed
+#			"denied" Access is denied and the hook is responsible
+#				for generating the Authenticate challenge
+#			"skip"	Meaning the hook doesn't care about the URL,
+#				but perhaps another access control hook does.
+#
+# Side Effects
+#	Save the access control hook
+
+proc Url_AccessInstall {proc} {
+    global Url
+    if {[lsearch $Url(accessHooks) $proc] < 0} {
+	lappend Url(accessHooks) $proc
+    }
+    return
+}
+
+if {![info exist Url(accessHooks)]} {
+    set Url(accessHooks) {}
+}
 
 # Url_PrefixInstall
 #	Declare that a handler exists for a point in the URL tree
@@ -205,7 +245,15 @@ proc Url_PrefixInstall {prefix command {tothread 0}} {
     set Url(thread,$prefix) $tothread
 }
 
-# Undo a prefix registration
+# Url_PrefixRemove
+#
+#	Undo a prefix registration
+#
+# Arguments:
+#	prefix	The leadin part of the URL, (e.., /foo/bar)
+#
+# Side Effects:
+#	Remove the prefix from the dispatch set.
 
 proc Url_PrefixRemove {prefix} {
     global Url
@@ -217,7 +265,18 @@ proc Url_PrefixRemove {prefix} {
     set Url(prefixset) [join [lsort -command UrlSort $list] |]
 }
 
-# Sort the prefixes so the longest one is first
+# UrlSort
+#
+#	Sort the URL prefixes so the longest ones are first.
+#	The makes the regular expression match the longest
+#	matching prefix.
+#
+# Arguments:
+#	a, b	To URL prefixes
+#
+# Results:
+#	1 if b should sort before a, -1 if a should sort before b, else 0
+
 proc UrlSort {a b} {
     set la [string length $a]
     set lb [string length $b]
@@ -230,14 +289,34 @@ proc UrlSort {a b} {
     }
 }
 
-# Cache the handler for the url, then invoke it
+# Url_Handle
+#
+#	Cache the handler for the url, then invoke it
+#
+# Arguments:
+#	cmd	The command to eval to handle a URL
+#	sock	The socket for the current connection.
+#
+# Side Effects:
+#	Caches the command used to handle the URL
 
 proc Url_Handle {cmd sock} {
     upvar #0 Httpd$sock data
     global UrlCache
     set UrlCache($data(url)) $cmd
-    eval $cmd {$sock}
+    eval $cmd [list $sock]
 }
+
+# Url_UnCache
+#
+#	Deleted the cached handler for a URL
+#
+# Arguments:
+#	sock	The socket for the current connection.
+#	force	If set, there is no special case for the redirect hack
+#
+# Side Effects:
+#	Deletes the cached handler
 
 proc Url_UnCache {sock {force 0}} {
     upvar #0 Httpd$sock data
@@ -250,7 +329,15 @@ proc Url_UnCache {sock {force 0}} {
     }
 }
 
-# Validate a pathname.  Make sure it doesn't sneak out of its domain.
+# Url_PathCheck
+#
+#	Validate a pathname.  Make sure it doesn't sneak out of its domain.
+#
+# Arguments:
+#	urlsuffix	The URL after the domain prefix
+#
+# Results:
+#	Raises an error, or returns a list of components in the pathname
 
 proc Url_PathCheck {urlsuffix} {
     global Url
@@ -266,8 +353,10 @@ proc Url_PathCheck {urlsuffix} {
 
 	}
 	set part [Url_Decode $part]
+
 	# Disallow Mac and UNIX path separators in components
 	# Windows drive-letters are bad, too
+
 	if {[regexp $Url(fsSep) $part]} {
 	    error "URL components cannot include $Url(fsSep)"
 	}
@@ -293,7 +382,7 @@ proc Url_PostHook {sock length} {
 
     # Backdoor hack for Url_DecodeQuery compatibility
     # We remember the current connection so that Url_DecodeQuery
-    # can read the post data if it has not already be read by
+    # can read the post data if it has not already been read by
     # the time it is called.
 
     set Url(sock) $sock
@@ -515,12 +604,14 @@ proc Url_Encode {string} {
 }
  
 # Register a new location for a URL
+# These are here for compatibility.
+# They have moved to the redirect module
 
 proc Url_Redirect {url location} {
-    global UrlCache
-    set UrlCache($url) [list Httpd_Redirect $location]
+    Redirect_Url $url $location
 }
 proc Url_RedirectSelf {url location} {
-    global UrlCache
-    set UrlCache($url) [list Httpd_RedirectSelf $location]
+    # Cannot make the "self" computation until we have
+    # a socket and know the protocol and server name for sure
+    Redirect_UrlSelf $url $location
 }
