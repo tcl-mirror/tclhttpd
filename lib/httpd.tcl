@@ -289,7 +289,7 @@ proc HttpdRead {sock} {
 	        	[info exists data(mime,content-length)]} {
 		    set data(linemode) 0
 	            set data(count) $data(mime,content-length)
-	            if {$data(version) >= 1.1 && [info exists data(mime,expect]} {
+	            if {$data(version) >= 1.1 && [info exists data(mime,expect)]} {
 	                if {$data(mime,expect) == "100-continue"} {
 			    puts $sock "100 Continue HTTP/1.1\n"
 			    flush $sock
