@@ -8,6 +8,8 @@
 	Changed Scriptics to Ajuba
 	* htdocs/index.html:
 	Conditionally link to TclPro files
+	* lib/status.tcl: Fixed uses of Thread_List so there are
+	no errors when threading is not used.
 
 2000-08-25  Brent Welch <welch@scriptics.com>
 
