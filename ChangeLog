@@ -1,3 +1,9 @@
+2004-03-23  Colin McCormack <colin@chinix.com>
+	* htdocs/access, htdocs/htaccess: updated /htaccess and
+	documentation
+	* lib/auth.tcl: fixed bugs relating to generalised authentication
+	data structure
+	
 2004-03-16  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* lib/doc.tcl (DocDomain): more checks to ensure personal home
