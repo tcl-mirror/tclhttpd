@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.9 2000/09/06 21:45:43 welch Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.10 2000/09/27 19:35:26 welch Exp $
 
 package provide httpd::direct 1.0
 
@@ -73,37 +73,29 @@ proc DirectDomain {prefix sock suffix} {
 	}
 
 	# Honor content type of the query data
+	# Some browsers leave junk Content-Type lines in
+	# non-post requests as a side effect of keep alive.
 
-	if {[info exist data(mime,content-type)]} {
+	if {[info exist data(mime,content-type)] &&
+		("$data(proto)" != "GET")} {
 	    set type $data(mime,content-type)
 	} else {
 	    set type application/x-www-urlencoded
 	}
-	set valuelist [Url_DecodeQuery $data(query) -type $type]
 
-	# Parse form parameters into the cgi array
-	# If the parameter is listed twice, the array becomes a list
-	# of the values.
+	# Grab POST data, if any, and initialize the ncgi:: interface
 
-	foreach {name value} $valuelist {
-	    if [info exists list($name)] {
-		set cgi($name) [list $cgi($name) $value]
-		unset list($name)
-	    } elseif [info exists cgi($name)] {
-		lappend cgi($name) $value
-	    } else {
-		set cgi($name) $value
-		set list($name) 1	;# Need to listify if more values are added
-	    }
-	}
+	Url_ReadPost $sock data(query)
+	ncgi::reset $data(query) $type
+	ncgi::parse
+	ncgi::urlStub $data(url)
     }
     set cmd $prefix$suffix
     if {![iscommand $cmd]} {
 	Doc_NotFound $sock
 	return
     }
-    # "Cache hit" is a misnomer, but this is how things are counted
-    Count cachehit,$Direct($prefix)$suffix
+    CountName $data(url) hit
 
     # Compare built-in command's parameters with the form data.
     # Form fields with names that match arguments have that value
@@ -113,7 +105,7 @@ proc DirectDomain {prefix sock suffix} {
     set cmdOrig $cmd
     set params [info args $cmdOrig]
     foreach arg $params {
-	if ![info exists cgi($arg)] {
+	if {[ncgi::empty $arg]} {
 	    if [info default $cmdOrig $arg value] {
 		lappend cmd $value
 	    } elseif {[string compare $arg "args"] == 0} {
@@ -122,11 +114,11 @@ proc DirectDomain {prefix sock suffix} {
 		lappend cmd {}
 	    }
 	} else {
-	    lappend cmd $cgi($arg)
+	    lappend cmd [ncgi::value $arg]
 	}
     }
     if [info exists needargs] {
-	foreach {name value} $valuelist {
+	foreach {name value} [ncgi::nvlist] {
 	    if {[lsearch $params $name] < 0} {
 		lappend cmd $name $value
 	    }

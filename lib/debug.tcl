@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.10 2000/09/20 00:25:44 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.11 2000/09/27 19:35:26 welch Exp $
 
 package provide httpd::debug 1.0
 
@@ -134,7 +134,7 @@ proc DebugValue {aname} {
 	# Be careful about declared but undefined procedures
 	# that used to blow the recursion stack here...
 
-	set list [uplevel #0 [list info vars $aname]]
+	set list [uplevel #0 [lsort [list info vars $aname]]]
 	if {[llength $list] == 1 &&
 		[string compare [lindex $list 0] $aname] == 0} {
 	    append html "<pre># $aname undefined</pre>"
@@ -297,6 +297,15 @@ proc Debug/errorInfo {title errorInfo {env {no environment}}} {
 
 proc Debug/dbg {host port} {
     global debug_init Httpd
+
+    # In case application-direct parameter bindings are broken...
+    if {$host == ""} {
+	set host sage
+    }
+    if {$port == ""} {
+	set port 5000
+    }
+
     if {![info exist debug_init]} {
 	if {[info command debugger_init] == ""} {
 	    source [file join $Httpd(library) prodebug.tcl]

@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.59 2000/09/26 19:45:36 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.60 2000/09/27 19:35:26 welch Exp $
 
 package provide httpd 1.5
 
@@ -332,6 +332,7 @@ proc HttpdAccept {self sock ipaddr port} {
 	# We do that by calling tls::handshake in a fileevent
 	# until it is complete, or an error occurs.
 
+	Count accept_https
 	fconfigure $sock -blocking 0
 	fileevent $sock readable [list HttpdHandshake $sock]
     } else {

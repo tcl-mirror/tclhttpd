@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.19 2000/09/25 22:48:23 welch Exp $
+# RCS: @(#) $Id: status.tcl,v 1.20 2000/09/27 19:35:26 welch Exp $
 
 package provide httpd::status 1.0
 
@@ -442,6 +442,7 @@ proc StatusTable {} {
 	    UrlCacheHit "UrlCache eval"
 	    urlreply "URL Replies"
 	    accepts "Total Connections"
+	    accept_https "HTTPS Connections"
 	    keepalive "KeepAlive Requests"
 	    http1.0 "OneShot Connections"
 	    http1.1 "Http1.1 Connections"
@@ -506,7 +507,7 @@ proc Status/all {args} {
 
     append html [stats::histHtmlDisplay serviceTime \
 	    -title "Service Time" -unit seconds \
-	    -width 1 -skip 10 -min 0 -max 200 \
+	    -width 1 -skip 10 -min 0 -max 400 \
 	    -images $_status(images)]
 
     append html [stats::histHtmlDisplay urlhits \
