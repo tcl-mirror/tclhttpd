@@ -1,3 +1,8 @@
+2000-05-08  Melissa Chawla  <hershey@scriptics.com>
+
+	* lib/httpd.tcl: removed extra requirement that the caDir
+	Httpd(SSL_CADIR) be an existing file.
+
 2000-05-08 Brent Welch <welch@scriptics.com>
 
 	* lib/httpd.tcl: Fixed Httpd_SelfUrl to correctly insert the port

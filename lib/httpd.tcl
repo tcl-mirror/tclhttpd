@@ -203,9 +203,6 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
     if {![file exists $Httpd(SSL_CERTFILE)]} {
 	return -code error "Certificate  \"$Httpd(SSL_CERTFILE)\" not found"
     }
-    if {![file exists $Httpd(SSL_CADIR)]} {
-	return -code error "Directory \"$Httpd(SSL_CADIR)\" not found"
-    }
     set cmd [list tls::socket -server [list HttpdAccept \
 	    [list https $name $port]]]
     lappend cmd -request $Httpd(SSL_REQUEST) \
