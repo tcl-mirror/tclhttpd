@@ -76,7 +76,11 @@ mkdir ${SUPER_DIR}/build
 ########cp CONFIG MAKE ${SUPER_DIR}/build
 
 cp README ${SUPER_DIR}
-cp Makefile.boot ${SUPER_DIR}/Makefile
+sed -e s/@TCLHTTPD_VERSION@/$TCLHTTPD_VERSION/ \
+    -e s/@TCL_VERSION@/$TCL_VERSION/ \
+    -e s/@TCLLIB_VERSION@/$TCLLIB_VERSION/ \
+    -e s/@THREAD_VERSION@/$THREAD_VERSION/ \
+        < Makefile.boot > ${SUPER_DIR}/Makefile
 
 # Unbundled packages
 
