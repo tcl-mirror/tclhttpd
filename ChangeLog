@@ -1,3 +1,7 @@
+2004-04-02 Jeffrey Rankin <jrankin@oneil.com>
+	* sampleapp/bugdb/htdocs/.tml: Added .tml which was left
+	out during the recent sampleapp reorganization.
+
 2004-03-22 Brent Welch <welch@panasas.com>
         * htdocs/man: minor updates to some of these pages
         * lib/cookie.tcl: Added Cookie_GetSock to get a cookie from the
