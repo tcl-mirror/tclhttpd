@@ -81,22 +81,26 @@ proc Dummy_Init {name} {
 # Populate it with the useful aliases.
 #   Type:  An arbitrary session type, used for automatic alias creation.
 
-proc Session_Create {type} {
+proc Session_Create {type {isSafe 1}} {
 
     # Pick a unique session id, create the interpreter and global state.
 
     while {[info globals *[set id [randomx]]*] != ""} {}
-    Session_CreateWithID $type $id
+    Session_CreateWithID $type $id $isSafe
 }
 
-proc Session_CreateWithID {type id} {
-    set interp [SessionCreate $id]
+proc Session_CreateWithID {type id {isSafe 1}} {
+    set interp [SessionCreate $id $isSafe]
     SessionTypeAliases $interp $id $type
 }
 
-proc SessionCreate {id} {
+proc SessionCreate {id {isSafe 1}} {
     upvar #0 Session:$id session
-    set interp [interp create -safe interp$id]
+    if {$isSafe} then {
+	set interp [interp create -safe interp$id]
+    } else {
+        set interp [interp create interp$id]
+    }
     set session(start) [clock seconds]
     set session(current) $session(start)
     set session(count) 0
@@ -151,9 +155,9 @@ proc Session_Reap {age {type .*}} {
 	upvar #0 $id session
 	set old [expr {[clock seconds] - $age}]
 	if {[regexp -- $type $session(type)] && $session(current) < $old} {
-	    interp delete $session(interp)
-	    puts stderr "Reaping session $session"
-	    unset $session
+	    catch {interp delete $session(interp)}
+	    puts stderr "Reaping session $id"
+	    unset session
 	}
     }
 }
@@ -177,7 +181,7 @@ proc Session_Destroy {id} {
 # - type:  The type of this session
 # - error_name:  The variable holding the error result (if any)
 
-proc Session_Match {querylist {type {}} {error_name error}} {
+proc Session_Match {querylist {type {}} {error_name error} {isSafe 1}} {
     upvar $error_name error
 
     # Check the session informatioin provided in the query data.
@@ -194,10 +198,10 @@ proc Session_Match {querylist {type {}} {error_name error}} {
     }
 
     if {$query(session) == "new"} {
-	set query(session) [Session_Create $type]
+        set query(session) [Session_Create $type $isSafe]
     } elseif {[regexp "kill(.+)" $query(session) x id]} {
 	Session_Destroy $id
-	set query(session) [Session_Create $type]
+        set query(session) [Session_Create $type $isSafe]
     }
 
     upvar #0 Session:$query(session) session

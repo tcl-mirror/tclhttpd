@@ -25,8 +25,6 @@ proc DirList {dir urlpath} {
 	    }
 	}
     }
-
-
  
     if [string compare macintosh $tcl_platform(platform)] {
 	set what Directory
@@ -48,12 +46,14 @@ proc DirList {dir urlpath} {
 </HEAD>
 <BODY>
 <H1>Listing of $what $urlpath</H1>
-<form action=/$urlpath>
+
+<form action=$urlpath>
+Pattern <input type=text name=pattern value=$pattern><br>
+Sort by Modify Date <input type=radio name=sort value=number $numcheck>
+or Name <input type=radio name=sort value=name $namecheck><br>
+<input type=submit name=submit value='Again'><p>
 <PRE>
 "
-    append listing "Pattern <input type=text name=pattern value=$pattern><br>"
-    append listing "Sort by Modify Date <input type=radio name=sort value=number $numcheck> or Name <input type=radio name=sort value=name $namecheck><br>"
-    append listing "<input type=submit name=submit value=\"Again\"><p>"
 
     set path [file split $dir]
     if {[catch {lsort -dict [glob -nocomplain -- [file join $dir $pattern]]} list]} {
@@ -71,6 +71,7 @@ proc DirList {dir urlpath} {
 	foreach entry $list {
 	    setmax max [string length [file tail $entry]]
 	}
+	incr max [string length </a>]
 	if {[string compare $sort "number"] == 0} {
 	    set mlist {}
 	    foreach entry $list {
@@ -89,19 +90,19 @@ proc DirList {dir urlpath} {
 	    switch $lst(type) {
 		file {
 		    # Should determine dingbat from file type
-		    append listing "<A HREF=\"[file tail $entry]\">[format %-*s $max [file tail $entry]]</A> [format %8d $lst(size)] [format %-5s bytes]  [clock format $lst(mtime) -format $timeformat]\n"
+		    append listing "<A HREF=\"${urlpath}[file tail $entry]\">[format %-*s $max [file tail $entry]</a>] [format %8d $lst(size)] [format %-5s bytes]  [clock format $lst(mtime) -format $timeformat]\n"
 		}
 		directory {
-		    append listing "<A HREF=\"[file tail $entry]/\">[format %-*s $max [file tail $entry]/]</A> [format %8s {}] [format %-5s dir]  [clock format $lst(mtime) -format $timeformat]\n"
+		    append listing "<A HREF=\"${urlpath}[file tail $entry]/\">[format %-*s $max [file tail $entry]/</a>] [format %8s {}] [format %-5s dir]  [clock format $lst(mtime) -format $timeformat]\n"
 		}
 		link {
-		    append listing "<A HREF=\"[file tail $entry]\">[format %-*s $max [file tail $entry]]</A> [format %8s {}] [format %-5s link]  [clock format $lst(mtime) -format $timeformat] -> [file readlink $entry]\n"
+		    append listing "<A HREF=\"${urlpath}[file tail $entry]\">[format %-*s $max [file tail $entry]</a>] [format %8s {}] [format %-5s link]  [clock format $lst(mtime) -format $timeformat] -> [file readlink $entry]\n"
 		}
 		characterSpecial -
 		blockSpecial -
 		fifo -
 		socket {
-		    append listing "<A HREF=\"[file tail $entry]\">[format %-20s [file tail $entry]]</A> $lst(type)\n"
+		    append listing "<A HREF=\"${urlpath}[file tail $entry]\">[format %-20s [file tail $entry]</a>] $lst(type)\n"
 		}
 	    }
 	}

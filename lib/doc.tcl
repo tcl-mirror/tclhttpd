@@ -560,11 +560,11 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     ]]]
 
     Cgi_SetEnv $sock $filename pass
-    interp eval $Doc(templateInterp) [list uplevel #0 \
+    interp eval $interp [list uplevel #0 \
 	[list array set env [array get pass]]]
-    interp eval $Doc(templateInterp) [list uplevel #0 \
+    interp eval $interp [list uplevel #0 \
 	{catch {unset cgienv}}]
-    interp eval $Doc(templateInterp) [list uplevel #0 \
+    interp eval $interp [list uplevel #0 \
 	[list array set cgienv [array get pass]]]
 
     # Check query data
@@ -591,16 +591,16 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	set path [file join $path $dir]
 	set libfile [file join $path $Doc(tmlSuffix)]
 	if {[file exists $libfile]} {
-	    interp eval $Doc(templateInterp) [list uplevel #0 [list source $libfile]]
+	    interp eval $interp [list uplevel #0 [list source $libfile]]
 	}
     }
 
     # Process the template itself
 
-    set html [DocSubst $template $Doc(templateInterp)]
+    set html [DocSubst $template $interp]
 
     # Cache the result
-    set dynamic [interp eval $Doc(templateInterp) {uplevel #0 {set page(dynamic)}}]
+    set dynamic [interp eval $interp {uplevel #0 {set page(dynamic)}}]
 
     if {!$dynamic} {
 	catch {file delete -force $htmlfile}
