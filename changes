@@ -453,3 +453,20 @@ libtml/htmlutils.tcl	An assortment of procedures useful from
 		libtml/template.tcl file.
 
 ----------------- released 2.3.0 October 3, 1999 ------------------
+
+lib/doc.tcl	Fixed DocTemplate in two ways.  First, templates can both
+		set cookies with Doc_SetCookie and cause redirects with
+		Doc_Redirect.  Second, it deals correctly with pending
+		post data so document templates do not have to use
+		Httpd_GetPostData.
+
+lib/url.tcl	Fixed a bug where errors in document handlers would cause
+		the document handler to be run twice, once from the entry
+		in the UrlCache array, and one through the URL prefix dispatch.
+
+lib/httpd.tcl	Added Httpd_PostDataSize so you can see if there is any
+		pending post data.
+		Turned off the socket read handler before calling Url_Dispatch
+		so document handlers don't have to worry about the socket.
+
+----------------- released 2.3.1 October 5, 1999 ------------------
