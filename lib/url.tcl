@@ -230,9 +230,40 @@ proc Url_PathCheck {urlsuffix} {
     return $pathlist
 }
 
+proc Url_PostHook {sock length} {
+    global Url
+
+    # Backdoor hack for Url_DecodeQuery compatibility
+    # We remember the current connection so that Url_DecodeQuery
+    # can read the post data if it has not already be read by
+    # the time it is called.
+
+    set Url(sock) $sock
+    set Url(postlength) $length
+}
+
 # convert a x-www-urlencoded string into a list of name/value pairs
 
 proc Url_DecodeQuery {query args} {
+    global Url
+
+    if {[info exist Url(postlength)] && ($Url(postlength) > 0)} {
+	
+	# For compatibility with older versions of the Httpd module
+	# that used to read all the post data for us, we read it now
+	# if it hasn't already been read
+
+	append query &
+	while {$Url(postlength) > 0} {
+	    set Url(postlength) [Httpd_GetPostData $Url(sock) query]
+	}
+	unset Url(postlength)
+    }
+    eval {Url_DecodeQueryOnly $query} $args
+}
+
+proc Url_DecodeQueryOnly {query args} {
+
     array set options {-type application/x-www-urlencoded -qualifiers {}}
     catch {array set options $args}
     if {[string length [info command Url_DecodeQuery_$options(-type)]] == 0} {
@@ -242,24 +273,32 @@ proc Url_DecodeQuery {query args} {
 }
 
 proc Url_DecodeQuery_application/x-www-urlencoded {query qualifiers} {
-    regsub -all {\+} $query " " query
-    set result {}
 
     # These foreach loops are structured this way to ensure there are matched
     # name/value pairs.  Sometimes query data gets garbled.
 
+    set result {}
     foreach pair [split $query "&"] {
 	foreach {name value} [split $pair "="] {
-	    lappend result [UrlDecodeData $name] [UrlDecodeData $value]
+	    lappend result [Url_Decode $name] [Url_Decode $value]
 	}
     }
     return $result
 }
-proc UrlDecodeData {data} {
+proc Url_Decode {data} {
+    regsub -all {\+} $data " " data
     regsub -all {([][$\\])} $data {\\\1} data
     regsub -all {%([0-9a-fA-F][0-9a-fA-F])} $data  {[format %c 0x\1]} data
     return [subst $data]
 }
+if 0 {
+    proc UrlDecodeData {data} {
+	regsub -all {([][$\\])} $data {\\\1} data
+	regsub -all {%([0-9a-fA-F][0-9a-fA-F])} $data  {[format %c 0x\1]} data
+	return [subst $data]
+    }
+}
+
 
 # Sharing procedure bodies doesn't work with compiled procs,
 # so these call each other instead of doing
@@ -370,13 +409,6 @@ proc Url_DecodeMIMEField type {
     }
     foreach {major minor} [split $type /] break
     return [list [string trim $major] [string trim $minor] $qualList]
-}
-
-proc Url_Decode {data} {
-    regsub -all {\+} $data " " data
-    regsub -all {([][$\\])} $data {\\\1} data
-    regsub -all {%([0-9a-fA-F][0-9a-fA-F])} $data  {[format %c 0x\1]} data
-    return [subst $data]
 }
 
 # do x-www-urlencoded character mapping
