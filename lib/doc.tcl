@@ -164,6 +164,7 @@ proc Doc_File {sock curfile npath} {
 
 proc DocDomain {directory sock suffix} {
     global Doc
+    upvar #0 Httpd$sock data
 
     # Make sure the path doesn't sneak out via ..
 
@@ -192,7 +193,7 @@ proc DocDomain {directory sock suffix} {
 
     set path [eval {file join $directory} $pathlist]
     if [file exists $path] {
-	Incr Doc(hit,$suffix)
+	Incr Doc(hit,$data(url))
 	Url_Handle [list DocHandle $path $suffix $cookie] $sock
 	return
     }
@@ -313,11 +314,12 @@ proc DocChoose {accept choices} {
 # Handle a document URL.  Dispatch to the mime type handler, if defined.
 
 proc DocHandle {path suffix cookie sock} {
+    upvar #0 Httpd$sock data
     if ![Auth_Verify $sock $cookie] {
 	return	;# appropriate response already generated
     }
     if [file isdirectory $path] {
-	if {[string length $suffix] && ![regexp /$ $suffix]} {
+	if {[string length $data(url)] && ![regexp /$ $data(url)]} {
 	    # Insist on the trailing slash
 	    Httpd_RedirectDir $sock
 	    return
@@ -346,6 +348,7 @@ proc DocHandle {path suffix cookie sock} {
 # the index file pattern.
 
 proc DocDirectory {path suffix cookie sock} {
+    upvar #0 Httpd$sock data
     global Doc
     set npath [file join $path $Doc(indexpat)]
     set newest [DocLatest [glob -nocomplain $npath]]
@@ -362,7 +365,8 @@ proc DocDirectory {path suffix cookie sock} {
 	# Don't cache translation this to avoid latching onto the wrong file
 	return [DocHandle $newest $suffix $cookie $sock]
     }
-    Httpd_ReturnData $sock text/html [DirList $path $suffix]
+
+    Httpd_ReturnData $sock text/html [DirList $path $data(url)]
 }
 
 proc DocLatest {files} {
