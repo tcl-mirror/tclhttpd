@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc_error.tcl,v 1.2 2003/04/04 04:51:53 coldstore Exp $
+# RCS: @(#) $Id: doc_error.tcl,v 1.3 2003/10/27 13:57:56 coldstore Exp $
 
 package provide httpd::doc_error 1.0
 
@@ -100,9 +100,12 @@ proc Doc_NotFound { sock } {
 proc Doc_Error { sock ei } {
     global Doc
     upvar #0 Httpd$sock data
-    set Doc(errorUrl) $data(url)
-    set Doc(errorInfo) $ei	;# For subst
-    CountName $Doc(errorUrl) errors
+    # Could have been reset!!!
+    catch {
+	set Doc(errorUrl) $data(url)
+	set Doc(errorInfo) $ei	;# For subst
+	CountName $Doc(errorUrl) errors
+    }
     DocSubstSystemFile $sock error 500 [protect_text $ei]
 }
 
