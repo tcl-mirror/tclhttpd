@@ -1,3 +1,10 @@
+2000-10-26  Brent Welch <welch@ajubasolutions.com>
+
+	* lib/cgi.tcl:  fixed POST data handling in light of the
+	-readpost change to Url and Httpd.
+	* lib/counter.tcl: Explicitly initialize cgihits counter
+	* lib/version.tcl: Changed version to 3.2.1
+
 2000-10-20  Brent Welch <welch@ajubasolutions.com>
     
 	* DIST_build/Makefile.boot: Fixed installation of Tcllib
