@@ -538,15 +538,17 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 
     # Set state in the interpreter about this page
     set root ""
+    set prefix ""
     foreach d $dirs {
 	append root ../
+	append prefix /$d
     }
     if {[string length $htmlfile]} {
-	set url /[join $dirs /]/[file tail $htmlfile]
+	set url $prefix/[file tail $htmlfile]
 	set filename $htmlfile
 	set dynamic 0
     } else {
-	set url /[join $dirs /]/[file tail $template]
+	set url $prefix/[file tail $template]
 	set filename $template
 	set dynamic 1
     }
@@ -623,6 +625,15 @@ proc Doc_Dynamic {} {
     global page
     set page(dynamic) 1
     return "<!-- DynamicOnly -->\n"
+}
+
+# Doc_IsLinkToSelf
+#	Compare the link to the URL of the current page.
+#	If they seem to be the same thing, return 1
+
+proc Doc_IsLinkToSelf {url} {
+    global page
+    return [expr {[string compare $url $page(url)] == 0}]
 }
 
 # Check modify times on all templates that affect a page
