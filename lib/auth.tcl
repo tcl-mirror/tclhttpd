@@ -36,6 +36,11 @@ proc Auth_Check {sock directory pathlist} {
     global auth
     set cookie {}
 
+    # Make sure we do checks in the root
+    if {$pathlist==""} {
+	 set pathlist ./
+    }
+
     # Look for the .htaccess files that keep Basic Authtication info
     # or .tclaccess files with a general authorization callback
     set path $directory
