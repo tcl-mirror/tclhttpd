@@ -1,10 +1,23 @@
 # Nothin in this directory should be cached
 cd [Doc_Root]	;# so relative paths will be doc root relative
 Doc_Dynamic
+
+package require html
+if {[llength [info proc ::html::stylesheet]] == 0} {
+    proc ::html::stylesheet {href} {
+	variable page
+	lappend page(meta) "<link rel='stylesheet' type='text/css' href='$href'>"
+	return ""
+    }
+}
+
 namespace eval validation {
 }
 proc ::validation::genPasswd {password} {
-    package require crypt
+    if {[catch {package require crypt}] || [catch {crypt foo ba}]} {
+	# if we don't have a C library, fall back to pure tcl crypt
+	package require tclcrypt
+    }
     package require uuencode
     set crypt ":"
     while {[string match *:* $crypt]} {
@@ -14,7 +27,10 @@ proc ::validation::genPasswd {password} {
 }
 
 proc ::validation::chkPasswd {pass crypt} {
-    package require crypt
+    if {[catch {package require crypt}] || [catch {crypt foo ba}]} {
+	# if we don't have a C library, fall back to pure tcl crypt
+	package require tclcrypt
+    }
     set salt [string range $crypt 0 1]
     set crypt2 [crypt $pass $salt]
     if {[string compare $crypt $crypt2] != 0} {
@@ -37,7 +53,10 @@ proc ::validation::parseFile {file var {extra ""}} {
     }
     seek $in 0
     while {[gets $in line] >= 0} {
-	if {[regexp {^([^:]+):[      ]*([^: ]+)(.*)$} $line x key value extra]} {
+	if {[regexp {^[ \t]*#} $line]} {
+	    continue
+	}
+	if {[regexp {^[ \t]*([^:]+)[ \t]*:[ \t]*([^:]+)(.*)$} $line x key value extra]} {
 	    #append result "<p>[protect_text $line] [protect_text $key] [protect_text $value] [protect_text $extra]"
 	    set v($key) [string trim $value]
 	    set e($key) [string trim $extra]

@@ -1,67 +1,151 @@
 [html::author "Colin McCormack"]
-[mypage::header "Access Control User Editor"]
+[html::stylesheet ./htaccess.css]
+[mypage::header "User Editor"]
 [
- set file [ncgi::value file]
- 
- set in [validation::parseFile $file users]
- set valid 1
- if {$in != ""} {
-     set valid 0
-     return "<p>$in</p>"
- } else {
-     return "<p>(Read [ncgi::value file])</p>"
- }
-]
-[
- set name [ncgi::value name]
- # write file if necessary
- if {$valid && $name != ""} {
-     if {[ncgi::value action] == "Del"} {
-	 catch {unset users($name)}
-     } else {
-	 set users($name) [validation::genPasswd [ncgi::value password]]
+ set directory [html::quoteFormValue [ncgi::value directory]]
+ set file [html::quoteFormValue [ncgi::value file]]
+ if {[ncgi::value action] == "Create"} {
+     if {![file exists $file]} {
+	 set fd [open $file w]
+	 puts $fd "\# Created [clock format [clock seconds]] by /htaccess"
+	 close $fd
      }
-     
-     # save the file if necessary
+ }
+
+ set in [validation::parseFile $file users]
+
+ if {$in != ""} {
+     # file doesn't exist - create it
+     set html "<p>User File $file doesn't exist.</p>"
+     append html [subst {
+	 <h4>Create new (or specify existing) User File:</h4>
+	 <form action="$page(url)" method=POST>
+	 <input type=hidden name=directory value="$directory">
+	 <input type=text name=file  value="$file">
+	 <input type=submit name=action value=Create>
+	 </form>
+     }]
+     return $html
+ }
+
+ set name [ncgi::value name]	;# user name to edit
+
+ # strip file of Digest passwords of the form '*@*'
+ foreach {key value} [array get users *@*] {
+     if {[regexp {([^@]+)@(.+)} $key junk user realm]} {
+	 # get the list of realms for which user is digest-authenticated
+	 if {[info exists users($user)]} {
+	     lappend realms($user) $realm
+	 }
+
+	 if {$user eq $name} {
+	     # user is named for edit or deletion
+	     # we strip their digest passwords in either Del or Edit case
+	     # because it'll be regenerated below
+	     unset users($key)
+	 }
+     }
+ }
+
+ if {$name != ""} {
+     # we're editing or deleting a user named $name
+     if {[ncgi::value action] == "Del"} {
+	 # remove any trace of the named user
+	 # note: we assume user@* has already been removed
+	 catch {unset users($name)}
+	 catch {unset realms($name)}
+     } else {
+	 set password [ncgi::value password]
+	 set realm_list [string trim [ncgi::value realm] " "]	;# user's realms
+	 catch {unset realms($name)}	;# the user has no default realms
+
+	 # generate the Basic crypt'ed password
+	 set users($name) [validation::genPasswd $password]
+
+	 # create Digest passwords for each of the user's realms
+	 foreach realm [split $realm_list] {
+	     lappend realms($name) $realm
+	     set users(${name}@$realm) [Digest_Passwd $name $realm $password]
+	 }
+     }
+
+     # save the file
      validation::writefile $file users
      
-     return "<p>(Updated [ncgi::value file])</p>"
+     set caption "User File: $file (Updated)"
+ } else {
+     set caption "User File: $file"
  }
-]
-[
+
+ set html [subst {
+     <table class='group' align='center'>
+     <caption>$caption</caption>
+     <tr><th>User</th>
+     <th title='Change User Password'>Password</th>
+     <th title='Realms accessible to User'>Realms</th>
+     <th title='Action to perform on User'>Action</th>
+     </tr>
+ }]
+
  ncgi::setValue name ""
  ncgi::setValue people ""
  ncgi::setValue action 0
- set html ""
- if {$file != ""} {
-     foreach {key value} [array get users] {
-	 append html [subst {
-	     <form action="$page(url)" method=POST>
-	     <input type=hidden name=file  value="[html::quoteFormValue $file]">
-	     <input type=hidden name=name value="[html::quoteFormValue $key]">
-	     <input type=submit value="[html::quoteFormValue $key]">
-	     <input type=text name=password value="">
-	     <input type=checkbox name=action value=Del>Del
-	     </form>
-	 }]
-     }
+ 
+ # strip the Digest entries from users
+ foreach key [array names users *@*] {
+     unset users($key)
+ }
 
-     append html [subst {<form action="$page(url)" method=POST>
-	 <input type=hidden name=file  value="[html::quoteFormValue $file]">
-	 <input type=text name=name value="">
-	 <input type=text name=password value="">
-	 <input type=submit name=action value=Add>
+ # generate a table row + form per user
+ foreach {key} [lsort [array names users]] {
+     set value $users($key)
+     if {[info exists realms($key)]} {
+	 set realm [html::quoteFormValue [lsort $realms($key)]]
+     } else {
+	 set realm ""
+     }
+     set key [html::quoteFormValue $key]
+
+     append html [subst {
+	 <tr>
+	 <form action="$page(url)" method=POST>
+	 <input type=hidden name=file  value="$file">
+	 <input type=hidden name=name value="$key">
+	 <input type=hidden name=directory value="$directory">
+
+	 <td><input type=submit value="$key" size=12></td>
+	 <td><input type=password name=password value="" size=10></td>
+	 <td><input type=text name=realm value="$realm" size=50></td>
+	 <td><input type=checkbox name=action value=Del>Del</td>
 	 </form>
+	 </tr>
      }]
- } 
+ }
+ 
+ append html [subst {
+     <tr>
+     <form action="$page(url)" method=POST>
+     <input type=hidden name=file  value="$file">
+     <input type=hidden name=directory value="$directory">
+     <td><input type=text name=name value="" size=12 title='New User name'></td>
+     <td><input type=password name=password value="" size=10></td>
+     <td><input type=text name=realm value="" size=50></td>
+     <td><input type=submit name=action value=Add title='Add new user to file'></td>
+     </form>
+     </tr>
+ }]
+ append html </table>
  return $html
 ]
-<p><a href="index.html">Return to htaccess editor</a></p>
-
+</table>
+<p><a href='index.html?directory=$directory'>Resume editing</a> $directory</p>
 [
  unset html
+ catch {unset realms}
  #ncgi::setValue debug 1
- return [::validation::debug users]
+ set x [::validation::debug users]
+ catch {unset users}
+ return $x
 ]
 
 [mypage::footer]

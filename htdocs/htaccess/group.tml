@@ -1,71 +1,92 @@
 [html::author "Colin McCormack"]
-[mypage::header "Access Control Group Editor"]
+[html::stylesheet ./htaccess.css]
+[mypage::header "Group Editor"]
 [
- set file [ncgi::value file]
- set in [validation::parseFile $file groups]
- set valid 1
- if {$in != ""} {
-     set valid 0
-     return "<p>$in</p>"
- } else {
-     return "<p>(Read [ncgi::value file])</p>"
- }
-]
-[
- # write file if necessary 
- set group [ncgi::value group]
- if {$group != ""} {
-     if {[ncgi::value action] == "Del"} {
-	 catch {unset groups($group)}
-     } else {
-	 set groups($group) [ncgi::value people]
+ set directory [html::quoteFormValue [ncgi::value directory]]
+ set file [html::quoteFormValue [ncgi::value file]]
+ if {[ncgi::value action] == "Create"} {
+     if {![file exists $file]} {
+	 set fd [open $file w]
+	 puts $fd "\# Created [clock format [clock seconds]] by /htaccess"
+	 close $fd
      }
-
-     # save the file if necessary
-     validation::writefile $file groups
-
-     return "<p>(Updated [ncgi::value file])</p>"
  }
-]
-[
- ncgi::setValue group ""
- ncgi::setValue people ""
- ncgi::setValue action 0
- catch {unset html}
- return ""
-]
-[
- if {$valid} {
-     return [subst { 
-	 <h4>Create a new group by typing its name and members, then clicking Add</h4>
+
+ set in [validation::parseFile $file groups]
+
+ if {$in != ""} {
+     # file doesn't exist - create it
+     set html [subst {
+	 <p>Group File $file doesn't exist.</p>
+	 <h4>Create new group file by typing its name, then clicking Create</h4>
 	 <form action="$page(url)" method=POST>
-	 <input type=hidden name=file  value="[html::quoteFormValue $file]">
-	 <input type=text name=group value="">
-	 <input type=text name=people value="">
-	 <input type=submit name=action value=Add>
+	 <input type=hidden name=directory value="$directory">
+	 <input type=text name=file value="$file">
+	 <input type=submit name=action value=Create>
 	 </form>
      }]
- }
-]
- [
- set html ""
- if {$valid} {
-     set html "<h4>Edit the groups below by typing new group members<br>or check Del to delete the group.<br>Update by clicking on the group name.</h4>"
-     foreach {key value} [array get groups] {
+ } else {
+     # write file if necessary 
+     set group [ncgi::value group]
+     if {$group != ""} {
+	 if {[ncgi::value action] == "Del"} {
+	     catch {unset groups($group)}
+	 } else {
+	     set groups($group) [ncgi::value people]
+	 }
+
+	 # save the file if necessary
+	 validation::writefile $file groups
+
+	 set html "<p>Group File: $file (Updated)</p>"
+
+     } else {
+	 set html "<p>Group File: $file</p>"
+     }
+
+     append html {
+	 <table class='group' align='center'>
+	 <tr><th>Group</th><th>Members</th><th>Action</th></tr>
+     }
+
+     ncgi::setValue group ""
+     ncgi::setValue people ""
+     ncgi::setValue action 0
+
+     foreach {key} [lsort [array names groups]] {
+	 set value [html::quoteFormValue [lsort $groups($key)]]
+	 set key [html::quoteFormValue $key]
 	 append html [subst {
 	     <form action="$page(url)" method=POST>
-	     <input type=hidden name=file  value="[html::quoteFormValue $file]">
-	     <input type=hidden name=group value="[html::quoteFormValue $key]">
-	     <input type=submit value="[html::quoteFormValue $key]">
-	     <input type=text name=people value="[html::quoteFormValue $value]">
-	     <input type=checkbox name=action value=Del>Del
+	     <tr>
+	     <input type=hidden name=file  value="$file">
+	     <input type=hidden name=group value="$key">
+	     <input type=hidden name=directory value="$directory">
+
+	     <td><input type=submit value="$key" size=12></td>
+	     <td><input type=text name=people value="$value" size=50></td>
+	     <td><input type=checkbox name=action value=Del>Del</td>
+	     </tr>
 	     </form>
 	 }]
      }
+     append html [subst { 
+	 <form action="$page(url)" method=POST>
+	 <tr>
+	 <input type=hidden name=file  value="$file">
+	 <input type=hidden name=directory value="$directory">
+
+	 <td><input type=text name=group value="" size=12 title='new group name'></td>
+	 <td><input type=text name=people value="" size=50></td>
+	 <td><input type=submit name=action value=Add title='click to add new group'></td>
+	 </tr>
+	 </form>
+     }]
  }
  return $html
 ]
-<p><a href="index.html">Return to htaccess editor</a></p>
+</table>
+<p><a href="index.html?directory=$directory">Resume editing</a> $directory</p>
 [
  unset html
 #ncgi::setValue debug 1
