@@ -13,7 +13,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.11 2000/08/02 07:06:51 welch Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.12 2000/08/25 17:50:31 hershey Exp $
 
 package provide httpd::auth 1.0
 package require base64
@@ -333,7 +333,7 @@ proc AuthParseHtaccess {sock file} {
 	    if [catch {
 		eval {Ht-$cmd auth$file} [lrange $words 1 end]
 	    } err] {
-		Log $sock $err
+		Log $sock Error $err
 	    }
 	}
 	close $in
