@@ -1,3 +1,9 @@
+2000-09-29  Lee Bernhard  <lfb@ajubasolutions.com>
+
+	* lib/direct.tcl: Split DirectDomain into four functions that
+	parse the query data, assemble the Tcl command line to execute,
+	evaluate the command, and return a result.  
+
 2000-09-27  Brent Welch <welch@ajubasolutions.com>
 
 	* lib/direct.tcl: Converted this to use the ncgi:: module.
