@@ -57,24 +57,34 @@ proc Base64_Decode {string} {
     set group 0
     set j 18
     foreach char [split $string {}] {
+	if {[string compare $char \n] == 0} {
+	    continue
+	}
 	if [string compare $char "="] {
 	    set bits $base64($char)
 	    set group [expr {$group | ($bits << $j)}]
+	} else {
+	    break
 	}
 
 	if {[incr j -6] < 0} {
 	    scan [format %06x $group] %2x%2x%2x a b c
-	    # Append carefully to avoid trailing NULLs
-	    if {$c} {
-		append output [format %c%c%c $a $b $c]
-	    } elseif {$b} {
-		append output [format %c%c $a $b]
-	    } elseif {$a} {
-		append output [format %c $a]
-	    }
+	    append output [format %c%c%c $a $b $c]
 	    set group 0
 	    set j 18
 	}
+    }
+    switch $j {
+	-6 { # Even multiple of 4 6-bit chars }
+	0 { # One traiing = means one extra byte we don't want
+	    scan [format %06x $group] %2x%2x%2x a b c
+	    append output [format %c%c $a $b]
+	}
+	6 { # Two tailing == means two extra bytes we don't want
+	    scan [format %06x $group] %2x%2x%2x a b c
+	    append output [format %c $a] 
+	}
+	12 { # Shouldn't happen, go through loop at least twice }
     }
     return $output
 }
