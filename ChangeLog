@@ -1,3 +1,7 @@
+2004-07-09 Colin McCormack <colin@chinix.com>
+        * sampleapp/ca/: Added a simple Certificate Authority sufficient
+	to create CA and server keys, and deliver them to a client.
+
 2004-07-08 Colin McCormack <colin@chinix.com>
         * lib/config.tcl: fixed bug in config file rewrite
 
