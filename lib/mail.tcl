@@ -34,7 +34,15 @@ proc Mail/bugreport {email errorInfo args} {
 proc Mail/forminfo {sendto subject href label args} {
     set from ""
     foreach {name value} $args {
-	append message [list Data $name $value]\n
+	# If the value has unbalanced braces, we will do base64
+	# encoding to avoid a huge jumble of backslashes and
+	# a long line that will not survive the email transport
+	set blob [list $value]
+	if {[regsub -all \\\\ $blob {} _] > 0} {
+	    append message [list Data64 $name [Base64_Encode $value]]\n
+	} else {
+	    append message [list Data $name $value]\n
+	}
 	if {[string compare $name "email"] == 0} {
 	    set from $value
 	}
