@@ -1,0 +1,280 @@
+# Makefile.in --
+#
+#	This file is a Makefile for the tclhttpd web server
+#
+# Copyright (c) 1999-2000 Scriptics Corporation.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: Makefile.in,v 1.1 2000/01/20 23:31:00 wart Exp $
+
+# TEMPORARY:  Values for the dist target.
+
+DISTDIR=/tmp/
+DEST=${DISTDIR}/tclhttpd${VERSION}
+
+HTDOCS_FILES = \
+	error.html \
+	.tml \
+	access/auth/.htaccess \
+	access/auth/hello.txt \
+	access/.htaccess \
+	access/README.txt \
+	access/bydir/.htaccess \
+	access/bydir/README.txt \
+	access/bydir/user.cgi \
+	access/bytcl/.tclaccess \
+	access/noawe/.htaccess \
+	access/session/.tclaccess \
+	access/session/page.auth \
+	hacks.html \
+	include.shtml \
+	index.html \
+	license.terms \
+	notfound.html \
+	register.html \
+	book/TCLHTTPD-1.gif \
+	book/TCLHTTPD-2.gif \
+	book/TCLHTTPD.css \
+	book/TCLHTTPD.html \
+	cgi-bin/big.cgi \
+	cgi-bin/cgilib.tcl \
+	cgi-bin/cwd.cgi \
+	cgi-bin/debugee.cgi \
+	cgi-bin/env \
+	cgi-bin/env.cgi \
+	cgi-bin/err0.cgi \
+	cgi-bin/err1.cgi \
+	cgi-bin/err2.cgi \
+	cgi-bin/flip.cgi \
+	cgi-bin/junk \
+	cgi-bin/junk.exe \
+	cgi-bin/prodebug.tcl \
+	cgi-bin/redirect.cgi \
+	cgi-bin/sleep.cgi \
+	cgi-bin/tclIndex \
+	cgi-bin/test.cgi \
+	cgi-bin/user.cgi \
+	forms/file.html \
+	forms/form1.html \
+	forms/index.html \
+	forms/posttest.html \
+	guestbook/guestbook.cgi \
+	guestbook/newguest.cgi \
+	guestbook/newguest.html \
+	images/Blue.gif \
+	images/Red.gif \
+	images/ScripticsLogo1.gif \
+	images/TclPro200.gif \
+	images/lake.gif \
+	images/lake.map \
+	images/logo125.gif \
+	images/ppt1.gif \
+	images/ppt2.gif \
+	images/ppt3.gif \
+	images/ppt4.gif \
+	images/ppt5.gif \
+	images/pwrdLogo100.gif \
+	images/pwrdLogo150.gif \
+	images/pwrdLogo175.gif \
+	images/pwrdLogo200.gif \
+	images/pwrdLogo75.gif \
+	images/setup.gif \
+	images/tcl89.gif \
+	include/footer.html \
+	java/Auth.class \
+	java/Getpass.class \
+	java/Helper.class \
+	java/MD5.class \
+	java/README \
+	java/ServerDemo.class \
+	java/ServerDemo.html \
+	java/auth.js \
+	java/test.html \
+	libtml/faq.tcl \
+	libtml/form.tcl \
+	libtml/htmlutils.tcl \
+	libtml/pkgIndex.tcl \
+	libtml/ss_survey.tcl \
+	libtml/sunscript.tcl \
+	manual/htdig.html \
+	manual/reference.html \
+	manual/stdin.html \
+	map/bush.html \
+	map/index.html \
+	map/mapdefault.html \
+	map/surfer.html \
+	snmp/browser/end.snmp \
+	snmp/browser/README \
+	snmp/browser/browser.snmp \
+	snmp/browser/browser2.snmp \
+	snmp/browser/control.snmp \
+	snmp/browser/start.html \
+	snmp/browser/table.snmp \
+	snmp/browser/title.html \
+	snmp/browser/title.snmp \
+	snmp/browser/walk.snmp \
+	snmp/browser/walker.snmp \
+	snmp/allport.snmp \
+	snmp/discover.snmp \
+	snmp/host.snmp \
+	snmp/index.html \
+	snmp/outdiscov.snmp \
+	snmp/portdetail.snmp \
+	snmp/repeat.snmp \
+	snmp/system.snmp \
+	snmp/telnet.snmp \
+	snmp/telnet_pass.snmp \
+	snmp/test_mibTable/index.html \
+	snmp/test_mibTable/README \
+	snmp/test_mibTable/table1.snmp \
+	snmp/test_mibTable/table2.snmp \
+	snmp/test_mibTable/table3.snmp \
+	snmp/test_mibTable/table4.snmp \
+	snmp/test_mibTable/test2.snmp \
+	stats/doc.tml \
+	stats/.tml \
+	stats/index.tml \
+	stats/notfound.tml \
+	templates/form.tml \
+	templates/.tml \
+	templates/index.tml \
+	templates/simple.subst
+
+HTDOCS_DIRS = \
+	access \
+	access/auth \
+	access/bydir \
+	access/bytcl \
+	access/noawe \
+	access/session \
+	book \
+	cgi-bin \
+	forms \
+	guestbook \
+	images \
+	include \
+	java \
+	libtml \
+	manual \
+	map \
+	snmp \
+	snmp/browser \
+	snmp/test_mibTable \
+	stats \
+	templates
+
+#========================================================================
+# Nothing of the variables below this line need to be changed.
+#========================================================================
+
+SHELL = @SHELL@
+EXEEXT	= @EXEEXT@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+htdocsdir = $(prefix)/htdocs
+
+pkglibdir = ${prefix}/lib/@PACKAGE@@VERSION@
+
+top_builddir = .
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+
+PACKAGE = @PACKAGE@
+VERSION = @VERSION@
+PROWRAP = @PROWRAP@
+AUTOCONF = autoconf
+CYGPATH = @CYGPATH@
+TCLSH_PROG = @TCLSH_PROG@
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+
+#========================================================================
+# TEA TARGETS.  Please note that the "libraries:" target refers to platform
+# independent files, and the "binaries:" target inclues executable programs and
+# platform-dependent libraries.  Modify these targets so that they install
+# the various pieces of your package.  The make and install rules
+# for the BINARIES that you specified above have already been done.
+#========================================================================
+
+all: binaries libraries doc
+
+binaries:
+
+libraries:
+
+doc:
+
+install: all install-binaries install-libraries install-doc
+
+test:
+
+depend:
+
+install-binaries:
+
+install-libraries: installdirs install-htdocs
+	@echo "Installing script programs in $(prefix)/bin"
+	@for i in $(srcdir)/bin/*.tcl ; do \
+	    $(INSTALL_SCRIPT) $$i $(prefix)/bin ; \
+	done;
+	@for i in $(srcdir)/bin/*.rc ; do \
+	    $(INSTALL_SCRIPT) $$i $(prefix)/bin ; \
+	done;
+	@echo "Installing script files in $(pkglibdir)"
+	@for i in $(srcdir)/lib/*.tcl ; do \
+	    $(INSTALL_SCRIPT) $$i $(pkglibdir) ; \
+	done;
+	$(INSTALL_SCRIPT) $(srcdir)/lib/mime.types $(pkglibdir)
+
+install-htdocs:
+	@echo "Creating skeleton htdocs tree in $(htdocsdir)"
+	@for i in $(HTDOCS_DIRS) ; do \
+	    $(mkinstalldirs) $(htdocsdir)/$$i ; \
+	done ;
+	@echo "Populating htdocs tree..."
+	@for i in $(HTDOCS_FILES) ; do \
+	    $(INSTALL_SCRIPT) $(srcdir)/htdocs/$$i $(htdocsdir)/$$i ; \
+	done;
+
+install-doc:
+
+installdirs:
+	$(mkinstalldirs) $(pkglibdir) $(prefix)/bin $(htdocsdir)
+
+clean:  
+	-test -z "$(BINARIES)" || rm -f $(BINARIES)
+	-rm -f *.o core *.core
+	-rm -f *.$(OBJEXT)
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+
+distclean: clean
+	-rm -f *.tab.c
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+	-rm -f config.status
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+# dist target
+
+dist:
+	rm -rf $(DEST)
+	$(TCLSH_PROG) $(srcdir)/bin/CopyDist `pwd` $(DEST)
+	(cd $(DISTDIR); tar cf - ./tclhttpd$(VERSION) | gzip > tclhttpd$(VERSION).tar.gz)
+	(cd $(DISTDIR) ; zip -9 -r -o  tclhttpd$(WIN_VERSION).zip  tclhttpd$(VERSION))
+.PHONY: all binaries clean depend distclean doc install installdirs \
+libraries test
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

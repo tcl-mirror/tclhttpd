@@ -1,0 +1,51 @@
+AC_INIT(bin/httpd.tcl)
+
+PACKAGE=tclhttpd
+
+MAJOR_VERSION=2
+MINOR_VERSION=3
+PATCHLEVEL=.6
+
+VERSION=${MAJOR_VERSION}.${MINOR_VERSION}${PATCHLEVEL}
+NODOT_VERSION=${MAJOR_VERSION}${MINOR_VERSION}
+WIN_VERSION=`echo ${VERSION} | sed -e 's/\.//g'`
+
+AC_SUBST(PACKAGE)
+AC_SUBST(VERSION)
+AC_SUBST(WIN_VERSION)
+eval AC_DEFINE_UNQUOTED(VERSION, "${VERSION}")
+
+AC_PROG_INSTALL
+
+#--------------------------------------------------------------------
+# "cygpath" is used on windows to generate native path names for include
+# files.
+# These variables should only be used with the compiler and linker since
+# they generate native path names.
+#
+# Unix tclConfig.sh points SRC_DIR at the top-level directory of
+# the Tcl sources, while the Windows tclConfig.sh points SRC_DIR at
+# the win subdirectory.  Hence the different usages of SRC_DIR below.
+#
+# This must be done before calling SC_PUBLIC_TCL_HEADERS
+#--------------------------------------------------------------------
+
+case "`uname -s`" in
+    *win32* | *WIN32* | *CYGWIN_NT*)
+	CYGPATH="cygpath -w"
+    ;;
+    *)
+	CYGPATH=echo
+    ;;
+esac
+
+AC_SUBST(CYGPATH)
+
+#--------------------------------------------------------------------
+# This is used when running "make dist"
+#--------------------------------------------------------------------
+
+SC_PROG_TCLSH
+
+AC_OUTPUT([Makefile],
+	chmod +x ${srcdir}/install-sh ${srcdir}/mkinstalldirs)
