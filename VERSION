@@ -23,3 +23,5 @@ DIST_build/DIST
         tclhttpd-3-4-rel-2)
 DIST_build/DIST.exp
         To remove the scratch directories used to create the distribution
+DIST_build/Makefiel.boot
+        To fix the version number

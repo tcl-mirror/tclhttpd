@@ -1,3 +1,8 @@
+2002-10-14  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch).
+        * DIST_build/Makefile.boot: Fixed version reference
+        * VERSION: updated notes
+
 2002-09-23  Brent Welch <welch@panasas.com>
         * (In the tclhttpd-3-4-rel branch).
         * lib/upload.tcl: Added the completion callback to UploadTidyUp.

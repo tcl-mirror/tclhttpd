@@ -5,7 +5,7 @@ See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 Version: 3.4.2
-Last Modified: Tue Sep  3 15:05:00 PDT 2002
+Last Modified: Mon Oct 14 18:17:43 PDT 2002
 
 QUICK START
 
@@ -42,6 +42,12 @@ httpd.tcl -help
 This lets you set basic parameters like port number and server name.
 
 VERSION SUMMARY
+
+Version 3.4.2 has bug fixes in the directory listing code (dirlist.tcl).
+Prevent listing of directory trees outside the URL tree, and get them to work
+at all.  Added a fix in upload.tcl so that extra post data is cleaned up
+correctly - fixes bugs that occur when GET and POST uploads are mixed.
+Minor cleanup to the sample htdocs tree.
 
 Version 3.4.1 fixes CGI POST forms on Windows, a typo in upload.tcl
 and the lib/pkgIndex.tcl.  It also disallows the ability to retrieve
