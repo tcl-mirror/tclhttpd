@@ -40,11 +40,11 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.14 2004/09/16 04:54:46 coldstore Exp $
+# RCS: @(#) $Id: session.tcl,v 1.15 2004/10/19 03:55:33 coldstore Exp $
 
 package provide httpd::session 1.0
 
-package require httpd::cookie	;# Cookie_Get Cookie_GetSock Cookie_Set Cookie_Unset
+package require httpd::cookie	;# Cookie_GetSock Cookie_Make
 package require httpd::doc	;# Doc_Root
 package require httpd::utils	;# Stderr file iscommand randomx
 
@@ -200,14 +200,7 @@ proc Session_Destroy {id} {
     if {[info exists session]} {
 	interp delete $session(interp)
 	unset session
-
-	global Session
-	set sfile [file join [SessionDir] ${id}.sess]
-	if {[file exists $sfile]} {
-	    # delete the session save file
-	    file delete $sfile
-	}
-
+	SessionDiscard $id
 	return 1
     } else {
     	return 0
@@ -226,11 +219,12 @@ proc Session_Destroy {id} {
 proc Session_Cookie {{querylist {}} {type {}} {error_name error} {isSafe 1}} {
     upvar $error_name error
     global Httpd
+    set sock $Httpd(currentSocket)
 
     # fetch cookies pertaining to session
     set old 0
     foreach {key var} {session session session_sequence sequence} {
-	set x [Cookie_GetSock $Httpd(currentSocket) ${type}_$key]
+	set x [Cookie_GetSock $sock ${type}_$key]
 	if {$x != ""} {
 	    incr old
 	    lappend querylist $var [lindex $x 0]
@@ -259,7 +253,7 @@ proc Session_Cookie {{querylist {}} {type {}} {error_name error} {isSafe 1}} {
 	    session_sequence session(sequence)
 	    session_type session(type)} {
 	    if {[info exists $var]} {
-		Cookie_Set -expires $Session(expires) -path / -name ${type}_$key -value [set $var]
+		Httpd_SetCookie $sock [Cookie_Make -expires $Session(expires) -path / -name ${type}_$key -value [set $var]] 1
 	    }
 	}
     }
@@ -291,16 +285,17 @@ proc SessionDir {} {
 # note, this won't take immediate effect,
 # you may have to reload the page to get the new cookies
 proc Session_CookieDestroy {{type {}}} {
+    global Httpd
+    set sock $Httpd(currentSocket)
+    
     foreach key {session session_sequence} {
-	Cookie_Unset ${type}_$key -path /
+	Httpd_RemoveCookies $sock ${type}_*
     }
 }
 
 # Save session state in a file under $Session(dir),
 # for later reconstruction
 proc Session_Save {id} {
-    # see if there's a session to be instantiated
-    global Session
     upvar #0 Session:$id session
 
     # create a session save file, write state
@@ -334,6 +329,45 @@ proc Session_Save {id} {
     puts $fd $arrays
 
     close $fd
+}
+
+# SessionDiscard - destroy persistent record of session $id
+proc SessionDiscard {id} {
+    set sfile [file join [SessionDir] ${id}.sess]
+    if {[file exists $sfile]} {
+	# delete the session save file
+	file delete $sfile
+    }
+}
+
+# SessionFetch - fetch persistent record of session $id
+proc SessionFetch {id} {
+    upvar #0 Session:$id session
+    set sfile [file join [SessionDir] ${id}.sess]
+    if {[file exists $sfile]} {
+	# open a session save file, read state
+	set fd [open $sfile r]
+	set type [gets $fd]
+	set isSafe [gets $fd]
+	set sarray [gets $fd]
+	set script [read $fd]
+	close $fd
+	
+	# create the interpreter
+	Session_CreateWithID $type $id $isSafe
+	array set session $sarray	;# set session vars
+	interp eval $session(interp) $script
+
+	# consistency check
+	if {$type != {} && $type != $session(type)} {
+	    return "Session: Invalid session type."
+	}
+
+	return ""
+    } else {
+	# there's no stored session
+	return "Session: Invalid session id."
+    }
 }
 
 # Find the correct session, and return the proper interp or error.
@@ -371,35 +405,15 @@ proc Session_Match {querylist {type {}} {error_name error} {isSafe 1}} {
     upvar #0 Session:$id session
     if {![array exists session]} {
 	# see if there's a session to be instantiated
-	global Session
-
-	set sfile [file join [SessionDir] ${id}.sess]
-	if {[file exists $sfile]} {
-	    # open a session save file, read state
-	    set fd [open $sfile r]
-	    set type [gets $fd]
-	    set isSafe [gets $fd]
-	    set sarray [gets $fd]
-	    set script [read $fd]
-	    close $fd
-
-	    # create the interpreter
-	    Session_CreateWithID $type $id $isSafe
-	    array set session $sarray	;# set session vars
-	    interp eval $session(interp) $script
-	} else {
-	    set error "Session: Invalid session id."
+	set error [SessionFetch $id]
+	if {$error != ""} {
 	    return {}
 	}
-    }
-
-    if {$type != {} && $type != $session(type)} {
-    	set error "Session: Invalid session type."
-    	return $id
+    } else {
+	# session's already instantiated
     }
 
     # Check sequence number (if any).
-
     if {[info exists session(sequence)]} {
     	if {![info exists query(sequence)]} {
 	    set error "Session: Sequence number required, not provided."
