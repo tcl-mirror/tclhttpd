@@ -4,7 +4,7 @@ package require http 2.0
 
 set url [lindex $argv 0]
 if {[string length $url] == 0} {
-    set server http://localhost:8015/debug/echo
+    set url http://localhost:8015/debug/echo
 }
 
 # Construct a vast amount of post data to try and choke the server.
