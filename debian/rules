@@ -2,7 +2,7 @@
 # -*- makefile -*-
 # debian/rules with debhelper for tclhttpd
 
-export VERSION=3.4.3
+export VERSION=3.5.0
 export BUILD=$(CURDIR)/debian/tclhttpd/
 
 # Uncomment this to turn on verbose mode.
@@ -65,7 +65,7 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/<packagename>
-	$(MAKE) DESTDIR=`pwd`/debian/`dh_listpackages` SERVER_ROOT=/var/www install pkglibdir=/usr/lib/tclhttpd$(VERSION)
+	$(MAKE) DESTDIR=`pwd`/debian/`dh_listpackages` SERVER_ROOT=/var/www pkglibdir=/usr/lib/tclhttpd$(VERSION) install
 	#cp `which env` $(BUILD)/var/www/htdocs/cgi-bin/env
 	-rm $(BUILD)/var/www/htdocs/cgi-bin/env
 	rm $(BUILD)/var/www/htdocs/license.terms
