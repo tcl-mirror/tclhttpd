@@ -233,24 +233,26 @@ proc StatusMainTable {} {
     append html "<p>[StatusTable counter counter_reset]<p>\n"
 
     # Per thread stats
-
-    set self [Thread_Id]
-    foreach id [lsort -integer [Thread_List]] {
-	if {$id == $self} {
-	    continue
-	}
-	append html "<h4>Thread $id</h4>\n"
-	global counter_thread_$id
-	if {[Thread_IsFree $id]} {
-	    array set counter_thread_$id [Thread_Send $id {array get ::counter}]
-	} else {
-	    # Use cached version of the other threads counters,
-	    # but update our stats for next time.
-	    append html "<i>busy, using cached values</i>\n"
-	    Thread_SendAsync $id [list StatusThreadUpdate $id $self]
-	}
-	if {[info exist counter_thread_$id]} {
-	    append html [StatusTable counter_thread_$id]
+    if {$Thread(enable)} {
+        set self [Thread_Id]
+	foreach id [lsort -integer [Thread_List]] {
+	    if {$id == $self} {
+		continue
+	    }
+	    append html "<h4>Thread $id</h4>\n"
+	    global counter_thread_$id
+	    if {[Thread_IsFree $id]} {
+		array set counter_thread_$id \
+		    [Thread_Send $id {array get ::counter}]
+	    } else {
+		# Use cached version of the other threads counters,
+		# but update our stats for next time.
+		append html "<i>busy, using cached values</i>\n"
+		Thread_SendAsync $id [list StatusThreadUpdate $id $self]
+	    }
+	    if {[info exist counter_thread_$id]} {
+		append html [StatusTable counter_thread_$id]
+	    }
 	}
     }
     return $html

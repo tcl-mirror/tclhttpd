@@ -69,7 +69,10 @@ proc Thread_Disable {} {
 #	a list
 
 proc Thread_List {} {
-    return [thread names]
+	global Thread
+	if {$Thread(enable)} {
+        return [thread names]
+	}
 }
 
 
@@ -130,7 +133,7 @@ proc Thread_Start {} {
 proc Thread_Dispatch {sock cmd} {
     global Thread
     upvar #0 Httpd$sock data
-    if {$Thread(maxthreads) == 0 || !$Thread(enable)} {
+    if {!$Thread(enable) || $Thread(maxthreads) == 0} {
 	eval $cmd
     } else {
 	if {[llength $Thread(freelist)] == 0} {
