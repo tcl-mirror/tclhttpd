@@ -1,3 +1,11 @@
+2000-04-21  Brent Welch <welch@scriptics.com>
+
+	* lib/httpd.tcl: The server now drains the socket if the Domain
+	handler choose not to read the POST data.  This makes it more
+	reliable for the client side to read the server's reply.  Added
+	Httpd_GetPostDataAsync and Httpd_CopyPostData so Domain handlers
+	have a clean interface to asynchronously deal with POST data.
+
 2000-04-20  Brent Welch <welch@scriptics.com>
 	* configure.in, Makefile.in: Fixes so that crypt and limit can have
 	a different version number (1.0) than TclHttpd
