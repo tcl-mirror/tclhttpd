@@ -50,7 +50,16 @@ proc bugdb::bug-list {} {
     return $results
 }
 
-proc bugdb::bug-details {bug} {
+proc bugdb::bug-details {bug Application OS Priority Assigned \
+Summary Description Date} {
+
+    upvar 1 $Application my_application
+    upvar 1 $OS my_os
+    upvar 1 $Priority my_priority
+    upvar 1 $Assigned my_assigned
+    upvar 1 $Summary my_summary
+    upvar 1 $Description my_description
+    upvar 1 $Date my_date
 
     # Open the db
     mk::file open bugdb ../sampleapp/bugdb/bugdb.mk
@@ -60,5 +69,14 @@ proc bugdb::bug-details {bug} {
     # Close the db
     mk::file close bugdb
 
-    return $row
+    set my_application [lindex $row 1]
+    set my_os [lindex $row 3]
+    set my_priority [lindex $row 5]
+    set my_assigned [lindex $row 7]
+    set my_summary [lindex $row 9]
+    set my_description [lindex $row 11]
+    set my_date [lindex $row 13]
+
+    return
 }
+
