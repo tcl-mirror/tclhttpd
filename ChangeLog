@@ -1,3 +1,16 @@
+2003-10-28 Colin McCormack <colin@field.medicine.adelaide.edu.au>
+       * Fixed sf.net bug [804488] Redirect_To does not work in .tml
+        Added suggested patch to template.tcl
+       * Added Http_AddHeaders and Http_RemoveHeaders, and
+       modified HttpRespondHeader so users can add http headers
+       * Added Http_Refresh and Http_NoCache convenience procs
+       * Fixed sf.net bug 607590 error counter named "errors" or "error"?
+       picked errors - it's less easily confused with error command
+       * Fixed sf.net bug 723419 Doc_Error errors
+       as suggested by davygrvy
+       * Fixed sf.net bug 761322 Upload module is dangerous
+       Added -unique flag to upload module to resolve problem
+	
 2003-10-16 Colin McCormack <colin@field.medicine.adelaide.edu.au>
         * lib/{auth,passcheck,tclcrypt}.tcl: added pure tcl crypt
         as a fallback for installations lacking the compiled version
