@@ -17,9 +17,11 @@ package provide direct 1.0
 # prefix: The Tcl command prefix to use when constructing calls, e.g. Device
 
 proc Direct_Url {virtual {prefix {}}} {
+    global Direct
     if {[string length $prefix] == 0} {
 	set prefix $virtual
     }
+    set Direct($prefix) $virtual	;# So we can reconstruct URLs
     Url_PrefixInstall $virtual [list DirectDomain $prefix]
 }
 
@@ -46,9 +48,20 @@ proc DirectDomain {prefix sock suffix} {
     Count $prefix
     set valuelist {}
     if [info exists data(query)] {
+
+	# search for comma separeted pair of numbers
+	# as generated from server side map
+	#      e.g 190,202
+	# Bjorn Ruff.
+
+	if { [regexp {^([0-9]+),([0-9]+)$} $data(query) match x y]} {
+	    set data(query) x=$x&y=$y
+	}
+
 	# Parse form parameters into the cgi array
 	# If the parameter is listed twice, the array becomes a list
 	# of the values.
+
 	set valuelist [Url_DecodeQuery $data(query)]
 	foreach {name value} $valuelist {
 	    if [info exists list($name)] {
@@ -70,6 +83,8 @@ proc DirectDomain {prefix sock suffix} {
     if {[string length [info command $cmd]] == 0} {
 	auto_load $cmd
     }
+    # "Cache hit" is a misnomer, but this is how things are counted
+    Count cachehit,$Direct($prefix)$suffix
 
     # Compare built-in command's parameters with the form data.
     # Form fields with names that match arguments have that value
@@ -98,17 +113,28 @@ proc DirectDomain {prefix sock suffix} {
 	    }
 	}
     }
-    # Eval the command.  Errors are trapped by Url_Dispatch
+    # Eval the command.  Errors can be used to trigger redirects.
 
-    set result [eval $cmd]
+    set code [catch $cmd result]
+    switch $code {
+	0	{ # fall through to Httpd_ReturnData }
+	302	{ # redirect 
+	    Httpd_Redirect $result $sock
+	    return ""
+	}
+	default {
+	    global errorInfo errorCode
+	    return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+	}
+    }
 
     # See if a content type has been registered for the URL
 
     set type text/html
     upvar #0 $cmdOrig aType
-    catch {set type $aType}
+    if {[info exist aType]} {
+	set type $aType
+    }
     Httpd_ReturnData $sock $type $result
-    return $result
+    return ""
 }
-
-
