@@ -44,11 +44,6 @@ cd ..
 cd thread${THREAD_VERSION}
 autoconf
 cd ..
-tar cf - ./tclhttpd${HTTPD_VERSION} | gzip > ${DISTDIR}/tclhttpd${HTTPD_VERSION}.tar.gz
-zip -9 -r -o  ${DISTDIR}/tclhttpd${WIN_VERSION}.zip  tclhttpd${HTTPD_VERSION}
-
-tar cf - ./thread${THREAD_VERSION} | gzip > ${DISTDIR}/thread${THREAD_VERSION}.tar.gz
-zip -9 -r -o  ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip thread${THREAD_VERSION}
 
 cd tclhttpd${HTTPD_VERSION}/DIST_build
 
@@ -72,6 +67,16 @@ mkdir ${SUPER_DIR}/build
 
 cp README ${SUPER_DIR}
 cp Makefile.boot ${SUPER_DIR}/Makefile
+
+# Unbundled packages
+
+(cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ; tar cf - ./tclhttpd${HTTPD_VERSION} | gzip > ${DISTDIR}/tclhttpd${HTTPD_VERSION}.tar.gz)
+(cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ; zip -9 -r -o  ${DISTDIR}/tclhttpd${WIN_VERSION}.zip  tclhttpd${HTTPD_VERSION})
+
+(cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ;tar cf - ./thread${THREAD_VERSION} | gzip > ${DISTDIR}/thread${THREAD_VERSION}.tar.gz)
+(cd ${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist ;zip -9 -r -o  ${DISTDIR}/thread${THREAD_WIN_VERSION}.zip thread${THREAD_VERSION})
+
+# Bundled packages
 
 (cd ${DISTDIR}; tar cf - ./tclhttpd${HTTPD_VERSION}-dist | gzip > tclhttpd${HTTPD_VERSION}-dist.tar.gz)
 (cd ${DISTDIR} ; zip -9 -r -o  tclhttpd${WIN_VERSION}dist.zip  tclhttpd${HTTPD_VERSION}-dist)

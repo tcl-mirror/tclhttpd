@@ -2,6 +2,7 @@
 
 	* DIST_build/DIST:
 	Changed to version 3.2 and tag tclhttpd-3-2-0
+	Fixed unbundled distributions to not contain CVS directories.
 	* README:
 	* DIST_build/DIST:
 	* DIST_build/README:
