@@ -14,6 +14,7 @@ HTTPD = tclhttpd3.4
 # Edit MODULES if you don't want to build something.
 
 MODULES = $(THREAD) $(TCLLIB) $(HTTPD)
+ALL_MODULES = $(TCL) $(MODULES)
 
 all: config make install
 
@@ -46,35 +47,6 @@ CONFIG_FLAGS = --enable-gcc --enable-threads
 # The use of prefix and exec_prefix in these rules is done to expand
 # the `pwd` that is used in the definition of PREFIX and EXEC_PREFIX
 # before the various chdir's done in the rule.
-
-# XXX This nice loop used to work, but now some packages
-# need custom configure flags, so I'm punting
-
-config_orig: build/$(PLATFORM)
-	@echo "Running configure prefix=$(PREFIX)"
-	-pwd=`pwd`; \
-	prefix=$(PREFIX) ; \
-	exec_prefix=$(EXEC_PREFIX) ; \
-	for i in $(MODULES) ; do \
-	    echo "" ; \
-	    mkdir $$pwd/build/$(PLATFORM)/$$i ; \
-	    cd $$pwd/build/$(PLATFORM)/$$i ; \
-	    if test -f $$pwd/$$i/$(ARCH)/configure ; then \
-		path=$$pwd/$$i/$(ARCH)/configure ; \
-	    else \
-		path=$$pwd/$$i/configure ; \
-	    fi; \
-	    if test -f $$path ; then \
-		echo "Configuring in build/$(PLATFORM)/$$i" ; \
-		sh $$path --prefix=$$prefix \
-		    --exec-prefix=$$exec_prefix \
-		    $(CONFIG_FLAGS) \
-		    --with-tcl=$$pwd/build/$(PLATFORM)/$(TCL); \
-	    else \
-		echo "Skipping configure in $$i" ; \
-	    fi ; \
-	    echo "" ; \
-	done;
 
 config: build/$(PLATFORM) config-tcl config-modules
 
@@ -125,7 +97,7 @@ build/$(PLATFORM):  build
 make:
 	-pwd=`pwd`; \
 	prefix=$(PREFIX) ; \
-	for i in $(MODULES) ; do \
+	for i in $(ALL_MODULES) ; do \
 	    echo "" ; \
 	    if test -f $$pwd/build/$(PLATFORM)/$$i/Makefile ; then \
 		echo "Make in $$pwd/build/$(PLATFORM)/$$i" ; \
@@ -144,7 +116,7 @@ install-force:
 	-mkdir $(EXEC_PREFIX)
 	-pwd=`pwd`; \
 	prefix=$(PREFIX) ; \
-	for i in $(MODULES) ; do \
+	for i in $(ALL_MODULES) ; do \
 	    echo "" ; \
 	    if test -f $$pwd/build/$(PLATFORM)/$$i/Makefile ; then \
 		echo "Make install for $$pwd/build/$(PLATFORM)/$$i" ; \
