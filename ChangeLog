@@ -1,3 +1,7 @@
+2000-09-22  Brent Welch <welch@ajubasolutions.com>
+	* lib/httpd.tcl: Protect against unknown error codes passed
+	into Httpd_ReturnData and Httpd_Error.
+
 2000-09-21  Brent Welch <welch@ajubasolutions.com>
 	* lib/counter.tcl: Added secsPerMinute parameter to Counter_Init
 	* lib/httpd.tcl:
