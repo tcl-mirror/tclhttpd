@@ -558,6 +558,10 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
     Cgi_SetEnv $sock $filename pass
     interp eval $Doc(templateInterp) [list uplevel #0 \
 	[list array set env [array get pass]]]
+    interp eval $Doc(templateInterp) [list uplevel #0 \
+	{catch {unset cgienv}}]
+    interp eval $Doc(templateInterp) [list uplevel #0 \
+	[list array set cgienv [array get pass]]]
 
     # Check query data
 
