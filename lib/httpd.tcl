@@ -735,6 +735,7 @@ proc HttpdReadPost {sock varName blockSize {cmd {}}} {
 		$blockSize : $data(count)}]
 	if {[catch {read $sock $toRead} block]} {
 	    set doneMsg $block
+	    set data(count) 0
 	} else {
 	    if {[info exist buffer]} {
 		append buffer $block
