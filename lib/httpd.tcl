@@ -22,7 +22,15 @@
 #
 # SCCS: @(#) httpd.tcl 1.16 97/07/12 14:29:54
 
-package provide httpd 1.1
+package provide httpd 1.2
+
+# The version.tcl file used to be part of httpd package, but
+# that confused the use of tcl_findLibrary because by loading
+# just version.tcl Tcl thought we had the whole package.  So
+# we split it out, but require it here so users of httpd don't
+# have to worry about httpd_version
+
+package require httpd_version
 
 # initialize all the global data
 
