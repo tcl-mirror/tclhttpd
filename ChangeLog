@@ -1,6 +1,12 @@
-2000-04-25  Brent Welch <welch@scriptics.com>
+2000-04-26  Brent Welch <welch@scriptics.com>
 
 	* DIST_build: added directory for distribution scripts
+	* htdocs/.tml: Tracking name changes in ncgi
+	* lib/doc.tcl: Added call to ncgi::urlStub so pages can call this procedure
+	instead of using $page(url)
+
+2000-04-25  Brent Welch <welch@scriptics.com>
+
 	* Makefile.in: fixes for make dist and make install
 	* htdocs/*.tml: various clean up for new html:: proc names
 	* lib/cgi.tcl: Nuked reference to Httpd(fcopy)
