@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.14 2000/04/26 05:26:21 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.15 2000/04/26 05:52:33 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -86,6 +86,7 @@ TCL_VERSION=@TCL_VERSION@
 TCLLIB_VERSION=@TCLLIB_VERSION@
 TCL_DIR=@TCL_DIR@
 TCLLIB_DIR=@TCLLIB_DIR@
+THREAD_VERSION=@THREAD_VERSION@
 
 #========================================================================
 # Nothing of the variables below this line need to be changed.  Please
@@ -391,6 +392,7 @@ superdist:
 	mkdir $(SUPER_DIR)
 	mkdir $(SUPER_DIR)/tclhttpd$(VERSION)
 	$(TCLSH_PROG) $(srcdir)/bin/CopyDist $(srcdir) $(SUPER_DIR)/tclhttpd$(VERSION)
+	$(TCLSH_PROG) $(srcdir)/bin/CopyDist $(srcdir)../thread$(THREAD_VERSION) $(SUPER_DIR)/thread$(THREAD_VERSION)
 	gunzip < $(TCL_DIST) | (cd $(SUPER_DIR) ; tar xf -)
 	gunzip < $(TCLLIB_DIST) | (cd $(SUPER_DIR) ; tar xf -)
 

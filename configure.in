@@ -33,6 +33,7 @@ WIN_VERSION=`echo ${VERSION} | sed -e 's/\.//g'`
 
 TCL_VERSION=8.3.1
 TCLLIB_VERSION=0.4
+THREAD_VERSION=2.0
 
 # We build two minor packages for the crypt and limit C extensions
 
