@@ -25,11 +25,10 @@
 # invoked.
 #
 # Brent Welch (c) 1997 Sun Microsystems, 1998-2000 Scriptics Corporation.
-# Brent Welch (c) 1998-2000 Ajuba Solutions
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: url.tcl,v 1.28 2000/08/02 07:06:54 welch Exp $
+# SCCS: @(#) url.tcl 1.7 97/08/20 11:50:13
 
 package provide httpd::url 1.0
 
@@ -161,15 +160,27 @@ proc Url_PrefixMatch {url prefixVar suffixVar} {
 
 proc Url_Unwind {sock ei ec} {
 
-    # URL implementations can raise an error and put redirect info
-    # into the errorCode variable, which should be of the form
-    # HTTPD_REDIRECT $newurl
+    # URL implementations can raise special errors to unwind their processing.
 
     set key [lindex $ec 0]
     set error [lindex [split $ei \n] 0]
-    if {[string match HTTPD_REDIRECT $key]} {
-	Httpd_Redirect [lindex $ec 1] $sock
-	return
+    switch -- $key {
+        HTTPD_REDIRECT {
+
+	    # URL implementations can raise an error and put redirect info
+	    # into the errorCode variable, which should be of the form
+	    # HTTPD_REDIRECT $newurl
+
+            Httpd_Redirect [lindex $ec 1] $sock
+            return
+        }
+        HTTPD_SUSPEND {
+	    
+	    # The domain handler has until Httpd(timeout2) to complete this request
+	    
+            Httpd_Suspend $sock
+            return
+        }
     }
 
     switch -glob -- $ei {
