@@ -32,7 +32,8 @@ exec tclsh8.0 "$0" ${1+"$@"}
 
 set home [string trimright [file dirname [info script]] ./]
 set home [file join [pwd] $home]
-lappend auto_path [file join [file dirname $home] lib]
+set Config(lib) [file join [file dirname $home] lib]
+lappend auto_path $Config(lib)
 set Config(home) $home
 unset home
 
@@ -41,9 +42,9 @@ unset home
 
 regsub -all { } $tcl_platform(os) {} tmp
 foreach dir [list \
-	[file join $Httpd(library) Binaries $tmp] \
-	[file join $Httpd(library) Binaries $tmp $tcl_platform(osVersion)] \
-	$Httpd(library)] {
+	[file join $Config(lib) Binaries $tmp] \
+	[file join $Config(lib) Binaries $tmp $tcl_platform(osVersion)] \
+	$Config(lib)] {
     if {[file isdirectory $dir]} {
 	lappend auto_path $dir
     }
@@ -74,7 +75,7 @@ package require opt
     if {[string length $library]} {
 	lappend auto_path $library
     }
-    foreach var {docRoot port host ipaddr webmaster uid gid debug limit} {
+    foreach var {docRoot port host ipaddr webmaster uid gid debug limit library} {
 	set Config($var) [set $var]
     }
     set Config(file) $config 
