@@ -110,6 +110,55 @@ proc ::validation::debug {var} {
     }
 }
 
+proc get_AllowDeny {op} {
+    foreach {v1 v2} [split [ncgi::value order_$op] ,] {break}
+    return "[string totitle $v1],[string totitle $v2]"
+}
+ 
+proc MyAuthParseHtaccess {sock file {infoName ""}} {
+    if {$infoName == ""} {
+	upvar #0 auth$file info
+	set infoName auth$file
+    } else {
+	upvar #0 $infoName info
+    }
+    
+    set mtime [file mtime $file]
+    if {![info exists info] || ($mtime > $info(htaccessp,mtime))} {
+	# Parse .htaccess file
+	foreach i [array names info "htaccessp*"] {
+	    unset info($i)
+	}
+	set info(htaccessp,mtime) $mtime
+	set info(htaccessp,userfile) {}
+	set info(htaccessp,groupfile) {}
+	if {[catch {open $file} in]} {
+	    return 1
+	}
+	set state [list vars]
+	foreach line [split [read $in] \n] {
+	    #puts stderr "$state $line"
+	    if {[regexp "^#" $line] || [string length [string trim $line]] == 0} {
+		continue
+	    }
+	    if {[regexp <(.+)> $line x tag]} {
+		#puts stderr "var tag $tag"
+		set line $tag
+	    }
+	    set words [split $line]
+	    set cmd [string tolower [lindex $words 0]]
+	    if {[catch {
+		#puts stderr "var eval Ht-$cmd $infoName [lrange $words 1 end]"
+		eval Ht-$cmd $infoName [lrange $words 1 end]
+	    } err]} {
+		Log $sock Error $err
+	    }
+	}
+	close $in
+    }
+    return 1
+}
+
 ### Local Variables: ###
 ### mode:tcl ###
 ### End: ###

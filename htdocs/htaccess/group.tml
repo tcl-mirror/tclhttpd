@@ -2,8 +2,17 @@
 [html::stylesheet ./htaccess.css]
 [mypage::header "Group Editor"]
 [
- set directory [html::quoteFormValue [ncgi::value directory]]
- set file [html::quoteFormValue [ncgi::value file]]
+ set directory [file normalize [ncgi::value directory]]
+ set dirW [html::quoteFormValue $directory]
+ set file [file normalize [ncgi::value file]]
+ set fileW [html::quoteFormValue $file]
+
+ if {$directory != ""} {
+     set dirRedir "?directory=$dirW"
+ } else {
+     set dirRedir ""
+ }
+
  if {[ncgi::value action] == "Create"} {
      if {![file exists $file]} {
 	 set fd [open $file w]
@@ -17,11 +26,11 @@
  if {$in != ""} {
      # file doesn't exist - create it
      set html [subst {
-	 <p>Group File $file doesn't exist.</p>
+	 <p>Group File $fileW doesn't exist.</p>
 	 <h4>Create new group file by typing its name, then clicking Create</h4>
 	 <form action="$page(url)" method=POST>
-	 <input type=hidden name=directory value="$directory">
-	 <input type=text name=file value="$file">
+	 <input type=hidden name=directory value="$dirW">
+	 <input type=text name=file value="$fileW">
 	 <input type=submit name=action value=Create>
 	 </form>
      }]
@@ -38,10 +47,10 @@
 	 # save the file if necessary
 	 validation::writefile $file groups
 
-	 set html "<p>Group File: $file (Updated)</p>"
+	 set html "<p>Group File: $fileW (Updated)</p>"
 
      } else {
-	 set html "<p>Group File: $file</p>"
+	 set html "<p>Group File: $fileW</p>"
      }
 
      append html {
@@ -59,9 +68,9 @@
 	 append html [subst {
 	     <form action="$page(url)" method=POST>
 	     <tr>
-	     <input type=hidden name=file  value="$file">
+	     <input type=hidden name=file  value="$fileW">
 	     <input type=hidden name=group value="$key">
-	     <input type=hidden name=directory value="$directory">
+	     <input type=hidden name=directory value="$dirW">
 
 	     <td><input type=submit value="$key" size=12></td>
 	     <td><input type=text name=people value="$value" size=50></td>
@@ -73,8 +82,8 @@
      append html [subst { 
 	 <form action="$page(url)" method=POST>
 	 <tr>
-	 <input type=hidden name=file  value="$file">
-	 <input type=hidden name=directory value="$directory">
+	 <input type=hidden name=file  value="$fileW">
+	 <input type=hidden name=directory value="$dirW">
 
 	 <td><input type=text name=group value="" size=12 title='new group name'></td>
 	 <td><input type=text name=people value="" size=50></td>
@@ -86,7 +95,7 @@
  return $html
 ]
 </table>
-<p><a href="index.html?directory=$directory">Resume editing</a> $directory</p>
+<p><a href="index.html$dirRedir">Resume editing</a> $dirW</p>
 [
  unset html
 #ncgi::setValue debug 1

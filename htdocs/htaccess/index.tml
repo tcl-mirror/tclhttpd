@@ -2,56 +2,6 @@
 [html::stylesheet ./htaccess.css]
 [mypage::header "Access Control Editor"]
 [
- proc get_AllowDeny {op} {
-     foreach {v1 v2} [split [ncgi::value order_$op] ,] {break}
-     return "[string totitle $v1],[string totitle $v2]"
- }
- 
- proc MyAuthParseHtaccess {sock file {infoName ""}} {
-     if {$infoName == ""} {
-	 upvar #0 auth$file info
-	 set infoName auth$file
-     } else {
-	 upvar #0 $infoName info
-     }
-     
-     set mtime [file mtime $file]
-     if {![info exists info] || ($mtime > $info(htaccessp,mtime))} {
-	 # Parse .htaccess file
-	 foreach i [array names info "htaccessp*"] {
-	     unset info($i)
-	 }
-	 set info(htaccessp,mtime) $mtime
-	 set info(htaccessp,userfile) {}
-	 set info(htaccessp,groupfile) {}
-	 if {[catch {open $file} in]} {
-	     return 1
-	 }
-	 set state [list vars]
-	 foreach line [split [read $in] \n] {
-	     #puts stderr "$state $line"
-	     if {[regexp {^#} $line] || [string length [string trim $line]] == 0} {
-		 continue
-	     }
-	     if {[regexp <(.+)> $line x tag]} {
-		 #puts stderr "var tag $tag"
-		 set line $tag
-	     }
-                     set words [split $line]
-	     set cmd [string tolower [lindex $words 0]]
-	     if {[catch {
-		 #puts stderr "var eval Ht-$cmd $infoName [lrange $words 1 end]"
-		 eval Ht-$cmd $infoName [lrange $words 1 end]
-	     } err]} {
-		 Log $sock Error $err
-	     }
-                 }
-                 close $in
-     }
-     return 1
- }
-]
-[
  # set blank defaults
  ::ncgi::setDefaultValue debug 0	;# set to 1 for debugging output
 
@@ -73,16 +23,24 @@
  ::ncgi::setDefaultValue require_POST_group ""
  ::ncgi::setDefaultValue require_POST_user ""
 
- set directory [ncgi::value directory]
  set submit [ncgi::value submit]
- set groupfile [ncgi::value groupfile]
- set userfile [ncgi::value userfile]
 
+ # get significant files
+ set directory [ncgi::value directory]
+ set groupfile [file normalize [ncgi::value groupfile]]
+ set userfile [file normalize [ncgi::value userfile]]
+
+ # quote the file names
+ set dirW [::html::quoteFormValue $directory]
+ set groupfW [::html::quoteFormValue $groupfile]
+ set userfW [::html::quoteFormValue $userfile]
+ 
  if {![string match /* $directory]} { 
      set full_dir [file join $Config(docRoot) $directory]
  } else {
      set full_dir $directory
  }
+ set full_dir [file normalize $full_dir]
 
  # Save the file if necessary
  if {[::ncgi::value submit] == "Update"} {
@@ -141,7 +99,7 @@
      close $fd
 
      if {[info exists redirect]} {
-	 Redirect_Self "$redirect&directory=$directory"
+	 Redirect_Self "$redirect&directory=$dirW"
      }
  }
 
@@ -167,10 +125,10 @@
 	 Edit the .htaccess file in directory [html::textInput directory [::ncgi::value directory]]
 	 </form></li>
 	 <li><form action='./group.html' method='POST'>
-	 Or edit Group file [html::textInput file [::ncgi::value groupfile]]
+	 Or edit Group file [html::textInput file $groupfile]
 	 </form></li>
 	 <li><form action='./user.html' method='POST'>
-	 Or edit User file [html::textInput file [::ncgi::value userfile]]
+	 Or edit User file [html::textInput file $userfile]
 	 </form></li>
 	 </ul>
      }]
@@ -191,7 +149,7 @@
 	     global errorInfo
 	     return [::html::row $err][::html::row $errorInfo]
 	 }
-
+	 
 	 foreach tag {userfile groupfile name type
 	     order_GET network_deny_GET network_allow_GET
 	     require_GET_group require_GET_user
@@ -205,21 +163,20 @@
 	 }
      }
      set submit "Update"
-
+     
      set html "<br><form action='$page(url)' method='POST'>"
-     append html "<input type='hidden' name=directory value='$directory'>"
+     append html "<input type='hidden' name=directory value='$dirW'>"
      append html "<table align='center' class='group'>\n"
-
+     
      if {[file exists [file join $full_dir .tclaccess]]} {
 	 append html "<h2>$full_dir contains a .tclaccess - .htaccess will be overriden!</h2>"
      }
      
-     append html "<tr><th colspan=3>$directory</th></tr>"
+     append html "<tr><th colspan=3>$dirW</th></tr>"
      append html [::html::foreach {tag var comment} [subst {
 	 "Realm" name "Authentication realm displayed in prompt."
-	 "<a href='user.html?file=[::html::quoteFormValue [ncgi::value userfile]]&directory=[::html::quoteFormValue $directory]' title='Click to edit user file'>User File</a>" userfile "Contains user names and passwords."
-	 "<a href='group.html?file=[::html::quoteFormValue [ncgi::value groupfile]]&directory=[::html::quoteFormValue $directory]' title='Click to edit group file'>Group File</a>" groupfile "Defines named user groups."
-
+	 "<a href='user.html?file=$userfW&directory=$dirW' title='Click to edit user file'>User File</a>" userfile "Contains user names and passwords."
+	 "<a href='group.html?file=$groupfW&directory=$dirW' title='Click to edit group file'>Group File</a>" groupfile "Defines named user groups."
      }] {
 	 <tr>
 	 <th>$tag</th>
