@@ -15,7 +15,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: counter.tcl,v 1.9 2000/09/27 19:35:25 welch Exp $
+# RCS: @(#) $Id: counter.tcl,v 1.10 2000/09/27 19:57:13 welch Exp $
 
 package provide httpd::counter 2.0
 package require stats 1.0
@@ -69,14 +69,16 @@ proc Counter_Init {{secsPerMinute 60}} {
 
 proc Counter_CheckPoint {} {
     global Log
-    set path $Log(log)counter
-    catch {file rename -force $path $path.old}
-    if {![catch {open $path w} out]} {
-	puts $out \n[parray counter]
-	puts $out \n[parray [stats::countGet urlhits -histVar]]
-	puts $out \n[parray [stats::countGet urlhits -histHourVar]]
-	puts $out \n[parray [stats::countGet urlhits -histDayVar]]
-	close $out
+    if {[info exists Log(log)]} {
+	set path $Log(log)counter
+	catch {file rename -force $path $path.old}
+	if {![catch {open $path w} out]} {
+	    puts $out \n[parray counter]
+	    puts $out \n[parray [stats::countGet urlhits -histVar]]
+	    puts $out \n[parray [stats::countGet urlhits -histHourVar]]
+	    puts $out \n[parray [stats::countGet urlhits -histDayVar]]
+	    close $out
+	}
     }
 }
 
