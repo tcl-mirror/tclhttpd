@@ -112,7 +112,7 @@ proc Httpd_Init {} {
     Mtype_ReadTypes [file join $Httpd(library) mime.types]
 
     # SSL Support - These are just the run-time defaults
-    set Httpd(SSL_REQUEST) 0    ;# don't request a cert
+    set Httpd(SSL_REQUEST) 1    ;# don't request a cert
     set Httpd(SSL_REQUIRE) 0    ;# don't require a cert
     # File containing Server Certificate
     set Httpd(SSL_CERTFILE) $Httpd(library)/server.pem
@@ -192,18 +192,8 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
 	if {![file exists $Httpd(SSL_CADIR)]} {
         return -code error "Directory \"$Httpd(SSL_CADIR)\" not found"
 	}
-		
-	tls::init \
-	    -cadir $Httpd(SSL_CADIR) \
-		-cafile $Httpd(SSL_CAFILE) \
-		-certfile $Httpd(SSL_CERTFILE) \
-		-ssl2 $Httpd(USE_SSL2) \
-		-ssl3 $Httpd(USE_SSL3) \
-		-server 1 \
-		-keyfile $Httpd(SSL_KEYFILE) \
-		-cipher $Httpd(SSL_CIPHERS)
-    set cmd [list tls::socket -server [list HttpdAccept [list https $name $port]]]
-	if {0} {
+    set cmd [list tls::socket -server [list HttpdAccept \
+	    [list https $name $port]]]
     lappend cmd -request $Httpd(SSL_REQUEST) \
 	    -require $Httpd(SSL_REQUIRE) \
 	    -ssl2 $Httpd(USE_SSL2) \
@@ -214,7 +204,6 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
 	    -cafile $Httpd(SSL_CAFILE) \
 	    -certfile $Httpd(SSL_CERTFILE) \
 	    -keyfile $Httpd(SSL_KEYFILE)
-	}
     if {[string length $ipaddr] != 0} {
         lappend cmd -myaddr $ipaddr
     }
