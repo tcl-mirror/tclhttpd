@@ -1,3 +1,8 @@
+tclhttpd (3.5.1-1) unstable; urgency=low
+  * change version for release
+
+ -- Colin McCormack <colin@chinix.com>  Thu, 27 May 2004 10:06:02 +1000
+
 tclhttpd (3.5.0-2) unstable; urgency=low
 
   * cleaned up some errors
