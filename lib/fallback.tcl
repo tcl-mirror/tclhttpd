@@ -14,7 +14,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: fallback.tcl,v 1.3 2004/02/25 04:29:34 coldstore Exp $
+# RCS: @(#) $Id: fallback.tcl,v 1.4 2004/04/28 08:38:07 coldstore Exp $
 
 package provide httpd::fallback 1.0
 
@@ -45,6 +45,7 @@ if {![info exists Fallback(excludePat)]} {
 # Fallback_Try
 #
 # Arguments:
+#	prefix	The URL prefix of the domain.
 #	path	The pathname we were trying to find.
 #	suffix	The URL suffix.
 #	sock	The socket connection.
@@ -67,6 +68,7 @@ proc Fallback_Try {virtual path suffix sock} {
     # Here we look for files indicated by any Accept headers.
     # Most browsers say */*, but they may provide some ordering info, too.
 
+    # First generate a list of candidate files by ignoring extension
     set ok {}
     foreach choice [glob -nocomplain $root.*] {
 	
@@ -80,7 +82,6 @@ proc Fallback_Try {virtual path suffix sock} {
     }
 
     # Now we pick the best file from the ones that matched.
-
     set npath [FallbackChoose [Mtype_Accept $sock] $ok]
     if {[string length $npath] == 0 || [string compare $path $npath] == 0} {
 
@@ -88,8 +89,9 @@ proc Fallback_Try {virtual path suffix sock} {
 
 	return 0
     } else {
+	# A file matched, but has a different extension to that requested
 
-	# Another hack for templates.  If the .html is not found,
+	# Another hack for templates.  If the requested .html is not found,
 	# and the .tml exists, ask for .html so the template is
 	# processed and cached as the .html file.
 
@@ -99,6 +101,7 @@ proc Fallback_Try {virtual path suffix sock} {
 	    return 1
 	}
 
+	# No template matched the request, so redirect_to/offer our best match.
 	# Redirect so we don't mask spelling errors like john.osterhoot
 
 	set new [file extension $npath]
@@ -115,12 +118,12 @@ proc Fallback_Try {virtual path suffix sock} {
 	# Preserve query data when bouncing among pages.
 
 	upvar #0 Httpd$sock data
-	set url  $virtual/[string trimleft $suffix /~]
+	set url $virtual/[string trimleft $suffix /~]
 	if {[info exist data(query)] && [string length $data(query)]} {
 	    append url ? $data(query)
 	}
 
-	Redirect_Self $url
+	Redirect_Self $url	;# offer what we have to the client
     }
 }
 
@@ -158,7 +161,8 @@ proc FallbackExclude {name} {
 #	choices	The list of matching file names.
 #
 # Results:
-#	The chosen file name.
+#	Name of the newest file whose mime type is most acceptable
+#	to client browser.
 #
 # Side Effects:
 #	None
@@ -169,16 +173,15 @@ proc FallbackChoose {accept choices} {
 	set t [string trim [string tolower $t]]
 	set hits {}
 	foreach f $choices {
-	    set type [Mtype $f]
+	    set type [Mtype $f]	;# mime-type for f's file extension
 	    if {[string match $t $type]} {
-		lappend hits $f
+		lappend hits $f	;# this file provides a matching mime type
 	    }
 	}
-	set result [file_latest $hits]
+	set result [file_latest $hits]	;# latest file matching mime type $t
 	if {[string length $result]} {
 	    return $result
 	}
     }
     return {}
 }
-

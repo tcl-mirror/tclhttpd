@@ -6,11 +6,13 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: mtype.tcl,v 1.6 2002/08/31 07:30:43 welch Exp $
+# RCS: @(#) $Id: mtype.tcl,v 1.7 2004/04/28 08:38:07 coldstore Exp $
 
 package provide httpd::mtype 1.1
 
 # Convert the file suffix into a mime type
+
+# global MimeType is a mapping from file extension to mime-type
 
 proc Mtype {path} {
     global MimeType
