@@ -1,3 +1,7 @@
+2004-04-15 Colin McCormack <colin@chinix.com>
+	* changed the file evaluated for ${template}.tml/ directory
+	to index.tml ... fewer special case filenames to remember.
+
 2004-04-14 Colin McCormack <colin@chinix.com>
 	* lib/subst.tcl: Fixed list quote bug in Subst_File preventing subst
 	of filenames with spaces and bug subst'ing links, both in directory
