@@ -158,7 +158,7 @@ proc Cgi_SetEnvAll {sock path extra url var} {
     set env(REMOTE_ADDR) $data(ipaddr)
     set env(SCRIPT_NAME) $url
     set env(PATH_INFO) $extra
-    set env(PATH_TRANSLATED) [string trimright [Doc_Root] /]/[string trimleft $extra /]
+    set env(PATH_TRANSLATED) [string trimright [Doc_Root] /]/[string trimleft $data(url) /]
     set env(DOCUMENT_ROOT) [Doc_Root]
     set env(HOME) [Doc_Root]
 
@@ -229,7 +229,16 @@ proc CgiSpawn {sock script} {
     fconfigure $fd -blocking 0
     # it might be better to look at "content length" instead.
     if {$data(proto) == "POST"} {
-	puts $fd $data(query)
+
+	# We are not using fcopy here so that the Httpd module
+	# can keep track of how much post data is left
+
+	set more 1 
+	while {$more > 0} {
+	    set more [Httpd_GetPostData $sock buffer 8192]
+	    puts -nonewline $fd $buffer
+	    set buffer {}
+	}
 	flush $fd
     }
     fileevent $sock readable [list CgiCleanup $fd $sock]
