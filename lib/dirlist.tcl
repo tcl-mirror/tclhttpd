@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: dirlist.tcl,v 1.10 2003/04/04 04:10:54 coldstore Exp $
+# RCS: @(#) $Id: dirlist.tcl,v 1.11 2003/09/24 20:41:57 welch Exp $
 
 package provide httpd::dirlist 1.1
  
@@ -174,7 +174,8 @@ proc DirListInner {dir urlpath sort pattern} {
     set path [file split $dir]
 
     # Filter pattern to avoid leaking path information
-    regsub -all {\.\./} $pattern {} pattern
+    regsub -all {\.+/} $pattern {} pattern
+    set pattern [string trimleft $pattern /]
 
     set list [glob -nocomplain -- [file join $dir $pattern]]
     if {[llength $path] > 1} {

@@ -1,3 +1,9 @@
+2003-9-24  Brent Welch <welch@panasas.com>
+        * lib/dirlist.tcl: Security fix to prevent you from listing
+        the contents of directories you are not supposed to. It is
+        worth noting that you could never fetch a file outside the
+        URL tree, but you could list directories.
+
 2003-8-28  Brent Welch <welch@panasas.com>
         * lib/httpd.tcl: Fix in virtual host code suggested by Colin McCormack
 
