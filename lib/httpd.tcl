@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.54 2000/09/20 00:25:44 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.55 2000/09/20 01:04:47 welch Exp $
 
 package provide httpd 1.5
 
@@ -622,6 +622,15 @@ proc HttpdRead {sock} {
 		    Httpd_Error $sock 400 "No proxy support\n$err"
 		}
 	    } else {
+		# Dispatch to the URL implementation.
+
+		# As a service for domains that loose track of their
+		# context (e.g., .tml pages) we save the socket in a global.
+		# If a domain implementation would block and re-enter the
+		# event loop, it must use Httpd_Suspend to clear this state,
+		# and use Httpd_Resume later to restore it.
+
+		set Httpd(currentSocket) $sock
 		CountStart serviceTime $sock
 		Url_Dispatch $sock
 	    }
@@ -1715,8 +1724,8 @@ proc HttpdCookieLog {sock what} {
 
 # Httpd_Suspend --
 #
-# Suspend Wire Callback - for async transactions
-# Use HttpdReset once you are back in business
+#	Suspend Wire Callback - for async transactions
+#	Use Httpd_Resume once you are back in business
 #
 # Arguments:
 #	sock	Socket connection
@@ -1739,12 +1748,62 @@ proc Httpd_Suspend {sock {timeout ""}} {
 	after cancel $data(cancel)
 	unset data(cancel)
     }
+    if {[info exists Httpd(currentSocket)]} {
+	unset Httpd(currentSocket)
+    }
     if {$timeout == ""} {
 	set timeout $Httpd(timeout2)
     }
     if {$timeout != 0} {
 	set data(cancel) [after $timeout [list HttpdCancel $sock]]
     }
+}
+
+# Httpd_Resume --
+#
+#	Resume processing of a request.  Sets up a bit of global state that
+#	has been cleared by Httpd_Suspend.
+#
+# Arguments:
+#	sock	Socket connection
+#	timeout Timeout period.  After this the request is aborted.
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Restores the Httpd(currentSocket) setting.
+
+proc Httpd_Resume {sock {timeout ""}} {
+    upvar #0 Httpd$sock data
+    global Httpd
+    set Httpd(currentSocket) $sock
+    if {[info exists data(cancel)]} {
+	after cancel $data(cancel)
+    }
+    if {$timeout == ""} {
+	set timeout $Httpd(timeout1)
+    }
+    set data(cancel) [after $timeout \
+	[list Httpd_SockClose $sock 1 "timeout"]]
+}
+
+# Httpd_CurrentSocket --
+#
+#	Return the handle to the current socket.
+#
+# Arguments:
+#	none.
+#
+# Results:
+#	A socket.
+#
+# Side Effects:
+#	None.
+
+proc Httpd_CurrentSocket {} {
+    global Httpd
+    return $Httpd(currentSocket)
 }
 
 # Httpd_Pair --
