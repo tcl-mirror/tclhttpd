@@ -452,6 +452,7 @@ proc HttpdRead {sock} {
 	# Url_DecodeQuery is called or Httpd_GetPostData is called.
 
 	fileevent $sock readable {}
+	set ::env(HTTP_CHANNEL) $sock
 	Url_PostHook $sock $data(count)
 	Url_Dispatch $sock
     } else {
