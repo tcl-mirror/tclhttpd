@@ -220,7 +220,7 @@ proc Url_DecodeQuery_application/x-www-urlencoded {query qualifiers} {
     # name/value pairs.  Sometimes query data gets garbled.
 
     foreach pair [split $query "&"] {
-	foreach {name value} [split $query "="] {
+	foreach {name value} [split $pair "="] {
 	    lappend result [UrlDecodeData $name] [UrlDecodeData $value]
 	}
     }
