@@ -24,7 +24,7 @@ proc Debug/source {source} {
     }
     foreach dir $dirlist {
 	set file [file join $dir $source]
-	if [file exists $file] {
+	if {[file exists $file]} {
 	    break
 	}
     }
@@ -111,7 +111,7 @@ proc Debug/after {} {
     set html "<title>After Queue</title>\n"
     append html "<H1>After Queue</H1>\n"
     append html "<pre>"
-    if [catch {after info} afterlist] {
+    if {[catch {after info} afterlist]} {
 	append html "\"after info\" not supported in Tcl $tcl_version"
     } else {
 	foreach a $afterlist {
@@ -132,12 +132,18 @@ proc Debug/echo {title args} {
     append html </dl>
     return $html
 }
-proc Debug/errorInfo {title errorInfo} {
+proc Debug/errorInfo {title errorInfo {env {no environment}}} {
     set html "<title>$title</title>\n"
     append html "<H1>$title</H1>\n"
     append html "<p>[Version]"
     append html "<br>Webmaster: [Doc_Webmaster]"
     append html <pre>$errorInfo</pre>
+    append html "<p>Environment:</p>"
+    append html "<table>"
+    foreach {n v} $env {
+	append html "<tr><td>$n</td><td>$v</td></tr>\n"
+    }
+    append html "</table>"
     return $html
 }
 
@@ -145,7 +151,7 @@ proc Debug/dbg {{host sage} {port 5000}} {
     global debug_init Httpd
     if {![info exist debug_init]} {
 	if {[info command debugger_init] == ""} {
-	    source $Httpd(library)/prodebug.tcl
+	    source [file join $Httpd(library) prodebug.tcl]
 	}
 	debugger_init $host $port
 	set debug_init "$host $port"

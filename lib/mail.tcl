@@ -20,7 +20,15 @@ proc Mail/bugreport {email errorInfo args} {
     global Httpd
     set html "<pre>"
     foreach {name value} $args {
-	append html "$name: $value\n"
+	if {([string compare $name "env"] == 0) && 
+		([catch {array set X $value}] == 0)} {
+	    append html "Environment:\n"
+	    foreach n [lsort [array names X]] {
+		append html "  $n: $X($n)\n"
+	    }
+	} else {
+	    append html "$name: $value\n"
+	}
     }
     append html  $Httpd(server)\n
     append html [protect_text $errorInfo]
@@ -97,9 +105,9 @@ Content-Type: $type"
 
     switch $tcl_platform(platform) {
 	unix {
-	    if [catch {
+	    if {[catch {
 		exec /usr/lib/sendmail $sendto << $message
-	    } err] {
+	    } err]} {
 		Stderr "ERROR: $err"
 		Stderr $message
 	    } else {
