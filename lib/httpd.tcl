@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.71 2002/08/19 05:14:39 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.72 2002/12/03 06:57:22 welch Exp $
 
 package provide httpd 1.6
 
@@ -657,6 +657,15 @@ proc HttpdRead {sock} {
 	    # MIME headers.  MIME headers may be continue with a line
 	    # that starts with spaces.
 	    if {[regexp {^([^ :]+):[ 	]*(.*)} $line dummy key value]} {
+
+                # The following allows something to
+                # recreate the headers exactly
+
+                lappend data(headerlist) $key $value
+
+                # The rest of this makes it easier to pick out
+                # headers from the data(mime,headername) array
+
 		set key [string tolower $key]
 		if [info exists data(mime,$key)] {
 		    append data(mime,$key) ,$value
@@ -665,6 +674,7 @@ proc HttpdRead {sock} {
 		    lappend data(mimeorder) $key
 		}
 		set data(key) $key
+
 	    } elseif {[regexp {^[ 	]+(.*)}  $line dummy value]} {
 		# Are there really continuation lines in the spec?
 		if [info exists data(key)] {

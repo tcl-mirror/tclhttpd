@@ -80,6 +80,7 @@ proc Url_Dispatch {sock} {
 	foreach hook $Url(accessHooks) {
 	    switch -- [eval $hook [list $sock $url]] {
 		ok	{ break }
+                return  -
 		denied	{
 		    # A URL implementation should have generated the
 		    # appropriate response, such as a 403, to request

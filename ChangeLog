@@ -1,3 +1,10 @@
+2002-12-02  Wojciech Kocjan (via Brent Welch)
+        * lib/httpd.tcl: added data(headerlist) that records the header
+        information in order so the AOLserver emulation can recreate
+        the exact MIME headers of the request.
+        * lib/url.tcl: added a URL access hook return code of "return"
+        which just means "I've serviced this URL request completely".
+
 2002-09-25  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* Makefile.in: better DESTDIR/libdir support (steffen)
