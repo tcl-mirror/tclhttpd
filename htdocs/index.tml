@@ -8,7 +8,13 @@ platform for web application development."]
 
 <p>
 The Tcl-Httpd is a pure Tcl implementation of a Web server (HTTP/1.0).
-It runs as a Tcl script on top of <a href=http://www.scriptics.com/software/download.html>Tcl 7.5 or later</a> releases.
+It runs as a Tcl script on top of <a href=http://www.scriptics.com/software/download.html>Tcl 8.3</a>.
+<p>
+<small>
+If you install the Standard Tcl Library with your Tcl 8.0 or later release you can probably
+get by, and if you grab a 2.3.* version of TclHttpd you can run with Tcl 7.5 or later.</small>
+<p>
+
 While this server works fine as a stand alone web server, the
 intent is to embed the server in other applications in order to
 "web enable" them.
@@ -29,7 +35,7 @@ the server.
 <p>
 The server is distributed under a <a href=license.terms>copyright</a> that allows free use.
 <h2>See Also</h2>
-<a href=http://www.scriptics.com/tclhttpd/>The main Scriptics TclHttpd Information Page</a>.
+<a href=http://www.scriptics.com/tclhttpd/>The main TclHttpd Information Page</a>.
 <p>
 A <a href=book/TCLHTTPD.html>Tcl Httpd Book Chapter</a> from the
 3rd Edition of
@@ -42,15 +48,11 @@ The book chapter is more coherent, but may lack some details presented
 in the reference pages.  The source code is the truth!
 <p>
 Please <a href=register.html>Register Your Software</a> so
-we can see how widely used the server is.  Registration also gives you
-the opportunity to join the 
-<a href=mailto:tcl-httpd@scriptics.com>tcl-httpd@scriptics.com</a> mailing list.
+we can see how widely used the server is.
+<p>
+The <a href=mailto:tcl-httpd@scriptics.com>tcl-httpd@scriptics.com</a> mailing list,
+for which there is an <a href=http://dev.scriptics.com/lists/tcl-httpd>archive</a>.
 
-<h2>Sample GuestBook</h2>
-<ul>
-<li><a href="guestbook/guestbook.cgi">View Guest Book</a>
-<li><a href="guestbook/newguest.html">Update Guest Book</a>
-</ul>
 <h2>Control/Status Pages</h2>
 <ul>
 <li><a HREF="/status/">Server statistics</a> 
@@ -59,11 +61,22 @@ the opportunity to join the
 <h2>Test Pages</h2>
 <ul>
 <li><a HREF="include.shtml">Server includes</a> 
-<li><a HREF="snmp/">Snmp Integration</a>. 
-<li><a HREF="templates/">Templates with inline Tcl</a>. 
-<li><a HREF="forms/">CGI</a> 
+<li><a HREF="snmp/">Snmp Integration</a>.  You need Scotty installed for this.
+<li><a HREF="templates/">Templates with inline Tcl</a>.  The simple look-and-feel for these
+pages is implemented in the htdocs/libtml/mypage.tcl file.
+<li><a HREF="access/">Access control schemes</a>. 
+<li><a HREF="forms/">CGI</a>  You probably need to install the Standard Tcl Library for this.
 <li><a HREF="map/">Imagemaps</a> 
-<li><a HREF="java/ServerDemo.html">Java applet</a> 
+<li><a HREF="java/ServerDemo.html">Java applet</a> You need to run Netscape 2.0 for this
+ancient applet to work :-)
+<li><a HREF="/xyzzy">Sample missing page</a>
+<li><a HREF="/debug/raise?message=This+page+raises+errors!">A page that raises an error</a>
+</ul>
+
+<h2>Sample GuestBook</h2>
+<ul>
+<li><a href="guestbook/guestbook.cgi">View Guest Book</a>
+<li><a href="guestbook/newguest.html">Update Guest Book</a>
 </ul>
 
 [mypage::footer]

@@ -29,6 +29,7 @@ mypage::contents {
     Register		/register.html
     "CGI Tests"		/forms/
     "Templates"		/templates/
+    "Access Control"	/access/
     "Reference Manual"	/manual/reference.html
 }
 
