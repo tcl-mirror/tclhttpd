@@ -186,6 +186,8 @@ proc bugdb::update {Bug Status Application OS Priority Assigned Summary Descript
 
 proc bugdb::special-chars {value} {
     # Substitute for characters that break the HTML
-    regsub -all {"} $value {\&quot;} safe_value
+    regsub -all {\"} $value {\&quot;} safe_value
+    regsub -all {<} $safe_value {\&lt;} safe_value
+    regsub -all {>} $safe_value {\&gt;} safe_value
     return $safe_value
 }
