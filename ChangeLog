@@ -1,3 +1,13 @@
+2000-09-27  Brent Welch <welch@ajubasolutions.com>
+
+	* lib/direct.tcl: Converted this to use the ncgi:: module.
+	This means you can use ncgi::value inside application-direct URLs.
+	* lib/httpd.tcl: Added accept_https counter
+	* lib/status.tcl: Added accept_https counter
+	* lib/counter.tcl:  Added unused code for -histlog
+	* lib/debug.tcl: Added wired-in defaults for debug host, port
+	in case things are so broken you cannot pass parameters.
+
 2000-09-26  Brent Welch <welch@ajubasolutions.com>
 
 	* lib/httpd.tcl: Fixed long-standing buglet in 
