@@ -131,10 +131,14 @@ Config LogFlushMinutes 0
 # LogDebug - set up a debug logfile - default: no
 Config LogDebug 0
 
-# CompressProg - the program to use to compress 
-# log files and such
+# CompressProg - the program to use to compress log files and such
 
 Config CompressProg gzip
+foreach d {/bin /usr/bin /usr/local/bin} {
+    if {[file exists [file join $d gzip]]} {
+        Config CompressProg [file join $d gzip]
+    }
+}
 
 # MaxFileDescriptors - the maximum number of file descriptors the
 # server can have open.  This impacts the number of simultaneous
