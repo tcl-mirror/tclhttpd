@@ -238,7 +238,7 @@ proc HttpdRead {sock} {
 	set state [string compare $readCount 0],$data(state)
 	switch -glob -- $state {
 	    1,start	{
-		if [regexp {([^ ]+) +([^?]+)\??([^ ]*) +HTTP/(1.[01])} \
+		if [regexp {^([^ ]+) +([^?]+)\??([^ ]*) +HTTP/(1.[01])} \
 			$line x data(proto) data(url) data(query) data(version)] {
 		    set data(state) mime
 		    set data(line) $line
@@ -624,13 +624,19 @@ proc Httpd_Redirect {newurl sock} {
 
 proc Httpd_RedirectSelf {newurl sock} {
     global Httpd
-    set url http://$Httpd(name)
+    Httpd_Redirect [Httpd_SelfUrl $newurl] $sock
+    return $newurl
+}
+
+# Create an absolute URL for this server
+
+proc Httpd_SelfUrl {url} {
+    global Httpd
+    set newurl http://$Httpd(name)
     if {$Httpd(port) != 80} {
-	append url :$Httpd(port)
+	append newurl :$Httpd(port)
     }
-    append url $newurl
-    Httpd_Redirect $url $sock
-    return $url
+    append newurl $url
 }
 
 # Generate a redirect because the trailing slash isn't present
