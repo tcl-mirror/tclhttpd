@@ -8,13 +8,11 @@ AuthType Basic
 order deny,allow
 deny from all
 allow from localhost
-require group webmaster
 </Limit>
 
 <Limit POST>
 order deny,allow
 deny from all
 allow from localhost
-require group webmaster
 </Limit>
 

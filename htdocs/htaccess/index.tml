@@ -166,7 +166,7 @@
 			} [ncgi::value type]]]
  } else {
      # we have not been given a directory - use default
-     ::ncgi::setDefaultValue directory [file join [pwd] htdocs admin]
+     ::ncgi::setDefaultValue directory [file join [pwd] htdocs htaccess]
      set submit "Load"
      return [html::textInputRow  Directory directory]
  }
