@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cookie.tcl,v 1.2 2002/08/15 13:13:29 coldstore Exp $
+# RCS: @(#) $Id: cookie.tcl,v 1.3 2003/01/19 17:32:49 acacio Exp $
 
 package provide httpd::cookie 1.0
 
@@ -25,6 +25,7 @@ proc Cookie_Save {{interp {}}} {
     if {![catch {
 	interp eval $interp {uplevel #0 {set Cookie(set-cookie)}}
     } cookie]} {
+        upvar sock sock
 	foreach c $cookie {
 	    Httpd_SetCookie $sock $c
 	}
