@@ -1,3 +1,7 @@
+2004-11-27 Colin McCormack <colin@sharedtech.dyndns.org>
+	* renamed custom/dodirs.tcl to custom/zzzdodirs.tcl to place
+	directories after files in custom library load
+
 2004-11-20 Colin McCormack <colin@sharedtech.dyndns.org>
 	* lib/direct.tcl: export DirectRespond as Direct_Respond
 	It makes no sense to export Direct_Marshall, and not Direct_Respond
