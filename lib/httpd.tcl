@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.79 2003/10/26 23:53:10 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.80 2003/10/27 00:03:47 coldstore Exp $
 
 package provide httpd 1.6
 
@@ -1197,7 +1197,7 @@ proc HttpdRespondHeader {sock type close size {code 200}} {
 	    }
 	}
     }
-    Stderr '$reply'
+
     puts -nonewline $sock $reply
 }
 
