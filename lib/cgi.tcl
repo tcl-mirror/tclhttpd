@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cgi.tcl,v 1.23 2000/11/29 18:37:02 welch Exp $
+# RCS: @(#) $Id: cgi.tcl,v 1.24 2001/01/27 01:33:11 welch Exp $
 
 package provide httpd::cgi 1.0
 
@@ -264,12 +264,38 @@ proc CgiSpawn {sock script} {
 	    # Pump the query data to the CGI process in the background
 	    # We set up fileevents after this finishes, so return now
 
-	    fcopy $sock $fd -command [list CgiCopyDone $sock $fd] -size $data(count)
+	    # fcopy bug in Tcl 8.3.2 and Tcl 8.4a2 and all previous versions 
+	    # prevents this from working reliably on large amounts of POST data
+	    # fcopy $sock $fd -command [list CgiCopyDone $sock $fd] -size $data(count)
+	    fileevent $sock readable [list CgiCopyPost $sock $fd]
 	    return
 	}
     }
 
     CgiCopyDone $sock $fd $data(count) ""
+}
+
+# CgiCopyPost --
+#
+#	Called to copy POST data down the pipe - need to avoid fcopy bug
+
+proc CgiCopyPost {sock fd} {
+    upvar #0 Httpd$sock data
+    global tcl_version
+
+    set buf [read $sock $data(count)]
+    puts -nonewline $fd $buf
+    if {$tcl_version <= 8.0} {
+	set len [string length $buf]
+    } else {
+	# Ensure we get byte count, not I18N character count
+	set len [string bytelength $buf]
+    }
+    set data(count) [expr {$data(count) - $len}]
+    if {$data(count) <= 0} {
+	flush $fd
+	CgiCopyDone $sock $fd dummy ""
+    }
 }
 
 # CgiCopyDone --
@@ -357,7 +383,12 @@ proc CgiRead {fd sock} {
 	    # Read and accumulate headers until we know what kind
 	    # of response to make
 
-	    if {[gets $fd line] <= 0} {
+	    set n [gets $fd line]
+	    if {$n < 0} {
+		# Blocked or EOF - do nothing.
+		# EOF will be caught on next fileevent.
+		# Blocked means we have a partial line, just wait.
+	    } elseif {$n == 0} {
 		set data(header) 1
 		append header "HTTP/1.0 $data(headercode)\n"
 		append header "Server: $Httpd(server)\n"

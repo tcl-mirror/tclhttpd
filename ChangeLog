@@ -1,3 +1,9 @@
+2001-01-26  Brent Welch <welch@ajubasolutions.com>
+
+	* bin/cgi.tcl: Fixed handling of large POST data by replacing
+	an fcopy with filevent.  The works around a fcopy bug
+	diagnosed by Don Porter.
+
 2000-11-29  Brent Welch <welch@ajubasolutions.com>
 
 	* bin/httpd.tcl: Fixed setting of auto_path in the standard
@@ -8,8 +14,8 @@
 	* lib/cgi.tcl: Fixed "extra timer" bug found by Petrus that could cause
 	erroneous aborts of CGI connections. (Petrus Vloet)
 	Added use of Doc_RegisterRoot so DocAccessHook works right for
-	/cgi-bin directories outside the htdocs hierarchy.  (Peter Summers)
-	Eliminated extra / build-up in /cgi/bin pathnames (Peter Summers)
+	/cgi-bin directories outside the htdocs hierarchy.  (Peter Farmer)
+	Eliminated extra / build-up in /cgi/bin pathnames (Peter Farmer)
 
 2000-11-13  Brent Welch <welch@ajubasolutions.com>
 
