@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.29 2002/12/03 07:20:29 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.30 2003/08/11 16:46:57 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -81,7 +81,7 @@ BUILD_LIMIT = @BUILD_LIMIT@
 # DISTDIR and DEST are used when creating distributions
 
 DISTDIR=/tmp/
-DEST=${DISTDIR}/tclhttpd${VERSION}
+DEST=${DISTDIR}/tclhttpd-${VERSION}
 TCL_VERSION=@TCL_VERSION@
 TCLLIB_VERSION=@TCLLIB_VERSION@
 TCL_DIR=@TCL_DIR@
@@ -143,6 +143,7 @@ POST_UNINSTALL = :
 
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
+RELEASE = @RELEASE@
 WIN_VERSION = @WIN_VERSION@
 CC = @CC@
 CFLAGS_DEBUG = @CFLAGS_DEBUG@
@@ -408,9 +409,19 @@ dist:
 	rm -rf $(DEST)
 	mkdir $(DEST)
 	$(TCLSH_PROG) $(srcdir)/bin/CopyDist $(srcdir) $(DEST)
-	(cd $(DISTDIR); tar cf - ./tclhttpd$(VERSION) | gzip > tclhttpd$(VERSION).tar.gz)
-	(cd $(DISTDIR) ; zip -9 -r -o  tclhttpd$(WIN_VERSION).zip  tclhttpd$(VERSION))
+	(cd $(DISTDIR); tar cf - ./tclhttpd-$(VERSION) | gzip > tclhttpd-$(VERSION).tar.gz)
+	(cd $(DISTDIR) ; zip -9 -r -o  tclhttpd$(WIN_VERSION).zip  tclhttpd-$(VERSION))
 
+rpm: dist
+	rm -rf $(DISTDIR)/dist
+	mkdir -p $(DISTDIR)/dist/SPECS
+	mkdir -p $(DISTDIR)/dist/SRPMS
+	mkdir -p $(DISTDIR)/dist/RPMS
+	mkdir -p $(DISTDIR)/dist/SOURCES
+	mkdir -p $(DISTDIR)/dist/BUILD
+	cp $(DISTDIR)/$(PACKAGE)-$(VERSION).tar.gz $(DISTDIR)/dist/SOURCES/
+	cp $(srcdir)/$(PACKAGE).spec $(DISTDIR)/dist/SPECS/$(PACKAGE)-$(VERSION)-$(RELEASE).spec
+	rpmbuild --define "_topdir $(DISTDIR)/dist" -ba $(DISTDIR)/dist/SPECS/$(PACKAGE)-$(VERSION)-$(RELEASE).spec
 
 .PHONY: all binaries clean depend distclean doc install installdirs \
 libraries test

@@ -1,4 +1,6 @@
-#!/usr/local/bin/tclsh8.3
+#!/bin/sh
+# \
+exec tclsh8.3 "$0"
 
 # This script decodes the HTTP_AUTHORIZATION environment variable.
 

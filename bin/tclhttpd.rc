@@ -107,6 +107,12 @@ Config secsPerMinute	60
 
 Config threads		0
 
+# gui - if we should attempt to start up a GUI when Tk is used
+# Set this to 0 if you want to run your own GUI.
+# The default is to run the simple gui from srvui.tcl
+
+Config gui              1
+
 #####################
 
 # The parameters below here are not settable via the command line

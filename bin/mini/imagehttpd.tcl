@@ -1,4 +1,6 @@
-#!/usr/local/bin/tclsh8.0
+#!/bin/sh
+# \
+exec tclsh8.3 "$0"
 
 # Simple Sample httpd/1.0 server in 250 lines of Tcl
 # Stephen Uhler / Brent Welch (c) 1996 Sun Microsystems

@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.14 2003/04/04 04:10:39 coldstore Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.15 2003/08/11 16:46:58 welch Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -33,7 +33,22 @@ package require httpd          	;# Protocol stack
 package require httpd::version	;# Version number
 package require httpd::url	;# URL dispatching
 package require httpd::mtype	;# Mime types
-Mtype_ReadTypes 		[file join $Config(lib) mime.types]
+
+# Search for mime.types either right in Config(lib), or down
+# one level in the installed tclhttpd subdirectory
+
+foreach path [list \
+    [file join $Config(lib) mime.types] \
+    [glob -nocomplain [file join $Config(lib) tclhttpd* mime.types]] \
+    ] {
+  if {[llength $path] > 0} {
+    set path [lindex $path 0]
+  }
+  if {[file exists $path]} {
+    Mtype_ReadTypes $path
+    break
+  }
+}
 package require httpd::counter	;# Statistics
 Counter_Init $Config(secs)
 package require httpd::utils	;# handy stuff like "lassign"

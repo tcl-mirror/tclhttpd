@@ -1,4 +1,6 @@
-#!/usr/local/bin/tclsh8.0
+#!/bin/sh
+# \
+exec tclsh8.3 "$0"
 #
 puts "Content-Type: text/html"
 puts ""

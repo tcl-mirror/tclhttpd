@@ -1,3 +1,10 @@
+2003-8-11  Brent Welch <welch@panasas.com>
+        * tclhttpd.spec: Updates from Michael Thomas to create RPMs.
+        * bin/httpdthread.tcl: fixed loading of mime.types in installed configuration
+        * bin/httpd.tcl: added support for -gui flag to control default Tk gui
+        * bin/tclhttpd.rc: added support for -gui flag to control default Tk gui
+        * Everything else is cleanup associated with creating RPMs.
+
 2003-6-26  Brent Welch <welch@panasas.com>
         * lib/subst.tcl: fixed Doc_application/x-tcl-auth based on a bug
         filed by Andreas Kupries

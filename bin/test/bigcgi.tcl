@@ -1,4 +1,6 @@
-#!/usr/local/bin/tclsh8.2
+#!/bin/sh
+# \
+exec tclsh8.3 "$0"
 
 package require ncgi
 

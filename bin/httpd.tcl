@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.45 2003/04/04 04:50:57 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.46 2003/08/11 16:46:58 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -185,6 +185,7 @@ array set Config [cmdline::getoptions argv [list \
         [list library.arg      [cget library]      {Directory list where custom packages and auto loads are}] \
         [list debug.arg	       0	        {If true, start interactive command loop}] \
         [list compat.arg       3.3	        {version compatibility to maintain}] \
+        [list gui.arg           [cget gui]      {flag for launching the user interface}]
     ] \
     "usage: httpd.tcl options:"]
 
@@ -322,7 +323,7 @@ Log_Flush
 
 # Start up the user interface and event loop.
 
-if {[info exists tk_version]} {
+if {[info exists tk_version] && $Config(gui)} {
     package require httpd::srvui
     SrvUI_Init "Tcl HTTPD $Httpd(version)"
 }
