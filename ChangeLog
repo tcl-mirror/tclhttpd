@@ -1,3 +1,8 @@
+2004-03-16  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* lib/doc.tcl (DocDomain): more checks to ensure personal home
+	page dirs exist and are readable (petrus)
+
 2004-2-29 Brent Welch <welch@panasas.com>
         * bin/httpd.tcl: removed compatibility warning message
         * lib/auth.tcl: Fixed to tolerate missing group and user files

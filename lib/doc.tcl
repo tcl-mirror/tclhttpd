@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.48 2003/05/01 23:38:49 welch Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.49 2004/03/16 21:38:27 hobbs Exp $
 
 package provide httpd::doc 1.1
 
@@ -330,6 +330,14 @@ proc DocDomain {prefix directory sock suffix} {
 	    return	;# No such user
 	}
 	set directory [file join $homedir $Doc(homedir)]
+	if {![file isdirectory $directory]} {
+	    Doc_NotFound $sock
+	    return	;# No User's Public Directory
+	}
+	if {![file readable $directory]} {
+	    Doc_NotFound $sock
+	    return	;# No access to User's Public Directory
+	}
 	set pathlist [lrange $pathlist 1 end]
 	set suffix [join $pathlist /]
     }
