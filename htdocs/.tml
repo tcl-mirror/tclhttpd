@@ -28,6 +28,7 @@ if {[info exists page(query)]} {
 package require sunscript 1.2
 package require faq 1.2
 package require htmlutils
+package require form
 
 # This should be overridden in each sub directories
 
