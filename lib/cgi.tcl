@@ -264,10 +264,19 @@ proc CgiExec {script arglist} {
     switch -- $tcl_platform(platform) {
 	unix {
 	    if {[file exists /dev/stdout]} {
-		return [open "|[list $script] $arglist 2> /dev/stdout" r+]
-	    } else {
-		return [open "|[list $script] $arglist |& cat" r+]
+
+		# This trick "2> /dev/stdout" fails if you start the process in
+		# the background under an xterm, then quit the xterm.  In that case
+		# the open raises an error.
+
+		if { ! [catch {open "|[list $script] $arglist 2> /dev/stdout" r+} pipe]} {
+		    return $pipe
+		}
 	    }
+
+	    # We use cat to merge the stderr and stdout
+
+	    return [open "|[list $script] $arglist |& cat" r+]
 	}
 	windows {
 	    switch -- [file extension $script] {
