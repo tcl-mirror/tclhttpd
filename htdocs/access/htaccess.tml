@@ -1,0 +1,113 @@
+[mypage::header "About .htaccess Files"]
+
+Each directory can contain a file named ".htacess"
+that controls access to the pages in that directory.
+This depends on the files 
+<ul><li>   .htaccess, 
+    <li>/usr/local/htaccess/passwd
+    <li>/usr/local/htaccess/group.<br>
+</ul>
+<br>
+Description of the <b>.htaccess</b> file:
+<br>
+<br>
+Each line begins with a keyword with one or more arguments. A keyword is case insensitive.
+Also comment lines, a line starting with a '#', and blank lines are allowed.
+<pre>
+KEYWORDS for .htaccess
+
+AuthType             &lt;type&gt;
+                     Authentication mechanism
+                     type  ::  Basic
+
+AuthName             &lt;name&gt;
+                     Text displayed in password prompt from the browser
+                     name  ::  &lt;ASCII&gt;
+
+AuthUserFile         &lt;filename&gt;
+                     Reference to user file, inclusive path (See below)
+
+AuthGroupFile        &lt;filename&gt;
+                     Reference to group file, inclusive path (See below)
+
+Limit                &lt;op&gt;
+                     List of operations     
+                     op    ::  "GET|POST|.."
+
+/Limit
+
+Following Keywords should be enclosed by the keywords "Limit" and "/Limit":
+Require, Order, Deny, Allow
+
+# USER and/or GROUP protection
+Require              &lt;key value&gt;
+                     key   ::  "user|group"
+                     value ::  "&lt;username&gt;|&lt;groupname&gt;"
+                     "value" must be specified in the AuthUserFile or AuthGroupFile
+
+# NETWORK BASED PROTECTION
+In the case "allow" and/or "deny" is specified, order must be specified too!
+Order                &lt;value,value&gt;
+                     value ::  "allow|deny"
+
+Deny                 &lt;args&gt;
+                     args  ::  "\\\[from] {fully qualified network}* | all"
+
+Allow                &lt;args&gt;
+                     args  ::  "\\\[from] {fully qualified network}* | all
+
+</pre>
+The <b>AuthUserfile</b> file "passwd" has this format:
+<pre>
+&lt;username&gt;:&lt;encrypted_password&gt;
+..</pre>The generation of encrypted passwords is support by the tcl package "crypt".
+On unix you can copy e.g. an entry from the "passwd"/"shadow" file to the
+AuthUserFile.
+<br>
+<br>
+The <b>AuthGroupFile</b> file "group" has this format:
+<pre>
+&lt;groupname&gt;:&lt;member&gt;,&lt;member2&gt;,&lt;member3&gt;
+..
+</pre>
+<pre>Notes:
+- At the moment of this writing a crypt library for Win32 is included in 
+  tclpro1.4.1 and is not part of Tclhttpd.
+- How to create an AuthUserFile entry?
+  Start a tcl shell and load the crypt package:
+  tclsh
+  % package require crypt
+  % crypt &lt;password&gt; &lt;salt&gt;
+  
+  For further understanding I copied following text from the
+  crypt.3c man page:
+
+     password is the input string to encrypt, for instance,  a  user's
+     typed  password.   Only the first eight characters are used;
+     the rest are ignored.  salt is a two-character string chosen
+     from  the  set \\\[a-zA-Z0-9./]; this string is used to perturb
+     the hashing algorithm in one of 4096 different  ways,  after
+     which  the  input  string  is  used as the key to repeatedly
+     encrypt a constant string.  The returned value points to the
+     encrypted  input  string.   The  first two characters of the
+     return value are the salt itself.
+</pre>
+<b>Examples:</b>
+<br>
+To be able to run the examples you have to create the files
+/usr/local/htaccess/passwd and /usr/local/htaccess/group.
+Following links point to precompiled files for <a href=htaccess/win32/>Win32</a> 
+and <a href=htaccess/unix/>Unix</a>. 
+The password for a user is identical to its username.<br>
+
+<a href=noawe/>Deny access to a host</a>  This is a .htaccess example that
+denies access to noawe.sun.com. <br>
+
+<a href=auth/>Webmaster</a> Access is allowed to anyone in the group webmaster.<br>
+
+<a href=bydir/>Tcl97</a> It only allows the user tcl97.<br>
+
+<a href=multiple/>Multiple</a> Example with multiple "require group" and/or 
+"require user" entries in a .htaccess file.
+<br>
+[mypage::footer]
