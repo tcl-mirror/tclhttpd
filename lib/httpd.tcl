@@ -861,6 +861,12 @@ set Httpd_ErrorFormat {
 # error display page, but falls back to this if necessary.
 
 proc Httpd_Error {sock code {detail ""}} {
+
+    if {[Thread_Respond $sock [list Httpd_Error $sock $code $detail]]} {
+	# We've passed the error back to the main thread
+	return
+    }
+
     upvar #0 Httpd$sock data
     global Httpd Httpd_Errors Httpd_ErrorFormat
 
