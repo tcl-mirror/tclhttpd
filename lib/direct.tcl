@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.10 2000/09/27 19:35:26 welch Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.11 2000/09/29 20:47:32 lfb Exp $
 
 package provide httpd::direct 1.0
 
@@ -53,13 +53,55 @@ proc Direct_Url {virtual {prefix {}} {inThread 0}} {
 
 proc DirectDomain {prefix sock suffix} {
     global Direct
+    global env
     upvar #0 Httpd$sock data
     Count $prefix
 
-    # Set up the environment a-la CGI
+    # Set up the environment a-la CGI.
 
-    global env
     Cgi_SetEnv $sock $prefix$suffix
+
+    # Prepare an argument data from the query data.
+
+    DirectParseQueryData $sock
+    set cmd [DirectMarshallArguments $prefix $suffix]
+    if {$cmd == ""} {
+	Doc_NotFound $sock
+	return
+    }
+
+    # "Cache hit" is a misnomer, but this is how things are counted
+
+    Count cachehit,$Direct($prefix)$suffix
+
+    # Eval the command.  Errors can be used to trigger redirects.
+
+    set code [catch $cmd result]
+
+    set type text/html
+    upvar #0 $prefix$suffix aType
+    if {[info exist aType]} {
+	set type $aType
+    }
+
+    DirectRespond $sock $code $result $type
+}
+
+# DirectParseQueryData --
+#
+#	Turn the query data into a key/value list.
+#
+# Arguments:
+# 	sock	The socket back to the client.
+#
+# Results:
+#	Returns a key/value list of query data names and their values.
+#
+# Side effects:
+#	None.
+
+proc DirectParseQueryData {sock} {
+    upvar #0 Httpd$sock data
 
     set valuelist {}
     if [info exists data(query)] {
@@ -90,12 +132,33 @@ proc DirectDomain {prefix sock suffix} {
 	ncgi::parse
 	ncgi::urlStub $data(url)
     }
+    return
+}
+
+# DirectMarshallArguments --
+#
+#	Use the url prefix, suffix, and cgi values (set with the
+#	ncgi package) to create a Tcl command line to invoke.
+#
+# Arguments:
+# 	prefix		The Tcl command prefix of the domain registered 
+#			with Direct_Url.
+#	suffix		The part of the url after the domain prefix.
+#
+# Results:
+#	Returns a Tcl command line.
+#
+# Side effects:
+#	If the prefix and suffix do not map to a Tcl procedure,
+#	returns empty string.
+
+proc DirectMarshallArguments {prefix suffix} {
+    global Direct
+
     set cmd $prefix$suffix
     if {![iscommand $cmd]} {
-	Doc_NotFound $sock
 	return
     }
-    CountName $data(url) hit
 
     # Compare built-in command's parameters with the form data.
     # Form fields with names that match arguments have that value
@@ -124,32 +187,58 @@ proc DirectDomain {prefix sock suffix} {
 	    }
 	}
     }
-    # Eval the command.  Errors can be used to trigger redirects.
+    return $cmd
+}
 
-    set code [catch $cmd result]
+# DirectRespond --
+#
+#	This function returns the result of evaluating the direct
+#	url.  Usually, this involves returning a page, but a redirect
+#	could also occur.
+#
+# Arguments:
+# 	sock	The socket back to the client.
+#	code	The return code from evaluating the direct url.
+#	result	The return string from evaluating the direct url.
+#	type	The mime type to use for the result.  (Defaults to text/html).
+#	
+#
+# Results:
+#	None.
+#
+# Side effects:
+#	If code 302 (redirect) is passed, calls Httpd_Redirect to 
+#	redirect the current request to the url in result.
+#	If code 0 is passed, the result is returned to the client.
+#	If any other code is passed, an exception is raised, which
+#	will cause a stack trace to be returned to the client.
+#
+
+proc DirectRespond {sock code result {type text/html}} {
     switch $code {
-	0	{ # fall through to Httpd_ReturnData }
-	302	{ # redirect 
+	0 {
+	    # Fall through to Httpd_ReturnData.
+	}
+	302	{
+	    # Redirect.
+
 	    Httpd_Redirect $result $sock
 	    return ""
 	}
 	default {
+	    # Exception will cause error page to be returned.
+
 	    global errorInfo errorCode
-	    return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+	    return -code $code -errorinfo $errorInfo -errorcode $errorCode \
+		    $result
 	}
     }
 
-    # See if a content type has been registered for the URL
+    # See if a content type has been registered for the URL.
 
-    set type text/html
-    upvar #0 $cmdOrig aType
-    if {[info exist aType]} {
-	set type $aType
-    }
-
-    # See if any cookies have been set
+    # See if any cookies have been set.
     # This works with the Doc_SetCookie procedure that populates
-    # the global page array
+    # the global page array.
 
     global page
     if {[info exist page(set-cookie)]} {
