@@ -4,8 +4,19 @@
 
 [html::h1 {TclHttpd &gt; Sample Apps &gt; Bug Database}]
 
+[html::h2 {Support Libraries}]
+
 <p>
-This sample application...
-</p>
+First create a library containing procedures that output HTML
+headers and footers. Since this library will be used in other
+applications, it will be given a generic name (e.g. html-strict). The
+library should be put in one of the library directories
+designated in the config file or through command line (e.g. custom).
+<span class="note">Note:</span> In the case of this sample application, 
+custom libraries are in the sampleapp directory.</p>
+
+<pre>
+
+</pre>
 
 [html-strict::foot]
