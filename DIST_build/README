@@ -5,12 +5,12 @@ If you already have tcl 8.3 installed, then you can probably
 run the Tcl Web Server directly from this distribtuion without
 doing any installation steps:
 
-cd tclhttpd3.2/bin
+cd tclhttpd3.2.1/bin
 tclsh8.3 httpd.tcl -port 8001 -debug 1
 
 If you get complaints about missing the Standard Tcl Library,
 then you can install just that by running the install.sh script
-in the tcllib0.7 directory.
+in the tcllib0.8 directory.
 
 If you want a clean install of everything, including a Tcl 8.3.2
 that has thread enabled, then use the Makefile in the top-level directory.
@@ -19,26 +19,25 @@ by platform into different subdirectories.
 
 More Docs
 There are a few more README-like files you should read:
-tclhttpd3.2/INSTALL
-tclhttpd3.2/README
-tclhttpd3.2/WHATSNEW
-tclhttpd3.2/ChangeLog
-tclhttpd3.2/certs/README.ssl
+tclhttpd3.2.1/INSTALL
+tclhttpd3.2.1/README
+tclhttpd3.2.1/WHATSNEW
+tclhttpd3.2.1/ChangeLog
+tclhttpd3.2.1/certs/README.ssl
 
 Information about TclHttpd is at
 
 http://dev.ajubasolutions.com/software/tclhttpd
 
 The mailing list is
-mailto:tcl-httpd@ajubasolutions.com
-You must be a member to post to this list.  To join, send a message
-with the subject of "subscribe" to
-tcl-httpd-request@ajubasolutions.com
+mailto:tclhttpd-users@lists.sourceforge.net
+You must be a member to post to this list.  To join, visit this URL
+http://lists.sourceforge.net/mailman/listinfo/tclhttpd-users
 
-There are archives of the list at
+There are archives of the older mailing list at
 http://dev.ajubasolutions.com/lists/tcl-httpd
 
-I'm staring a new SourceForge project for tclhttpd.  Please see
+I've started a new SourceForge project for tclhttpd.  Please see
 http://sourceforge.net/projects/tclhttpd/
 http://tclhttpd.sourceforge.net/
 ftp://tclhttpd.sourceforge.net/projects/tclhttpd/
@@ -46,6 +45,7 @@ ftp://tclhttpd.sourceforge.net/projects/tclhttpd/
 Brent Welch <welch@ajubasolutions.com>	(our new identity)
 	or  <welch@scriptics.com>	(our original company name)
 	or  <welch@acm.org>		(this should work always)
+	or  <bwelch@interwoven.com>	(my new email)
 
 
 SSL Note:

@@ -43,6 +43,9 @@ This lets you set basic parameters like port number and server name.
 
 VERSION SUMMARY
 
+Version 3.2.1 fixes bugs in CGI handling related to the changes
+in 3.2 in the way POST data is handled.  
+
 Version 3.2 changes the way you customize a TclHttpd installation with
 the goal of not having to modify the bin/httpd.tcl and bin/httpdthread.tcl
 scripts, although in some cases this will still be necessary.  A new
