@@ -62,8 +62,8 @@ proc Url_Dispatch {sock} {
 
     # Dispatch to cached handler for the URL, if any
 
-    if {![info exists data(query)] && [Httpd_PostDataSize $sock] == 0 
-	    && [info exists UrlCache($url)]} {
+    if {(![info exists data(query)] || ([string length $data(query)] == 0)) &&
+	    ([Httpd_PostDataSize $sock] == 0) && [info exists UrlCache($url)]} {
 	Count cachehit,$url
 	set code [catch { eval $UrlCache($url) {$sock} } error]
 	if {$code == 0} {
