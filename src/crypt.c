@@ -9,15 +9,25 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
+
 #include "tcl.h"
+#ifndef _WIN32
 #include "unistd.h"
+#endif
 
 /*
  * Prototypes for procedures defined later in this file:
  */
 
+
 static int	Crypt_Cmd _ANSI_ARGS_((ClientData clientData,
 		    Tcl_Interp *interp, int argc, char **argv));
+
+#undef TCL_STORAGE_CLASS
+#define TCL_STORAGE_CLASS DLLEXPORT
+
+EXTERN int	Crypt_Init _ANSI_ARGS_((Tcl_Interp *interp));
+
 
 /*
  *----------------------------------------------------------------------
@@ -72,12 +82,17 @@ Crypt_Cmd(dummy, interp, argc, argv)
  *----------------------------------------------------------------------
  */
 
-int
-Crypt_Init(interp)
+int Crypt_Init(interp)
     Tcl_Interp *interp;		/* Interpreter in which the package is
 				 * to be made available. */
 {
     int code;
+
+#ifdef USE_TCL_STUBS
+	if (Tcl_InitStubs(interp, "8.1", 0) == NULL) {
+	    return TCL_ERROR;
+	}
+#endif
 
     code = Tcl_PkgProvide(interp, "crypt", "1.0");
     if (code != TCL_OK) {
