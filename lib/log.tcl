@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: log.tcl,v 1.10 2000/09/29 22:53:12 welch Exp $
+# RCS: @(#) $Id: log.tcl,v 1.11 2003/10/08 07:55:44 coldstore Exp $
 
 package provide httpd::log 1.1
 package require httpd::logstd 1.0
@@ -158,6 +158,24 @@ proc Log_FlushMinutes {min} {
     if {[info exist Log(flushID)]} {
 	Log_Flush
     }
+}
+
+# Log_CompressProg --
+#
+# Set log compression program
+#
+# Arguments:
+#	prog	the program used to compress logs
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	None
+
+proc Log_CompressProg {prog} {
+    global Log
+    set Log(compressProg) $prog
 }
 
 # Log_SetFile --

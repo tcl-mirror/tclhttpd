@@ -128,6 +128,11 @@ Config LogFile	[file join /tmp log ]
 
 Config LogFlushMinutes 0
 
+# CompressProg - the program to use to compress 
+# log files and such
+
+Config CompressProg /usr/local/bin/gzip
+
 # MaxFileDescriptors - the maximum number of file descriptors the
 # server can have open.  This impacts the number of simultaneous
 # client requests it can have open.
