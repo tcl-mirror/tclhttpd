@@ -81,6 +81,7 @@ build/$(PLATFORM):  build
 
 make:
 	-pwd=`pwd`; \
+	prefix=$(PREFIX) ; \
 	for i in $(MODULES) ; do \
 	    echo "" ; \
 	    if test -f $$pwd/build/$(PLATFORM)/$$i/Makefile ; then \
@@ -89,7 +90,14 @@ make:
 		echo "" ; \
 		make ; \
 	    else \
-		echo "Skipping Make for $$i" ; \
+		if test -f $$pwd/build/$(PLATFORM)/$$i/install.sh ; then \
+		    echo "install.sh in $$pwd/build/$(PLATFORM)/$$i" ; \
+		    cd $$pwd/build/$(PLATFORM)/$$i ; \
+		    echo "" ; \
+		    sh install.sh $$prefix ; \
+		else \
+		    echo "Skipping Make for $$i" ; \
+		fi; \
 	    fi; \
 	done;
 
