@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: redirect.tcl,v 1.5 2004/03/23 01:16:54 welch Exp $
+# RCS: @(#) $Id: redirect.tcl,v 1.6 2004/06/12 04:50:22 coldstore Exp $
 
 package provide httpd::redirect 1.0
 
@@ -51,6 +51,56 @@ proc Redirect_Self {newurl} {
     Redirect_To $newurl
 }
 
+
+# Redirect_QuerySelf --
+#
+#	Like Redirect_Self, but preserves query data
+#
+# Arguments:
+#	newurl	Server-relative URL
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	See Redirect_To
+
+proc Redirect_QuerySelf {sock newurl} {
+    upvar #0 Httpd$sock data
+
+    # Preserve query data when bouncing among pages.
+    if {[info exist data(query)] && [string length $data(query)]} {
+	append newurl ? $data(query)
+    }
+
+    Redirect_Self $newurl	;# offer what we have to the client
+}
+
+# Redirect_Dir --
+#
+# Generate a redirect because the trailing slash isn't present
+# on a URL that corresponds to a directory.
+#
+# Arguments:
+#	sock	Socket connection
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	Generate a redirect page.
+
+proc Redirect_Dir {sock} {
+    global Httpd
+    upvar #0 Httpd$sock data
+
+    set url  $data(url)/
+    if {[info exist data(query)] && [string length $data(query)]} {
+	# maintain the query data
+	append url ? $data(query)
+    }
+    Httpd_Redirect $url $sock
+}
 
 # Redirect_Init
 #
@@ -233,3 +283,4 @@ proc Redirect/status {} {
     append html </table>\n
     return $html
 }
+
