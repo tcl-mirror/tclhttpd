@@ -183,6 +183,16 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
 	}
 	package require tls
 	# following is temporary until we have good OpenSSL library
+	if {![file exists $Httpd(SSL_CAFILE)]} {
+        return -code error "CA file \"$Httpd(SSL_CAFILE)\" not found"
+	}
+	if {![file exists $Httpd(SSL_CERTFILE)]} {
+        return -code error "Certificate  \"$Httpd(SSL_CERTFILE)\" not found"
+	}
+	if {![file exists $Httpd(SSL_CADIR)]} {
+        return -code error "Directory \"$Httpd(SSL_CADIR)\" not found"
+	}
+		
 	tls::init \
 	    -cadir $Httpd(SSL_CADIR) \
 		-cafile $Httpd(SSL_CAFILE) \
