@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.12 2000/10/04 19:55:53 welch Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.13 2000/10/09 19:00:21 welch Exp $
 
 package provide httpd::direct 1.1
 
@@ -55,7 +55,6 @@ proc DirectDomain {prefix sock suffix} {
     global Direct
     global env
     upvar #0 Httpd$sock data
-    Count $prefix
 
     # Set up the environment a-la CGI.
 

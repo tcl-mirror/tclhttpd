@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.62 2000/10/05 04:53:51 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.63 2000/10/09 19:00:21 welch Exp $
 
 package provide httpd 1.5
 
@@ -1255,13 +1255,14 @@ proc Httpd_Error {sock code {detail ""}} {
 		append message "$l: [info level $l]<br>"
 	}
     }
+    Log $sock Error $code $data(url) $detail
+
     # We know something is bad here, so we make the completion callback
     # and then unregister it so we don't get an extra call as a side
     # effect of trying to reply.
 
     HttpdDoCallback $sock $message
 
-    Log $sock Error $code $data(url) $detail
     if {[info exists data(infile)]} {
 	# We've already started a reply, so just bail out
 	Httpd_SockClose $sock 1
