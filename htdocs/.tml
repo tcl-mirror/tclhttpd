@@ -45,4 +45,3 @@ html::init {
     font.face		arial
 }
 
-lappend tmllist [info script]

@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.8 2002/08/31 07:30:44 welch Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.9 2002/12/03 07:20:30 welch Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -50,6 +50,7 @@ proc Upload_Url {virtual dir command args} {
     Url_PrefixInstall $virtual [list UploadDomain $dir $command \
 	$opt(-maxfiles) $opt(-maxbytes) $opt(-totalbytes)] \
 	-thread $opt(-inThread) \
+        -callback [list UploadTidyUp] \
 	-readpost 0
 }
 
@@ -109,12 +110,19 @@ proc UploadDomain {dir cmd maxfiles maxbytes totalbytes sock suffix} {
     set upload(totalbytes) $totalbytes
     set upload(maxbytes) $maxbytes
     set upload(suffix) $suffix
+    set upload(count) $data(count)
 
     # These are temporary storage used when parsing the headers of each part
 
     set upload(headers) {}
     set upload(formName) {}
     set upload(formNames) {}
+
+    # Now that we are going to read the post data, clear out the
+    # hook and the data count so noone else tries to read it
+
+    Url_PostHook $sock 0
+    set data(count) 0
 
     # Accept cr-lf endings in the headers
     fconfigure $sock -trans auto
@@ -334,12 +342,20 @@ proc UploadDone {sock} {
     Httpd_ReturnData $sock text/html $result
 }
 
+# This is called as the "final" completion callback to clean up
+
+proc UploadTidyUp {sock errmsg} {
+    upvar #0 Upload$sock upload
+
+    unset upload
+}
+
 # UploadTest --
 #	Sample callback procedure for an upload domain
 
 proc UploadTest {flist vlist} {
     set html "<title>Upload Test</title>\n"
-    set html "<h1>Upload Test</h1>\n"
+    append html "<h1>Upload Test</h1>\n"
     append html "<h2>File List</h2>\n"
     append html [html::tableFromList $flist]\n
     append html "<h2>Data List</h2>\n"

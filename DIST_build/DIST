@@ -2,9 +2,9 @@
 #
 # Create a super distribution of TclHttpd, Tcl, Tcllib, and Thread
 
-HTTPD_VERSION=3.4.1
-HTTPD_TAG=tclhttpd-3-4-rel-1
-WIN_VERSION=341
+HTTPD_VERSION=3.4.3
+HTTPD_TAG=tclhttpd-3-4-rel-3
+WIN_VERSION=343
 DISTDIR=/usr10/home/welch/dist
 SUPER_DIR=${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist
 
@@ -32,6 +32,12 @@ chmod a-x tclhttpd${HTTPD_VERSION}/bin/httpdthread.tcl
 chmod a+x tclhttpd${HTTPD_VERSION}/htdocs/cgi-bin/junk*
 chmod a+x tclhttpd${HTTPD_VERSION}/htdocs/cgi-bin/env
 find tclhttpd${HTTPD_VERSION}/htdocs -name "*.cgi" -exec chmod a+x {} \;
+cp tclhttpd${HTTPD_VERSION}/license.terms tclhttpd${HTTPD_VERSION}/htdocs
+mkdir tclhttpd${HTTPD_VERSION}/htdocs/links
+cp tclhttpd${HTTPD_VERSION}/README tclhttpd${HTTPD_VERSION}/htdocs/links/README.txt
+cp tclhttpd${HTTPD_VERSION}/certs/README.ssl tclhttpd${HTTPD_VERSION}/htdocs/links/README.ssl.txt
+cp tclhttpd${HTTPD_VERSION}/WHATSNEW tclhttpd${HTTPD_VERSION}/htdocs/links/WHATSNEW.txt
+cp tclhttpd${HTTPD_VERSION}/INSTALL tclhttpd${HTTPD_VERSION}/htdocs/links/INSTALL.txt
 
 rm -rf ${SCRATCH}/thread${THREAD_VERSION}
 cvs -d welch@cvs.sourceforge.net:/cvsroot/tcl checkout -r ${THREAD_TAG} thread

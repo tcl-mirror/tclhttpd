@@ -1,3 +1,10 @@
+2002-12-02  Brent Welch <welch@panasas.com>
+        * Merged the tclhttpd-3-4-rel branch into the trunk.
+          tclhttpd-3-4-rel-3 represents the 3.4.3 release and
+          the merge point.  This sets the version numbers to
+          3.4.3, which isn't strictly correct, but reflects
+          the merge.
+
 2002-12-02  Wojciech Kocjan (via Brent Welch)
         * lib/httpd.tcl: added data(headerlist) that records the header
         information in order so the AOLserver emulation can recreate
@@ -13,6 +20,63 @@
         * Merged the tclhttpd-3-4-rel branch into the trunk.
           tclhttpd-3-4-rel-1 represents the 3.4.1 release and
           the merge point.
+
+2002-10-28  Brent Welch <welch@panasas.com>
+        * Makefile.in: MAKE_LIB doesn't work for building two different
+          extensions, so I fixed that.  The Makefile is now Unix-specific
+          for the limit and crypt .so files, which is OK.  These now build.
+
+2002-10-28  Brent Welch <welch@panasas.com>
+        * bin/httpdthread.tcl: Fixed loading of custom code.
+        * Bumped version to 3.4.3
+
+2002-10-14  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch).
+        * DIST_build/Makefile.boot: Fixed version reference
+        * VERSION: updated notes
+        * tagged tclhttpd-3-4-rel-2 (3.4.2)
+
+2002-09-23  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch).
+        * lib/upload.tcl: Added the completion callback to UploadTidyUp.
+
+2002-09-15  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch).
+        * lib/doc.tcl: ensure we don't try to cache a template result
+        when you fetch a .tml file directly.  If your template somehow
+        set page(dynamic) to 0, the server was trying to cache the result
+        using an empty filename.
+        * lib/upload.tcl: reset the Url_PostHook state and data(count) so
+        the other layers don't try to read any of the post data.
+        * lib/httpd.tcl: reset the Url_PostHook on GET requests to clear
+        any state from a previous POST request.
+
+2002-09-11  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch).
+        * lib/dirlist.tcl: added in the Dir_ShowListings,
+        Dir_HideListings, and Dir_IsHidden api that got
+        dropped when I merged in additions by Melissa Chawla.
+
+2002-09-03  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch).
+        * lib/dirlist.tcl: Fixing bug where a ../* in the dirlist form
+          could leak filenames (but not contents) outside the URL tree.
+        * htdocs/.tml: plugged silly memory leak (lappend to unused var)
+
+2002-09-03  Brent Welch <welch@panasas.com>
+        * (In the tclhttpd-3-4-rel branch).
+        * bin/httpdthread.tcl: Fixed custom code loader to skip pkgIndex.tcl
+        files.
+        * htdocs/index.html: Fixed a few errors pointed out by Larry Virden
+        * htdocs/forms/posttest.tml: Added comments that explain this form.
+        * DIST_build/DIST: moved the copying of some things into the htdocs
+        tree from the Makefile to the distribution creation script.
+        * configure.in:
+        * README
+        * bin/httpd.tcl:
+        * lib/version.tcl: Changed to 3.4.2 (sigh)
+        * Added VERSION so I remember how to change the version number in
+          all the right places!
 
 2002-08-30  Brent Welch <welch@panasas.com>
         * (In the tclhttpd-3-4-rel branch).

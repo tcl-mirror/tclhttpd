@@ -1,12 +1,7 @@
 # Expect script to drive DIST, and handle the CVS password prompting.
 
-set v 3.4.1
-set vv 341
-
-foreach f [glob -nocomplain ~/scratch/* ~/dist/tclhttpd$v* ~/dist/tclhttpd$vv* ~/tmp/tclhttpd$v-dist] {
-  puts "Removing $f"
-  file delete -force $f
-}
+set v 3.4.3
+set vv 343
 
 stty -echo
 send_user "CVS Password: "
@@ -16,6 +11,11 @@ expect_user {
 }
 stty echo
 send_user \n
+
+foreach f [glob -nocomplain ~/scratch/* ~/dist/tclhttpd$v* ~/dist/tclhttpd$vv* ~/tmp/tclhttpd$v-dist] {
+  puts "Removing $f"
+  file delete -force $f
+}
 
 set timeout 1000
 spawn sh DIST

@@ -17,7 +17,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.45 2002/08/15 13:13:30 coldstore Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.46 2002/12/03 07:20:30 welch Exp $
 
 package provide httpd::doc 1.1
 
@@ -401,7 +401,6 @@ proc Doc_Handle {prefix path suffix sock} {
 	}
     }
 }
-
 
 # this is too much of a compatibility hassle, so we alias
 catch {interp alias {} Doc_Dynamic {} Template_Dynamic}

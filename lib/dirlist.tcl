@@ -7,9 +7,9 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: dirlist.tcl,v 1.8 2002/08/15 13:13:30 coldstore Exp $
+# RCS: @(#) $Id: dirlist.tcl,v 1.9 2002/12/03 07:20:30 welch Exp $
 
-package provide httpd::dirlist 1.0
+package provide httpd::dirlist 1.1
  
 # DirList_IndexFile --
 #
@@ -79,6 +79,64 @@ proc DirList_Directory {prefix path suffix sock} {
     Httpd_ReturnData $sock text/html [DirList $sock $path $data(url)]
 }
 
+# Dir_HideListings --
+#
+#	If a directory is viewed, hide the directory listing.
+#
+# Arguments:
+#	None
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	From now on, directory listings are hidden.
+
+proc Dir_HideListings {} {
+    global Doc
+    set Doc(HideDirListing) 1
+    return
+}
+
+# Dir_ShowListings --
+#
+#	If a directory is viewed, show the directory listing.
+#
+# Arguments:
+#	None
+#
+# Results:
+#	None
+#
+# Side Effects:
+#	From now on, directory listings can be shown.
+
+proc Dir_ShowListings {} {
+    global Doc
+    set Doc(HideDirListing) 0
+    return
+}
+
+# Dir_ListingIsHidden --
+#
+#	Tell whether directory listings are currently hidden.
+#
+# Arguments:
+#	None
+#
+# Results:
+#	Returns 1 if listings are hidden, otherwise 0.
+#
+# Side Effects:
+#	None
+
+proc Dir_ListingIsHidden {} {
+    global Doc
+    return $Doc(HideDirListing)
+}
+
+# By default, directory listings are shown.
+Dir_ShowListings
 
 proc DirListForm {dir urlpath {sort name} {pattern *}} {
     set what [DirListTerm]
@@ -114,6 +172,10 @@ or Size <input type=radio name=sort value=size $sizecheck><br>
 proc DirListInner {dir urlpath sort pattern} {
     set listing "<PRE>\n"
     set path [file split $dir]
+
+    # Filter pattern to avoid leaking path information
+    regsub -all {\.\./} $pattern {} pattern
+
     set list [glob -nocomplain -- [file join $dir $pattern]]
     if {[llength $path] > 1} {
 	append listing \
