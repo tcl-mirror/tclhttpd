@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.11 2004/04/18 04:10:06 coldstore Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.12 2004/04/19 06:40:02 coldstore Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -122,6 +122,32 @@ proc UploadDomain {dir cmd maxfiles maxbytes totalbytes unique sock suffix} {
     set upload(formName) {}
     set upload(formNames) {}
 
+    if {$upload(maxfiles) != -1} {
+	set files [glob -nocomplain -- [file join $upload(dir) *]]
+	if {[llength $files] >= $upload(maxfiles)} {
+	    Httpd_Error $sock 503 "Max files ($upload(maxfiles)) exceeded.<br>Unable to upload"
+	    return
+	}
+    }
+
+    if {$upload(maxbytes) != -1} {
+	if {$upload(count) >= $upload(maxbytes)} {
+	    Httpd_Error $sock 503 "File size limit ($upload(maxbytes) bytes) exceeded.<br>Unable to upload."
+	    return
+	}
+    }
+
+    if {$upload(totalbytes) != -1} {
+	set tot $upload(count)
+	foreach f [glob -nocomplain -- [file join $upload(dir) 0]] {
+	    incr tot [file size $f]
+	}
+	if {$tot >= $upload(totalbytes)} {
+	    Httpd_Error $sock 503 "Total size limit ($upload(totalbytes) bytes) exceeded.<br>Unable to upload."
+	    return
+	}
+    }
+
     # Now that we are going to read the post data, clear out the
     # hook and the data count so noone else tries to read it
 
@@ -146,7 +172,7 @@ proc UploadFindBoundary {sock} {
 	if {[regexp ^--$upload(boundary) $line]} {
 	    fileevent $sock readable [list UploadReadHeader $sock]
 	} else {
-Stderr "UploadFindBoundary Unexpected line $line"
+	    Stderr "UploadFindBoundary Unexpected line $line"
 	}
     }
 }
@@ -209,14 +235,14 @@ proc UploadReadHeader {sock} {
 			"filename" {
 			    # Open the upload file
 
-                            # If the uploade file is empty string,
-                            # then use a temporary name--this request
-                            # will fail later.  Netscape allows you
-                            # to upload dirnames like /a/b/, which
-                            # end up as empty string here.
-                            if {$v == ""} {
-                                set v "directory"
-                            }
+			    # If the uploade file is empty string,
+			    # then use a temporary name--this request
+			    # will fail later.  Netscape allows you
+			    # to upload dirnames like /a/b/, which
+			    # end up as empty string here.
+			    if {$v == ""} {
+				set v "directory"
+			    }
 
 			    # I'm a bit suprised that "file tail"
 			    # when run on a Unix box will not deal
@@ -229,7 +255,8 @@ proc UploadReadHeader {sock} {
 			    } else {
 				set path [file join $upload(dir) $tail]
 			    }
-                            set upload(fd) [open $path w]
+
+			    set upload(fd) [open $path w]
 			    set upload(lastLineExists) 0
 
 			    # always do binary transfers
@@ -295,11 +322,12 @@ proc UploadReadFile {sock} {
 
     while {[gets $sock line] >= 0} {
 	if {[regexp ^--$upload(boundary)(--)? $line x end]} {
-            if {$upload(lastLineExists)} {
-                # At least 1 line was read.  Write the last line to the
-                # file without the trailing newline character.
-                puts -nonewline $upload(fd) [string range $upload(lastLine) 0 end-1]
-            }
+	    if {$upload(lastLineExists)} {
+		# At least 1 line was read.  Write the last line to the
+		# file without the trailing newline character.
+		puts -nonewline $upload(fd) [string range $upload(lastLine) 0 end-1]
+	    }
+
 	    set buffersize 0
 	    close $upload(fd)
 	    unset upload(fd)
@@ -312,14 +340,14 @@ proc UploadReadFile {sock} {
 	    }
 	    return
 	} else {
-            # Delay the writing of each line to make sure we don't add an
-            # extra trailing newline to the last line.
-            if {$upload(lastLineExists)} {
-                puts $upload(fd) $upload(lastLine)
-            } else {
-                set upload(lastLineExists) 1
-            }
-            set upload(lastLine) $line
+	    # Delay the writing of each line to make sure we don't add an
+	    # extra trailing newline to the last line.
+	    if {$upload(lastLineExists)} {
+		puts $upload(fd) $upload(lastLine)
+	    } else {
+		set upload(lastLineExists) 1
+	    }
+	    set upload(lastLine) $line
 	}
 	incr buffersize [string bytelength $line]
 	if { $buffersize > $maxbuffersize } {
