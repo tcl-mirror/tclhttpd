@@ -32,9 +32,10 @@ sh ../configure --enable-gcc --enable-threads --enable-symbols \
 	--with-tcl=../../../tcl${TCL_VERSION}/unix/${PLATFORM}
 cd ${PWD}
 
+mkdir ../tclhttpd${HTTPD_VERSION}/build
 mkdir ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM}
 cd ../tclhttpd${HTTPD_VERSION}/build/${PLATFORM}
-sh ../configure --enable-gcc --enable-threads --enable-symbols \
+sh ../../configure --enable-gcc --enable-threads --enable-symbols \
 	--prefix=${PREFIX} \
 	--exec-prefix=${EXEC_PREFIX} \
 	--with-tcl=../../../tcl${TCL_VERSION}/unix/${PLATFORM}

@@ -5,7 +5,7 @@
 PWD=`pwd`
 PLATFORM=solaris
 
-cd ../tclsh8.3.1/unix/${PLATFORM}
+cd ../tcl8.3.1/unix/${PLATFORM}
 make
 make install
 cd ${PWD}
