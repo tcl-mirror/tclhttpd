@@ -4,7 +4,12 @@ package provide admin 1.0
 
 proc Admin_Url {dir} {
     Direct_Url $dir Admin
-    catch {Admin/redirect/reload}	;# Load redirects
+
+    # Load redirect file
+
+    if {[catch {Admin/redirect/reload} err]} {
+	puts stderr $err
+    }
 }
 
 proc Admin/redirect/reload {} {
