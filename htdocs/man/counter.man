@@ -1,0 +1,124 @@
+[manpage_begin httpd::counter n 1.0]
+[copyright {2003 Andreas Kupries <andreas_kupries@users.sourceforge.net>}]
+[titledesc {Counters and histograms}]
+[moddesc   {Tcl Web Server}]
+[require httpd::counter [opt 1.0]]
+[description]
+
+The package [package httpd::counter] is a thin layer over the package
+[package counter] in tcllib, adapting this general package for use in
+a web server.
+
+[para]
+
+It pre-declares a number of non-simple counters (e.g., the time-based
+histogram for urlhits, and the interval-histogram for service times)
+and everything else defaults to a basic counter.  Once things are
+declared, the [cmd counter::count] function counts things for us.
+
+[para]
+
+This package has a soft-dependency on the package
+
+[package httpd::log]. The command [cmd Counter_Checkpoint] will save
+the state actually if and only if [package httpd::log] is present,
+because it tries to take the information about the filename to use
+from it. The dependency is soft because if the [package httpd::log] is
+not present saving the state will simply be disabled without affecting
+the remainder of this package.
+
+
+[section {Public API}]
+[para]
+
+[list_begin definitions]
+
+[call [cmd Counter_Init] [opt [arg secPerMinute]]]
+
+Initializes the package. If in argument is specified it will tell the
+system how many seconds are there in a minute. This value defaults to
+[const 60].
+
+
+[call [cmd Counter_Checkpoint]]
+
+Writes the current urlhits status into the counter log.
+THe base name for the file used comes out of the package
+[package httpd::log].
+
+[nl]
+
+This command is hooked into the server shutdown sequence
+via [cmd Httpd_RegisterShutdown].
+
+
+
+[call [cmd Count] [arg what] [opt [arg delta]]]
+
+Increments the counter identified by [arg what] by [arg delta].
+If [arg delta] is not specified it defaults to [const 1].
+
+If the counter [arg what] does not exist at the time of the call it
+will be created automatically.
+
+
+[call [cmd CountHist] [arg what] [opt [arg delta]]]
+
+An alias of [cmd Count] which assumes that the counter exists. It does
+everything [cmd Count] does, except for the initialization of an
+non-existing counter.
+
+
+[call [cmd CountName] [arg instance] [arg tag]]
+
+Increments the bucket [arg instance] of the histogram counter
+identified by [arg tag] by 1.
+
+If the counter [arg tag] does not exist at the time of the call it
+will be created automatically.
+
+
+[call [cmd Counter_Reset] [arg what] [arg arg]...]
+
+Resets the counter [arg what]. The additional arguments control the
+re-initialization of the counter, but if and only if the type of the
+counter is not known. If it is known they are ignored.
+
+[list_end]
+
+
+[section {Predefined counters}]
+
+The package pre-creates the following counters for use by the other
+modules of the web server.
+
+[list_begin definitions]
+[lst_item [const urlhits]]
+The number of requests serviced.
+
+[lst_item [const serviceTime]]
+Histogram of connection service times.
+
+[lst_item [const domainHit]]
+[lst_item [const hit]]
+[lst_item [const notfound]]
+[lst_item [const error]]
+Group counters for per-page, not-found, and error statistics.
+
+[lst_item [const accepts]]
+[lst_item [const sockets]]
+[lst_item [const connections]]
+[lst_item [const urlreply]]
+[lst_item [const keepalive]]
+[lst_item [const connclose]]
+[lst_item [const http1.0]]
+[lst_item [const http1.1]]
+[lst_item [const cgihits]]
+Simple counters for each kind of connection event.
+
+[list_end]
+
+
+[see_also httpd httpd::log]
+[keywords {web server} counters]
+[manpage_end]
