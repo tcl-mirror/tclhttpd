@@ -4,13 +4,13 @@ Brent is now at Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 2.3.3
-Last update: Mon Oct 25 10:29:20 PDT 1999
+Version: 2.3.4
+Last update: Sun Nov 28 15:42:30 PDT 1999
 
 It requires Tcl7.5 and Tk4.1, or higher.
 It works with the latest 8.2 release.
 The following releases are recommended:
-Tcl 7.6p2, Tcl 8.0.5, Tcl 8.2.1
+Tcl 7.6p2, Tcl 8.0.5, Tcl 8.2.2
 
 [The "opt" package in the main bin/httpd.tcl script is not
 supported in Tcl 7.5 or 7.6.  It is only used for parsing the command
@@ -34,6 +34,8 @@ httpd.tcl -help
 This lets you set basic parameters like port number and server name.
 
 Version 2.3 changes the way post data is  handled.
+The various point releases (e.g., 2.3.4) fix important
+bugs in cookie handling and the new post data handler.
 
 Version 2.1.6 introduces a configuration file, tclhttpd.rc
 You can edit this to tune the set of modules used by the server,
@@ -65,4 +67,4 @@ http://www.beedub.com/tclhttpd/
 http://www.scriptics.com/tclhttpd/
 
 There is a netCVS repository on cvs.scriptics.com.
-For details, please see http://www.scriptics.com/software/netcvs.html
+For details, please see http://www.scriptics.com/products/tcltk/netcvs.html

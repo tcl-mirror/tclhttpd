@@ -504,4 +504,18 @@ bin/imagehttpd.tcl	Updated this to fix the 1.1 support.  This seems
 
 bin/torture.tcl	Added some feedback to the Iterate proc
 
------------------ released 2.3.2 October 15, 1999 ------------------
+----------------- released 2.3.3 October 25, 1999 ------------------
+
+lib/dirlist.tcl	Fixed directory listing to have relative pathnames and to
+		Url Encode file names (mostly, except for . and _).  This fixes
+		the handing of files with spaces in their names.
+
+lib/httpd.tcl	Strip leading http://server.name from incoming URLs, and filter
+		out any proxy requests to other servers.
+
+lib/log.tcl	** Added cookie to log ** as an extra field.  Check your log
+		analysis programs to make sure this doesn't confuse them.
+
+----------------- released 2.3.4 November 28, 1999 ------------------
+
+
