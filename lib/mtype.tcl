@@ -15,7 +15,7 @@ proc Mtype {path} {
     global MimeType
 
     set type text/plain
-    catch {set type $MimeType([file extension $path])}
+    catch {set type $MimeType([string tolower [file extension $path]])}
     return $type
 }
 
@@ -52,7 +52,7 @@ proc Mtype_ReadTypes {file} {
 	if [regexp {([^ 	]+)[ 	]+(.+)$} $line match type rest] {
 	    foreach item [split $rest] {
 		if [string length $item] {
-		    set MimeType(.$item) $type
+		    set MimeType([string tolower .$item]) $type
 		}
 	    }
 	}

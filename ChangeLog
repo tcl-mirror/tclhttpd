@@ -1,3 +1,9 @@
+2000-05-30  Dan Kuchler <kuchler@scriptics.com>
+
+        * lib/mtype.tcl: Changed the file extension array to use case
+        insensitive file extension to mime type mapping.  This makes
+        .GIF and .gif the same and .HTM and .htm identical.
+
 2000-05-17  Brent Welch <welch@scriptics.com>
 
 	* Released 3.0.2
