@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cgi.tcl,v 1.28 2003/04/04 04:10:54 coldstore Exp $
+# RCS: @(#) $Id: cgi.tcl,v 1.29 2004/08/23 07:18:42 coldstore Exp $
 
 package provide httpd::cgi 1.1
 
@@ -406,7 +406,7 @@ proc CgiRead {fd sock} {
 		set data(header) 1
 		append header "HTTP/1.0 $data(headercode)\n"
 		append header "Server: $Httpd(server)\n"
-		append header "Date: [HttpdDate [clock seconds]]\n"
+		append header "Date: [Httpd_Date [clock seconds]]\n"
 		append header "Connection: Close\n"
 		foreach line $data(headerlist) {
 		    append header $line\n

@@ -22,7 +22,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.86 2004/06/12 04:45:07 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.87 2004/08/23 07:18:42 coldstore Exp $
 
 package provide httpd 1.7
 
@@ -1211,7 +1211,7 @@ proc HttpdRespondHeader {sock type close size {code 200}} {
 
     set data(code) $code
     append reply "HTTP/$data(version) $code [HttpdErrorString $code]" \n
-    append reply "Date: [HttpdDate [clock seconds]]" \n
+    append reply "Date: [Httpd_Date [clock seconds]]" \n
     append reply "Server: $Httpd(server)\n"
 
     if {$close} {
@@ -1344,7 +1344,7 @@ proc Httpd_ReturnFile {sock type path {offset 0}} {
     Count urlreply
     if {[info exists data(mime,if-modified-since)]} {
         # No need for complicated date comparison, if they're identical then 304.
-	if {$data(mime,if-modified-since) == [HttpdDate [file mtime $path]]} {
+	if {$data(mime,if-modified-since) == [Httpd_Date [file mtime $path]]} {
             Httpd_NotModified $sock
             return
         }
@@ -1360,7 +1360,7 @@ proc Httpd_ReturnFile {sock type path {offset 0}} {
 	set close [HttpdCloseP $sock]
 	HttpdRespondHeader $sock $type $close $data(file_size) 200
 	HttpdSetCookie $sock
-	puts $sock "Last-Modified: [HttpdDate [file mtime $path]]"
+	puts $sock "Last-Modified: [Httpd_Date [file mtime $path]]"
 	puts $sock ""
 	if {$data(proto) != "HEAD"} {
 	    set in [open $path]		;# checking should already be done
@@ -1465,7 +1465,7 @@ proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
     if {[catch {
 	HttpdRespondHeader $sock $type $close [string length $content] $code
 	HttpdSetCookie $sock
-	puts $sock "Last-Modified: [HttpdDate $date]"
+	puts $sock "Last-Modified: [Httpd_Date $date]"
 	puts $sock ""
 	if {$data(proto) != "HEAD"} {
 	    fconfigure $sock -translation binary -blocking $Httpd(sockblock)
@@ -1895,7 +1895,7 @@ proc Httpd_RequestAuth {sock type realm args} {
     Httpd_SockClose $sock $close
 }
 
-# HttpdDate --
+# Httpd_Date --
 #
 # generate a date string in HTTP format
 #
@@ -1908,7 +1908,7 @@ proc Httpd_RequestAuth {sock type realm args} {
 # Side Effects:
 #	None
 
-proc HttpdDate {seconds} {
+proc Httpd_Date {seconds} {
     return [clock format $seconds -format {%a, %d %b %Y %T GMT} -gmt true]
 }
 
