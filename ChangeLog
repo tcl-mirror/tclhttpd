@@ -1,3 +1,6 @@
+2004-10-22 Colin McCormack <colin@sharedtech.dyndns.org>
+	* lib/*.tcl: added braces around all [if] conditionals - for speed
+
 2004-10-19 Colin McCormack <colin@sharedtech.dyndns.org>
 	* session.tcl: Added SessionFetch and SessionDiscard to get and clean up
 	old session persistent state,
