@@ -237,7 +237,11 @@ proc AuthGroupCheck {sock file group user} {
 	}
 	close $in
     }
-    return [expr {[lsearch $info(group,$group) $user] >= 0}]
+    if {![info exist info(group,$group)]} {
+	return 0
+    } else {
+	return [expr {[lsearch $info(group,$group) $user] >= 0}]
+    }
 }
 proc AuthGetPass {sock file user} {
     upvar #0 auth$file info
