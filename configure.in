@@ -34,7 +34,7 @@ VERSION=${MAJOR_VERSION}.${MINOR_VERSION}${PATCHLEVEL}
 NODOT_VERSION=${MAJOR_VERSION}${MINOR_VERSION}
 WIN_VERSION=`echo ${VERSION} | sed -e 's/\.//g'`
 
-SERVER_ROOT='$(prefix)/$(PACKAGE)'
+AC_ARG_WITH(serverroot, [ --with-serverroot=DIR         Location of where to install the server document tree], SERVER_ROOT=${withval}, SERVER_ROOT='$(prefix)/$(PACKAGE)')
 
 AC_SUBST(PACKAGE)
 AC_SUBST(ALTPACKAGE1)
@@ -100,7 +100,7 @@ AC_EXEEXT
 #--------------------------------------------------------------------
 
 case "`uname -s`" in
-    *win32* | *WIN32* | *CYGWIN_NT*)
+    *win32* | *WIN32* | *CYGWIN_NT* | *CYGWIN_98* | *CYGWIN_95*)
 	CYGPATH="cygpath -w"
 	RELPATH=".. .. bin"
     ;;
