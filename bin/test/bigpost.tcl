@@ -9,10 +9,16 @@ if {[string length $url] == 0} {
 
 # Construct a vast amount of post data to try and choke the server.
 
+set value "x"
+while {[string length $value] < 1024} {
+    append value $value
+}
+
 set i 0
 set sep ""
-while {$i < 10000} {
-    append bigpost "${sep}name$i=value$i"
+
+while {$i < 100} {
+    append bigpost "${sep}name$i=$i$value"
     set sep &
     incr i
 }
