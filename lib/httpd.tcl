@@ -358,10 +358,7 @@ proc Httpd_GetPostData {sock varName {size -1}} {
     upvar #0 Httpd$sock data
     upvar 1 $varName buffer
 
-    if {![info exist data(count)]} {
-	error "no post data"
-    }
-    if {$data(count) == 0} {
+    if {![info exist data(count)] || $data(count) == 0} {
 	return 0
     }
     if {$size < 0 || $size > $data(count)} {
