@@ -4,11 +4,10 @@
 # Derived from doc.tcl
 # Stephen Uhler / Brent Welch (c) 1997-1998 Sun Microsystems
 # Brent Welch (c) 1998-2000 Ajuba Solutions
-# Colin McCormack (c) 2002
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cookie.tcl,v 1.4 2003/03/28 08:03:56 coldstore Exp $
+# RCS: @(#) $Id: cookie.tcl,v 1.5 2004/02/25 04:29:34 coldstore Exp $
 
 package provide httpd::cookie 1.0
 

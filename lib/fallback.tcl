@@ -11,11 +11,10 @@
 # Derived from doc.tcl
 # Stephen Uhler / Brent Welch (c) 1997-1998 Sun Microsystems
 # Brent Welch (c) 1998-2000 Ajuba Solutions
-# Colin McCormack (c) 2002
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: fallback.tcl,v 1.2 2002/08/15 13:13:30 coldstore Exp $
+# RCS: @(#) $Id: fallback.tcl,v 1.3 2004/02/25 04:29:34 coldstore Exp $
 
 package provide httpd::fallback 1.0
 

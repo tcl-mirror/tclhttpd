@@ -4,11 +4,10 @@
 # Derived from doc.tcl
 # Stephen Uhler / Brent Welch (c) 1997-1998 Sun Microsystems
 # Brent Welch (c) 1998-2000 Ajuba Solutions
-# Colin McCormack (c) 2002
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: template.tcl,v 1.6 2003/10/20 07:43:49 coldstore Exp $
+# RCS: @(#) $Id: template.tcl,v 1.7 2004/02/25 04:29:34 coldstore Exp $
 
 package provide httpd::template 1.0
 
