@@ -5,6 +5,14 @@
 # and then (if applicable) each worker thread will source this
 # file to initialize itself.
 
+# Copyright (c) 1997 Sun Microsystems, Inc.
+# Copyright (c) 1998-2000 Scriptics Corporation
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: httpdthread.tcl,v 1.4 2000/08/02 07:05:52 welch Exp $
+
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
 # while it might be possible to limit the various initialization
@@ -19,34 +27,34 @@ package require html
 
 # Core modules
 package require httpd           ;# Protocol stack
-package require url		;# URL dispatching
-package require mtype           ;# Mime types
+package require httpd::url		;# URL dispatching
+package require httpd::mtype           ;# Mime types
 Mtype_ReadTypes 		[file join $Config(lib) mime.types]
-package require counter         ;# Statistics
-package require utils           ;# junk
+package require httpd::counter         ;# Statistics
+package require httpd::utils           ;# junk
 
-package require redirect	;# URL redirection
-package require auth            ;# Basic authentication
-package require log             ;# Standard logging
+package require httpd::redirect	;# URL redirection
+package require httpd::auth            ;# Basic authentication
+package require httpd::log             ;# Standard logging
 
 if {$Config(threads) > 0} {
     package require Thread		;# C extension
-    package require threadmgr		;# Tcl layer on top
+    package require httpd::threadmgr		;# Tcl layer on top
 }
 
 # Image maps are done either using a Tk canvas (!) or pure Tcl.
 
 if {[info exists tk_version]} {
-    package require ismaptk
+    package require httpd::ismaptk
 } else {
-    package require ismaptcl
+    package require httpd::ismaptcl
 }
 # These packages are required for "normal" web servers
 
 # doc
 # provides access to files on the local file systems.
 
-package require doc
+package require httpd::doc
 
 # Doc_Root defines the top-level directory, or folder, for
 # your web-visible file structure.
@@ -104,29 +112,29 @@ Doc_NotFoundPage		/notfound.html
 
 Doc_Webmaster			$Config(webmaster)
 
-package require dirlist		;# Directory listings
-package require include		;# Server side includes
+package require httpd::dirlist		;# Directory listings
+package require httpd::include		;# Server side includes
 
-package require cgi		;# Standard CGI
+package require httpd::cgi		;# Standard CGI
 Cgi_Directory			/cgi-bin
 
-package require direct		;# Application Direct URLs
+package require httpd::direct		;# Application Direct URLs
 
-package require status		;# Built in status counters
+package require httpd::status		;# Built in status counters
 Status_Url			/status /images
 
-package require mail		;# Crude email form handlers
+package require httpd::mail		;# Crude email form handlers
 Mail_Url			/mail
 
-package require admin		;# Url-based administration
+package require httpd::admin		;# Url-based administration
 Admin_Url			/admin
 
-package require session		;# Session state module (better Safe-Tcl)
+package require httpd::session		;# Session state module (better Safe-Tcl)
 
-package require debug		;# Debug utilites
+package require httpd::debug		;# Debug utilites
 Debug_Url			/debug
 
-package require redirect	;# Url redirection tables
+package require httpd::redirect	;# Url redirection tables
 Redirect_Init			/redirect
 
 if {[catch {
@@ -137,7 +145,7 @@ if {[catch {
 
 # This is currently broken
 if {0} {
-    package require safetcl	;# External process running safetcl shells
+    package require httpd::safetcl	;# External process running safetcl shells
 }
 
 if {[catch {
@@ -146,7 +154,8 @@ if {[catch {
     #	MIB info
     # "Tnm" is the SNMP interface from the Scotty extension
 
-    package require snmp
+    package require httpd::snmp
+    package require httpd::telnet
     package require Tnm
     Stderr "SNMP Enabled"
 }]} {

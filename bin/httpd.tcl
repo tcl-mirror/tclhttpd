@@ -8,10 +8,8 @@
 # or
 # wish httpd.tcl -debug 1
 #
-# Ordinarily you'll not want to edit this file.
 # For a quick spin, just pass the appropriate settings via the command line.
-# For fully custom operation, copy tclhttpd.rc to your own configuration file,
-# modify it, and specify it as the value of the -config command line option.
+# For fully custom operation, see the notes in README_custom.
 #
 # A note about the code structure:
 # httpd.tcl	This file, which is the main startup script.  It does
@@ -44,8 +42,10 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
+# RCS: @(#) $Id: httpd.tcl,v 1.24 2000/08/02 07:05:52 welch Exp $
+#
 # \
-exec tclsh8.0 "$0" ${1+"$@"}
+exec tclsh8.3 "$0" ${1+"$@"}
 
 ############
 # auto_path
@@ -62,7 +62,7 @@ set home [file join [pwd] $home]
 # 2. Standalone install - look for $home/../lib/tclhttpd $home/tcllib
 # 3. Tcl package install - look for $tcl_library/../tclhttpd
 
-set v 3.0.4
+set v 3.1.0
 
 if {[file exist [file join $home ../lib/httpd.tcl]]} {
     # Cases 1 and 2
@@ -142,7 +142,7 @@ if {$ix >= 0} {
     set Config(config) [file join $Config(home) tclhttpd.rc]
 }
 
-package require config
+package require httpd::config
 namespace import config::cget
 config::init $Config(config) Config
 
@@ -180,7 +180,7 @@ if {[string length $Config(library)]} {
 
 if {$Config(debug)} {
     puts stderr "auto_path:\n[join $auto_path \n]"
-    if {[catch {package require stdin}]} {
+    if {[catch {package require httpd::stdin}]} {
 	puts "No command loop available"
 	set Config(debug) 0
     }
@@ -191,9 +191,9 @@ if {$Config(debug)} {
 ###################
 
 package require httpd
-package require utils		;# For Stderr
-package require counter		;# Fix Httpd_Init and move to main.tcl
-package require mtype		;# Fix Httpd_Init and move to main.tcl
+package require httpd::utils		;# For Stderr
+package require httpd::counter		;# Fix Httpd_Init and move to main.tcl
+package require httpd::mtype		;# Fix Httpd_Init and move to main.tcl
 
 Httpd_Init
 
@@ -256,7 +256,7 @@ if ![catch {
 
 if {$Config(threads) > 0} {
     package require Thread		;# C extension
-    package require threadmgr		;# Tcl layer on top
+    package require httpd::threadmgr		;# Tcl layer on top
     Stderr "Threads enabled"
     Thread_Init $Config(threads)
 } else {
@@ -285,7 +285,7 @@ Log_Flush
 # Start up the user interface and event loop.
 
 if {[info exists tk_version]} {
-    package require srvui
+    package require httpd::srvui
     SrvUI_Init "Tcl HTTPD $Httpd(version)"
 }
 Stderr $startup

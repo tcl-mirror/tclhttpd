@@ -25,7 +25,9 @@ Then you could create a directory named
 
 Put your own scripts there and run the Tcl "pkg_mkIndex" command over
 that directory to create the pkgIndex.tcl file there.  Now you are
-ready to run the server and load your code into it.
+ready to run the server and load your code into it.  Of course, you
+must have put "package provide" statements into your code so the
+main server can "package require" them.
 
 If it is not convenient to create the directory as described above,
 you can pass in the location of your custom script directory with the
