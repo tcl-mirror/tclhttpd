@@ -147,6 +147,20 @@ proc Url_PrefixMatch {url prefixVar suffixVar} {
     }
 }
 
+# Url_PrefixExists
+#	Determine if a prefix has been registered.
+#
+# Arguments
+#	prefix	The input URL
+#
+# Results
+#	0 or 1
+
+proc Url_PrefixExists {prefix} {
+    global Url
+    return [info exist Url(command,$prefix)]
+}
+
 # Url_Unwind
 #	Do common error handling after a URL request
 #
@@ -297,6 +311,10 @@ proc Url_PrefixRemove {prefix} {
     set list [split $Url(prefixset) |]
     ldelete list $prefixquoted
     set Url(prefixset) [join [lsort -command UrlSort $list] |]
+    if {[info exist Url(command,$prefix)]} {
+	unset Url(command,$prefix)
+	unset Url(thread,$prefix)
+    }
 }
 
 # UrlSort
