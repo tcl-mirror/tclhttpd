@@ -1,3 +1,13 @@
+2004-03-22 Jeffrey Rankin <jrankin@oneil.com>
+        * sampleapp/bugdb/bugdb.tcl: Added a procedure to remove
+	characters that can break HTML (<, >, "). Appropriate
+	character entities are substituted. Added documentation.
+	* htdocs/sampleapp/bugdb/.tml: Removed SMTP server variable.
+	* htdocs/sampleapp/bugdb/bugdb-design.png: Added this
+	screenshot showing the Metakit database design.
+	* htdocs/sampleapp/bugdb/report.tml: Removed send email
+	checkbox.
+
 2004-03-22  Brent Welch <welch@panasas.com>
         * lib/debug.tcl: Added DebugSetRandomPassword and have the
         debug domain compute a random password when it starts up.
