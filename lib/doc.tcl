@@ -661,7 +661,14 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	set data(query) {}
     }
     if {[info exist data(query)]} {
-	if {![info exist data(mime,content-type)]} {
+	if {![info exist data(mime,content-type)] || $data(proto) == "GET"} {
+	    
+	    # The check against GET is because IE 5 has the following bug.
+	    # If it does a POST with content-type multipart/form-data and
+	    # keep-alive reuses the connection for a subsequent GET request,
+	    # then the GET request erroneously has a content-type header
+	    # that is a copy of the one from the previous POST!
+
 	    set type application/x-www-urlencoded
 	} else {
 	    set type $data(mime,content-type)

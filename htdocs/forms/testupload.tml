@@ -8,6 +8,7 @@ Query
     set html ""
     foreach {n v} [ncgi::nvlist] {
 	append html [html::row $n [html::tableFromList [lindex $v 0]]]
+	append html [html::row $n [ncgi::value $n]]
 	append html <tr>[html::cell "colspan=2" "<pre>[html::quoteFormValue [lindex $v 1]]</pre>"]</tr>
     }
     set html
