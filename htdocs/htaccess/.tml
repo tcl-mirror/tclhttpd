@@ -1,4 +1,5 @@
-# Everything in this directory should not be cached
+# Nothin in this directory should be cached
+cd [Doc_Root]	;# so relative paths will be doc root relative
 Doc_Dynamic
 namespace eval validation {
 }
@@ -7,12 +8,11 @@ proc ::validation::genPasswd {password} {
     package require uuencode
     set crypt ":"
     while {[string match *:* $crypt]} {
-	set salt [string range [uuencode::Encode [binary format cc [expr [clock clicks] % 256] [expr ([clock clicks] / 256) % 256]]] 0 1]
-	set crypt [crypt $password $salt]
+	set crypt [crypt $password [Passgen_Salt]]
     }
     return $crypt
 }
-    
+
 proc ::validation::chkPasswd {pass crypt} {
     package require crypt
     set salt [string range $crypt 0 1]
@@ -29,13 +29,13 @@ proc ::validation::parseFile {file var {extra ""}} {
     if {$extra != ""} {
 	upvar $extra e
     }
-
+    
     # read the file
     catch {unset v}
-    if {[catch {open $file} in]} {
-	return "<p>$in</p>"
+    if {[catch {open $file a+} in]} {
+	return $in
     }
-    
+    seek $in 0
     while {[gets $in line] >= 0} {
 	if {[regexp {^([^:]+):[      ]*([^: ]+)(.*)$} $line x key value extra]} {
 	    #append result "<p>[protect_text $line] [protect_text $key] [protect_text $value] [protect_text $extra]"
@@ -44,33 +44,33 @@ proc ::validation::parseFile {file var {extra ""}} {
 	}
     }
     close $in
-    #return $result
+    return ""
 }
 
 proc validation::writefile {file var {extra ""}} {
     catch {
-    upvar $var v
-    if {$extra != ""} {
-	upvar $extra e
-    } else {
-	set e() ""
-	unset e()
-    }
-
-    catch {
-	file copy -force $file ${file}~
-    }
-
-    set fd [open $file w]
-    foreach {name val} [array get v] {
-	if {[info exists e($name)]} {
-	    puts $fd "${name}: $e($name)"
+	upvar $var v
+	if {$extra != ""} {
+	    upvar $extra e
 	} else {
-	    puts $fd "${name}: $val"
+	    set e() ""
+	    unset e()
 	}
-    }
-
-    close $fd
+	
+	catch {
+	    file copy -force $file ${file}~
+	}
+	
+	set fd [open $file w]
+	foreach {name val} [array get v] {
+	    if {[info exists e($name)]} {
+		puts $fd "${name}: $e($name)"
+	    } else {
+		puts $fd "${name}: $val"
+	    }
+	}
+	
+	close $fd
     } err
     Stderr $err
 }
@@ -90,3 +90,7 @@ proc ::validation::debug {var} {
 	}]
     }
 }
+
+### Local Variables: ###
+### mode:tcl ###
+### End: ###
