@@ -11,10 +11,14 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: log.tcl,v 1.13 2004/05/09 05:50:17 coldstore Exp $
+# RCS: @(#) $Id: log.tcl,v 1.14 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::log 1.1
-package require httpd::logstd 1.0
+
+package require httpd::config	;# Config
+package require httpd::counter	;# Count Counter_CheckPoint
+package require httpd::logstd	;# LogStandardData
+package require httpd::utils	;# Stderr file
 
 # log an Httpd transaction
 

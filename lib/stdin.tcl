@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: stdin.tcl,v 1.3 2004/04/30 02:21:46 coldstore Exp $
+# RCS: @(#) $Id: stdin.tcl,v 1.4 2004/09/05 05:10:14 coldstore Exp $
 
 # The following is an event-driven command loop for testing with tclsh
 # with command history:
@@ -14,6 +14,9 @@
 # Nb: history doesn't work, too many changes to the tcl api to track.
 
 package provide httpd::stdin 1.1
+
+package require httpd::log	;# Log Log_Flush
+#package require httpd::utils	;# file
 
 set Stdin(maxHistory) 100
 append Stdin(history) {}

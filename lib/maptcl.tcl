@@ -15,10 +15,12 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: maptcl.tcl,v 1.5 2000/10/02 16:58:53 welch Exp $
+# RCS: @(#) $Id: maptcl.tcl,v 1.6 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::ismaptcl 1.0
-package require httpd::imagemap 1.0
+package require httpd::imagemap 1.0	;# MapPointInCircle MapPointInPoly MapPointInRect
+package require httpd::log	;# Log
+#package require httpd::utils	;# file
 
 # translate an x/y coordinate into a url
 

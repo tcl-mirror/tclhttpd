@@ -17,17 +17,24 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc.tcl,v 1.56 2004/07/18 13:32:32 coldstore Exp $
+# RCS: @(#) $Id: doc.tcl,v 1.57 2004/09/05 05:10:13 coldstore Exp $
+
+package require uri
 
 package provide httpd::doc 1.1
 
-package require uri
-package require httpd::fallback
-package require httpd::subst
-package require httpd::template
-package require httpd::dirlist
-package require httpd::doc_error
-package require httpd::cookie
+package require httpd	;# Httpd_ReturnFile
+package require httpd::auth	;# Auth_Check Auth_Verify
+package require httpd::cgi	;# Cgi_Domain
+package require httpd::counter	;# Count CountName
+package require httpd::dirlist	;# DirList DirList_Directory
+package require httpd::doc_error ;# Doc_NotFound
+package require httpd::fallback	;# Fallback_Try
+package require httpd::mtype	;# Mtype
+package require httpd::redirect	;# Redirect_Dir Redirect_Self Redirect_To
+package require httpd::template	;# Template_Dynamic Template_Try
+package require httpd::url	;# Url_AccessInstall Url_PathCheck Url_PrefixInstall Url_PrefixMatch
+package require httpd::utils	;# file iscommand
 
 # Doc_Root --
 #

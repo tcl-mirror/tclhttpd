@@ -5,7 +5,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: include.tcl,v 1.5 2002/08/15 13:13:30 coldstore Exp $
+# RCS: @(#) $Id: include.tcl,v 1.6 2004/09/05 05:10:14 coldstore Exp $
 
 # Process server side includes.
 # Look for comments of the form:
@@ -21,8 +21,15 @@
 # on the included files, so they cannot be cgi scripts or other fancy
 # objects.
 
-package provide httpd::include 1.0
 package require html
+
+package provide httpd::include 1.0
+
+package require httpd	;# Httpd_Error Httpd_ReturnData
+package require httpd::cgi	;# Cgi_SetEnv
+package require httpd::counter	;# Count
+package require httpd::doc	;# Doc_Virtual
+package require httpd::utils	;# file iscommand
 
 # Global state for this module
 # maxdepth controls recursively included files.

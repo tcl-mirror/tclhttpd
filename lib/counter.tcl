@@ -15,12 +15,16 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: counter.tcl,v 1.19 2003/10/27 13:46:13 coldstore Exp $
+# RCS: @(#) $Id: counter.tcl,v 1.20 2004/09/05 05:10:13 coldstore Exp $
 
 # Layer ourselves on top of the Standard Tcl Library counter package.
 
 package require counter 2.0
 package provide httpd::counter 2.0
+
+package require httpd	;# Httpd_RegisterShutdown
+package require httpd::log	;# Log
+package require httpd::utils	;# file parray
 
 proc Counter_Init {{secsPerMinute 60}} {
     global counter

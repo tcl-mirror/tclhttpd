@@ -7,10 +7,12 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cookie.tcl,v 1.8 2004/05/01 13:49:21 coldstore Exp $
+# RCS: @(#) $Id: cookie.tcl,v 1.9 2004/09/05 05:10:13 coldstore Exp $
 
 package provide httpd::cookie 1.0
 
+package require httpd	;# Httpd_CurrentSocket Httpd_RemoveCookies Httpd_SetCookie
+package require httpd::utils	;# K file lassign
 
 # Cookie_Save
 #

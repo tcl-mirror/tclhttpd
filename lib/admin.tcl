@@ -5,10 +5,16 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: admin.tcl,v 1.7 2002/08/15 13:13:29 coldstore Exp $
+# RCS: @(#) $Id: admin.tcl,v 1.8 2004/09/05 05:10:13 coldstore Exp $
 
 
 package provide httpd::admin 1.0
+
+package require httpd::auth	;# AuthVerifyBasic
+package require httpd::counter	;# Count Counter_Reset
+package require httpd::direct	;# DirectDomain Direct_Url
+package require httpd::redirect	;# Redirect_Url
+#package require httpd::utils	;# file
 
 proc Admin_Url {dir} {
     Direct_Url $dir Admin

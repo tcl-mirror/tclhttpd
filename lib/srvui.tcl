@@ -6,9 +6,13 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: srvui.tcl,v 1.8 2004/08/08 02:44:48 welch Exp $
+# RCS: @(#) $Id: srvui.tcl,v 1.9 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::srvui 1.0
+
+package require httpd	;# Httpd_Shutdown
+package require httpd::counter	;# Count CountVarName
+package require httpd::utils	;# file
 
 proc SrvUI_Init {title} {
     global Httpd Doc

@@ -14,11 +14,14 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: fallback.tcl,v 1.7 2004/06/15 08:19:47 coldstore Exp $
+# RCS: @(#) $Id: fallback.tcl,v 1.8 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::fallback 1.0
 
-package require httpd::mtype
+package require httpd::mtype	;# Mtype Mtype_Accept
+package require httpd::redirect	;# Redirect_QuerySelf
+package require httpd::template	;# Template_Choose
+#package require httpd::utils	;# file
 
 # Fallback_ExcludePat --
 #

@@ -22,9 +22,19 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.87 2004/08/23 07:18:42 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.88 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd 1.7
+
+package require httpd::config	;# Config config::cget config::init
+package require httpd::counter	;# Count CountHist CountStart CountStop
+package require httpd::log	;# Log Log_Flush Log_FlushMinutes Log_SetFile
+package require httpd::logstd	;# LogValue
+package require httpd::redirect	;# Redirect_Dir
+package require httpd::threadmgr	;# Thread_Enabled Thread_Init Thread_Respond
+package require httpd::url	;# Url_Decode Url_DecodeQuery Url_Dispatch Url_PostHook
+package require httpd::utils	;# K Stderr file protect_text
+package require httpd::version	;# Httpd_Version
 
 # initialize all the global data
 

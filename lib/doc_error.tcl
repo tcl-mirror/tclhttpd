@@ -8,11 +8,16 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc_error.tcl,v 1.6 2004/02/28 02:12:41 coldstore Exp $
+# RCS: @(#) $Id: doc_error.tcl,v 1.7 2004/09/05 05:10:13 coldstore Exp $
 
 package provide httpd::doc_error 1.0
 
-package require httpd::subst
+package require httpd	;# Httpd_Error
+package require httpd::counter	;# Count CountName
+package require httpd::doc	;# Doc_Virtual
+package require httpd::log	;# Log
+package require httpd::subst	;# Subst_ReturnFile
+package require httpd::utils	;# file lappendOnce protect_text
 
 # Doc_NotFoundPage --
 #

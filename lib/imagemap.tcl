@@ -5,9 +5,13 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: imagemap.tcl,v 1.6 2002/08/15 13:13:30 coldstore Exp $
+# RCS: @(#) $Id: imagemap.tcl,v 1.7 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::imagemap 1.0
+
+package require httpd	;# Httpd_Redirect Httpd_ReturnData
+package require httpd::counter	;# Count
+package require httpd::utils	;# file parray
 
 # Doc_application/x-imagemap --
 #

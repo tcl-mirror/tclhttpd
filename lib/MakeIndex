@@ -3,6 +3,8 @@
 # First, auto-generate the standard direct-style package index
 
 pkg_mkIndex -verbose -direct . *.tcl
+return
+
 file rename -force pkgIndex.tcl pkgIndex.tcl.direct
 set in [open pkgIndex.tcl.direct r]
 set out [open pkgIndex.tcl w]

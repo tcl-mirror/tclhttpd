@@ -8,9 +8,11 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: open.tcl,v 1.2 2000/08/02 07:06:53 welch Exp $
+# RCS: @(#) $Id: open.tcl,v 1.3 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::opentrace 1.0
+
+#package require httpd::utils	;# file
 
 if {[info commands "open-orig"] == ""} {
     rename open open-orig

@@ -8,9 +8,16 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: debug.tcl,v 1.20 2004/08/08 02:44:48 welch Exp $
+# RCS: @(#) $Id: debug.tcl,v 1.21 2004/09/05 05:10:13 coldstore Exp $
 
 package provide httpd::debug 1.0
+
+package require httpd	;# Httpd_Webmaster
+package require httpd::config	;# Config
+package require httpd::direct	;# Direct_Url Direct_UrlRemove
+package require httpd::status	;# Version
+package require httpd::threadmgr	;# Thread_List Thread_Send
+package require httpd::utils	;# Stderr file parray
 
 # Debug_Url
 #

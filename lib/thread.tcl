@@ -8,9 +8,16 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: thread.tcl,v 1.15 2004/06/11 08:51:27 coldstore Exp $
+# RCS: @(#) $Id: thread.tcl,v 1.16 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::threadmgr 1.0
+
+package require httpd	;# Httpd_GetPostData
+package require httpd::config	;# Config
+package require httpd::counter	;# Count
+package require httpd::log	;# Log
+package require httpd::url	;# Url_Unwind
+package require httpd::utils	;# Stderr file ldelete
 
 # The "Thread" package is implemented by a C extension.
 # We let the main .rc script do the appropriate package

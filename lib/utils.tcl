@@ -4,9 +4,11 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: utils.tcl,v 1.12 2004/06/16 03:08:37 welch Exp $
+# RCS: @(#) $Id: utils.tcl,v 1.13 2004/09/05 05:10:15 coldstore Exp $
 
 package provide httpd::utils 1.0
+
+package require httpd::log	;# Log_SetFile
 
 # Stderr - print to standard error
 

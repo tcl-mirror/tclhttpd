@@ -7,10 +7,16 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: dirlist.tcl,v 1.11 2003/09/24 20:41:57 welch Exp $
+# RCS: @(#) $Id: dirlist.tcl,v 1.12 2004/09/05 05:10:13 coldstore Exp $
 
 package provide httpd::dirlist 1.1
  
+package require httpd	;# Httpd_ReturnData
+package require httpd::doc	;# Doc_Handle
+package require httpd::doc_error	;# Doc_NotFound
+package require httpd::url	;# Url_Decode Url_DecodeQuery Url_Encode
+package require httpd::utils	;# file file_latest setmax
+
 # DirList_IndexFile --
 #
 #	Define the index file for a directory

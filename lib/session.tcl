@@ -40,9 +40,13 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.12 2004/06/18 16:03:42 welch Exp $
+# RCS: @(#) $Id: session.tcl,v 1.13 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::session 1.0
+
+package require httpd::cookie	;# Cookie_Get Cookie_GetSock Cookie_Set Cookie_Unset
+package require httpd::doc	;# Doc_Root
+package require httpd::utils	;# Stderr file iscommand randomx
 
 # use long session IDs
 if {![info exists Session(short)]} {
@@ -52,13 +56,6 @@ if {![info exists Session(short)]} {
 # how long do session cookies last?
 if {![info exists Session(expires)]} {
     set Session(expires) "now + 10 years"	;# should be long enough
-}
-
-# create a directory for saved sessions
-if {![info exists Session(dir)]} {
-    # I'm not keen on this default location, as it could
-    # be exposed to URL fetches
-    set Session(dir) [file join [Doc_Root] .sessions]
 }
 
 # if an MD5 package is available, we use it to make
@@ -205,7 +202,7 @@ proc Session_Destroy {id} {
 	unset session
 
 	global Session
-	set sfile [file join $Session(dir) ${id}.sess]
+	set sfile [file join [SessionDir] ${id}.sess]
 	if {[file exists $sfile]} {
 	    # delete the session save file
 	    file delete $sfile
@@ -279,6 +276,17 @@ proc Session_Cookie {{querylist {}} {type {}} {error_name error} {isSafe 1}} {
     return $id
 }
 
+# Create and return the session directory for saved sessions
+proc SessionDir {} {
+    if {![info exists Session(dir)]} {
+	# I'm not keen on this default location, as it could
+	# be exposed to URL fetches
+	set Session(dir) [file join [Doc_Root] .sessions]
+    }
+    file mkdir $Session(dir)
+    return $Session(dir)
+}
+
 # Destroy the session cookie for this type
 # note, this won't take immediate effect,
 # you may have to reload the page to get the new cookies
@@ -296,8 +304,7 @@ proc Session_Save {id} {
     upvar #0 Session:$id session
 
     # create a session save file, write state
-    set sfile [file join $Session(dir) ${id}.sess]
-    file mkdir $Session(dir)
+    set sfile [file join [SessionDir] ${id}.sess]
     set fd [open $sfile w]
     puts $fd $session(type)
     puts $fd [interp issafe interp$id]
@@ -366,7 +373,7 @@ proc Session_Match {querylist {type {}} {error_name error} {isSafe 1}} {
 	# see if there's a session to be instantiated
 	global Session
 
-	set sfile [file join $Session(dir) ${id}.sess]
+	set sfile [file join [SessionDir] ${id}.sess]
 	if {[file exists $sfile]} {
 	    # open a session save file, read state
 	    set fd [open $sfile r]

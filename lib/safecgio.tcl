@@ -2,7 +2,7 @@
 # Brent Welch (c) 1996 Sun Microsystems
 # Brent Welch (c) 1998-2000 Ajuba Solutions
 #
-# RCS: @(#) $Id: safecgio.tcl,v 1.6 2003/10/08 05:47:40 coldstore Exp $
+# RCS: @(#) $Id: safecgio.tcl,v 1.7 2004/09/05 05:10:14 coldstore Exp $
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
@@ -18,6 +18,9 @@
 #  as a name-value list in the "Query" variable.
 
 package provide httpd::safecgio 1.0
+
+package require httpd::log	;# Log
+package require httpd::utils	;# Stderr file
 
 # start a safe CGI server 
 

@@ -6,9 +6,10 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: config.tcl,v 1.3 2004/07/08 08:39:02 coldstore Exp $
+# RCS: @(#) $Id: config.tcl,v 1.4 2004/09/05 05:10:13 coldstore Exp $
 
 package provide httpd::config 1.0
+#package require httpd::utils	;# file
 
 namespace eval config {
     

@@ -5,9 +5,18 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: cgi.tcl,v 1.29 2004/08/23 07:18:42 coldstore Exp $
+# RCS: @(#) $Id: cgi.tcl,v 1.30 2004/09/05 05:10:13 coldstore Exp $
 
 package provide httpd::cgi 1.1
+
+package require httpd	;# Httpd_Date Httpd_Error Httpd_Port Httpd_SelfUrl Httpd_SockClose
+package require httpd::counter	;# Count
+package require httpd::doc	;# DocAccessHook Doc_RegisterRoot Doc_Root Doc_Virtual
+package require httpd::doc_error	;# Doc_NotFound
+package require httpd::log	;# Log
+package require httpd::threadmgr	;# Thread_Id Thread_Send Thread_SendAsync
+package require httpd::url	;# Url_Dispatch Url_Handle Url_PathCheck Url_PrefixInstall
+#package require httpd::utils	;# file
 
 # Cgi parameters
 # timeout	Seconds before pipe to CGI program is closed

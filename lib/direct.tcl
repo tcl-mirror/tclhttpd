@@ -8,9 +8,16 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: direct.tcl,v 1.18 2003/04/04 04:10:54 coldstore Exp $
+# RCS: @(#) $Id: direct.tcl,v 1.19 2004/09/05 05:10:13 coldstore Exp $
 
 package provide httpd::direct 1.1
+
+package require httpd	;# Httpd_Redirect Httpd_ReturnData
+package require httpd::cgi	;# Cgi_SetEnv
+package require httpd::cookie	;# Cookie_Save
+package require httpd::doc_error	;# Doc_NotFound
+package require httpd::url	;# Url_PrefixInstall Url_PrefixRemove Url_QuerySetup
+package require httpd::utils	;# file iscommand
 
 # Direct_Url
 #	Define a subtree of the URL hierarchy that is implemented by

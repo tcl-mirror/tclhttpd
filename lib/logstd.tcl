@@ -7,7 +7,13 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: logstd.tcl,v 1.4 2003/10/11 06:50:00 welch Exp $
+# RCS: @(#) $Id: logstd.tcl,v 1.5 2004/09/05 05:10:14 coldstore Exp $
+
+package provide httpd::logstd 1.0
+
+package require httpd	;# Httpd_Peername
+package require httpd::log	;# Log
+package require httpd::utils	;# file
 
 # Use IP address, or domain name?
 # Default is IP address, because looking up names is expensive
@@ -145,6 +151,4 @@ proc LogValue {var} {
        return -
     }
 }
-
-package provide httpd::logstd 1.0
 

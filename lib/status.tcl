@@ -9,9 +9,18 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: status.tcl,v 1.27 2004/04/29 01:46:26 coldstore Exp $
+# RCS: @(#) $Id: status.tcl,v 1.28 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::status 1.0
+
+package require httpd	;# Httpd_ReturnData Httpd_ReturnFile
+package require httpd::counter	;# Count Counter_StartTime
+package require httpd::direct	;# Direct_Url
+package require httpd::log	;# Log
+package require httpd::subst	;# Subst_ReturnFile
+package require httpd::threadmgr	;# Thread_Enabled Thread_Id Thread_IsFree Thread_List Thread_Send Thread_SendAsync
+package require httpd::url	;# Url_Decode Url_DecodeQuery Url_Dispatch
+package require httpd::utils	;# K file setmax
 
 proc Status_Url {dir {imgdir /images}} {
     global _status

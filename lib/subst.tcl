@@ -7,9 +7,14 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: subst.tcl,v 1.9 2004/07/18 13:32:32 coldstore Exp $
+# RCS: @(#) $Id: subst.tcl,v 1.10 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::subst 1.0
+
+package require httpd	;# Httpd_RequestAuth Httpd_ReturnData
+package require httpd::cgi	;# Cgi_SetEnv
+package require httpd::session	;# Session_Authorized
+#package require httpd::utils	;# file
 
 # Subst_ReturnFile --
 #

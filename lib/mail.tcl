@@ -9,9 +9,14 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: mail.tcl,v 1.15 2004/05/19 04:58:17 welch Exp $
+# RCS: @(#) $Id: mail.tcl,v 1.16 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::mail 1.0
+
+package require httpd	;# Httpd_Webmaster
+package require httpd::config	;# Config
+package require httpd::direct	;# Direct_Url
+package require httpd::utils	;# file protect_text
 
 # No useful default, but we define procedures so the vanilla server
 # can start up.

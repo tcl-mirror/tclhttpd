@@ -11,10 +11,15 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.12 2004/04/19 06:40:02 coldstore Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.13 2004/09/05 05:10:14 coldstore Exp $
+
+package require ncgi
 
 package provide httpd::upload 1.0
-package require ncgi
+
+package require httpd	;# Httpd_Error Httpd_Redirect Httpd_ReturnData Httpd_Suspend
+package require httpd::url	;# Url_PostHook Url_PrefixInstall
+package require httpd::utils	;# Incr K Stderr file
 
 # Upload_Url
 #	Define a subtree of the URL hierarchy that handles

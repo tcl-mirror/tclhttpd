@@ -9,6 +9,11 @@ if {[catch {package require doctools}]} {
     return
 }
 
+package require httpd	;# Httpd_PostDataSize Httpd_ReturnData Httpd_ReturnFile
+package require httpd::mtype	;# Mtype Mtype_Add
+package require httpd::url	;# Url_ReadPost
+#package require httpd::utils	;# file
+
 # register the man suffix as a doctool application
 set Doctools(suffix) .man
 Mtype_Add $Doctools(suffix) application/x-doctool

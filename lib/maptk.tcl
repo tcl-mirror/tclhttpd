@@ -9,9 +9,12 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: maptk.tcl,v 1.4 2000/08/26 05:38:05 build Exp $
+# RCS: @(#) $Id: maptk.tcl,v 1.5 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::ismaptk 1.0
+
+package require httpd::log	;# Log
+#package require httpd::utils	;# file
 
 # 	read in an image map file, and generate the appropriate canvas
 # 	# sample image map

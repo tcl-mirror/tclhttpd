@@ -8,9 +8,14 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: redirect.tcl,v 1.6 2004/06/12 04:50:22 coldstore Exp $
+# RCS: @(#) $Id: redirect.tcl,v 1.7 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::redirect 1.0
+
+package require httpd	;# Httpd_Redirect Httpd_RedirectSelf Httpd_SelfUrl
+package require httpd::direct	;# Direct_Url
+package require httpd::url	;# Url_AccessInstall Url_Dispatch Url_PrefixInstall Url_Unwind
+#package require httpd::utils	;# file
 
 # Redirect_To --
 #

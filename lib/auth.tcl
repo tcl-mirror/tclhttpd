@@ -29,11 +29,19 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.23 2004/08/08 02:44:48 welch Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.24 2004/09/05 05:10:13 coldstore Exp $
 
 package provide httpd::auth 2.0
+
 package require base64
-package require httpd::digest
+
+package require httpd	;# Httpd_Error Httpd_RequestAuth
+package require httpd::config	;# Config
+package require httpd::digest	;# Digest_Passwd
+package require httpd::log	;# Log
+package require httpd::passgen	;# Passgen_Generate Passgen_Salt
+package require httpd::utils	;# K Stderr file
+package require tclcrypt	;# crypt
 
 set Auth_DigestOnly 0;	# set this to 1 to only use Digest auth
 

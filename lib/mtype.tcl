@@ -6,9 +6,11 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: mtype.tcl,v 1.7 2004/04/28 08:38:07 coldstore Exp $
+# RCS: @(#) $Id: mtype.tcl,v 1.8 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::mtype 1.1
+
+#package require httpd::utils	;# file
 
 # Convert the file suffix into a mime type
 

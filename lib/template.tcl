@@ -7,12 +7,19 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: template.tcl,v 1.18 2004/06/15 18:27:27 welch Exp $
+# RCS: @(#) $Id: template.tcl,v 1.19 2004/09/05 05:10:14 coldstore Exp $
 
 package provide httpd::template 1.0
 
-package require httpd::subst
-package require httpd::cookie
+package require httpd	;# Httpd_PostDataSize Httpd_ReturnData
+package require httpd::cgi	;# Cgi_SetEnv Cgi_SetEnvInterp
+package require httpd::cookie	;# Cookie_Save
+package require httpd::doc	;# Doc_GetPath
+package require httpd::log	;# Log
+package require httpd::mtype	;# Mtype
+package require httpd::subst	;# Subst_File
+package require httpd::url	;# Url_Decode Url_DecodeQuery Url_ReadPost
+package require httpd::utils	;# file file_latest lappendOnce
 
 # Set the file extension for templates
 
