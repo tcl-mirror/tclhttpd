@@ -28,7 +28,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: sendsock.tcl,v 1.3 2003/10/08 05:47:40 coldstore Exp $
+# RCS: @(#) $Id: sendsock.tcl,v 1.1 2004/03/23 02:53:25 welch Exp $
 
 package provide httpd::eval 1.0
 

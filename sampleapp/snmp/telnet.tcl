@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: telnet.tcl,v 1.2 2000/08/02 07:06:54 welch Exp $
+# RCS: @(#) $Id: telnet.tcl,v 1.1 2004/03/23 02:53:25 welch Exp $
 
 package provide httpd::telnet 1.0
 

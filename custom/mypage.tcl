@@ -116,6 +116,9 @@ proc mypage::footer {} {
 proc mypage::README_links {} {
     set html ""
     foreach f [lsort [glob -nocomplain [file join [Doc_Root] links/*]]] {
+        if {[file tail $f] == "CVS"} {
+            continue
+        }
 	if {[file exists $f]} {
 	    # Symlink is not broken
 	    set t [file tail $f]

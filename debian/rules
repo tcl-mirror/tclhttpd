@@ -73,8 +73,11 @@ install: build
 	rm $(BUILD)/var/www/README*
 
 	# move some lib dirs out of the way
+        # The htdocs/libtml directory is no longer used
+        # The code to support the sample website is in the custom directory
 	mkdir $(BUILD)/usr/lib/tclhttpd/
-	mv $(BUILD)/var/www/htdocs/libtml $(BUILD)/usr/lib/tclhttpd/
+#	mv $(BUILD)/var/www/htdocs/libtml $(BUILD)/usr/lib/tclhttpd/
+        rm -rf $(BUILD)/var/www/htdocs/libtml
 	mv $(BUILD)/var/www/custom $(BUILD)/usr/lib/tclhttpd/
 
 	mv $(BUILD)/var/www/htdocs/* $(BUILD)/var/www

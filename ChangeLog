@@ -1,3 +1,28 @@
+2004-03-22 Brent Welch <welch@panasas.com>
+        * Large reshuffle of files among
+          htdocs/libtml, lib, custom, and sampleapp
+          The goal is that the minimum is in the lib directory for
+          the main server (no demos or sample apps) and that the
+          custom directory has things to support the pages under htdocs.
+          Everything is being organized under sampleapp
+        * bin/httpdthread.tcl, debian/tclhttpd-debian/httpdthread.tcl,
+          and debian/rules: eliminted reference to htdocs/libtml
+        * custom/mkweb_05.tcl:            -> sampleapp/mkweb/mkweb.tcl
+        * custom/ddehack.tcl:             -> sampleapp/ddehack/ddehack.tcl
+        * htdocs/libtml: gone
+        * htdocs/libtml/faq.tcl:          -> custom
+        * htdocs/libtml/htmlutils.tcl:    -> sampleapp/sunscript
+        * htdocs/libtml/mypage.tcl:       -> custom
+        * htdocs/libtml/ss_survey.tcl:    -> sampleapp/sunscript
+        * htdocs/libtml/sunscript.tcl:    -> sampleapp/sunscript
+        * htdocs/sampleapp/bugdb:         -> sampleapp/bugdb/htdocs
+        * lib/demo.tcl:                   -> sampleapp/addnode/demo.tcl
+        * lib/sendsock.tcl:               -> sampleapp/sendsock/sendsock.tcl
+        * lib/snmp.tcl:                   -> sampleapp/snmp/snmp.tcl
+        * lib/telnet.tcl:                 -> sampleapp/snmp/telnet.tcl
+        * lib/snmp.tcl:                   -> sampleapp/snmp/snmp.tcl
+        * custom/snmpinit.tcl:            -> sampleapp/snmp/snmpinit.tcl
+
 2004-03-22 Jeffrey Rankin <jrankin@oneil.com>
         * sampleapp/bugdb/bugdb.tcl: Added a procedure to remove
 	characters that can break HTML (<, >, "). Appropriate

@@ -10,7 +10,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: snmp.tcl,v 1.5 2002/08/15 13:13:30 coldstore Exp $
+# RCS: @(#) $Id: snmp.tcl,v 1.1 2004/03/23 02:53:25 welch Exp $
 
 package provide httpd::snmp 1.0
 

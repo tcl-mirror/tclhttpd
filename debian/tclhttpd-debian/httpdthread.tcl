@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.1 2004/01/18 09:47:29 coldstore Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.2 2004/03/23 02:53:25 welch Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -82,9 +82,6 @@ package require httpd::doc
 # your web-visible file structure.
 
 Doc_Root			$Config(docRoot)
-#if {[file isdirectory [file join $Config(docRoot) libtml]]} {
-#    Template_Library [file join $Config(docRoot) libtml]
-#}
 Template_Library /usr/lib/tclhttpd/libtml
 
 # Merge in a second file system into the URL tree.
