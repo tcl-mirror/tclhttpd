@@ -2,6 +2,10 @@
     
 	* lib/counter.tcl: Fixed secsPerMinute initialization.
 	* lib/status.tcl: Added use of stats::htmlHistDisplayRow
+	Added /status/domain for per-domain counting
+	* lib/url.tcl: Added per-domain hit counting.
+	* imagemap.tcl, ismap.tcl, snmp.tcl, discover.tcl - cleaned up to have a
+	packge not span files because that breaks our custom-generated pkgIndex.tcl
 
 2000-09-29  Brent Welch <welch@ajubasolutions.com>
     
