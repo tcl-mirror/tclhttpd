@@ -21,7 +21,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.67 2000/11/14 00:59:34 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.68 2001/07/12 01:12:21 welch Exp $
 
 package provide httpd 1.5
 
@@ -1213,6 +1213,9 @@ proc Httpd_ReturnCacheableData {sock type content date {code 200}} {
 #	See Httpd_SockClose
 
 proc HttpdCopyDone {in sock close bytes {error {}}} {
+    if {[string length $error] == 0} {
+	set error Close	;# Normal close, which triggers log message
+    }
     Httpd_SockClose $sock $close $error
 }
 

@@ -1,3 +1,11 @@
+2001-07-11  Brent Welch <welch@panasas.com>
+	* bin/httpdthread.tcl: Catch around package require html
+	because the latest version of that module conflicts with prodebug.
+	* lib/httpd.tcl: Fixed (ancient?) bug where static files would
+	not end up in the access log.
+	* lib/stdlog.tcl: Fixed this procedure so status and file size
+	are correctly logged.
+
 2001-07-09  Brent Welch <welch@panasas.com>
 	* htdocs/access/index.tml: Fixed typo in section headers.
 	* lib/doc.tcl: Fixed Doc_Cookie to look in the connection

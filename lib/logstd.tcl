@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: logstd.tcl,v 1.2 2000/09/26 06:42:44 welch Exp $
+# RCS: @(#) $Id: logstd.tcl,v 1.3 2001/07/12 01:12:21 welch Exp $
 
 # Use IP address, or domain name?
 # Default is IP address, because looking up names is expensive
@@ -60,13 +60,6 @@ proc LogStandardPrint {data} {
 	    continue
 	}
 	switch -- $n {
-	    ipaddr -
-	    authuser -
-	    code -
-	    filesize -
-	    username {
-		append result $sep$v
-	    }
 	    time {
 		 append result $sep\[[clock format $v -format "%d/%h/%Y:%T %Z"]\]
 	    }
@@ -75,6 +68,9 @@ proc LogStandardPrint {data} {
 	    useragent -
 	    cookie {
 		append result $sep"$v"
+	    }
+	    default {
+		append result $sep$v
 	    }
 	}
 	set sep " "

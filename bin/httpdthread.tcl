@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpdthread.tcl,v 1.10 2001/03/13 06:23:01 welch Exp $
+# RCS: @(#) $Id: httpdthread.tcl,v 1.11 2001/07/12 01:12:21 welch Exp $
 
 # Note about per-thread vs. per-application.  Essentially all
 # the "package require" commands are needed in all the threads,
@@ -23,7 +23,10 @@
 
 # Standard Library dependencies
 package require ncgi
-package require html
+catch {
+    # Prodebug pukes on this because it defines html::foreach
+    package require html
+}
 
 # Core modules
 package require httpd          	;# Protocol stack
