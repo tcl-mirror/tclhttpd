@@ -1,8 +1,22 @@
+2000-09-25  Brent Welch <welch@ajubasolutions.com>
+
+	* bin/httpd.tcl: Changed Log_SetFile call so we append the port
+	to the log file name given in the .rc file.
+	* bin/tclhttpd.rc: Removed use of config port in log file name.
+	* lib/log.tcl: Split out routines that relate to standard logging format.
+	This is so an application can provide its own Log interface, yet still use
+	our code to format standard web logs.
+	* lib/logstd.tcl: Split out routines that relate to standard logging format.
+	* lib/status.tcl: Fixed histogram init calls.
+
+
 2000-09-22  Brent Welch <welch@ajubasolutions.com>
+
 	* lib/httpd.tcl: Protect against unknown error codes passed
 	into Httpd_ReturnData and Httpd_Error.
 
 2000-09-21  Brent Welch <welch@ajubasolutions.com>
+
 	* lib/counter.tcl: Added secsPerMinute parameter to Counter_Init
 	* lib/httpd.tcl:
 	* bin/httpd.tcl: moved Counter_Init call to here from Httpd_Init.
@@ -11,6 +25,7 @@
 	* lib/status.tcl:  Minor cleanup of histogram calls.
 
 2000-09-20  Brent Welch <welch@ajubasolutions.com>
+
 	* lib/counter.tcl: Fixed Counter_CheckPoint
 	* lib/MakeIndex: Fixed this to create the specially-constructed
 	pkgIndex.tcl file.
