@@ -49,3 +49,7 @@ proc bugdb::bug-list {} {
 
     return $results
 }
+
+proc bugdb::bug-details {bug} {
+    return $bug
+}
