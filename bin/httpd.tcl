@@ -16,9 +16,9 @@
 #		command line processing, sets up the auto_path, and
 #		loads tclhttpd.rc and httpdthread.tcl.  This file also opens
 #		the server listening sockets and does setuid, if possible.
-# tclhttpd.rc	This has configuration settings like port and host, and other
-#		server-wide calls like Url_PrefixInstall. It
-#		is sourced one time by the server during start up.
+# tclhttpd.rc	This has configuration settings like port and host.
+#		It is sourced one time by the server during start up
+#		before command line arguments are processed.
 # httpdthread.tcl	This has the bulk of the initialization code.  It is
 #		split out into its own file because it is loaded by
 #		by each thread: the main thread and any worker threads
@@ -42,7 +42,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.28 2000/09/06 21:44:39 welch Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.29 2000/09/11 18:08:29 welch Exp $
 #
 # \
 exec tclsh8.3 "$0" ${1+"$@"}
@@ -82,7 +82,7 @@ set auto_path [concat [list $Config(lib)] $auto_path]
 
 # Search around for the Standard Tcl Library
 
-if {![catch {package require base64 2.0}]} {
+if {![catch {package require tcllib 0.6}]} {
     # Already available in environment
 } elseif {[file exist [file join $home ../tcllib]]} {
     lappend auto_path [file join $home ../tcllib]
@@ -143,9 +143,13 @@ if {$ix >= 0} {
 }
 
 package require httpd
-package require httpd::config
-namespace import config::cget
+package require httpd::version		;# For Version proc
+package require httpd::utils		;# For Stderr
+package require httpd::counter		;# For Count
+
+package require httpd::config		;# for config::init
 config::init $Config(config) Config
+namespace import config::cget
 
 # The Config array now reflects the info in the configuration file
 
@@ -153,7 +157,7 @@ config::init $Config(config) Config
 # command line arguments
 #########################
 
-# Merge command line args into the Config array
+# Override config file settings with command line arguments.
 
 package require cmdline
 array set Config [cmdline::getoptions argv [list \
@@ -190,10 +194,6 @@ if {$Config(debug)} {
 ###################
 # Start the server
 ###################
-
-package require httpd::version		;# For Version proc
-package require httpd::utils		;# For Stderr
-package require httpd::counter		;# For Count
 
 Httpd_Init
 

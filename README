@@ -4,8 +4,8 @@ Brent is now at Ajuba Solutions, previously known as Scriptics Corporation.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 3.1.0
-Last Modified: Sat Aug 26 23:15:20 PDT 2000
+Version: 3.2
+Last Modified: Mon Sep 11 10:41:20 PDT 2000
 
 QUICK START
 
@@ -26,7 +26,7 @@ UNIX:
 
 1) Test preconditions
 	tclsh8.3
-	package require tcllib 0.4
+	package require tcllib 0.6
 
 2) If you can do the above, then you should be able to run the
 server directly from this distribution directory without bothering
@@ -45,6 +45,13 @@ httpd.tcl -help
 This lets you set basic parameters like port number and server name.
 
 VERSION SUMMARY
+
+Version 3.2 changes the way you customize a TclHttpd installation with
+the goal of not having to modify the bin/httpd.tcl and bin/httpdthread.tcl
+scripts, although in some cases this will still be necessary.  A new
+"custom code" directory is supported and the server will load all the
+code from that directory during startup.  Specify this with the -library
+command line option or the "library" Config specification in your .rc file.
 
 Version 3.1.0 renames all the packages to be httpd::foo instead of just
 foo, so that the package namespace is a bit more organized when TclHttpd

@@ -2,6 +2,13 @@
 
 	* DIST_build/DIST:
 	Changed to version 3.2 and tag tclhttpd-3-2-0
+	* README:
+	* DIST_build/DIST:
+	* DIST_build/README:
+	* bin/httpd.tcl:
+	Updated for 3.2
+	* bin/README_custom:
+	Explained the new way to cutomize the server.
 
 2000-09-05  Brent Welch <welch@ajubasolutions.com>
 

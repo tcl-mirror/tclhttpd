@@ -2,46 +2,27 @@ You can use TclHTTPD "out of the box" to implement a basic Web server.
 However, if you want to create your own Web application, you'll want
 to integrate your own custom Tcl code with the server.  
 
+*** Custom Code Directory ***
+
 The recommended way to do this is to create Tcl packages for your
-functionality, and then add "package require" commands plus any
-initialization calls to TclHTTPD as described below.  The package
-require commands will load your code into the server, and the
-initialization calls (e.g., Doc_Root or Cgi_Directory) set up
-the configuration of those modules.
+functionality and put them into a "custom code" directory.
+The "custom" directory of the distribution has some trivial examples.
 
-Step 1 - Create a directory for your custom Tcl code
+Specify the location of the custom code directory with the -library
+command line argument or the "library" .rc file Config specification.
+The files in this directory are sourced in alphabetical order.
+If you run with "-debug 1" then you'll see feedback as these are loaded.
 
-For the "package require" to work, your packages must be located
-in a file system directory known to the server.  Any directory
-that is a peer of the Tcl script library is sufficient.  For example,
-if the Tcl script library is located at
-    /usr/local/lib/tcl8.3
-    or
-    D:/tcldev/lib/tcl8.3
-Then you could create a directory named
-    /usr/local/lib/myapp
-    or
-    D:/tcldev/lib/myapp
+If you do not need to substantially change the way the default server
+works, but instead just add more stuff, then you are done.  Otherwise...
 
-Put your own scripts there and run the Tcl "pkg_mkIndex" command over
-that directory to create the pkgIndex.tcl file there.  Now you are
-ready to run the server and load your code into it.  Of course, you
-must have put "package provide" statements into your code so the
-main server can "package require" them.
-
-If it is not convenient to create the directory as described above,
-you can pass in the location of your custom script directory with the
--library pathname
-command line argument.  This directory gets added to the auto_path of
-the Tcl web server application.
-
-Step 2 - Modify the server startup code
+*** Modifing the server startup code ***
 
 The Tcl scripts that start up the server are divided into three files.
 You will end up modifying one or more of the following files:
 
 bin/httpd.tcl
-	(Startup time)
+	(The main program)
 	This main script processes command line arguments,
 	loads the configuration file,
 	starts the Http server,
@@ -53,18 +34,34 @@ bin/httpd.tcl
 	to modify this file.
 
 bin/tclhttpd.rc
-	(Configuration time)
+	(The Configuration File)
 	This script is sourced before the command line arguments are processed.
 	Its use is limited to setting simple parameters.  Typically these
-	correspond to command line arguments.
+	correspond to command line arguments.  However, you are free to
+	add new Config parameters.  If you have
+		Config foo	"The value of foo"
+	in your .rc file, then you can access that value by using the
+	    config::cget foo
+	command, or (if you haven't changed bin/httpd.tcl) by using the
+	global Config array:
+	    global Config
+	    set foovalue $Config(foo)
 
 bin/httpdthread.tcl
-	start up time for a worker thread, includes the main interpreter
+	(The per-thread main program)
+	This file is sourced by the main interpreter, and again by
+	each worker thread if you are using threads.
+	This file starts up most of the packages associated with a normal
+	web server.  At the very end it loads all the code from the custom
+	code directory described above.
 
-	This is the mostly likely file to modify to add your package
-	require commands and other initialization calls.
+	If you need to disable some of the standard web server features,
+	you may need to edit this file.  You can select a different version
+	of this file with the "-main" command line argument, or the
+	"main" .rc Config specification.
 
-Step 3 - Start the server.  If you have created copies of the configuration
+*** Starting the server ***
+	If you have created copies of the configuration
 	file and per-thread startup file, you'll need to specify those
 	on the command line:
 

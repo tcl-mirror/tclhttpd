@@ -25,10 +25,12 @@ cd ${SCRATCH}
 rm -rf ${SCRATCH}/tclhttpd${HTTPD_VERSION}
 cvs -d /home/cvs checkout -r ${HTTPD_TAG} tclhttpd 
 mv tclhttpd tclhttpd${HTTPD_VERSION}
+chmod -R a+r tclhttpd${HTTPD_VERSION}
 
 rm -rf ${SCRATCH}/thread${THREAD_VERSION}
 cvs -d /home/cvs checkout -r ${THREAD_TAG} thread
 mv thread thread${THREAD_VERSION}
+chmod -R a+r thread${THREAD_VERSION}
 
 cd tclhttpd${HTTPD_VERSION}
 autoconf
