@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.10 2000/04/19 00:46:12 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.11 2000/04/19 03:04:04 sandeep Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -302,7 +302,7 @@ install-libraries: installdirs install-htdocs
 
 install-htdocs:
 	@echo "Creating htdocs tree in $(htdocsdir)"
-	$(TCLSH_PROG) $(srcdir)/bin/CopyDist $(srcdir)/htdocs $(htdocsdir)
+	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/bin/CopyDist` `@CYGPATH@ $(srcdir)/htdocs` `@CYGPATH@ $(htdocsdir)`
 
 install-doc:
 
