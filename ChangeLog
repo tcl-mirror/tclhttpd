@@ -1,3 +1,8 @@
+2004-10-19 Colin McCormack <colin@sharedtech.dyndns.org>
+	* session.tcl: Added SessionFetch and SessionDiscard to get and clean up
+	old session persistent state,
+	* session.tcl: Use Httpd_*Cookie commands to avoid races
+
 2004-09-05 Colin McCormack <colin@sharedtech.dyndns.org>
 	* session.tcl: fixed error in Session_Value and Session_Variable,
 	fixed error in session saving for values with \n
