@@ -1,3 +1,6 @@
+2004-06-15 Brent Welch <welch@panasas.com>
+        * lib/template.tcl: code smithing and bug fixes in new code.
+
 2004-06-15 Colin McCormack <colin@chinix.com>
 	* lib/{template,fallback}.tcl: Fixed bugs in .html/.htm substitution
 	  and fallback content negotiation
