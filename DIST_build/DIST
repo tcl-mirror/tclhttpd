@@ -104,7 +104,7 @@ sed -e s/@HTTPD_VERSION@/$HTTPD_VERSION/ \
 
 TCLLIB_MODULES="./base64 ./cmdline ./counter ./doctools ./fileutil ./html ./md5 ./md5crypt ./ncgi ./mime ./textutil ./uri"
 for f in ${TCLLIB_MODULES}; do
-  cp ${SUPER_DIR}/tcllib-${TCLLIB_VERSION}/modules/$f/$f.man \
+  cp ${SUPER_DIR}/tcllib-${TCLLIB_VERSION}/modules/$f/*.man \
         ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}/htdocs/man
 done
 
@@ -147,7 +147,7 @@ cd ${SUPER_DIR}/tclhttpd${HTTPD_VERSION}/lib
 tar cf - . | (cd ${VFS_DIR}/lib/tclhttpd${HTTPD_VERSION} ; tar xf -)
 
 cd ${SUPER_DIR}/tcllib-${TCLLIB_VERSION}/modules
-tar cf - ./base64 ./cmdline ./counter ./doctools ./fileutil ./html ./md5 ./md5crypt ./ncgi ./textutil ./uri | \
+tar cf - ${TCLLIB_MODULES} | \
         (cd ${VFS_DIR}/lib ; tar xf -)
 
 cat > ${VFS_DIR}/main.tcl << EOF
