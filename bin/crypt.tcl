@@ -5,6 +5,7 @@
 # \
 exec expect "$0" ${1+"$@"}
 
+# Obviously, edit this to reference the appropriate crypt .so file
 load /home/welch/cvs/tclhttpd/lib/Binaries/SunOS/5.6/crypt.so
 
 
