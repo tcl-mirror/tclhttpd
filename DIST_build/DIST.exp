@@ -30,4 +30,6 @@ puts "Unzipping package into ~/tmp"
 cd ~/tmp
 exec gunzip < ~/dist/tclhttpd3.4-dist.tar.gz | tar xf -
 cd tclhttpd3.4-dist
+set timeout 0
 spawn make 
+expect eof
