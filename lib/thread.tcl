@@ -43,9 +43,9 @@ proc Thread_Init {{max 4}} {
     set Thread(enable) 1
 }
 
-# Thread_Disable
+# Thread_Enabled
 #
-#	Disable the thread dispatcher
+#	Find out if the threading system is turned on
 #
 # Arguments
 #	none
@@ -53,9 +53,9 @@ proc Thread_Init {{max 4}} {
 # Results
 #	none
 
-proc Thread_Disable {} {
+proc Thread_Enabled {} {
     global Thread
-    set Thread(enable) 0
+    return $Thread(enable)
 }
 
 # Thread_List
@@ -111,7 +111,7 @@ proc Thread_Start {} {
     Thread_Send $id \
 	[list array set Config [array get Config]]
     Thread_Send $id \
-	[list source $Config(file)]
+	[list source $Config(main)]
     Thread_Send $id \
 	{puts stderr "Init done for thread [thread id]"}
     
@@ -161,10 +161,12 @@ puts stderr "Queued request $sock"
 	
 	# Until we can pass sockets, read the post data here
 
-	while {[info exists Url(postlength)] && $Url(postlength) > 0} {
-	    set Url(postlength) [Httpd_GetPostData $sock data(query)]
+	if {[info exist Url(postlength)]} {
+	    while {$Url(postlength) > 0} {
+		set Url(postlength) [Httpd_GetPostData $sock data(query)]
+	    }
+	    unset Url(postlength)
 	}
-	unset Url(postlength)
 	Thread_SendAsync $id [list Thread_Invoke $sock [array get data] $cmd]
     }
 }

@@ -245,7 +245,14 @@ proc Url_PrefixInstall {prefix command {tothread 0}} {
     # Install the unquoted prefix so the Url dispatch works right
 
     set Url(command,$prefix) $command
-    set Url(thread,$prefix) $tothread
+
+    # The decision to use worker threads is done on a domain-by-domain basis
+    #
+    # Do the check against Thread_Enabled here instead of inside
+    # Url_Dispatch.  This means you cannot easily turn
+    # threading on and off without restarting the server.
+
+    set Url(thread,$prefix) [expr {[Thread_Enabled] ? $tothread : 0}]
 }
 
 # Url_PrefixRemove
@@ -263,8 +270,9 @@ proc Url_PrefixRemove {prefix} {
 
     # Delete the prefix from the regular expression used to match URLs
 
+    regsub -all {([][\\().*+?$|])} $prefix {\\\1} prefixquoted
     set list [split $Url(prefixset) |]
-    ldelete list $prefix
+    ldelete list $prefixquoted
     set Url(prefixset) [join [lsort -command UrlSort $list] |]
 }
 
