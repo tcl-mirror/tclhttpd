@@ -128,6 +128,7 @@ proc Httpd_Init {} {
 }
 
 # Httpd_Server
+# Httpd_SecureServer
 # start the server by listening for connections on the desired port.
 # This may be re-run to re-start the server.  Call this late,
 # after Httpd_Init and the init calls for the other modules.
@@ -139,10 +140,8 @@ proc Httpd_Init {} {
 #
 # This sets up a callback to HttpdAccept for new connections.
 
-proc Httpd_Server {{port 80} {name {}} {ipaddr {}} {type http}} {
+proc Httpd_Server {{port 80} {name {}} {ipaddr {}}} {
     global Httpd
-
-	puts stdout "Httpd_Server $port $name $ipaddr $type"
 
     if {![info exists Httpd(initialized)]} {
 	Httpd_Init
@@ -154,10 +153,46 @@ proc Httpd_Server {{port 80} {name {}} {ipaddr {}} {type http}} {
     if {[string length $name] == 0} {
 	set Httpd(name) [info hostname]
     }
-    if {$type == "https"} {
-	    package require tls
-        set cmd [list tls::socket -server [list HttpdAccept [list $type $name $port]]]
-        lappend cmd -request $Httpd(SSL_REQUEST) \
+    set cmd [list socket -server [list HttpdAccept \
+	    [list http $name $port]]]
+    if {[string length $ipaddr] != 0} {
+        lappend cmd -myaddr $ipaddr
+    }
+    lappend cmd $port
+    if {[catch $cmd Httpd(listen)]} {
+        return -code error "$Httpd(name):$port $Httpd(listen)\ncmd=$cmd"
+    }
+    Counter_Reset accepts
+}
+
+proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
+    global Httpd
+
+    if {![info exists Httpd(initialized)]} {
+	Httpd_Init
+    }
+    catch {close $Httpd(https_listen)}
+    set Httpd(name) $name
+    set Httpd(https_ipaddr) $ipaddr
+    set Httpd(https_port) $port
+    if {[string length $name] == 0} {
+	set Httpd(name) [info hostname]
+    }
+	if {[info exists Httpd(port)] == 0} {
+		set Httpd(port) $port
+	}
+	package require tls
+	# following is temporary until we have good OpenSSL library
+	tls::init \
+	    -cadir $Httpd(SSL_CADIR) \
+		-cafile $Httpd(SSL_CAFILE) \
+		-certfile $Httpd(SSL_CERTFILE) \
+		-ssl2 $Httpd(USE_SSL2) \
+		-ssl3 $Httpd(USE_SSL3) \
+		-cipher $Httpd(SSL_CIPHERS)
+    set cmd [list tls::socket -server [list HttpdAccept [list https $name $port]]]
+	if {0} {
+    lappend cmd -request $Httpd(SSL_REQUEST) \
 	    -require $Httpd(SSL_REQUEST) \
 	    -ssl2 $Httpd(USE_SSL2) \
 	    -ssl3 $Httpd(USE_SSL3) \
@@ -167,20 +202,17 @@ proc Httpd_Server {{port 80} {name {}} {ipaddr {}} {type http}} {
 	    -cafile $Httpd(SSL_CAFILE) \
 	    -certfile $Httpd(SSL_CERTFILE) \
 	    -keyfile $Httpd(SSL_KEYFILE)
-    } else {
-        set cmd [list socket -server [list HttpdAccept \
-			[list $type $name $port]]]
-    }
+	}
     if {[string length $ipaddr] != 0} {
         lappend cmd -myaddr $ipaddr
     }
     lappend cmd $port
-    if {[catch $cmd Httpd(listen)]} {
-        return -code error "$Httpd(name):$port $Httpd(listen)\ncmd=$cmd"
+    if {[catch $cmd Httpd(https_listen)]} {
+        return -code error "$Httpd(name):$port $Httpd(https_listen)\ncmd=$cmd"
     }
-	puts stdout "cmd: $cmd"
     Counter_Reset accepts
 }
+
 
 # Kill the server gracefully
 
@@ -195,6 +227,7 @@ proc Httpd_Shutdown {} {
     }
     Log {} Shutdown
     catch {close $Httpd(listen)}
+    catch {close $Httpd(https_listen)}
     return $ok
 }
 
@@ -214,9 +247,7 @@ proc Httpd_RegisterShutdown {cmd} {
 
 proc HttpdAccept {self sock ipaddr port} {
     global Httpd
-	puts stdout "httpdAccept $self $sock $ipaddr $port"
     upvar #0 Httpd$sock data
-
 
     Count accepts
     Count sockets
@@ -224,7 +255,13 @@ proc HttpdAccept {self sock ipaddr port} {
     set data(ipaddr) $ipaddr
     if {[lindex $self 0] == "https"} {
 	set data(ssl) 1
-	tls::handshake $sock
+	set result [catch {tls::handshake $sock} err]
+	if {$result == 1} {
+		# following puts is temporary for debugging
+		puts stderr "HttpdAccept \{$self\} $sock $ipaddr $port $err"
+		Httpd_SockClose $sock 1 "$err"
+		return
+	}
 	set data(cert) [tls::status $sock]
     }
     HttpdReset $sock $Httpd(maxused)
