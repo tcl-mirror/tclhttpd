@@ -312,7 +312,7 @@ if {![info exist Url(accessHooks)]} {
 #	args	This is either a single boolean that, for backwards
 #		compatibility, indicates if the domain handler runs
 #		in a thread, or an option-value list of:
-#		-inThread boolean
+#		-thread boolean
 #			To indicate the domain handler runs in a thread
 #		-callback cmd
 #			A callback to make when the request completes
@@ -374,7 +374,7 @@ proc Url_PrefixInstall {prefix command args} {
 		}
 		default {
 		    return -code error "Unknown option $n.
-			    Must be -tothread or -callback"
+			    Must be -thread or -callback"
 		}
 	    }
 	}

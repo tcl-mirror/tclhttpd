@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: upload.tcl,v 1.4 2001/02/16 21:08:58 welch Exp $
+# RCS: @(#) $Id: upload.tcl,v 1.5 2001/12/01 17:20:20 welch Exp $
 
 package provide httpd::upload 1.0
 package require ncgi
@@ -75,6 +75,7 @@ proc UploadDomain {dir cmd maxfiles maxbytes totalbytes sock suffix} {
     # Testing
     if {[string match *test* $suffix]} {
 	set fd [open $dir/test w]
+	fconfigure $fd -trans binary
 	puts -nonewline $fd [read $sock $data(mime,content-length)]
 	close $fd
 	Httpd_ReturnData $sock text/html $dir/test
@@ -167,8 +168,8 @@ proc UploadReadHeader {sock} {
 
 	    # Now switch to reading the content of that part.
 
-	    # ? Should e use binary mode that will leave the \r in the files
-	    #fconfigure $sock -trans binary
+	    # Use binary mode so we don't corrupt the file
+	    fconfigure $sock -trans binary -encoding binary
 
 	    if {[info exist upload(fd)]} {
 		fileevent $sock readable [list UploadReadFile $sock]
@@ -201,6 +202,8 @@ proc UploadReadHeader {sock} {
 			    set tail [file tail $v]
 			    set path [file join $upload(dir) $tail]
 			    set upload(fd) [open $path w]
+			    # always do binary transfers
+			    fconfigure $upload(fd) -trans binary
 			    set upload(file,$upload(formName)) $path
 			}
 		    }
