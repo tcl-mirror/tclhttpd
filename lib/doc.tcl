@@ -254,6 +254,7 @@ proc DocDomain {virtual directory sock suffix} {
 	}
 	set directory [file join $homedir $Doc(homedir)]
 	set pathlist [lrange $pathlist 1 end]
+	set suffix [join $pathlist /]
     }
 
     # Handle existing files

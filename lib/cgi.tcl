@@ -233,11 +233,10 @@ proc CgiSpawn {sock script} {
     set data(headerlist) {}	;# list of read headers
     set data(headercode) "200 data follows"	;# normal return
     fconfigure $fd -blocking 0
-    # it might be better to look at "content length" instead.
     if {$data(proto) == "POST"} {
 
 	# We are not using fcopy here so that the Httpd module
-	# can keep track of how much post data is left
+	# can keep track of how much post data is left.
 
 	set more 1 
 	set buffer ""
@@ -246,9 +245,14 @@ proc CgiSpawn {sock script} {
 	    puts -nonewline $fd $buffer
 	    set buffer {}
 	}
-	flush $fd
+
+	# Errors appear here because of the non-blocking writes.
+
+	catch {flush $fd}
     }
-    # In a worker thread, this is not really a socket, hence the catch
+
+    # In a worker thread, this is not really a socket, hence the catch.
+
     catch {fileevent $sock readable [list CgiCleanup $fd $sock]}
     fileevent $fd readable [list CgiRead $fd $sock]
     set data(cancel) [after $Cgi(timeout) CgiCancel $fd $sock]
@@ -259,7 +263,11 @@ proc CgiExec {script arglist} {
     global Cgi
     switch -- $tcl_platform(platform) {
 	unix {
-	    return [open "|[list $script] $arglist |& cat" r+]
+	    if {[file exists /dev/stdout]} {
+		return [open "|[list $script] $arglist 2> /dev/stdout" r+]
+	    } else {
+		return [open "|[list $script] $arglist |& cat" r+]
+	    }
 	}
 	windows {
 	    switch -- [file extension $script] {

@@ -12,6 +12,13 @@
 
 package provide mail 1.0
 
+foreach f {/usr/lib/sendmail /usr/sbin/sendmail} {
+    if {[file exists $f]} {
+	set Mail(program) $f
+	break
+    }
+}
+
 proc Mail_Url {dir} {
     Direct_Url $dir Mail
 }
@@ -96,7 +103,7 @@ proc Mail/formdata {email subject args} {
 }
 
 proc MailInner {sendto subject from type body} {
-    global tcl_platform
+    global tcl_platform Mail
     set headers  \
 "To: $sendto
 Subject: $subject
@@ -108,21 +115,17 @@ Content-Type: $type"
 
     set message "$headers\n\n$body"
 
-    switch $tcl_platform(platform) {
-	unix {
-	    if {[catch {
-		exec /usr/lib/sendmail $sendto << $message
-	    } err]} {
-		Stderr "ERROR: $err"
-		Stderr $message
-	    } else {
-		return "<font size=+1><b>Thank You!</font></b><p>Mailed report to <b>$sendto</b>"
-	    }
+    if {[info exists Mail(program)]} {
+	if {[catch {
+	    exec $Mail(program) $sendto << $message
+	} err]} {
+	    Log "" MailError $err
+	} else {
+	    return "<font size=+1><b>Thank You!</font></b><p>Mailed report to <b>$sendto</b>"
 	}
-	default	{
-	    Stderr $message
-	}
+    } else {
+	Log "" NoMailProgram
+	return "Unable to send mail"
     }
-    return "Unable to send mail"
 }
 

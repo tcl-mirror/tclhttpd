@@ -76,10 +76,14 @@ array set Httpd_EnvMap {
 }
 
 # Httpd_Init
-#	Initialize the httpd module.  Call this early.
-#	Httpd is a global array containing the global server state
+#	Initialize the httpd module.  Call this early, before Httpd_Server.
+#
+# Arguments:
+#	none
+#
+# Side Effects:
+#	Initialize the global Httpd array.
 # bufsize:	Chunk size for copies
-# fcopy:	True if fcopy is being used.
 # initialized:	True after server started.
 # ipaddr:	Non-default ipaddr for the server (for multiple interfaces)
 # library:	a directory containing the tcl scripts.
@@ -93,12 +97,6 @@ array set Httpd_EnvMap {
 # timeout3:	Time allowed to drain extra post data
 # version:	The version number.
 # maxused:	Max number of transactions per socket (keep alive)
-#
-# Arguments:
-#	none
-#
-# Results:
-#	none
 
 proc Httpd_Init {} {
     global Httpd
@@ -118,41 +116,52 @@ proc Httpd_Init {} {
     }
     Httpd_Version
     append Httpd(server) $Httpd(version)
-    if {[info commands "unsupported0"] == "unsupported0"} {
-	rename unsupported0 copychannel
-    }
-    # We always have the counter module and mimetyes
+
+    # TODO - move these OUT of this file and into the main startup code
+
     Counter_Init
     Mtype_ReadTypes [file join $Httpd(library) mime.types]
 
     # SSL Support - These are just the run-time defaults
-    set Httpd(SSL_REQUEST) 1    ;# don't request a cert
+
+    set Httpd(SSL_REQUEST) 1    ;# dot request a cert
     set Httpd(SSL_REQUIRE) 0    ;# don't require a cert
+
     # File containing Server Certificate
+
     set Httpd(SSL_CERTFILE) $Httpd(library)/server.pem
     set Httpd(SSL_KEYFILE) ""
+
     # Dir/File containing CA's
+
     set Httpd(SSL_CADIR) $Httpd(library)
     set Httpd(SSL_CAFILE) server.pem
+
     # For SSL2/3 + RSA you need RSA-enabled versions of OpenSSL
+
     set Httpd(USE_SSL2) 1
     set Httpd(USE_SSL3) 1
     set Httpd(USE_TLS1) 0
     set Httpd(SSL_CIPHERS) ""        ;# use defaults
 }
 
-# Httpd_Server
-# Httpd_SecureServer
-# start the server by listening for connections on the desired port.
-# This may be re-run to re-start the server.  Call this late,
-# after Httpd_Init and the init calls for the other modules.
-# port: The TCP listening port number
-# name: the qualified host name returned in the Host field.  Defaults
-#	to [info hostname]
-# ipaddr: non-default interface address.  Otherwise IP_ADDR_ANY is used
-#	so the server can accept connections from any interface.
+# Httpd_Server --
+#	Start the server by listening for connections on the desired port.
+#	This may be re-run to re-start the server.  Call this late,
+# 	fter Httpd_Init and the init calls for the other modules.
 #
-# This sets up a callback to HttpdAccept for new connections.
+# Arguments:
+#	port	The TCP listening port number
+#	name	The qualified host name returned in the Host field.  Defaults
+#		to [info hostname]
+#	ipaddr	Non-default interface address.  Otherwise IP_ADDR_ANY is used
+#		so the server can accept connections from any interface.
+#
+# Results:
+#	none
+#
+# Side Effects:
+#	This sets up a callback to HttpdAccept for new connections.
 
 proc Httpd_Server {{port 80} {name {}} {ipaddr {}}} {
     global Httpd
@@ -179,6 +188,24 @@ proc Httpd_Server {{port 80} {name {}} {ipaddr {}}} {
     Counter_Reset accepts
 }
 
+# Httpd_SecureServer --
+#
+#	Like Httpd_Server, but with additional setup for SSL.
+#	This requires the TLS extension.
+#
+# Arguments:
+#	port	The TCP listening port number
+#	name	The qualified host name returned in the Host field.  Defaults
+#		to [info hostname]
+#	ipaddr	Non-default interface address.  Otherwise IP_ADDR_ANY is used
+#		so the server can accept connections from any interface.
+#
+# Results:
+#	none
+#
+# Side Effects:
+#	This sets up a callback to HttpdAccept for new connections.
+
 proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
     global Httpd
 
@@ -196,9 +223,10 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
 	set Httpd(port) $port
     }
     package require tls
-    # following is temporary until we have good OpenSSL library
+
     if {![file exists $Httpd(SSL_CADIR)] && ![file exists $Httpd(SSL_CAFILE)]} {
-	return -code error "Need a CA directory or a CA file: file \"$Httpd(SSL_CAFILE)\" not found"
+	return -code error "Need a CA directory or a CA file: \
+		file \"$Httpd(SSL_CAFILE)\" not found"
     }
     if {![file exists $Httpd(SSL_CERTFILE)]} {
 	return -code error "Certificate  \"$Httpd(SSL_CERTFILE)\" not found"
@@ -225,14 +253,25 @@ proc Httpd_SecureServer {{port 443} {name {}} {ipaddr {}}} {
     Counter_Reset accepts
 }
 
-
-# Kill the server gracefully
+# Httpd_Shutdown --
+#
+#	Kill the server gracefully
+#
+# Arguments:
+#	none
+#
+# Results:
+#	none
+#
+# Side Effects:
+#	Close the server listening socket(s)
+#	Invoke any registered shutdown procedures.
 
 proc Httpd_Shutdown {} {
     global Httpd
     set ok 1
     foreach handler $Httpd(shutdown) {
-	if [catch {eval $handler} err] {
+	if {[catch {eval $handler} err]} {
 	    Log "" "Shutdown: $handler" $err
 	    set ok 0
 	}
@@ -243,7 +282,18 @@ proc Httpd_Shutdown {} {
     return $ok
 }
 
-# Register a Tcl command to be called by Httpd_Shutdown
+# Httpd_RegisterShutdown --
+#
+#	Register a Tcl command to be called by Httpd_Shutdown
+#
+# Arguments:
+#	cmd	The command to eval from Httpd_Shutdown
+#
+# Results:
+#	none
+#
+# Side Effects:
+#	Save the callback.
 
 proc Httpd_RegisterShutdown {cmd} {
     global Httpd
@@ -252,10 +302,24 @@ proc Httpd_RegisterShutdown {cmd} {
     }
 }
 
-# Accept a new connection from the server and set up a handler, HttpdRead,
-# to read the request from the client.  The per-connection state is
-# kept in Httpd$sock, (e.g., Httpdsock6), and upvar is used to
-# create a local "data" alias for this global array.
+# HttpdAccept --
+#
+#	This is the socket accept callback invoked by Tcl when
+#	clients connect to the server.
+#
+# Arguments:
+#	self	A list of {protocol name port} that identifies the server
+#	sock	The new socket connection
+#	ipaddr	The client's IP address
+#	port	The client's port
+#
+# Results:
+#	none
+#
+# Side Effects:
+#	Set up a handler, HttpdRead, to read the request from the client.
+#	The per-connection state is kept in Httpd$sock, (e.g., Httpdsock6),
+#	and upvar is used to create a local "data" alias for this global array.
 
 proc HttpdAccept {self sock ipaddr port} {
     global Httpd
@@ -266,62 +330,111 @@ proc HttpdAccept {self sock ipaddr port} {
     set data(self) $self
     set data(ipaddr) $ipaddr
     if {[Httpd_Protocol $sock] == "https"} {
-	set data(ssl) 1
 	
-	# At this point the socket is in blocking mode, so
-	# tls::handshake will block until the SSL setup is complete.
-	# It seems possible to set up a fileevent that calls
-	# tls::handshake until it return 1, then switches the
-	# fileevent to HttpdRead.
+	# There is still a lengthy handshake that must occur.
+	# We do that by calling tls::handshake in a fileevent
+	# until it is complete, or an error occurs.
 
-	set result [catch {tls::handshake $sock} err]
-	if {$result == 1} {
-		Log $sock "HttpdAcceptHandshake" "\{$self\} $sock $ipaddr $port $err"
-		Httpd_SockClose $sock 1 "$err"
-		return
-	}
-	set data(cert) [tls::status $sock]
+	set data(ssl) 1
+	fconfigure $sock -blocking 0
+	fileevent $sock readable [list HttpdHandshake $sock]
+    } else {
+	HttpdReset $sock $Httpd(maxused)
     }
-    HttpdReset $sock $Httpd(maxused)
 }
 
-# Initialize or reset the socket state
-# We allow multiple transactions per socket (keep alive),
-# but handle them serially.
+# HttpdHandshake --
+#
+#	Complete the SSL handshake. This is called from a fileevent
+#	on a new https connection.  It calls tls::handshake until done.
+#
+# Arguments:
+#	sock	The socket connection
+#
+# Results:
+#	none
+#
+# Side Effects:
+#	If the handshake fails, close the connection.
+#	Otherwise, call HttpdReset to set up the normal HTTP protocol.
+
+proc HttpdHandshake {sock} {
+    upvar #0 Httpd$sock data
+    global Httpd errorCode
+	
+    if {[catch {tls::handshake $sock} complete]} {
+	if {[lindex $errorCode 1] == "EAGAIN"} {
+	    # This seems to occur normally on UNIX systems
+	    return
+	}
+	Log $sock "HttpdHandshake" "\{$data(self)\} $sock \
+	    $data(ipaddr) $complete"
+	Httpd_SockClose $sock 1 "$complete"
+    } elseif {$complete} {
+	set data(cert) [tls::status $sock]
+	HttpdReset $sock $Httpd(maxused)
+    }
+}
+
+# HttpdReset --
+#
+#	Initialize or reset the socket state.
+#	We allow multiple transactions per socket (keep alive).
+#
+# Arguments:
+#	sock	The socket connection
+#	left	(optional) The keepalive connection count.
+#
+# Results:
+#	none
+#
+# Side Effects:
+#	Resets the "data" array.
+#	Cancels any after events.
+#	Closes the socket upon error or if the reuse counter goes to 0.
+#	Sets up the fileevent for HttpdRead
 
 proc HttpdReset {sock {left {}}} {
     global Httpd
     upvar #0 Httpd$sock data
 
-    Count connections
-
-    # count down transactions
-    if {[string length $left]} {
-	set data(left) $left
-    } else {
-	set left [incr data(left) -1]
-    }
     if {[catch {
 	flush $sock
     } err]} {
 	Httpd_SockClose $sock 1 $err
 	return
     }
+    Count connections
+
+    # Count down transactions.
+
+    if {[string length $left]} {
+	set data(left) $left
+    } else {
+	set left [incr data(left) -1]
+    }
     if {[info exists data(cancel)]} {
 	after cancel $data(cancel)
     }
+
+    # Clear out (most of) the data array.
+
     set ipaddr $data(ipaddr)
     set self $data(self)
-    if {[Httpd_Protocol $sock] == "https"} {
+    if {[info exist data(cert)]} {
 	set cert $data(cert)
     }
     unset data
     array set data [list state start version 0 \
 	    left $left ipaddr $ipaddr self $self]
-    if {[Httpd_Protocol $sock] == "https"} {
+    if {[info exist cert]} {
 	set data(cert) $cert
     }
-    # Close the socket if it is not reused within a timeout
+
+    # Set up a timer to close the socket if the next request
+    # is not completed soon enough.  The request has already
+    # been started, but a bad client might not finish.
+
     set data(cancel) [after $Httpd(timeout1) \
 	[list Httpd_SockClose $sock 1 ""]]
     fconfigure $sock -blocking 0 -buffersize $Httpd(bufsize) \

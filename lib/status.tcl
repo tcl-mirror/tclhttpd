@@ -168,46 +168,97 @@ proc Status/notfound/reset {args} {
     return "<h1>Reset Notfound Counters</h1>"
 }
 proc Status/size {args} {
-    append html "<h1>Memory Size</h1>\n"
-    append html [StatusMenu]\n
+    global StatusDataSize StatusCodeSize
+    append top_html "<h1>Memory Size</h1>\n"
+    append top_html [StatusMenu]\n
     append html [Status/datasize]\n
     append html [Status/codesize]\n
-    return $html
+    append top_html "<h2>Grand Total</h3>"
+    append top_html "Bytes [expr $StatusDataSize(bytes) + $StatusCodeSize(bytes)]"
+    return $top_html$html
 }
-proc Status/datasize {args} {
+proc Status/datasize {{ns ::}} {
+    global StatusDataSize
+    array set StatusDataSize {
+	vars	0
+	values	0
+	bytes	0
+    }
+    set html "<h2>Data Size</h2>"
+    append html [StatusDataSize $ns]
+    append top_html "<h2>Total Data Size</h2>\n
+	Num Variables $StatusDataSize(vars)<br>\n\
+	Num Values $StatusDataSize(values)<br>\n\
+	Data Bytes $StatusDataSize(bytes)"
+    return $top_html$html
+}
+proc StatusDataSize {ns} {
+    global StatusDataSize
     set ng 0
     set nv 0
     set size 0
-    foreach g [info globals *] {
-	upvar #0 $g gg
+    foreach g [info vars ${ns}::*] {
 	incr ng
-	if [array exists gg] {
-	    foreach {name value} [array get gg] {
+	if [array exists $g] {
+	    foreach {name value} [array get $g] {
 		set size [expr {$size + [string length $name] + [string length $value]}]
 		incr nv
 	    }
-	} else {
-	    set size [expr {$size + [string length $g] + [string length $gg]}]
+	} elseif {[info exist $g]} {
+	    # info vars returns declared but undefined namespace vars
+	    set size [expr {$size + [string length $g] + [string length [set $g]]}]
 	    incr nv
 	}
     }
-    return "<h2>Data Size</h2>\n\
-		Num Globals $ng<br>\n\
+    set html "<h3>$ns</h3>\n\
+		Num Variables $ng<br>\n\
 		Num Values $nv<br>\n\
 		Data Bytes $size"
+    incr StatusDataSize(vars) $ng
+    incr StatusDataSize(values) $nv
+    incr StatusDataSize(bytes) $size
+
+    append html "<ul>"
+    foreach child [namespace children $ns] {
+	append html [StatusDataSize $child]
+    }
+    append html "</ul>"
+    return $html
 }
-proc Status/codesize {args} {
+
+proc Status/codesize {{ns ::}} {
+    global StatusCodeSize
+    array set StatusCodeSize {
+	procs	0
+	bytes	0
+    }
+    set html "<h2>Code Size</h2>"
+    append html [StatusCodeSize $ns]
+    append top_html "<h2>Total Code Size</h2>\n
+	Num Procs $StatusCodeSize(procs)<br>\n\
+	Code Bytes $StatusCodeSize(bytes)"
+    return $top_html$html
+}
+proc StatusCodeSize {{ns ::}} {
+    global StatusCodeSize
     set np 0
     set size 0
-    foreach g [info procs *] {
+    foreach g [info procs ${ns}::*] {
 	incr np
 	set size [expr {$size + [string length $g] +
 			    [string length [info args $g]] +
 			    [string length [info body $g]]}]
     }
-    return "<h2>Code Size</h2>\n\
+    set html "<h3>$ns</h3>\n\
 		Num Procs $np<br>\n\
 		Code Bytes $size"
+    incr StatusCodeSize(procs) $np
+    incr StatusCodeSize(bytes) $size
+    append html "<ul>"
+    foreach child [namespace children $ns] {
+	append html [StatusCodeSize $child]
+    }
+    append html "</ul>"
 }
 
 # StatusMainTable
@@ -577,4 +628,5 @@ proc Doc_application/x-tcl-status {path suffix sock} {
 	Httpd_ReturnFile $sock text/html $path
     }
 }
+
 
