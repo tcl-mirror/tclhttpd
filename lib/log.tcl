@@ -184,6 +184,10 @@ proc Log_SetFile {{basename {}}} {
     }
     set Log(log_file) $Log(log)[clock format $now -format %y.%m.%d]
     catch {close $Log(log_fd)}
+
+    # Create log directory, if neccesary, then open the log file
+
+    catch {file mkdir [file dirname $Log(log_file)]}
     catch {set Log(log_fd) [open $Log(log_file) a]}
 
     if {[info exists lastlog]} {
