@@ -651,11 +651,7 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	    [list array set cgienv [array get pass]]]
     }
 
-    # Check query data
-    # steve: 5/8/98: Add multipart document upload handling
-    # If there is out-standing (i.e., unread) post data, then
-    # calling Url_DecodeQuery will automatcally read it
-    # and append to data(query)
+    # Check query data.
 
     if {[Httpd_PostDataSize $sock] > 0 && ![info exists data(query)]} {
 	set data(query) {}
@@ -667,22 +663,24 @@ proc DocTemplate {sock template htmlfile suffix dynamicVar {interp {}}} {
 	    set type $data(mime,content-type)
 	}
 
-	# Initialize the Standard Tcl Library ncgi package so its
-	# ncgi::value can be used to get the data.  This replaces
-	# the old Url_DecodeQuery interface.
-
 	# Read and append the pending post data to data(query).
 
 	Url_ReadPost $sock data(query)
 
+	# Initialize the Standard Tcl Library ncgi package so its
+	# ncgi::value can be used to get the data.  This replaces
+	# the old Url_DecodeQuery interface.
+
 	interp eval $interp [list ncgi::reset $data(query) $type]
 	interp eval $interp [list ncgi::parse]
 
-	# For compatibility with older versions of TclHttpd
+	# Define page(query) and page(querytype)
+	# for compatibility with older versions of TclHttpd
 	# This is a bit hideous because it reaches inside ::ncgi
 	# to avoid parsing the data twice.
 
-	interp eval $interp [list uplevel #0 [list set page(querytype) $type]]
+	interp eval $interp [list uplevel #0 [list set page(querytype) \
+		[string trim [lindex [split $type \;] 0]]]]
 	interp eval $interp [list uplevel #0 {
 	    set page(query) {}
 	    foreach n $ncgi::varlist {
