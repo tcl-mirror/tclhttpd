@@ -1,3 +1,7 @@
+2004-04-15 Colin McCormack <colin@chinix.com>
+	* lib/upload.tcl: implemented -maxfiles, -maxbytes
+	and -totalbytes options to Upload_Url.
+
 2004-04-17 Brent Welch <welch@panasas.com>
         * Various doc updates.
         Created htdocs/man/index.tml
