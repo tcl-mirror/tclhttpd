@@ -35,10 +35,16 @@ proc Counter_StartTime {} {
 
 proc Counter_CheckPoint {} {
     global counter CntDayurlhits CntHoururlhits CntMinuteurlhits
-    Log {} \n[parray counter]
-    Log {} \n[parray CntDayurlhits]
-    Log {} \n[parray CntHoururlhits]
-    Log {} \n[parray CntMinuteurlhits]
+    global Log
+    set path $Log(log)counter
+    catch {file rename -force $path $path.old}
+    if {![catch {open $path w} out]} {
+	puts $out \n[parray counter]
+	puts $out \n[parray CntDayurlhits]
+	puts $out \n[parray CntHoururlhits]
+	puts $out \n[parray CntMinuteurlhits]
+	close $out
+    }
 }
 
 proc Count {what {delta 1}} {
