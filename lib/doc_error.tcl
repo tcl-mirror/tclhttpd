@@ -5,11 +5,10 @@
 # Derived from doc.tcl
 # Stephen Uhler / Brent Welch (c) 1997-1998 Sun Microsystems
 # Brent Welch (c) 1998-2000 Ajuba Solutions
-# Colin McCormack (c) 2002
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: doc_error.tcl,v 1.4 2003/11/04 01:50:59 coldstore Exp $
+# RCS: @(#) $Id: doc_error.tcl,v 1.5 2004/02/25 04:28:48 coldstore Exp $
 
 package provide httpd::doc_error 1.0
 
@@ -80,7 +79,9 @@ proc Doc_NotFound { sock } {
 
 	lappendOnce Referer($data(url)) $data(mime,referer)
     }
-    DocSubstSystemFile $sock notfound 404 [protect_text $Doc(url,notfound)]
+    if {![info exists data(notfound_hook)] || [catch {data(notfound_hook) $sock}]} {
+	DocSubstSystemFile $sock notfound 404 [protect_text $Doc(url,notfound)]
+    }
 }
 
 # Doc_Error --
@@ -106,7 +107,9 @@ proc Doc_Error { sock ei } {
 	set Doc(errorInfo) $ei	;# For subst
 	CountName $Doc(errorUrl) errors
     }
-    DocSubstSystemFile $sock error 500 [protect_text $ei]
+    if {![info exists data(error_hook)] || [catch {data(error_hook) $sock}]} {
+	DocSubstSystemFile $sock error 500 [protect_text $ei]
+    }
 }
 
 # DocSubstSystemFile --
