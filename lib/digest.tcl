@@ -44,12 +44,18 @@ if {[catch {package require Random}]} {
 }
 set DigestSecret [DigestRand]
 
+proc Digest_Passwd {username realm passwd} {
+    return [md5hex "$username:$realm:$passwd"]
+}
+
 # calculate a digest key for a given session
 proc DigestA1 {sock} {
     upvar #0 Httpd$sock data
     upvar #0 Digest$data(digest,nonce) digest
 
+    # create a digest for this socket
     set userstuff "$data(digest,username):$data(digest,realm):$digest(passwd)"
+    #Stderr "DigestA1: $userstuff"
     switch -- [string tolower $data(digest,algorithm)] {
 	md5 {
 	    set digest(A1) [md5hex $userstuff]
@@ -67,10 +73,14 @@ proc DigestA1 {sock} {
 # per operation hash
 proc DigestA2 {sock} {
     upvar #0 Httpd$sock data
-    if {[info exists data(op)]} {
-	set result [md5hex "[string toupper $data(op)]:$data(digest,uri)"]
+    set uri $data(digest,uri)
+    regexp {[^?]+} $uri uri
+    if {[info exists data(proto)]} {
+	#Stderr "A2: op:$data(proto) uri:$data(digest,uri)"
+	set result [md5hex "[string toupper $data(proto)]:$data(digest,uri)"]
 	# nb: we don't offer auth-int
     } else {
+	#Stderr "A2: uri:$data(digest,uri)"
 	set result [md5hex "GET:$data(digest,uri)"]
     }
     return $result
@@ -94,8 +104,10 @@ proc DigestDigest {sock} {
     }
     set digest(A2) [DigestA2 $sock]
 
+    #Stderr "DigestDigest A1:$digest(A1) A2:$digest(A2) nc:[format %08x $data(digest,nc)] cnonce:$data(digest,cnonce) qop:$data(digest,qop)"
+
     if {[info exists data(digest,qop)]} {
-	set result [md5hex "$digest(A1):$data(digest,nonce):[format %08x 0x$digest(nc)]:$data(digest,cnonce):$data(digest,qop):$digest(A2)"]
+	set result [md5hex "$digest(A1):$data(digest,nonce):[format %08x $data(digest,nc)]:$data(digest,cnonce):$data(digest,qop):$digest(A2)"]
     } else {
 	set result [md5hex "$digest(A1):$data(digest,nonce):$digest(A2)"]
     }
@@ -105,42 +117,58 @@ proc DigestDigest {sock} {
 # handle the client's Digest
 proc Digest_Request {sock realm file} {
     upvar #0 Httpd$sock data
-
     upvar #0 Digest$data(digest,nonce) digest
     set digest(last) [clock clicks]	;# remember the last use
 
-    # create a digest for this socket
-    if {![info exists digest(passwd)]} {
-	set digest(passwd) [AuthGetPass $sock $file $data(digest,username)]
+    if {![info exists digest(A1)]} {
+	set A1 [AuthGetPass $sock $file $data(digest,username)@$data(digest,realm)]
+	if {$A1 ne "*"} {
+	    set digest(A1) $A1
+	} else {
+	    # no digest password on record - use plaintext password
+	    if {![info exists digest(passwd)]} {
+		set digest(passwd) [AuthGetPass $sock $file $data(digest,username)]
+	    }
+	    set digest(A1) [DigestA1 $sock]
+	    #Stderr "Plaintext password $digest(passwd)"
+	}
+	#Stderr "A1 Calc: $digest(A1)"
     }
 
     # check that realms match
     if {$realm ne $data(digest,realm)} {
-	Stderr "realm"
+	#Stderr "realm"
 	return 0
     }
 
+    #Stderr "Digest_Request: [array get digest] - [array get data digest,*]"
+
     if {[info exists digest(opaque)]} {
 	if {$digest(opaque) ne $data(digest,opaque)} {
+	    #Stderr "Digest Opaque $digest(opaque) ne $data(digest,opaque)"
 	    return 0
 	}
     }
 
     # check the nonce count
+    set data(digest,nc) [scan $data(digest,nc) %08x]
     if {[info exists digest(nc)]} {
 	if { $data(digest,nc) <= $digest(nc)} {
 	    set digest(stale) 1
+	    #Stderr "Digest Stale $digest(nc) ne $data(digest,nc)"
 	    #return 0	;# Mozilla doesn't implement nc
 	}
-	#incr digest(nc)
-	set digest(nc) $data(digest,nc)
+	#Stderr "Digest nc $digest(nc) - $data(digest,nc)"
     } else {
+	#Stderr "Digest New Nonce $data(digest,nc)"
 	return 0	;# this is new to us
     }
+    set digest(nc) $data(digest,nc)
 
     # check the password
     set calc_digest [DigestDigest $sock]
     if {$calc_digest ne $data(digest,response)} {
+	#Stderr "Digest Response: $calc_digest ne $data(digest,response)"
 	return 0
     }
 
@@ -152,7 +180,7 @@ proc Digest_Request {sock realm file} {
 	append a_args ", rspauth=\"${calc_digest}\""
     }
     if {[info exists data(digest,nc)]} {
-	append auth_info [format ", nc=%08x" [expr 1 + 0x$digest(nc)]]
+	append auth_info [format ", nc=%08x" [expr 1 + $data(digest,nc)]]
     }
 
     # remember some data
@@ -166,20 +194,23 @@ proc Digest_Request {sock realm file} {
 
     Httpd_AddHeaders $sock Authentication-Info $auth_info
 
+    #Stderr "Digest Request OK"
     return 1
 }
 
 # decode an Authentication request
 proc Digest_Get {sock parts} {
     upvar #0 Httpd$sock data
-
+    #Stderr "Digest_Get $parts"
     # get the digest request args
     foreach el [lrange $parts 1 end] {
 	set el [string trimright $el ,]
-	foreach {n v} [split $el =] break
-	set data(digest,[string trim $n " "]) [string trim $v { "}]
+	#foreach {n v} [split $el =] break
+	regexp {^[ ]*([^=]+)[ ]*=[ ]*(.*)$} $el junk n v
+	#Stderr "Getting: '$el' -> $n $v"
+	set data(digest,[string trim $n " "]) [string trim $v " \""]
     }
-    
+    #Stderr "Digest Got: [array get data digest,*]"
     # perform some desultory checks on credentials
 }
 
@@ -216,33 +247,28 @@ proc Digest_Challenge {sock realm user} {
     # construct authentication args
     # minimally nonce, opaque, qop and algorithm
     set challenge [list nonce \"$digest(nonce)\" \
+		       domain \"/" \
 		       opaque \"$digest(opaque)\" \
 		       qop \"auth\" \
 		       algorithm MD5]
-#		   algorithm \"MD5,MD5-sess\"]
+    #		   algorithm \"MD5,MD5-sess\"
     #if {$digest(stale)} {
-	#lappend challenge stale true
+    #lappend challenge stale true
     #}
-    
+
+    #Stderr "Digest Challenge: [array get digest] - $challenge"
     # issue Digest authentication challenge
     eval Httpd_RequestAuth $sock Digest $realm $challenge
 }
 
-if {0} {
+if {1} {
     # test
-    array set Digest999 {
-	realm testrealm@host.com
-	qop auth,auth-int
-	nonce dcd98b7102dd2f0e8b11d0f600bfb0c093
-	opaque 5ccc069c403ebaf9f0171e9517f40e41
-	nc 0
-    }
-
     array set Httpd999 {
 	digest,username Mufasa
 	digest,realm testrealm@host.com
 	digest,nonce dcd98b7102dd2f0e8b11d0f600bfb0c093
 	uri /dir/index.html
+	digest,uri /dir/index.html
 	op GET
 	digest,qop auth
 	digest,nc 00000001
@@ -251,8 +277,12 @@ if {0} {
 	digest,opaque 5ccc069c403ebaf9f0171e9517f40e41
 	digest,algorithm MD5
     }
+    array set Digest$Httpd999(digest,nonce) [list last [clock clicks] nc [format %08d 1] opaque $Httpd999(digest,opaque) nonce $Httpd999(digest,nonce) realm testrealm@host.com qop auth,auth-int passwd "Circle Of Life"]
+
     AuthParseHtaccess 999 /usr/lib/tclhttpd3.5.0/testdigest
-    set DTest [Digest_Request 999 testrealm@host.com /usr/lib/tclhttpd3.5.0/testdigest]
+    if {[catch {Digest_Request 999 testrealm@host.com /usr/lib/tclhttpd3.5.0/testdigest}  DTest eo]} {
+	error "Digest test error: $eo"
+    }
     if {$DTest != 1} {
 	error "Failed digest test"
     }

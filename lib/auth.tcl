@@ -29,7 +29,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.19 2004/03/22 16:23:32 coldstore Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.20 2004/06/11 08:35:38 coldstore Exp $
 
 package provide httpd::auth 2.0
 package require base64
@@ -69,34 +69,35 @@ if {![info exists Config(AuthDefaultFile)]} {
 array set authdefault {mtime -1}
 package require httpd::passgen	;# random password generation
 
-if {[info exists Config(Auth)]} {
-    foreach {var val} $Config(Auth) {
-	if {[string match user,* $var]} {
-	    # encrypt the password
-	    set salt [Passgen_Salt]
-	    set val [crypt $password $salt]
-	}
-	
-	set authdefault($var) $val
-    }
-} else {
-    # we weren't given an Auth Config - generate a default for webmaster
-    # and write it to file $Config(AuthDefaultFile)
-    
-    set webmaster_password [Passgen_Generate]
-    set salt [Passgen_Salt]
-    set authdefault(user,webmaster) [crypt $webmaster_password $salt]
-    set authdefault(group,webmaster) webmaster
-    set fd [open $Config(AuthDefaultFile) w 0660]
-    puts $fd $webmaster_password
-    close $fd
-    unset webmaster_password
-}
-
 # Auth_InitCrypt --
 # Attempt to turn on the crypt feature used to store crypted passwords.
 
 proc Auth_InitCrypt {} {
+    global authdefault
+    global Config
+
+    if {[info exists Config(Auth)]} {
+	foreach {var val} $Config(Auth) {
+	    if {[string match user,* $var]} {
+		# encrypt the password
+		set salt [Passgen_Salt]
+		set val [crypt $password $salt]
+	    }
+	    set authdefault($var) $val
+	}
+    } else {
+	# we weren't given an Auth Config - generate a default for webmaster
+	# and write it to file $Config(AuthDefaultFile)
+	
+	set webmaster_password [Passgen_Generate]
+	set salt [Passgen_Salt]
+	set authdefault(user,webmaster) [crypt $webmaster_password $salt]
+	set authdefault(group,webmaster) webmaster
+	set authdefault(user,webmaster@webmaster) [Digest_Passwd webmaster webmaster $webmaster_password]
+	# This printf is important - it's the only way the admin
+	# knows what this password might be
+	Stderr "User \"webmaster\" default password \"$webmaster_password\""
+    }
 }
 
 proc Auth_AccessFile {args} {
