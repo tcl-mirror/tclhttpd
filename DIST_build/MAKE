@@ -4,6 +4,8 @@
 
 PWD=`pwd`
 PLATFORM=solaris
+HTTPD_VERSION=3.0.0
+PREFIX=/usr/local/tclhttpd${HTTPD_VERSION}
 
 cd ../tcl8.3.1/unix/${PLATFORM}
 make
@@ -21,7 +23,7 @@ make install
 cd ${PWD}
 
 cd ../tcllib0.4
-./install.sh
+./install.sh ${PREFIX}
 cd ${PWD}
 
 
