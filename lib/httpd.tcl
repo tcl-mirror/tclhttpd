@@ -302,9 +302,15 @@ proc HttpdReset {sock {left {}}} {
 
     set ipaddr $data(ipaddr)
     set self $data(self)
+	if {[lindex $self 0] == "https"} {
+		set cert $data(cert)
+	}
     unset data
     array set data [list state start linemode 1 version 0 \
 	    left $left ipaddr $ipaddr self $self]
+	if {[lindex $self 0] == "https"} {
+		set data(cert) $cert
+	}
     # Close the socket if it is not reused within a timeout
     set data(cancel) [after $Httpd(timeout1) \
 	[list Httpd_SockClose $sock 1 ""]]
