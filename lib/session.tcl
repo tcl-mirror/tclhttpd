@@ -40,7 +40,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: session.tcl,v 1.6 2004/04/21 05:09:37 welch Exp $
+# RCS: @(#) $Id: session.tcl,v 1.7 2004/04/21 06:52:16 welch Exp $
 
 package provide httpd::session 1.0
 
@@ -59,7 +59,7 @@ if {![info exists Session(dir)]} {
     set Session(dir) [file join [Doc_Root] .sessions]
 }
 if {![file exists $Session(dir)]} {
-    mkdir $Session(dir)
+    file mkdir $Session(dir)
 }
 
 # if an MD5 package is available, we use it to make
