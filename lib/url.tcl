@@ -571,7 +571,7 @@ proc Url_DecodeQuery_multipart/form-data {query qualifiers} {
 proc Url_DecodeMIMEField type {
     set qualList {}
     if {[regexp {([^;]+)[ 	]*;[ 	]*(.+)} $type discard type qualifiers]} {
-	foreach qualifier [split $qualifiers ;] {
+	foreach qualifier [split $qualifiers \;] {
 	    if {[regexp {[ 	]*([^=]+)="([^"]*)"} $qualifier discard name value]} {
 	    } elseif {[regexp {[ 	]*([^=]+)='([^']*)'} $qualifier discard name value]} {
 	    } elseif {[regexp {[ 	]*([^=]+)=([^ 	]*)} $qualifier discard name value]} {
