@@ -1,3 +1,7 @@
+2005-04-09 Colin McCormack <colin@sharedtech.dyndns.org>
+	* bin/httpd.tcl: changed version number to reflect actual
+	version (3.5.2)
+
 2005-02-26 Colin McCormack <colin@sharedtech.dyndns.org>
 	   * lib/httpd.tcl Fixes per sf bugs 1152183 1152182
 	    NotModified can't contain a message body and
