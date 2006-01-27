@@ -1,0 +1,169 @@
+#!/bin/sh
+#
+# /etc/init.d/tclhttpd - Start/Stop the tcl httpd server
+#
+# This file lives in slightly different locations on different platforms:
+# Solaris:
+# IRIX:
+#	/etc/init.d/tclhttpd
+# RedHat Linux:
+#	/etc/rc.d/init.d/tclhttpd
+# HPUX:
+#	/sbin/init.d/tclhttpd
+#
+# The script also needs links from peer directories named
+# rc2.d to start the server
+# (e.g., make rc2.d/S80tclhttpd a link to ../init.d/tclhttpd)
+# and in rc0.d to stop the server, create a link named rc0.d/K20tclhttpd
+#
+# The following two lines allow this script to be managed by Fedora's
+# chkconfig program.
+#
+# chkconfig: - 80 30
+# description: tclhttpd is a Tcl based web/application server.
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Modify the default status() function so that it works with
+# tclhttpd.  Unfortunately, the base name of the program (tclhttpd)
+# is not the same as what is found by running ps (tclsh /usr/bin/tclhttpd).
+status() {
+	local base=${1##*/}
+	local pid
+
+	# Test syntax.
+	if [ "$#" = 0 ] ; then
+		echo $"Usage: status {program}"
+		return 1
+	fi
+
+	if [ -f /var/run/$base/$base.pid ] ; then
+	        read pid < /var/run/$base/$base.pid
+		ps $pid | grep $base 2>&1 > /dev/null
+		running=$?
+		if [ "$running" = 0 ] ; then
+			echo $"$base (pid $pid) is running..."
+			return 0
+		fi
+
+	        if [ -n "$pid" ]; then
+	                echo $"$base dead but pid file exists"
+	                return 1
+	        fi
+	fi
+	# See if /var/lock/subsys/tclhttpd exists
+	if [ -f /var/lock/subsys/tclhttpd ]; then
+		echo $"$base dead but subsys locked"
+		return 2
+	fi
+	echo $"$base is stopped"
+	return 3
+}
+
+# A function to stop a program.
+killproc() {
+	RC=0
+	# Test syntax.
+	if [ "$#" -eq 0 ]; then
+		echo $"Usage: killproc {program} [signal]"
+		return 1
+	fi
+
+	notset=0
+	# check for second arg to be kill level
+	if [ -n "$2" ]; then
+		killlevel=$2
+	else
+		notset=1
+		killlevel="-9"
+	fi
+
+        # Save basename.
+        base=${1##*/}
+
+        # Find pid.
+	pid=
+	if [ -f /var/run/${base}/${base}.pid ]; then
+		local line p
+		read line < /var/run/$base/$base.pid
+		for p in $line ; do
+			[ -z "${p//[0-9]/}" -a -d "/proc/$p" ] && pid="$pid $p"
+		done
+	fi
+	if [ -z "$pid" ]; then
+		pid=`pidof -o $$ -o $PPID -o %PPID -x $1 || \
+			pidof -o $$ -o $PPID -o %PPID -x $base`
+	fi
+
+        # Kill it.
+        if [ -n "${pid:-}" ] ; then
+                [ "$BOOTUP" = "verbose" -a -z "$LSB" ] && echo -n "$base "
+		if [ "$notset" -eq "1" ] ; then
+		       if checkpid $pid 2>&1; then
+			   # TERM first, then KILL if not dead
+			   kill -TERM $pid
+			   usleep 100000
+			   if checkpid $pid && sleep 1 &&
+			      checkpid $pid && sleep 3 &&
+			      checkpid $pid ; then
+                                kill -KILL $pid
+				usleep 100000
+			   fi
+		        fi
+			checkpid $pid
+			RC=$?
+			[ "$RC" -eq 0 ] && failure $"$base shutdown" || success $"$base shutdown"
+			RC=$((! $RC))
+		# use specified level only
+		else
+		        if checkpid $pid; then
+	                	kill $killlevel $pid
+				RC=$?
+				[ "$RC" -eq 0 ] && success $"$base $killlevel" || failure $"$base $killlevel"
+			fi
+		fi
+	else
+	    failure $"$base shutdown"
+	    RC=1
+	fi
+
+        # Remove pid file if any.
+	if [ "$notset" = "1" ]; then
+            rm -f /var/run/$base.pid
+	fi
+	return $RC
+}
+
+prog="tclhttpd"
+base="tclhttpd"
+
+case $1 in 
+'start')
+        echo -n $"Starting $prog: "
+        ln -sf /var/run/tclhttpd/tclhttpd.pid /var/run/tclhttpd.pid
+	daemon $prog -daemon 1 -config /etc/tclhttpd/tclhttpd.rc -docRoot /var/www/tclhttpd/htdocs -library /var/www/tclhttpd/custom
+        RETVAL=$?
+        echo
+        [ $RETVAL = 0 ] && touch /var/lock/subsys/tclhttpd
+	;;
+'stop')
+	echo -n $"Stopping $prog: "
+	killproc $prog
+	RETVAL=$?
+        echo
+	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/tclhttpd /var/run/tclhttpd.pid
+	;;
+'status')
+    status $prog
+    ;;
+'reload' | 'restart')
+	$0 stop
+	$0 start
+	;;
+*)
+	echo "usage: $0 {start|stop|status|restart}"
+	;;
+esac
+
+exit $RETVAL
