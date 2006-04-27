@@ -43,7 +43,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: httpd.tcl,v 1.60 2005/04/08 18:50:54 coldstore Exp $
+# RCS: @(#) $Id: httpd.tcl,v 1.61 2006/04/27 00:24:51 wart Exp $
 #
 # \
 exec tclsh "$0" ${1+"$@"}
@@ -339,6 +339,11 @@ Stderr $startup
 
 # Fork a child process if expect is present.
 if {$Config(daemon)} {
+    if {[info exists tcl_platform(threaded)] && $tcl_platform(threaded) == 1} {
+	Stderr "Can't fork with a threaded interpreter.  Please run without the -daemon flag."
+        exit 1
+    }
+
     if {![catch {package require Expect}] || ![catch {package require Tclx}]} {
         if {[fork]} {
             exit
