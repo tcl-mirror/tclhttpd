@@ -1,3 +1,7 @@
+2005-04-26 Michael Thomas <wart@kobold.org>
+        * bin/httpd.tcl:  Don't [fork] if we're in a threaded interpreter
+          since [fork] doesn't play well with threads.
+
 2005-04-09 Colin McCormack <colin@sharedtech.dyndns.org>
 	* bin/httpd.tcl: changed version number to reflect actual
 	version (3.5.2)
