@@ -29,7 +29,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: auth.tcl,v 1.24 2004/09/05 05:10:13 coldstore Exp $
+# RCS: @(#) $Id: auth.tcl,v 1.25 2006/11/09 23:41:41 coldstore Exp $
 
 package provide httpd::auth 2.0
 
@@ -87,7 +87,7 @@ proc Auth_InitCrypt {} {
 	    if {[string match user,* $var]} {
 		# encrypt the password
 		set salt [Passgen_Salt]
-		set val [crypt $password $salt]
+		set val [crypt $val $salt]
 	    }
 	    set authdefault($var) $val
 	}
