@@ -66,6 +66,7 @@ application/x-sv4crc           sv4crc
 application/x-tar              tar             
 application/x-ustar            ustar           
 application/x-patch		patch
+application/x-shockwave-flash swf
 audio/basic                    au snd          
 audio/x-aiff                   aif aiff aifc
 audio/x-wav                    wav             
