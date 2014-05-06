@@ -9,7 +9,6 @@
 # RCS: @(#) $Id: config.tcl,v 1.4 2004/09/05 05:10:13 coldstore Exp $
 
 package provide httpd::config 1.0
-#package require httpd::utils	;# file
 
 namespace eval config {
     
@@ -52,7 +51,17 @@ proc config::init {config aname} {
     # Load the file into a safe interpreter that just creates Config array
 
     set i [interp create -safe]
-    interp expose $i file
+    if {$::tcl_version >= 8.5} {
+      namespace ensemble create -command ::SafeFile -map {
+        isdirectory {::file isdirectory}
+        exists      {::file exists}
+        join        {::file join}
+        dirname     {::file dirname}
+      }
+      $i alias file SafeFile
+    } else {
+      interp expose $i file
+    }
 
     # Create the slave's Config array, then source the config script
 
