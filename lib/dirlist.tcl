@@ -10,7 +10,7 @@
 # RCS: @(#) $Id: dirlist.tcl,v 1.13 2004/10/22 03:43:06 coldstore Exp $
 
 package provide httpd::dirlist 1.1
- 
+
 package require httpd	;# Httpd_ReturnData
 package require httpd::doc	;# Doc_Handle
 package require httpd::doc_error	;# Doc_NotFound
@@ -64,7 +64,7 @@ proc DirList_Directory {prefix path suffix sock} {
     if {[info exist tcl_platform(isWrapped)] && $tcl_platform(isWrapped)} {
 	set newest $npath
     } else {
-	set newest [file_latest [glob -nocomplain $npath]]
+	set newest [file_latest [glob -directory $path -nocomplain -- $dirlist(indexpat)]]
     }
     if {[string length $newest]} {
 
@@ -183,7 +183,7 @@ proc DirListInner {dir urlpath sort pattern} {
     regsub -all {\.+/} $pattern {} pattern
     set pattern [string trimleft $pattern /]
 
-    set list [glob -nocomplain -- [file join $dir $pattern]]
+    set list [glob -directory $dir -nocomplain -- $pattern]
     if {[llength $path] > 1} {
 	append listing \
 	    "<A HREF=\"..\">Up to parent [string tolower [DirListTerm]]</A>\n"
@@ -257,7 +257,7 @@ proc DirListInner {dir urlpath sort pattern} {
     } else {
 	append listing "[DirListTerm] is empty\n"
     }
- 
+
     append listing "
 </PRE>
 "
@@ -301,11 +301,11 @@ proc DirList {sock dir urlpath} {
 #
 # Utility procedure for case-insensitive filename comparison.
 # Suitable for use with lsort
- 
+
 proc DirlistCompare {a b} {
     string compare [string tolower $a] [string tolower $b]
 }
- 
+
 
 proc DateCompare {a b} {
     set a [lindex $a 1]
@@ -318,7 +318,7 @@ proc DateCompare {a b} {
 	return 0
     }
 }
- 
+
 proc SizeCompare {a b} {
     set aa [lindex $a 1]
     set bb [lindex $b 1]
@@ -336,7 +336,7 @@ proc SizeCompare {a b} {
 
 proc DirListTerm {} {
     global tcl_platform
- 
+
     if {[string compare macintosh $tcl_platform(platform)]} {
 	set what Directory
     } else {
