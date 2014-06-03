@@ -99,8 +99,8 @@ proc Thread_List {} {
 
 
 # Thread_Start --
-#	This starts a worker thread.  The big pain here is that a 
-#	virgin thread has none of our Tcl scripts, so we have to 
+#	This starts a worker thread.  The big pain here is that a
+#	virgin thread has none of our Tcl scripts, so we have to
 #	bootstrap into a useful state.
 #
 # Arguments:
@@ -111,9 +111,9 @@ proc Thread_List {} {
 
 proc Thread_Start {} {
     global auto_path tcl_library
-    set id [Thread_Create] 
+    set id [Thread_Create]
     Thread_Send $id \
-	{Stderr "Thread  starting."}
+	{puts stderr "Thread  starting."}
 
     # Set up auto_loading.  These steps may become redundent once the
     # TclpSetLibraryPath code works correctly in threads.
@@ -172,7 +172,7 @@ proc Thread_Dispatch {sock cmd} {
 		lappend Thread(threadlist) $id
 		lappend Thread(freelist) $id
 	    } else {
-		
+
 		# Queue the request until a thread is available
 
 		lappend Thread(queue) [list $sock $cmd]
@@ -183,7 +183,7 @@ proc Thread_Dispatch {sock cmd} {
 	set id [lindex $Thread(freelist) 0]
 	set Thread(freelist) [lrange $Thread(freelist) 1 end]
 	set data(master_thread) [Thread_Id]
-	
+
 	# Until we can pass sockets, read the post data here
 
 	if {[info exist Url(postlength)]} {
@@ -221,7 +221,7 @@ proc Thread_Dispatch_General {cmd} {
 		lappend Thread(threadlist) $id
 		lappend Thread(freelist) $id
 	    } else {
-		
+
 		# Queue the request until a thread is available
 
 		lappend Thread(queue) [list $cmd]
@@ -231,7 +231,7 @@ proc Thread_Dispatch_General {cmd} {
 	}
 	set id [lindex $Thread(freelist) 0]
 	set Thread(freelist) [lrange $Thread(freelist) 1 end]
-	
+
 	Thread_SendAsync $id [list Thread_Invoke_General $cmd]
     }
 }
@@ -286,7 +286,7 @@ proc Thread_Invoke_General {cmd} {
         # An error occurred, so log it.
         Log {} bgerror "Error with code $errorCode in thread [Thread_Id]:\n$errorInfo"
     }
-    
+
     Thread_MasterEvalAsync [list Thread_Free [Thread_Id]]
     return
 }
@@ -303,7 +303,7 @@ proc Thread_Invoke_General {cmd} {
 
 proc Thread_Respond {sock cmd} {
     upvar #0 Httpd$sock data
-    if {[info exist data(master_thread)] && 
+    if {[info exist data(master_thread)] &&
 	    $data(master_thread) != [Thread_Id]} {
 
 	# Pass request back to the master thread
@@ -562,4 +562,3 @@ proc Thread_SendAll {cmd} {
     lappend result [thread::id] $res
     return $result
 }
-
