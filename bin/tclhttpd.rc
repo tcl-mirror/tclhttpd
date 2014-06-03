@@ -2,7 +2,7 @@
 #
 # This is the default configuration file for TclHttpd
 #
-# Note - you should assume that all the paramters listed here 
+# Note - you should assume that all the paramters listed here
 # are required in one place or another.  If you want to "delete"
 # a parameter you should set the associated value to the
 # empty string, which is written either "" or {}
@@ -20,6 +20,8 @@
 # docRoot - the name of the file system directory containing
 # the root of your document tree.  This is conditional so you
 # can run from the source distribution or after doing "make install"
+
+package require fileutil
 
 foreach d [list \
 	[file join [Config home] ../htdocs] \
@@ -126,7 +128,7 @@ Config gui              1
 # This is actually the prefix of the name.  The port and current date stamp
 # is append to this file, and it is rolled every night at midnight
 
-Config LogFile	[file join /tmp log ]
+Config LogFile	[file join [::fileutil::tempdir] log ]
 
 # LogFlushMinutes - how frequently the log file is flushed to disk.
 # Use 0 to have each URL request cause a log flush.
@@ -183,7 +185,7 @@ Config SSL_CERTFILE	[file join [Config SSL_CADIR] server.pem]
 
 Config SSL_KEYFILE	[file join [Config SSL_CADIR] skey.pem]
 
-# USE_SSL2 - Allow the use of SSL version 2 
+# USE_SSL2 - Allow the use of SSL version 2
 # (You cannot get this with a "no patents" build of OpenSSL)
 
 Config USE_SSL2		1

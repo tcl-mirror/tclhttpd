@@ -27,7 +27,7 @@
     <dl>
       <dt>Auth</dt>
       <dd>The default webmaster password.
-	<p>If this is undefined, a new random password is created in /tmp/tclhttpd.default every time the server is restarted.  If it is defined, it is the plaintext default password for a user called webmaster, who has (by default) complete access to the Access Control Editor.</p>
+	<p>If this is undefined, a new random password is created in [::fileutil::tempdir]/tclhttpd.default every time the server is restarted.  If it is defined, it is the plaintext default password for a user called webmaster, who has (by default) complete access to the Access Control Editor.</p>
 	<p>After boostrapping, it would be advisable to set this value to ""</p>
       </dd>
       <dt>AuthUserFile</dt>
