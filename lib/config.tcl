@@ -62,6 +62,7 @@ proc config::init {config aname} {
     } else {
       interp expose $i file
     }
+    $i alias fileutil::tempdir ::fileutil::tempdir 
 
     # Create the slave's Config array, then source the config script
 
