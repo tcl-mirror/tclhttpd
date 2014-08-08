@@ -21,8 +21,6 @@
 # the root of your document tree.  This is conditional so you
 # can run from the source distribution or after doing "make install"
 
-package require fileutil
-
 foreach d [list \
 	[file join [Config home] ../htdocs] \
 	[file join [Config home] ../tclhttpd/htdocs]] {

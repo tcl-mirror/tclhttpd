@@ -154,6 +154,7 @@ package require httpd 1.6
 package require httpd::version		;# For Version proc
 package require httpd::utils		;# For Stderr
 package require httpd::counter		;# For Count
+package require fileutil                ;# For tempdir support: needed on Windows
 
 package require httpd::config		;# for config::init
 config::init $Config(config) Config
