@@ -46,7 +46,9 @@ LimitCmd(ClientData data, Tcl_Interp *interp, int argc, char *argv[])
     }
     }
     /* bad, bad style, direct writing to interp->result */
-    sprintf(interp->result, "%d %d", limit.rlim_cur, limit.rlim_max);
+    sprintf(buf, "%d %d", limit.rlim_cur, limit.rlim_max);
+    Tcl_Obj *errStr=Tcl_NewStringObj(buf,-1);
+    Tcl_SetObjResult(interp,errStr);
     return TCL_OK;
 }
 
