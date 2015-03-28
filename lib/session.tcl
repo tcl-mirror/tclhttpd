@@ -1,11 +1,14 @@
-# session.tcl -- 
+ # session.tcl -- 
 # Session management support.
 #
 # A session is implemented as a safe slave interpreter that holds its state.
-# Creating a session with Session_Create returns a 4 character ID.
-# The idea is that form data will have either
-# session=new or session=XXXX
+#
+# Creating a session with Session_Create returns either a 4 character ID
+# (if MD5 is missing or Session(short) is true) or an unforgeable MD5
+# hash.
+#
 # Use Session_Match to find and/or create a session based on query data.
+#
 # Use Session_Destroy to delete one session, and Session_Reap to
 # clean up "old" sessions.
 #
@@ -372,9 +375,15 @@ proc SessionFetch {id} {
 
 # Find the correct session, and return the proper interp or error.
 # If the session is "new", then create a new one.
-# - query: The array containing the form and/or url query
-# - type:  The type of this session
+# - query:       The array containing the form and/or url query
+#    session:	Either an ID or "new".  
+#               an ID will return that ID to confirm that the session is valid
+#                 or will return an empty string if session is invalid.
+#               "new" will create a new session.
+#    sequence:   Sequence position if this is a sequential set of pages.
+# - type:        The type of this session
 # - error_name:  The variable holding the error result (if any)
+# - isSafe:      True to create a safe interp, false for normal.
 
 proc Session_Match {querylist {type {}} {error_name error} {isSafe 1}} {
     upvar $error_name error

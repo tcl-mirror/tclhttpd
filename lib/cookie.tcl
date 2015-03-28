@@ -113,6 +113,7 @@ proc Cookie_GetSock {sock cookie} {
 #@a		-path	Path restriction
 #@a		-domain	domain restriction
 #@a		-expires	Time restriction
+#@a		-secure Append "secure" to cookie attributes
 #@r	a formatted cookie
 
 proc Cookie_Make {args} {

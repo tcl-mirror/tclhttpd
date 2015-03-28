@@ -126,7 +126,11 @@ proc Url_Dispatch {sock} {
 	# Invoke the URL domain handler either in this main thread
 	# or in a worker thread
 
-	if {$Url(thread,$prefix)} {
+        if {[info exists Url(dispatch,$prefix)]} {
+	    Count UrlCustom
+	    $Url(dispatch,$prefix) $sock \
+		    [concat $Url(command,$prefix) [list $sock $suffix]]
+	} elseif {$Url(thread,$prefix)} {
 	    Count UrlToThread
 	    Thread_Dispatch $sock \
 		    [concat $Url(command,$prefix) [list $sock $suffix]]
@@ -374,6 +378,9 @@ if {![info exist Url(accessHooks)]} {
 #			To indicate we should pre-read POST data.
 #		-filter cmd
 #			A command filter to be run on dynamic content
+#               -dispatch cmd
+#                       A custom dispatcher.  The receiving command should
+#                       accept arguments similar to Thread_Dispatch.
 
 proc Url_PrefixInstall {prefix command args} {
     global Url
@@ -430,9 +437,12 @@ proc Url_PrefixInstall {prefix command args} {
 		-filter {
 		    set Url(filter,$prefix) $v
 		}
+		-dispatch {
+		    set Url(dispatch,$prefix) $v
+		}
 		default {
 		    return -code error "Unknown option $n.\
-                        Must be -thread, -callback, -filter or -readpost"
+                        Must be -callback, -dispatch, -filter, -readpost or -thread"
 		}
 	    }
 	}

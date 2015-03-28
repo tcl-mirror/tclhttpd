@@ -21,8 +21,13 @@ package require httpd::utils	;# file protect_text
 # No useful default, but we define procedures so the vanilla server
 # can start up.
 
+# Config(mail) seems to be an old usage 
+# MailServer is defined in tclhttpd.rc
+
 if {[info exists Config(mail)] && ($Config(mail) != {})} {
     set Mail(server) $Config(mail)
+} elseif {[config::cget MailServer] ne ""} {
+    set Mail(server) [config::cget MailServer]
 }
 
 package require smtp
