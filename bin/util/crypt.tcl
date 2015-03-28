@@ -7,7 +7,7 @@ exec expect "$0" ${1+"$@"}
 
 # Obviously, edit this to reference the appropriate crypt .so file
 #load /home/welch/cvs/tclhttpd/lib/Binaries/SunOS/5.6/crypt.so
-load /usr/lib/tclhttpd3.5.0/libcrypt1.0.so
+load /usr/lib/tclhttpd4.0.0/libcrypt1.0.so
 
 stty -echo
 send_user "Enter a word to crypt: "

@@ -1,5 +1,8 @@
 What's new in TclHttpd
 
+4.0
+This version targets the new TclOO features backed into 8.6.
+
 3.5
 
 Mostly this is a cleanup of the code and web pages to cleanly

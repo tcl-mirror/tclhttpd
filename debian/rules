@@ -2,7 +2,7 @@
 # -*- makefile -*-
 # debian/rules with debhelper for tclhttpd
 
-export VERSION=3.5.1
+export VERSION=4.0.0
 export BUILD=$(CURDIR)/debian/tclhttpd/
 
 # Uncomment this to turn on verbose mode.

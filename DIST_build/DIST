@@ -2,16 +2,16 @@
 #
 # Create a super distribution of TclHttpd, Tcl, Tcllib, and Thread
 
-WELCH=/panfs/panwest/home/welch
+WELCH=/opt/odie/sandbox/tclhttpd
 
-HTTPD_VERSION=3.5.1
-HTTPD_TAG=tclhttpd-3-5-rel-1
-HTTPD_TAG=HEAD
+HTTPD_VERSION=4.0.0
+HTTPD_TAG=tclhttpd-4-0
+HTTPD_TAG=4_0
 WIN_VERSION=351
 DISTDIR=${WELCH}/dist
 SUPER_DIR=${DISTDIR}/tclhttpd${HTTPD_VERSION}-dist
 
-TCL_VERSION=8.4.5
+TCL_VERSION=8.6.4
 TCL_DIST=${DISTDIR}/tcl${TCL_VERSION}-src.tar.gz
 
 TCLLIB_VERSION=1.6
@@ -36,10 +36,15 @@ cd ${SCRATCH}
 echo "*** Checkout tclhttpd ${HTTPD_VERSION} ***"
 
 rm -rf ${SCRATCH}/tclhttpd${HTTPD_VERSION}
-cvs -d welch@cvs.sourceforge.net:/cvsroot/tclhttpd checkout -r ${HTTPD_TAG} tclhttpd 
-#(cd tclhttpd ; cvs -d welch@cvs.sourceforge.net:/cvsroot/tclpro checkout config)
-mv tclhttpd tclhttpd${HTTPD_VERSION}
-chmod -R a+r tclhttpd${HTTPD_VERSION}
+mkdir -p ${SCRATCH}/tclhttpd${HTTPD_VERSION}
+chmod -R a+r ${SCRATCH}/tclhttpd${HTTPD_VERSION}
+
+fossil clone http://core.tcl.tk/tclhttpd /opt/odie/download/tclhttpd.fos
+cd ${SCRATCH}/tclhttpd${HTTPD_VERSION}
+fossil open /opt/odie/download/tclhttpd.fos ${HTTPD_TAG}
+
+cd ${SCRATCH}
+
 chmod a+x tclhttpd${HTTPD_VERSION}/bin/httpd.tcl
 chmod a-x tclhttpd${HTTPD_VERSION}/bin/httpdthread.tcl
 chmod a+x tclhttpd${HTTPD_VERSION}/htdocs/cgi-bin/junk*

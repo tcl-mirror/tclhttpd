@@ -111,7 +111,7 @@ to the CGI process produces data.
 
 5. Starkit Distribution
 
-The tclhttpd3.5.0.kit file is a starkit that is used with the
+The tclhttpd4.0.0.kit file is a starkit that is used with the
 tclkit Tcl interpreter.  There is more information about Tclkit at
   http://wiki.tcl.tk/tclkit/
 but the basic idea is simple.  All you need is a tclkit binary

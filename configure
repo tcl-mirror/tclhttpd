@@ -2211,7 +2211,7 @@ PACKAGE=tclhttpd
 
 MAJOR_VERSION=4
 MINOR_VERSION=0
-PATCHLEVEL=".a0"
+PATCHLEVEL=".0"
 RELEASE=`grep Release: ${srcdir}/${PACKAGE}.spec | sed -e 's/Release: *//'`
 
 VERSION=${MAJOR_VERSION}.${MINOR_VERSION}${PATCHLEVEL}

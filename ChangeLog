@@ -1,3 +1,7 @@
+2015-03-28 Sean Woods <yoda@etoyoc.com>
+	* Started work on v4
+	* NOTE: Changes are now maintained in the fossil repo
+
 2005-04-26 Michael Thomas <wart@kobold.org>
         * bin/httpd.tcl:  Don't [fork] if we're in a threaded interpreter
           since [fork] doesn't play well with threads.

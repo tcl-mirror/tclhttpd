@@ -282,8 +282,8 @@ if {0} {
     }
     array set Digest$Httpd999(digest,nonce) [list last [clock clicks] nc [format %08d 1] opaque $Httpd999(digest,opaque) nonce $Httpd999(digest,nonce) realm testrealm@host.com qop auth,auth-int passwd "Circle Of Life"]
 
-    AuthParseHtaccess 999 /usr/lib/tclhttpd3.5.0/testdigest
-    if {[catch {Digest_Request 999 testrealm@host.com /usr/lib/tclhttpd3.5.0/testdigest}  DTest]} {
+    AuthParseHtaccess 999 /usr/lib/tclhttpd4.0.0/testdigest
+    if {[catch {Digest_Request 999 testrealm@host.com /usr/lib/tclhttpd4.0.0/testdigest}  DTest]} {
 	error "Digest test error"
     }
     if {$DTest != 1} {

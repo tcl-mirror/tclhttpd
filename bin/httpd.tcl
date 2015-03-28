@@ -63,7 +63,7 @@ set home [file join [pwd] $home]
 # 2. Standalone install - look for $home/../lib/tclhttpd $home/tcllib
 # 3. Tcl package install - look for $tcl_library/../tclhttpd
 
-set v 3.5.2
+set v 4.0.0
 
 if {[file exist [file join $home ../lib/httpd.tcl]]} {
     # Cases 1 and 2
