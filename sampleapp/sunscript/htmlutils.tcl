@@ -50,7 +50,7 @@ proc Body {args} {
     if {[info exists page(head)]} {
 	append html "[CloseTag]\n" ;# Should be HEAD
     }
-    append html [eval {OpenTag body} $args]\n
+    append html [OpenTag body {*}$args]\n
     return $html
 }
 

@@ -8,12 +8,11 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: compat.tcl,v 1.5 2003/04/04 04:24:49 coldstore Exp $
 
 package provide httpd::compat 3.3
 
 foreach {oldname newname} {
-    Doc_Cookie	Cookie_Get
+    Doc_Cookie	        Cookie_Get
     Doc_GetCookie	Cookie_Get
     Doc_SetCookie	Cookie_Set
     Doc_IsLinkToSelf	Url_IsLinkToSelf
@@ -28,7 +27,7 @@ foreach {oldname newname} {
     Doc_Dynamic		Template_Dynamic
     Doc_Subst		Subst_ReturnFile
     Doc_TemplateScope	Subst_Scope
-    Doc_SubstInstall		Subst_Install
+    Doc_SubstInstall    Subst_Install
 
     Url_Redirect	Redirect_Url
     Url_RedirectSelf	Redirect_UrlSelf

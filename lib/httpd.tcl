@@ -1141,9 +1141,8 @@ proc HttpdDoCallback {sock {errmsg {}}} {
 #	args	a list of header value ...
 
 proc Httpd_AddHeaders {sock args} {
-    upvar #0 Httpd$sock data
-
-    eval lappend data(headers) $args
+  upvar #0 Httpd$sock data
+  lappend data(headers) {*}$args
 }
 
 # Httpd_RemoveHeaders

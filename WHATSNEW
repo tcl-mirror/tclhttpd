@@ -1,7 +1,8 @@
 What's new in TclHttpd
 
 4.0
-This version targets the new TclOO features backed into 8.6.
+This version targets the new TclOO features backed into 8.6, as
+well as utilizing sqlite as a database backend.
 
 3.5
 

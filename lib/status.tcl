@@ -620,7 +620,7 @@ proc Status/text {args} {
 #	Returns HTML.
 
 proc Status/ {args} {
-    eval Status/all $args
+  Status/all {*}$args
 }
 
 # Status --
@@ -634,7 +634,7 @@ proc Status/ {args} {
 #	Returns HTML.
 
 proc Status {args} {
-    eval Status/all $args
+  Status/all {*}$args
 }
 
 proc Version {} {

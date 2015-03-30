@@ -621,7 +621,7 @@ proc Url_DecodeQuery {query args} {
     if {[info exist Url(sock)]} {
 	Url_ReadPost $Url(sock) query
     }
-    eval {Url_DecodeQueryOnly $query} $args
+    Url_DecodeQueryOnly $query {*}$args
 }
 
 # Url_QuerySetup --

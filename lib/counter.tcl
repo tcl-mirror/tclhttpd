@@ -101,18 +101,18 @@ proc CountName {instance tag} {
 }
 
 proc Counter_Reset {what args} {
-    eval {counter::reset $what} $args
+  counter::reset $what {*}$args
 }
 
 proc CountHist {what {delta 1}} {
-    counter::count $what $delta
+  counter::count $what $delta
 }
 
 proc CountStart {what instance} {
-    counter::start $what $instance
+  counter::start $what $instance
 }
 proc CountStop {what instance} {
-    counter::stop $what $instance
+  counter::stop $what $instance
 #    counter::stop $what $instance CountMsec
 }
 proc CountMsec {x} {

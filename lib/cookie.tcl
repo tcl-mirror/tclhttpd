@@ -157,7 +157,7 @@ proc Cookie_Make {args} {
 
 proc Cookie_Set {args} {
     global Cookie
-    lappend Cookie(set-cookie) [eval Cookie_Make $args]
+    lappend Cookie(set-cookie) [Cookie_Make {*}$args]
 }
 
 
@@ -171,6 +171,6 @@ proc Cookie_Set {args} {
 #@a		-path	Path restriction
 #@a		-domain	domain restriction
 proc Cookie_Unset {name args} {
-    Httpd_RemoveCookies [Httpd_CurrentSocket] $name
-    eval [list Cookie_Set -name $name -value "" -expires [clock format [clock scan "last year"] -format "%A, %d-%b-%Y %H:%M:%S GMT" -gmt 1]] $args
+  Httpd_RemoveCookies [Httpd_CurrentSocket] $name
+  Cookie_Set -name $name -value "" -expires [clock format [clock scan "last year"] -format "%A, %d-%b-%Y %H:%M:%S GMT" -gmt 1] {*}$args
 }

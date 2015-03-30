@@ -61,7 +61,7 @@ proc Doc_Root {args} {
     if {[llength $args] > 0} {
         set real [lindex $args 0]
 	set Doc(root) $real
-	eval [list Doc_AddRoot / $real] [lrange $args 1 end]
+	Doc_AddRoot / $real {*}[lrange $args 1 end]
         return
     }
     return $Doc(root)
@@ -83,7 +83,7 @@ proc Doc_Root {args} {
 
 proc Doc_AddRoot {virtual directory args} {
     Doc_RegisterRoot $virtual $directory
-    eval [list Url_PrefixInstall $virtual [list DocDomain $virtual $directory]] $args
+    Url_PrefixInstall $virtual [list DocDomain $virtual $directory] {*}$args
     Url_AccessInstall DocAccessHook
     return
 }

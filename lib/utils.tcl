@@ -73,37 +73,6 @@ proc Incr {varName {value 1}} {
     }
 }
 
-# Assign a set of variables from a list of values, a la TclX.
-# If there are more values than variables, they are returned.
-# If there are fewer values than variables, the variables get the empty string.
-
-proc lassign {valueList args} {
-    if {[llength $args] == 0} {
-	error "wrong # args: lassign list varname ?varname..?"
-    }
-    if {[llength $valueList] == 0} {
-	foreach x $args {
-	    uplevel 1 [list set $x {}]
-	}
-    } else {
-	uplevel 1 [list foreach $args $valueList {break}]
-    }
-    return [lrange $valueList [llength $args] end]
-}
-# Assign a set of variables from a list of values.
-# If there are more values than variables, they are ignored.
-# If there are fewer values than variables, the variables get the empty string.
-
-proc lassign-brent {varList value} {
-    if {[string length $value] == 0} {
-	foreach var $varList {
-	    uplevel [list set $var {}]
-	}
-    } else {
-	uplevel [list foreach $varList $value { break }]
-    }
-}
-
 # Delete a list item by value.  Returns 1 if the item was present, else 0
 
 proc ldelete {varList value} {
@@ -118,28 +87,6 @@ proc ldelete {varList value} {
     } else {
 	return 0
     }
-}
-
-# Recursive make directory
-
-if {$tcl_version < 7.6} {
-proc makedir { pathname } {
-    if {[file isdirectory $pathname]} {
-	return [glob $pathname]	;# Handle ~
-    } elseif {[file exists $pathname]} {
-	error "Non-directory $pathname already exists."
-    } else {
-	# Recurse to create intermediate directories
-	set parent [makedir [file dirname $pathname]]
-	set pathname [file join $parent [file tail $pathname]]
-	exec mkdir $pathname
-	return $pathname
-    }
-}
-} else {
-proc makedir { pathname } {
-    file mkdir $pathname
-}
 }
 
 # see if an option matches a list of options
@@ -337,7 +284,7 @@ proc Scrolled_Listbox { f args } {
 			[list grid $f.xscroll -row 1 -column 0 -sticky we]] \
 		-yscrollcommand [list Scroll_Set $f.yscroll \
 			[list grid $f.yscroll -row 0 -column 1 -sticky ns]]
-	eval {$f.list configure} $args
+	$f.list configure {*}$args
 	scrollbar $f.xscroll -orient horizontal \
 		-command [list $f.list xview]
 	scrollbar $f.yscroll -orient vertical \
