@@ -65,7 +65,7 @@ set home [file join [pwd] $home]
 
 set v 4.0.0
 
-if {[file exist [file join $home ../modules/tclhttpd/httpd.tcl]]} {
+if {[file exist [file join $home ../modules/httpd/httpd.tcl]]} {
     # Cases 1 and 2
     set Config(lib) [file join $home ../modules]
 } elseif {[file exist [file join $home ../lib/tclhttpd$v]]} {

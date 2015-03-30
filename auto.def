@@ -1,0 +1,360 @@
+# Created by migrate-autoconf - fix items marked XXX
+
+use cc cc-shared odie
+
+options {
+	with-serverroot:DIR  =>  {}
+}
+array set ::project {
+  name tclhttpd
+  major_version 4
+  minor_version 0
+  patchlevel .alpha
+  fedora_release 0.fdr.1
+}
+
+foreach {field value} [array get ::project] {
+  define PKG_[string toupper $field] $value
+}
+
+#--------------------------------------------------------------------
+# __CHANGE__
+# Set your package name and version numbers here.  The NODOT_VERSION is
+# required for constructing the library name on systems that don't like
+# dots in library names (Windows).  The VERSION variable is used on the
+# other systems.
+#--------------------------------------------------------------------
+
+# XXX PACKAGE=tclhttpd
+
+# XXX MAJOR_VERSION=4
+# XXX MINOR_VERSION=0
+# XXX PATCHLEVEL=".0"
+# XXX RELEASE=`grep Release: ${srcdir}/${PACKAGE}.spec | sed -e 's/Release: *//'`
+
+# XXX VERSION=${MAJOR_VERSION}.${MINOR_VERSION}${PATCHLEVEL}
+# XXX NODOT_VERSION=${MAJOR_VERSION}${MINOR_VERSION}
+# XXX WIN_VERSION=`echo ${VERSION} | sed -e 's/\.//g'`
+
+# XXX TCL_VERSION=8.6.4
+# XXX TCLLIB_VERSION=1.6
+# XXX THREAD_VERSION=2.6
+
+# We build two minor packages for the crypt and limit C extensions
+
+# XXX CRYPT_PACKAGE=crypt
+# XXX CRYPT_VERSION="1.0"
+# XXX WIN_CRYPT_VERSION=`echo ${CRYPT_VERSION} | sed -e 's/\.//g'`
+# XXX LIMIT_PACKAGE=limit
+# XXX LIMIT_VERSION="1.0"
+# XXX WIN_LIMIT_VERSION=`echo ${LIMIT_VERSION} | sed -e 's/\.//g'`
+
+if {[opt-val with-serverroot] ne {}} {
+	set withval [opt-val with-serverroot]
+	# XXX SERVER_ROOT=${withval}
+} else {
+	# XXX SERVER_ROOT='$(prefix)/$(PACKAGE)'
+}
+
+# XXX AC_SUBST PACKAGE
+# XXX AC_SUBST SERVER_ROOT
+# XXX AC_SUBST VERSION
+# XXX AC_SUBST RELEASE
+# XXX AC_SUBST WIN_VERSION
+
+# XXX AC_SUBST CRYPT_PACKAGE
+# XXX AC_SUBST CRYPT_VERSION
+# XXX AC_SUBST WIN_CRYPT_VERSION
+
+# XXX AC_SUBST LIMIT_PACKAGE
+# XXX AC_SUBST LIMIT_VERSION
+# XXX AC_SUBST WIN_LIMIT_VERSION
+
+# XXX AC_SUBST TCL_VERSION
+# XXX AC_SUBST TCLLIB_VERSION
+
+# XXX AC_SUBST THREAD_VERSION
+
+#--------------------------------------------------------------------
+# We put this here so that you can compile with -DVERSION="1.2" to
+# encode the package version directly into the source files.
+#--------------------------------------------------------------------
+
+# XXX eval AC_DEFINE_UNQUOTED(VERSION, "${VERSION}")
+
+#--------------------------------------------------------------------
+# Check whether --enable-gcc or --disable-gcc was given.  Do this
+# before AC_CYGWIN is called so the compiler can
+# be fully tested by built-in autoconf tools.
+# This macro also calls AC_PROG_CC to set the compiler if --enable-gcc
+# was not used.
+#--------------------------------------------------------------------
+
+# XXX SC_ENABLE_GCC
+cc-check-progs install
+
+#--------------------------------------------------------------------
+# Checks to see if the make program sets the $MAKE variable.
+#--------------------------------------------------------------------
+
+
+#--------------------------------------------------------------------
+# Find ranlib
+#--------------------------------------------------------------------
+
+cc-check-tools ranlib
+
+#--------------------------------------------------------------------
+# This macro performs additional compiler tests.
+#--------------------------------------------------------------------
+
+# XXX AC_CYGWIN
+
+#--------------------------------------------------------------------
+# Determines the correct binary file extension (.o, .obj, .exe etc.)
+#--------------------------------------------------------------------
+
+# XXX AC_OBJEXT
+
+#--------------------------------------------------------------------
+# "cygpath" is used on windows to generate native path names for include
+# files.
+# These variables should only be used with the compiler and linker since
+# they generate native path names.
+#
+# Unix tclConfig.sh points SRC_DIR at the top-level directory of
+# the Tcl sources, while the Windows tclConfig.sh points SRC_DIR at
+# the win subdirectory.  Hence the different usages of SRC_DIR below.
+#
+# This must be done before calling SC_PUBLIC_TCL_HEADERS
+#--------------------------------------------------------------------
+
+# XXX case "`uname -s`" in
+# XXX *win32* | *WIN32* | *CYGWIN_NT* | *CYGWIN_98* | *CYGWIN_95*)
+# XXX CYGPATH="cygpath -w"
+# XXX RELPATH=".. .. bin"
+# XXX ;;
+# XXX *)
+# XXX CYGPATH=echo
+# XXX RELPATH=..
+# XXX ;;
+# XXX esac
+
+# XXX AC_SUBST CYGPATH
+# XXX AC_SUBST RELPATH
+
+#--------------------------------------------------------------------
+# Load the tclConfig.sh file
+#--------------------------------------------------------------------
+
+# XXX SC_PATH_TCLCONFIG
+# XXX SC_LOAD_TCLCONFIG
+
+#--------------------------------------------------------------------
+# __CHANGE__
+# Choose which headers you need.  Extension authors should try very
+# hard to only rely on the Tcl public header files.  Internal headers
+# contain private data structures and are subject to change without
+# notice.
+# This MUST be called after SC_PATH_TCLCONFIG/SC_LOAD_TCLCONFIG
+#--------------------------------------------------------------------
+
+# XXX SC_PUBLIC_TCL_HEADERS
+#SC_PRIVATE_TCL_HEADERS
+
+#--------------------------------------------------------------------
+# __CHANGE__
+# A few miscellaneous platform-specific items:
+#
+# Define a special symbol for Windows (BUILD_exampleA in this case) so
+# that we create the export library with the dll.  See sha1.h on how
+# to use this.
+#
+# Windows creates a few extra files that need to be cleaned up.
+# You can add more files to clean if your extension creates any extra
+# files.
+#
+# Define any extra compiler flags in the PACKAGE_CFLAGS variable.
+# These will be appended to the current set of compiler flags for
+# your system.
+#--------------------------------------------------------------------
+
+# XXX case "`uname -s`" in
+# XXX *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
+# XXX AC_DEFINE_UNQUOTED BUILD_${PACKAGE}
+# XXX CLEANFILES="*.lib *.dll *.exp *.ilk *.pdb vc50.pch"
+# XXX AC_SUBST CLEANFILES
+# XXX ;;
+# XXX *)
+# XXX CLEANFILES=
+# XXX ;;
+# XXX esac
+
+#--------------------------------------------------------------------
+# Check whether --enable-threads or --disable-threads was given.
+# So far only Tcl responds to this one.
+#--------------------------------------------------------------------
+
+# XXX SC_ENABLE_THREADS
+
+#--------------------------------------------------------------------
+# The statement below defines a collection of symbols related to
+# building as a shared library instead of a static library.
+#--------------------------------------------------------------------
+
+# XXX SC_ENABLE_SHARED
+
+#--------------------------------------------------------------------
+# This macro figures out what flags to use with the compiler/linker
+# when building shared/static debug/optimized objects.  This information
+# is all taken from the tclConfig.sh file.
+#--------------------------------------------------------------------
+
+# XXX CFLAGS_DEBUG=${TCL_CFLAGS_DEBUG}
+# XXX CFLAGS_OPTIMIZE=${TCL_CFLAGS_OPTIMIZE}
+# XXX LDFLAGS_DEBUG=${TCL_LDFLAGS_DEBUG}
+# XXX LDFLAGS_OPTIMIZE=${TCL_LDFLAGS_OPTIMIZE}
+# XXX SHLIB_LD=${TCL_SHLIB_LD}
+# XXX STLIB_LD=${TCL_STLIB_LD}
+# XXX SHLIB_CFLAGS=${TCL_SHLIB_CFLAGS}
+
+# XXX AC_SUBST CFLAGS_DEBUG
+# XXX AC_SUBST CFLAGS_OPTIMIZE
+# XXX AC_SUBST STLIB_LD
+# XXX AC_SUBST SHLIB_LD
+# XXX AC_SUBST SHLIB_CFLAGS
+# XXX AC_SUBST SHLIB_LDFLAGS
+
+#--------------------------------------------------------------------
+# Find out where we should get the crypt() function
+#--------------------------------------------------------------------
+
+if {![cc-check-functions crypt]} {
+}
+
+# XXX AC_SUBST CRYPT_OBJS
+
+#--------------------------------------------------------------------
+# Find out if we have the sys/resource.h header file for building
+# the limit extension
+#--------------------------------------------------------------------
+
+if {[cc-check-includes sys/resource.h]} {
+	# XXX BUILD_LIMIT=1
+} else {
+	# XXX BUILD_LIMIT=0
+}
+
+# XXX if test "${BUILD_LIMIT}" = 1 ; then
+# XXX LIMIT_EXTENSION='$(limit_LIB_FILE)'
+# XXX else
+# XXX LIMIT_EXTENSION=''
+# XXX fi
+
+# XXX AC_SUBST LIMIT_EXTENSION
+# XXX AC_SUBST BUILD_LIMIT
+
+#--------------------------------------------------------------------
+# Set the default compiler switches based on the --enable-symbols
+# option.
+#--------------------------------------------------------------------
+
+# XXX SC_ENABLE_SYMBOLS
+
+# XXX if test "${SHARED_BUILD}" = "1" ; then
+# XXX CFLAGS='${CFLAGS_DEFAULT} ${CFLAGS_WARNING} ${SHLIB_CFLAGS}'
+# XXX else
+# XXX CFLAGS='${CFLAGS_DEFAULT} ${CFLAGS_WARNING}'
+# XXX fi
+
+#--------------------------------------------------------------------
+# Everyone should be linking against the Tcl stub library.  If you
+# can't for some reason, remove this definition.  If you aren't using
+# stubs, you also need to modify the SHLIB_LD_LIBS setting below to
+# link against the non-stubbed Tcl library.
+#--------------------------------------------------------------------
+
+define USE_TCL_STUBS
+
+#--------------------------------------------------------------------
+# This macro generates a line to use when building a library.  It
+# depends on values set by the SC_ENABLE_SHARED, SC_ENABLE_SYMBOLS,
+# and SC_LOAD_TCLCONFIG macros above.
+#--------------------------------------------------------------------
+
+# XXX SC_MAKE_LIB
+
+#--------------------------------------------------------------------
+# eval these two values to dereference the ${DBGX} variable.
+#--------------------------------------------------------------------
+
+# XXX eval "SHARED_LIB_SUFFIX=${TCL_SHARED_LIB_SUFFIX}"
+# XXX eval "UNSHARED_LIB_SUFFIX=${TCL_UNSHARED_LIB_SUFFIX}"
+
+#--------------------------------------------------------------------
+# Shared libraries and static libraries have different names.
+#--------------------------------------------------------------------
+
+# XXX case "`uname -s`" in
+# XXX *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
+# XXX if test "${SHARED_BUILD}" = "1" ; then
+# XXX SHLIB_LD_LIBS="\"`cygpath -w ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\" ${TCL_SHLIB_LD_LIBS}"
+# XXX eval "${PACKAGE}_LIB_FILE=${PACKAGE}${SHARED_LIB_SUFFIX}"
+# XXX eval "${CRYPT_PACKAGE}_LIB_FILE=${CRYPT_PACKAGE}${SHARED_LIB_SUFFIX}"
+# XXX eval "${LIMIT_PACKAGE}_LIB_FILE=${LIMIT_PACKAGE}${SHARED_LIB_SUFFIX}"
+# XXX RANLIB=:
+# XXX else
+# XXX eval "${PACKAGE}_LIB_FILE=${PACKAGE}${UNSHARED_LIB_SUFFIX}"
+# XXX eval "${CRYPT_PACKAGE}_LIB_FILE=${CRYPT_PACKAGE}${UNSHARED_LIB_SUFFIX}"
+# XXX eval "${LIMIT_PACKAGE}_LIB_FILE=${LIMIT_PACKAGE}${UNSHARED_LIB_SUFFIX}"
+# XXX fi
+# XXX ;;
+# XXX *)
+# XXX if test "${SHARED_BUILD}" = "1" ; then
+# XXX SHLIB_LD_LIBS="${TCL_STUB_LIB_SPEC} ${CRYPT_LIB}"
+# XXX eval "${PACKAGE}_LIB_FILE=lib${PACKAGE}${SHARED_LIB_SUFFIX}"
+# XXX eval "${CRYPT_PACKAGE}_LIB_FILE=lib${CRYPT_PACKAGE}${SHARED_LIB_SUFFIX}"
+# XXX eval "${LIMIT_PACKAGE}_LIB_FILE=lib${LIMIT_PACKAGE}${SHARED_LIB_SUFFIX}"
+# XXX RANLIB=:
+# XXX else
+# XXX eval "${PACKAGE}_LIB_FILE=lib${PACKAGE}${UNSHARED_LIB_SUFFIX}"
+# XXX eval "${CRYPT_PACKAGE}_LIB_FILE=lib${CRYPT_PACKAGE}${UNSHARED_LIB_SUFFIX}"
+# XXX eval "${LIMIT_PACKAGE}_LIB_FILE=lib${LIMIT_PACKAGE}${UNSHARED_LIB_SUFFIX}"
+# XXX fi
+# XXX ;;
+# XXX esac
+
+# XXX AC_SUBST SHARED_BUILD
+
+#--------------------------------------------------------------------
+# __CHANGE__
+# Change the name from exampeA_LIB_FILE to match your package name.
+#--------------------------------------------------------------------
+
+# Hack to map from the TclHttpd version number that got automatically
+# sucked up by the SHARED_LIB_SUFFIX macro
+# XXX crypt_LIB_FILE=`echo $crypt_LIB_FILE | sed -e "s/$VERSION/$CRYPT_VERSION/" | sed -e "s/$NODOT_VERSION/$WIN_CRYPT_VERSION/"`
+# XXX limit_LIB_FILE=`echo $limit_LIB_FILE | sed -e "s/$VERSION/$LIMIT_VERSION/" | sed -e "s/$NODOT_VERSION/$WIN_LIMIT_VERSION/"`
+# XXX AC_SUBST limit_LIB_FILE
+# XXX AC_SUBST crypt_LIB_FILE
+# XXX AC_SUBST SHLIB_LD_LIBS
+
+#--------------------------------------------------------------------
+# Find tclsh so that we can run pkg_mkIndex to generate the pkgIndex.tcl
+# file during the install process.  Don't run the TCLSH_PROG through
+# ${CYGPATH} because it's being used directly by make.
+# Require that we use a tclsh shell version 8.2 or later since earlier
+# versions have bugs in the pkg_mkIndex routine.
+#--------------------------------------------------------------------
+
+# XXX SC_PROG_TCLSH
+
+#--------------------------------------------------------------------
+# Finally, substitute all of the various values into the Makefile.
+#--------------------------------------------------------------------
+
+make-template Makefile.in
+make-template  crypt_pkgIndex.tcl.in
+make-template  limit_pkgIndex.tcl.in
+make-template  $::project(name).spec.in
+

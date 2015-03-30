@@ -1,8 +1,8 @@
 %define contentdir /usr/tclhttpd
 Summary: Extensible Web+Application server written in Tcl.
 Name: tclhttpd
-Version: 4.0.0
-Release: 0.fdr.1
+Version: @PKG_MAJOR_VERSION@.@PKG_MINOR_VERSION@@PKG_PATCHLEVEL@
+Release: @PKG_FEDORA_RELEASE@
 Epoch: 0
 License: BSD
 Group: System Environment/Daemons

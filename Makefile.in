@@ -118,8 +118,8 @@ DESTDIR =
 
 pkgdatadir = $(datadir)/@PACKAGE@@VERSION@
 pkglibdir = $(libdir)/@PACKAGE@@VERSION@
-cryptlibdir = $(libdir)/@CRYPT_PACKAGE@@CRYPT_VERSION@
-limitlibdir = $(libdir)/@LIMIT_PACKAGE@@LIMIT_VERSION@
+cryptlibdir = $(libdir)/@PACKAGE@@VERSION@/@CRYPT_PACKAGE@
+limitlibdir = $(libdir)/@PACKAGE@@VERSION@/@LIMIT_PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@@VERSION@
 SERVER_ROOT = @SERVER_ROOT@
 htdocsdir = $(SERVER_ROOT)/htdocs
@@ -309,12 +309,11 @@ install-binaries:
 	@echo "Installing sample boot script"
 	$(INSTALL_DATA) $(srcdir)/bin/tclhttpd.etc.init $(DESTDIR)$(SERVER_ROOT)
 
+
 install-libraries: install-custom installdirs 
 	@echo "Installing script files in $(DESTDIR)$(pkglibdir)"
-	@for i in $(srcdir)/lib/*.tcl ; do \
-	    $(INSTALL_SCRIPT) $$i $(DESTDIR)$(pkglibdir) ; \
-	done;
-	$(INSTALL_SCRIPT) $(srcdir)/lib/mime.types $(DESTDIR)$(pkglibdir)
+	$(TCLSH_PROG) autosetup/install.tcl $(srcdir)/modules $(DESTDIR)$(pkglibdir)
+	$(INSTALL_SCRIPT) $(srcdir)/modules/httpd/mime.types $(DESTDIR)$(pkglibdir)
 
 install-htdocs:
 	@echo "Creating htdocs tree in $(htdocsdir)"
@@ -378,12 +377,12 @@ install-lib-binaries: installdirs
 	        $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$p; \
 		lib=`basename $$p|sed -e 's/.[^.]*$$//'`.lib; \
 		if test -f $$lib; then \
-		    echo " $(INSTALL_PROGRAM) $$lib $(DESTDIR)$(libdir)/$$lib"; \
-	            $(INSTALL_PROGRAM) $$lib $(DESTDIR)$(libdir)/$$lib; \
+		    echo " $(INSTALL_PROGRAM) $$lib $(DESTDIR)$(pkglibdir)/$$lib"; \
+	            $(INSTALL_PROGRAM) $$lib $(DESTDIR)$(pkglibdir)/$$lib; \
 		fi; \
 	    else \
-		echo " $(INSTALL_PROGRAM) $$p $(DESTDIR)$(libdir)/$$p"; \
-	        $(INSTALL_PROGRAM) $$p $(DESTDIR)$(libdir)/$$p; \
+		echo " $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibdir)/$$p"; \
+	        $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibdir)/$$p; \
 	    fi; \
 	  else :; fi; \
 	done
