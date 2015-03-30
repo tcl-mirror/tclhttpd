@@ -49,7 +49,7 @@ exec tclsh "$0" ${1+"$@"}
 
 set home [string trimright [file dirname [info script]] ./]
 set home [file normalize [file join [pwd] $home ..]]
-set Config(lib) [file join $home .. lib]
+set Config(lib) [file join $home .. modules]
 
 # Auto-detect the configuration
 # 1. Development - look for $home/../lib and $home/../../tcllib/modules

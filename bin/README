@@ -8,7 +8,7 @@ httpd.tcl	Sample startup script.  To run a server on port 8015, just do:
 		where this means use up to 5 worker threads.
 
 		httpd.tcl depends on both tclhttpd.rc and httpdthread.tcl,
-		as well as the packages in ../lib
+		as well as the packages in ../modules/tclhttpd
 
 tclhttpd.rc	Configuration file with default port, etc.
 httpdthread.tcl	Per-thread initialization.

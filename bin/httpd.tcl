@@ -23,7 +23,7 @@
 #		split out into its own file because it is loaded by
 #		by each thread: the main thread and any worker threads
 #		created by the "-threads N" command line argument.
-# ../lib	The script library that contains most of the TclHttpd
+# ../modules/tclhttpd	The script library that contains most of the TclHttpd
 #		implementation
 # ../tcllib	The Standard Tcl Library.  TclHttpd ships with a copy
 #		of this library because it depends on it.  If you already
@@ -65,9 +65,9 @@ set home [file join [pwd] $home]
 
 set v 4.0.0
 
-if {[file exist [file join $home ../lib/httpd.tcl]]} {
+if {[file exist [file join $home ../modules/tclhttpd/httpd.tcl]]} {
     # Cases 1 and 2
-    set Config(lib) [file join $home ../lib]
+    set Config(lib) [file join $home ../modules]
 } elseif {[file exist [file join $home ../lib/tclhttpd$v]]} {
     # Standard package install (e.g., TclPro)
     # By going one level up, we make all Tcl packages available.
