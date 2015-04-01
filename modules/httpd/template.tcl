@@ -20,9 +20,12 @@ package require httpd::mtype	;# Mtype
 package require httpd::subst	;# Subst_File
 package require httpd::url	;# Url_Decode Url_DecodeQuery Url_ReadPost
 package require httpd::utils	;# file file_latest lappendOnce
+package require Markdown ;# Markdown handler
 
 # Set the file extension for templates
-
+if {![info exists Template(mdExt)]} {
+    set Template(mdExt) .md
+}
 if {![info exists Template(tmlExt)]} {
     set Template(tmlExt) .tml
 }
@@ -373,6 +376,10 @@ proc TemplateCheck {sock template htmlfile} {
     set dirs [lrange [file split [file dirname $template]] $rlen end]
 	
     foreach libdir [Doc_GetPath $sock $template] {
+	set mdfile [file join $libdir $Template(mdExt)]
+	if {[file exists $mdfile] && ([file mtime $mdfile] > $mtime)} {
+	    return 1
+	}
 	set libfile [file join $libdir $Template(tmlExt)]
 	if {[file exists $libfile] && ([file mtime $libfile] > $mtime)} {
 	    return 1
@@ -417,44 +424,79 @@ proc Template_Try {sock path suffix} {
     if {!$Template(checkTemplates)} {
 	return 0
     }
+    
+    set mdtemplate ${path}$Template(mdExt)
+    if {[file exists $mdtemplate]} {
+      # we have a matching template and extension for path
+      # See if the cached result is up-to-date
+      set dynamic 0
+      if {[TemplateCheck $sock $mdtemplate $path]} {
+        # Template file is newer than its cached version
+        # Do the subst and cache the result in the .html file
+        # We set a provisional type based on the file extension, but
+        # the template processing can override that
+        set data(contentType) text/html
+        set fin [open $mdtemplate r]
+        set mdtxt [read $fin]
+        close $fin
+        
+        set html [::Markdown::convert $mdtxt]
 
-    set template ${path}$Template(tmlExt)
+        if {$dynamic} {
+          # return the data directly
+          Httpd_ReturnData $sock $data(contentType) $html
+          return 1
+        } else {
+          set fout [open $path w]
+          puts $fout $html
+          close $fout
+          # we have generated a cached file from the template.
+          # leave it to caller to return newly generated file
+          return 0
+        }
+      } else {
+        # cache file is newer
+        return 0
+      }
+    } else {
+      set template ${path}$Template(tmlExt)
 
-    if {![file exists $template]} {
-	# special case, x.tml generates x.html
-	set template [file root $path]$Template(tmlExt)
-	
-	# ensure request was for *.htm[l]? and .tml exists
-	if {![regexp $Template(htmlMatch) [file extension $path]]
-	    || ![file exists $template]} {
-	    # no template found
-	    return 0
-	}
-    }
-
-    # we have a matching template and extension for path
-    # See if the cached result is up-to-date
-    if {[TemplateCheck $sock $template $path]} {
-	# Template file is newer than its cached version
-	# Do the subst and cache the result in the .html file
+      if {![file exists $template]} {
+  	# special case, x.tml generates x.html
+  	set template [file root $path]$Template(tmlExt)
+  	
+  	# ensure request was for *.htm[l]? and .tml exists
+  	if {![regexp $Template(htmlMatch) [file extension $path]]
+  	    || ![file exists $template]} {
+  	    # no template found
+  	    return 0
+  	}
+      }
+    
+      # we have a matching template and extension for path
+      # See if the cached result is up-to-date
+      if {[TemplateCheck $sock $template $path]} {
+        # Template file is newer than its cached version
+        # Do the subst and cache the result in the .html file
         # We set a provisional type based on the file extension, but
         # the template processing can override that
         set data(contentType) [Mtype $path]
-	set html [TemplateInstantiate $sock $template $path $suffix dynamic \
-		      $Template(templateInterp)]
+        set html [TemplateInstantiate $sock $template $path $suffix dynamic \
+                      $Template(templateInterp)]
 
-	if {$dynamic} {
-	    # return the data directly
-	    Httpd_ReturnData $sock $data(contentType) $html
-	    return 1
-	} else {
-	    # we have generated a cached file from the template.
-	    # leave it to caller to return newly generated file
-	    return 0
-	}
-    } else {
-	# cache file is newer
-	return 0
+        if {$dynamic} {
+          # return the data directly
+          Httpd_ReturnData $sock $data(contentType) $html
+          return 1
+        } else {
+          # we have generated a cached file from the template.
+          # leave it to caller to return newly generated file
+          return 0
+        }
+      } else {
+        # cache file is newer
+        return 0
+      }
     }
 }
 
