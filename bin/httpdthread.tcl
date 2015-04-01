@@ -33,12 +33,13 @@ package require httpd          	;# Protocol stack
 package require httpd::version	;# Version number
 package require httpd::url	;# URL dispatching
 package require httpd::mtype	;# Mime types
+package require httpd::bootstrap	;# Mime types
 
 # Search for mime.types either right in Config(lib), or down
 # one level in the installed tclhttpd subdirectory
-
 foreach path [list \
     [file join $Config(lib) mime.types] \
+    [file join $Config(lib) httpd mime.types] \
     [glob -nocomplain [file join $Config(lib) tclhttpd* mime.types]] \
     ] {
   if {[llength $path] > 0} {
@@ -49,6 +50,7 @@ foreach path [list \
     break
   }
 }
+
 package require httpd::counter	;# Statistics
 Counter_Init $Config(secs)
 package require httpd::utils	;# handy stuff like "lassign"

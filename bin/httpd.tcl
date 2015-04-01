@@ -81,7 +81,6 @@ if {![info exist Config(lib)]} {
 }
 # Put the library in front in case there is both the development
 # library and an installed library
-
 set auto_path [concat [list $Config(lib)] $auto_path]
 
 # Search around for the Standard Tcl Library
