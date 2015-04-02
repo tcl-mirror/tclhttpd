@@ -17,36 +17,19 @@ package require httpd::url	;# Url_PrefixInstall Url_PrefixRemove Url_QuerySetup
 package require httpd::utils	;# file iscommand
 package require TclOO
 
-oo::class create httpd.url {  
-  variable virtual
-  variable config
-  
-  constructor {virtual {localopts {}} args} {
-    my variable config
-    dict set config virtual $virtual
-    my configurelist $localopts
-    ::Url_PrefixInstall $virtual [namespace code {my httpdDirect}] {*}$args
-  }
+###
+# Seperate out the working bits so that Tao and TclOO can share
+# the same core functions
+###
+oo::class create httpd.meta {
   
   destructor {
     catch {::Url_PrefixRemove [my cget virtual]}
   }
   
-  method configurelist localopts {
-    my variable config
-    foreach {field value} $localopts {
-      dict set config $field $value
-    }
-  }
-  
-  method cget field {
-    my variable config
-    if {[dict exists $config $field]} {
-      return [dict get $config $field]
-    }
-    return {}
-  }
-  
+  method initialize {} {}
+
+
   # This calls out to the Tcl procedure named "$prefix$suffix",
   # with arguments taken from the form parameters.
   # Example:
@@ -85,20 +68,11 @@ oo::class create httpd.url {
   method httpdDirect {sock suffix} {
     global env
     upvar #0 Httpd$sock data
-    my variable config result cgidat
-    
-    array set result {
-      code 200
-      date  0
-      header {}
-      footer {}
-      body {}
-      content-type text/html
-    }
-    set result(sock) $sock
-    set result(datavar) ::Httpd$sock 
-    
+    my variable result
+    set prefix [my cget virtual]
+    my httpdSessionLoad $sock $prefix $suffix
     set cmd [my httpdMarshalArguments $sock $suffix]
+    ::Stderr $cmd
     # Eval the command.  Errors can be used to trigger redirects.
 
     if [catch $cmd] {
@@ -108,11 +82,7 @@ oo::class create httpd.url {
     }
     if {[string index $result(code) 0] in {0 2}} {
       # Normal reply
-      
-      # Save any return cookies which have been set.
-      # This works with the Doc_SetCookie procedure that populates
-      # the global cookie array.
-      ::Cookie_Save $sock
+      my httpdSessionSave $sock
     }
     switch $result(code) {
       401 {
@@ -139,6 +109,33 @@ oo::class create httpd.url {
     }
   }
   
+  method httpdSessionLoad {sock prefix suffix} {
+    my variable result
+    array set result {
+      code 200
+      date  0
+      header {}
+      footer {}
+      body {}
+      content-type text/html
+    }
+    set result(sock) $sock
+    set result(datavar) ::Httpd$sock 
+
+    # Set up the environment a-la CGI.
+    ::Cgi_SetEnv $sock $prefix$suffix [my varname env]
+    # Prepare an argument data from the query data.
+    ::Url_QuerySetup $sock
+    set result(query) [ncgi::nvlist]
+  }
+  
+  method httpdSessionSave sock {
+    # Save any return cookies which have been set.
+    # This works with the Doc_SetCookie procedure that populates
+    # the global cookie array.
+    ::Cookie_Save $sock 
+  }
+  
   #
   #	Use the url prefix, suffix, and cgi values (set with the
   #	ncgi package) to create a Tcl command line to invoke.
@@ -156,11 +153,6 @@ oo::class create httpd.url {
     my variable result
     set prefix [my cget virtual]
 
-    # Set up the environment a-la CGI.
-    ::Cgi_SetEnv $sock $prefix$suffix [my varname env]
-    # Prepare an argument data from the query data.
-    ::Url_QuerySetup $sock
-    set result(query) [ncgi::nvlist]
     if { $suffix in {/ {}} } {
       set method /html
     } else {
@@ -175,6 +167,16 @@ oo::class create httpd.url {
     return [list my $method]
   }
   
+  method reset {} {
+    my variable result
+    set result(body) {}
+  }
+  
+  method puts args {
+    my variable result
+    append result(body) {*}$args \n
+  }
+  
   method unknown {args} {
     if {[string range [lindex $args 0] 0 4] ne "/html"} {
       next {*}$args
@@ -182,7 +184,39 @@ oo::class create httpd.url {
     my variable result
     set result(code) 404
   }
+}
 
+
+###
+# Create a standalone class suitable for using in a pure tcloo
+# environment
+###
+oo::class create httpd.url {
+  superclass httpd.meta
+  
+  variable virtual
+  variable config
+  
+  constructor {virtual {localopts {}} args} {
+    my configurelist [list virtual $virtual {*}$localopts]
+    ::Url_PrefixInstall $virtual [namespace code {my httpdDirect}] {*}$args
+    my initialize
+  }
+  
+  method configurelist localopts {
+    my variable config
+    foreach {field value} $localopts {
+      dict set config $field $value
+    }
+  }
+  
+  method cget field {
+    my variable config
+    if {[dict exists $config $field]} {
+      return [dict get $config $field]
+    }
+    return {}
+  }
   
   ###
   # title: Implement html content at a toplevel
@@ -200,4 +234,3 @@ Hello World
     }
   }
 }
-

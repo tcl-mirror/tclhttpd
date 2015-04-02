@@ -4,7 +4,7 @@
 package provide httpd::md5hex 1.0
 catch {
     # for some reason pkg_mkIndex barfs on this ... hide it.
-    package require md5
+    package require md5 2
 
     # md5hex always returns a hex version of the md5 hash
 

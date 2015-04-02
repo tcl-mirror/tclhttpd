@@ -88,7 +88,7 @@ set auto_path [concat [list $Config(lib)] $auto_path]
 # Tcllib 1.6 has inconsistencies with md5 1.4.3 and 2.0.0,
 # and requiring 1.0 cures later conflicts with 2.0
 
-if {![catch {package require md5 1}]} {
+if {![catch {package require md5 2}]} {
     # Already available in environment
 } elseif {[file exist [file join $home ../tcllib]]} {
     lappend auto_path [file join $home ../tcllib]
