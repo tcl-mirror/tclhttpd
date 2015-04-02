@@ -1,7 +1,6 @@
 package provide tao 9.4.4
 package require sqlite3
 package require TclOO
-package require odie
 package require listutil 1.7
 
 ::namespace eval ::tao {}

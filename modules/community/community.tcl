@@ -331,7 +331,7 @@ insert into acl_grants (acl_name,userid,grant,right) VALUES ('default',NULL,1,'v
   
   method httpdHostName {} {
     my variable env
-    return [lindex [split [get env(HTTP_HOST) host] :] 0]
+    return [lindex [split [get env(HTTP_HOST)] :] 0]
   }
   
   method httpdSessionSave sock {
