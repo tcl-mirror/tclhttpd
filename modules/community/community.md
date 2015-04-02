@@ -12,7 +12,6 @@ Community uses the following internal packages:
 * tao from [tao](../tao/tao.md)
 * tao-sqlite [tao-sqlite](../tao-sqlite/tao-sqlite.md)
 
-
 ## Options
 
 * dbfile - Path to a file which stores the sqlite database for the community (default in-memory)
@@ -23,3 +22,4 @@ Community uses the following internal packages:
 Community objects (and their derived classes) contain an embedded sqlite
 database. This database can be accessed via that \<db\> method.
 
+## Methods
