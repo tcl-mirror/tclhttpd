@@ -8,5 +8,5 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded httpd::community 0.1 [list source [file join $dir community.tcl]]
-package ifneeded httpd::acl 0.1 [list source [file join $dir acl.tcl]]
+package ifneeded listutil 1.7 [list source [file join $dir lutils.tcl]]
+package ifneeded tao 9.4.4 [list source [file join $dir index.tcl]]

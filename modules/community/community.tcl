@@ -1,28 +1,16 @@
 ###
 # Facilities for user, group, and community management
 ###
-package require httpd::directoo
-package require sqlite3
 package require tao
+package require sqlite3
 package require tao-sqlite
 package require md5 2
 package require sha1 2
 
+package require httpd::taourl
 package require httpd::cookie	;# Cookie_GetSock Cookie_Make
 package require httpd::doc	;# Doc_Root
 package require httpd::utils	;# Stderr file iscommand randomx
-
-tao::class httpd.taourl {
-  superclass httpd.meta
-
-  property options_strict 0
-
-  constructor {virtual {localopts {}} args} {
-    my configurelist [list virtual $virtual {*}$localopts]
-    ::Url_PrefixInstall $virtual [namespace code {my httpdDirect}] {*}$args
-    my initialize
-  }
-}
 
 tao::class httpd.community {  
   superclass httpd.taourl taodb::yggdrasil
