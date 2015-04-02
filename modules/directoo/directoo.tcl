@@ -28,8 +28,26 @@ oo::class create httpd.meta {
   }
   
   method initialize {} {}
+  
+  method httpdCookieSet {field value {expire {}}} {
+    foreach host [my httpdHostName] {
+      if { $host eq "localhost" } { set host {} }
+      set cookie_args [list -name $field \
+        -value $value \
+        -domain $host \
+        -path [my cget virtual]]
+      if {[string is integer expire]} {
+        lappend cookie_args -expires [clock format [expr [clock seconds] + [set expire]] -format "%Y-%m-%d"]
+      }
+      ::Cookie_Set {*}$cookie_args
+    }
+  }
 
-
+  method httpdHostName {} {
+    my variable env
+    return [lindex [split [get env(HTTP_HOST)] :] 0]
+  }
+  
   # This calls out to the Tcl procedure named "$prefix$suffix",
   # with arguments taken from the form parameters.
   # Example:

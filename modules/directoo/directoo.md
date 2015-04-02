@@ -20,11 +20,11 @@ An array which contains the meta information and content about the page view in 
 
 ## Methods
 
-### configurelist *keyvaluelist*
+### method configurelist *keyvaluelist*
 
 Pass configuration items as a key/value list.
 
-### cget *field*
+### method cget *field*
 
 Retrieve the value of a configuration item
 
@@ -32,34 +32,48 @@ Retrieve the value of a configuration item
 
 A method which implements the default root page of the object.
 
-### initialize
+### method initialize
 
 A method which is called in the constructor, after the configuration items have been applied and the domain registered with Tclhttpd.
 
-### httpdDirect *sock* *suffix*
+### method httpdCookieSet *field* *value* *?expire?*
+
+Set a cookie named *field* and value of *value*. If *expire* is a postitive integer,
+it indicates how long (in seconds) this cookie should last.
+
+Note: Cookies destined for "localhost" are mapped to null so
+browser will honor them properly.
+
+### method httpdHostName
+
+Return the host name by which this page was accessed. Derived
+from env\(HTTP\_HOST\).
+
+
+### method httpdDirect *sock* *suffix*
 
 This method is the first called when resolving a dynamic page. It calles *httpdSessionLoad* to load the session, *httpdMarshalArguments* do compute the method to call. On error, this method returns an error message. On success it calls *httpdSessionSave*, before sending the resulting data out to TclHttpd via the *Httpd_ReturnData* or *Httpd_ReturnCacheableData* procs.
 
-### httpdMarshalArguments *sock* *suffix*
+### method httpdMarshalArguments *sock* *suffix*
 
 Calculate the command which will implement the current page view.
 
-### httpdSessionLoad *sock *prefix* *suffix*
+### method httpdSessionLoad *sock *prefix* *suffix*
 
 Initializes the *result* variable, and load session data from either cookies or the incoming GET/POST query. This method also calls the *Cgi_SetEnv* and *Url_QuerySetup* procs from Tclhttpd. Rather than populate the global *env* variable, Cgi_SetEnv populates the private *env* variable for this object.
 
-### httpdSessionSave *sock*
+### method httpdSessionSave *sock*
 
 Updates the current session, and writes cookies back to the browser.
 
-### reset
+### method reset
 
 Reset the current value of result(body)
 
-### puts
+### method puts
 
 Append to the value of result(body). Accepts multiple arguments. An implied \n is appended at the tail end.
 
-### unknown *args*
+### method unknown *args*
 
 Handler for unknown, incomplete, or invalid queries.
