@@ -4,9 +4,13 @@
 
 Community relies on the following external packages:
 
-* tao-sqlite from [taolib](http://fossil.etoyoc.com/fossil/taolib)
 * sha1 from [tcllib](http://core.tcl.tk/tcllib)
 * sqlite3 from [sqlite](http://www.sqlite.org)
+
+Community uses the following internal packages:
+
+* tao from [tao](../tao/tao.md)
+* tao-sqlite [tao-sqlite](../tao-sqlite/tao-sqlite.md)
 
 
 ## Options
@@ -16,4 +20,6 @@ Community relies on the following external packages:
 
 ## Attached Objects
 
-Community objects (and their derived classes) contain an embedded sqlite database. This database can be accessed via that \<db\> method.
+Community objects (and their derived classes) contain an embedded sqlite
+database. This database can be accessed via that \<db\> method.
+

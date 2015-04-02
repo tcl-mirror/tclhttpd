@@ -1,8 +1,4 @@
-#oo::define oo::class {
-#  destructor {
-#    ::tao::class_destroy [self]
-#  }
-#}
+
 if {[info command ::tao::metaclass] eq {}} {
   oo::class create ::tao::metaclass {
     superclass ::oo::class
