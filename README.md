@@ -1,6 +1,9 @@
 This HTTPD is written in Tcl and Tk.
-Written by Stephen Uhler and Brent Welch of Sun Microsystems Laboratory.
+Originally written by Stephen Uhler and Brent Welch of Sun Microsystems Laboratory.
 Brent is now at Panasas, Inc.
+
+Version 4 is maintained by Sean Woods of Test & Evaluation Solutions.
+
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
@@ -16,11 +19,11 @@ tclkit tclhttpd4.0.0.kit -help
 
 STANDARD QUICK START
 
-It requires Tcl 8.3 (or higher) and the Standard Tcl Library.
-This uses the cmdline, base64, ncgi, html, and counter
+It requires Tcl 8.6 (or higher) and the Standard Tcl Library.
+This uses the cmdline, base64, ncgi, html, sha1, and counter
 modules of the Standard Tcl Library. If you must, you
-can probably get by with Tcl 8.0 or later if you install
-the Standard Tcl Library.
+can probably get by with Tcl 8.5 or later if you install
+the Standard Tcl Library and the TclOO extension.
 
 The Web server runs under either tclsh or wish.
 With wish you get a simple GUI that shows some counters.
@@ -29,8 +32,8 @@ For a quick test that runs a server on port 8015, do
 UNIX:
 
 1) Test preconditions
-	Tcl interpreter: tclsh8.3, tclsh8.4, tclsh8.5, or tclkit (or wish)
-        tcllib 1.3 or higher
+	Tcl interpreter: tclsh8.5, tclsh8.6, tclkit (or wish)
+        tcllib 1.6 or higher
 Try
         tclsh (whatever version)
 	package require counter
@@ -39,7 +42,7 @@ Try
 server directly from this distribution directory without bothering
 to configure, make, and install it. e.g., 
 
-	tclsh8.4 bin/httpd.tcl -debug 1
+	tclsh8.6 bin/httpd.tcl -debug 1
 Windows and Macintosh:
 	Run wish or tclsh and source bin/httpd.tcl
 
@@ -51,7 +54,11 @@ This lets you set basic parameters like port number and server name.
 
 VERSION SUMMARY
 
-Version 4.0 adds support for Tcl 8.6, and integrates TclOO
+Version 4.0 adds support for Tcl 8.6, and integrates TclOO. The
+/lib directory has been moved to /modules, and the layout of modules
+now mirrors that of Tcllib. DirectOO adds the ability to implement
+dynamic content with TclOO objects. This version adds bootstrap
+and markdown support.
 
 Version 3.5 has various bug fixes, improvements to the docs, and
 some sample applications.  3.5.1 adds a mail client module.
@@ -146,25 +153,19 @@ There is a mailing list for users of the Tcl web server at
 SourceForge as part of the tclhttpd project.  Please sign
 up via the web site at www.sourceforge.net/projects/tclhttpd.
 If that is dead, send email to
-welch@acm.org
+yoda@etoyoc.com
 to find out the current location of the mailing list
 
 Send messages for the list to
 tclhttpd-users@lists.sourceforge.net
 
-Bugs and comments to the mailing list, or to <welch@acm.org>
+Bugs and comments to the mailing list, or to <yoda@etoyoc.com>
 Put "httpd" in the subject of the mail so I can sort it automatically.
 
 WWW
 
 The current URL for the distribution can be found in
-ftp://www.tcl.tk/pub/tcl/httpd/
+http://core.tcl.tk/tclhttpd
 
-There is documentation at
-http://www.beedub.com/tclhttpd/
-http://www.tcl.tk/software/tclhttpd/
-
-SourceForge
-
-http://www.sourceforge.net/projects/tclhttpd
-http://tclhttpd.sourceforge.net/
+This site contains the fossil source repository, as well as the
+most up to date documentation.
