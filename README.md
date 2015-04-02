@@ -4,15 +4,15 @@ Brent is now at Panasas, Inc.
 See the file "license.terms" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-Version: 3.5.1
+Version: 3.5.3
 Tue May 18 21:15:39 PDT 2004
 
 STARKIT QUICK START
 
-tclkit tclhttpd3.5.1.kit -port 80 -docRoot htmldir -library tcldir
+tclkit tclhttpd3.5.3.kit -port 80 -docRoot htmldir -library tcldir
 
 The server loads all the tcl sources in the library.  Try also
-tclkit tclhttpd3.5.1.kit -help
+tclkit tclhttpd3.5.3.kit -help
 
 STANDARD QUICK START
 

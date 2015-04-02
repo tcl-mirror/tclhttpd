@@ -1,13 +1,13 @@
 %define contentdir /usr/tclhttpd
 Summary: Extensible Web+Application server written in Tcl.
 Name: tclhttpd
-Version: 3.5.1
-Release: 0.fdr.5
+Version: 3.5.3
+Release: 0.fdr.1
 Epoch: 0
 License: BSD
 Group: System Environment/Daemons
 URL:            http://tclhttpd.sourceforge.net/
-Source0:        http://prdownloads.sourceforge.net/tclhttpd/tclhttpd3.5.1.tar.gz
+Source0:        http://prdownloads.sourceforge.net/tclhttpd/tclhttpd3.5.3.tar.gz
 Patch0:		tclhttpd_fedora.1.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: tcl tcllib expect
@@ -90,6 +90,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_sysconfdir}/init.d/tclhttpd
 
 %changelog
+* Thu Apr 2 2014 <yoda @ etoyoc.com> - 0:3.5.3-0.fdr.1
+- Packaged a final stable release of the 3.5 family before releasing 4.0
 * Sun Oct 24 2004 <wart at kobold.org> - 0:3.5.1-0.fdr.4
 - Change package group in the specfile.  Add tcllib to dependency list.
   Remove tclhttpd user during uninstall.

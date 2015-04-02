@@ -100,7 +100,7 @@ two through four again with different file names.
 
 To set up tclhttpd, copy the key and the cert into the
 tclhttpd/certs subdirectory.  E.g., 
-cd /usr/local/tclhttpd-3.5.1/
+cd /usr/local/tclhttpd-3.5.3/
 mkdir certs
 cp /usr/local/ssl/key1.pem certs/skey.pem
 cp /usr/local/ssl/demoCA/newcerts/02.pem certs/server.pem

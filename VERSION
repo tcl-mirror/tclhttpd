@@ -1,4 +1,4 @@
-Current version is 3.5.1
+Current version is 3.5.3
 This is reflected in the following files (sigh)
 
 README
@@ -7,7 +7,7 @@ configure.in
         The patchlevel is either "" or ".1" etc.
         *re-run* autoconf to update configure
 bin/httpd.tcl
-        set v 3.5.1
+        set v 3.5.3
         So it can look for the right tclhttpd library
 lib/version.tcl
         To set the right version string.  This does

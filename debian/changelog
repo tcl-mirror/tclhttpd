@@ -1,3 +1,9 @@
+tclhttpd (3.5.3) stable; urgency=low
+  * change version for release
+
+ -- Sean Woods <yoda@etoyoc.com>  Thu, 2 Apr 2015 06:01:02 +600
+
+
 tclhttpd (3.5.1-1) unstable; urgency=low
   * change version for release
 
