@@ -113,7 +113,7 @@ oo::class create httpd.meta {
       }
       302 {
         # Redirect.
-        ::Httpd_Redirect $result $sock
+        ::Httpd_Redirect $result(redirect) $sock
         return
       }
       default {
@@ -135,6 +135,7 @@ oo::class create httpd.meta {
       header {}
       footer {}
       body {}
+      redirect {}
       content-type text/html
     }
     set result(sock) $sock

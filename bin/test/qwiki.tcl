@@ -12,7 +12,7 @@ exec tclsh "$0" ${1+"$@"}
 set home [string trimright [file dirname [info script]] ./]
 set home [file normalize [file join [pwd] $home ..]]
 set Config(lib) [file join $home .. modules]
-
+set Config(dbfile) [file join $home test qwiki.sqlite]
 source $home/test/common.tcl
 
 ###
@@ -37,9 +37,7 @@ tao::class qwikitest {
 Hello World!
 <p>
     }
-    if {[info exists result(userid)]} {
-      append body "Logged in as user: $result(userid)<br>"
-    }
+    append body "Logged in as user: [dict getnull $result(session) username]<br>"
     if {[info exists result(sessionid)]} {
       append body "Logged with session: $result(sessionid)<br>"
     }
@@ -53,6 +51,8 @@ Try the following links:
       deadurl  {Page that generates a 505 error}
       suburl   {Valid Suburl}
       missing  {Non-existent url}
+      login    {Log In}
+      logout   {Log Out}
     } {
       append body "<li><a href=$prefix/$url>$url</a> - $comment</li>"
     }
@@ -113,7 +113,7 @@ Not Found
   }
 }
 
-qwikitest create HOME /home {db {}}
+qwikitest create HOME /home [list dbfile [Config dbfile]]
 
 vwait forever
 if 0 {

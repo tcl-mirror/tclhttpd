@@ -418,3 +418,10 @@ makeproc lintersect {list value} {
     return false
 }
 
+makeproc cat filename {
+  set fin [open $filename r]
+  set dat [read $fin]
+  close $fin
+  return $dat
+}
+

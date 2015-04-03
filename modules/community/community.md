@@ -40,7 +40,7 @@ Adds the following functions to the database:
 * uuid\_generate() - Generates sha1 UUIDs on demand
 * sha1() - Returns the SHA1 hash of the input
 
-### accessTypes
+### aclAccessTypes
 
 Returns a list of all possible rights.
 
