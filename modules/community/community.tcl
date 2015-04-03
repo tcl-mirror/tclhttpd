@@ -12,6 +12,7 @@ package require httpd::cookie	;# Cookie_GetSock Cookie_Make
 package require httpd::doc	;# Doc_Root
 package require httpd::utils	;# Stderr file iscommand randomx
 package require httpd::jshash   ;# Javascript password hashes
+package require httpd::bootstrap
 
 tao::class httpd.community {  
   superclass httpd.taourl taodb::yggdrasil
@@ -371,21 +372,25 @@ insert into acl_grants (acl_name,userid,grant,right) VALUES ('default',NULL,1,'v
   
   method pageHeader {} {
     return {
-<HTML><BODY>
+<HTML>
+<HEAD>
+    <TITLE>@TITLE@</TITLE>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+</HEAD>
+<BODY>
     }
   }
   
   method pageFooter {} {
     return {
+<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/bootstrap/js/jquery.min.js"></script>
 </BODY></HTML>
     }
   }
 
   method /html/logout {} {
     my variable result
-    
-    my puts [my pageHeader]
-    my puts "You have been logged out"
     set sesid $result(sessionid)
     my <db> eval {
 update session set userid='local.anonymous' where sesid=:sesid;
@@ -393,8 +398,8 @@ delete from session_property where sesid=:sesid;
 }
     dict set result(session) username anonymous
     dict set result(session) userid local.anonymous
-
-    my puts [my pageFooter]
+    set result(message) {You have been logged out}
+    my /html/login
   }
   
   method /html/login {} {
@@ -404,8 +409,11 @@ delete from session_property where sesid=:sesid;
     my puts <html>
     my puts {
   <head>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/bootstrap/js/jquery.min.js"></script>
     <TITLE>Log In</TITLE>
-    <script type="text/javascript" src="/jshash/sha1.js"></script>
+    <script type="text/javascript" src="/jshash/sha1-min.js"></script>
     <script type="text/javascript">  
 function login() {
   
@@ -423,6 +431,12 @@ function login() {
     }    
     my puts {
   <body>
+    }
+    set msg [get result(message)]
+    if { $msg ne {} } {
+      my puts "<pre><font color=ÓredÓ face=Ósans-serifÓ size=Ó1Ó>$msg</font></pre><hr>"
+    }
+    my puts {
 <table>
 <form action="authenticate" method="post" id="finalform">
 <tr><th>Username:</th><td><input name="uid" id="uid" /></td></tr>
@@ -445,21 +459,13 @@ function login() {
 
   method /html/authenticate {} {
     my variable result
-    my reset
-    my puts [my pageHeader]
-
-    my puts "sesid: $result(sessionid)<br>"    
     foreach {field value} $result(query) {
       if {$field eq "uid"} {
         set username $value
-        my puts "Username: $value<br>"
         foreach {field value} $result(query) {
           if {$field eq "hash"} {
-            my puts "Hash: $value<br>"
             set passhash [my <db> one {select password from users where username=:username}]
             set realhash [::sha1::sha1 -hex "$result(sessionid)$passhash"]
-            my puts "Passhash: $passhash<br>"
-            my puts "Realhash: $realhash<br>"
             if { $realhash eq $value } {
               set userid [my <db> one {select username from users where username=:username}]
               my <db> eval {update session set userid=:userid where sesid=:result(sessionid)}
@@ -481,8 +487,8 @@ You are now being logged in. You will be redirected in a moment.
         }
       }
     }
-    puts "Password or Username was incorrect or invalid."
-    my puts [my pageFooter]
+    set result(message) {Password or Username was incorrect or invalid.}
+    my /html/login
   }
 }
 

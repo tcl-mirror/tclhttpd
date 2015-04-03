@@ -90,7 +90,6 @@ oo::class create httpd.meta {
     set prefix [my cget virtual]
     my httpdSessionLoad $sock $prefix $suffix
     set cmd [my httpdMarshalArguments $sock $suffix]
-    ::Stderr $cmd
     # Eval the command.  Errors can be used to trigger redirects.
 
     if [catch $cmd] {
@@ -117,10 +116,11 @@ oo::class create httpd.meta {
         return
       }
       default {
+        set body [string map [list @TITLE@ $result(title)] $result(body)]
         if {$result(date)} {
-          ::Httpd_ReturnCacheableData $sock $result(content-type) $result(body) $result(date) $result(code)
+          ::Httpd_ReturnCacheableData $sock $result(content-type) $body $result(date) $result(code)
         } else {
-          ::Httpd_ReturnData $sock $result(content-type) $result(body) $result(code)
+          ::Httpd_ReturnData $sock $result(content-type) $body $result(code)
         }
         return
       }
@@ -132,8 +132,7 @@ oo::class create httpd.meta {
     array set result {
       code 200
       date  0
-      header {}
-      footer {}
+      title {}
       body {}
       redirect {}
       content-type text/html
@@ -242,14 +241,33 @@ oo::class create httpd.url {
   ###
   method /html {} {
     my variable result
-    array set result {
-      code 200
-      body {
-<HTML><BODY>
+    set result(title) {Welcome!}
+    my reset
+    my puts [my pageHeader]
+    my puts {
 Hello World
-</BODY></HTML>
-}
-      content-type text/html
+    }
+    my puts [my pageFooter]
+  }
+  
+
+  method pageHeader {} {
+    return {
+<HTML>
+<HEAD>
+    <TITLE>@TITLE@</TITLE>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+</HEAD>
+<BODY>
     }
   }
+  
+  method pageFooter {} {
+    return {
+<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/bootstrap/js/jquery.min.js"></script>
+</BODY></HTML>
+    }
+  }
+
 }
