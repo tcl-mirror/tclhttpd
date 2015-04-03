@@ -12,7 +12,7 @@ exec tclsh "$0" ${1+"$@"}
 set home [string trimright [file dirname [info script]] ./]
 set home [file normalize [file join [pwd] $home ..]]
 set Config(lib) [file join $home .. modules]
-
+set Config(dbfile) [file join $home test qwiki.sqlite]
 source $home/test/common.tcl
 
 ###
@@ -28,22 +28,19 @@ tao::class qwikitest {
   ###
   method /html {} {
     my variable result
-    array set result {
-      code 200
-      type text/html
-    }
-    set body {
-<HTML><BODY>
+    my reset
+    set result(title) {Welcome to Qwiki!}
+
+    my puts [my pageHeader]
+    my puts {
 Hello World!
 <p>
     }
-    if {[info exists result(userid)]} {
-      append body "Logged in as user: $result(userid)<br>"
-    }
+    my puts "Logged in as user: [dict getnull $result(session) username]<br>"
     if {[info exists result(sessionid)]} {
-      append body "Logged with session: $result(sessionid)<br>"
+      my puts "Logged with session: $result(sessionid)<br>"
     }
-    append body {
+    my puts {
 Try the following links:
 <ul>
     }
@@ -53,14 +50,15 @@ Try the following links:
       deadurl  {Page that generates a 505 error}
       suburl   {Valid Suburl}
       missing  {Non-existent url}
+      login    {Log In}
+      logout   {Log Out}
     } {
-      append body "<li><a href=$prefix/$url>$url</a> - $comment</li>"
+      my puts "<li><a href=$prefix/$url>$url</a> - $comment</li>"
     }
-    append body {
+    my puts {
 </ul>
 </BODY></HTML>
 }
-    set result(body) $body
   }
 
   method /html/errorurl {} {
@@ -69,15 +67,13 @@ Try the following links:
 
   method /html/deadurl {} {
     my variable result
-    array set result {
-      code 501
-      body {
-<HTML><BODY>
+    my reset
+    set result(code) 501
+    my puts [my pageHeader]
+    my puts {
 I threw an error this way
-</BODY></HTML>
-}
-      content-type text/html
     }
+    my puts [my pageFooter]
   }
 
   ###
@@ -85,15 +81,12 @@ I threw an error this way
   ###
   method /html/suburl {} {
     my variable result
-    array set result {
-      code 200
-      body {
-<HTML><BODY>
-Sub Url
-</BODY></HTML>
-}
-      type text/html
+    my reset
+    my puts [my pageHeader]
+    my puts {
+This is a suburl!
     }
+    my puts [my pageFooter]
   }
 
   ###
@@ -101,19 +94,17 @@ Sub Url
   ###
   method /html/default {} {
     my variable result
-    array set result {
-      code 404
-      body {
-<HTML><BODY>
+    my reset
+    set result(code) 404
+    my puts [my pageHeader]
+    my puts {
 Not Found
-</BODY></HTML>
-}
-      type text/html
     }
+    my puts [my pageFooter]
   }
 }
 
-qwikitest create HOME /home {db {}}
+qwikitest create HOME /home [list dbfile [Config dbfile]]
 
 vwait forever
 if 0 {

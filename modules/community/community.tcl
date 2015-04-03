@@ -11,18 +11,31 @@ package require httpd::taourl
 package require httpd::cookie	;# Cookie_GetSock Cookie_Make
 package require httpd::doc	;# Doc_Root
 package require httpd::utils	;# Stderr file iscommand randomx
+package require httpd::jshash   ;# Javascript password hashes
+package require httpd::bootstrap
 
 tao::class httpd.community {  
   superclass httpd.taourl taodb::yggdrasil
   
   option virtual {}
   option dbfile {}
+  option community-id {}
+
+  set dir [file dirname [file normalize [info script]]]
+  foreach jsfile [glob -nocomplain [file join $dir *.js]] {
+    property js [file tail $jsfile] [cat $jsfile]
+  }
 
   method initialize {} {
     if {[my cget dbfile] eq {}} {
       my configure dbfile :memory:
     }
     my Database_Attach [my cget dbfile]
+    my configurelist [my <db> eval {select name,value from config}]
+    if {[my cget community-id] eq {}} {
+      my configure community-id [::tao::uuid_generate]
+    }
+    my variable config
   }
 
   ###
@@ -161,7 +174,9 @@ UNIQUE (acl_name,userid,right)
 );
 
 --- POPULATE WITH DATA ---
-insert into users(userid,username,password) VALUES ('local.webmaster','webmaster',sha1('local.webmaster'||'password'));
+insert into config(name,value) VALUES ('community-id',uuid_generate());
+
+insert into users(userid,username,password) VALUES ('local.webmaster','webmaster',sha1((select value from config where name='community-id')||'password'));
 insert into users(userid,username,password) VALUES ('local.anonymous','anonymous','');
 
 insert into groups(groupid,groupname) VALUES ('local.wheel','wheel');
@@ -181,12 +196,12 @@ insert into acl_grants (acl_name,userid,grant,right) VALUES ('default',NULL,1,'v
     my <db> function sha1    {::sha1::sha1 -hex}
   }
 
-  method accessTypes {} {
-    set accessTypes {admin edit view}
+  method aclAccessTypes {} {
+    set aclAccessTypes {admin edit view}
     foreach type [my <db> eval "select distinct right from acl_grants order by right"] {
-        logicset add accessTypes $type
+        logicset add aclAccessTypes $type
     }     
-    return $accessTypes    
+    return $aclAccessTypes    
   }
 
   method aclRights {aclname userid} {
@@ -220,7 +235,7 @@ insert into acl_grants (acl_name,userid,grant,right) VALUES ('default',NULL,1,'v
           }
       } else {
         if { $right eq "all" } {
-          logicset add rights {*}[my accessTypes]
+          logicset add rights {*}[my aclAccessTypes]
         } else {
           logicset add rights $right
         }
@@ -240,7 +255,7 @@ insert into acl_grants (acl_name,userid,grant,right) VALUES ('default',NULL,1,'v
             }
         } else {
           if { $right eq "all" } {
-            logicset add rights {*}[my accessTypes]
+            logicset add rights {*}[my aclAccessTypes]
           } else {
             logicset add rights $right
           }
@@ -250,7 +265,6 @@ insert into acl_grants (acl_name,userid,grant,right) VALUES ('default',NULL,1,'v
     return $rights
   }
   
-
   method httpdSessionLoad {sock prefix suffix} {
     my variable result
     array set result {
@@ -300,7 +314,8 @@ insert into acl_grants (acl_name,userid,grant,right) VALUES ('default',NULL,1,'v
       }
     }
     if {![info exists result(userid)]} {
-      set result(userid) [my <db> one {select userid from users where name='anonymous'}]
+      set result(userid) local.anonymous
+      dict set result(session) username anonymous
     }
     set expdate  [expr {14*86400}]
     set expires [expr {[clock seconds]+$expdate}]]
@@ -312,28 +327,9 @@ insert into acl_grants (acl_name,userid,grant,right) VALUES ('default',NULL,1,'v
     } else {
       my <db> eval {update session set expires=:expires where sesid=:sesid;}
     }
-    my cookieSet session $result(sessionid) $expdate
+    my httpdCookieSet session $result(sessionid) $expdate
   }
-  
-  method cookieSet {field value {expire {}}} {
-    foreach host [my httpdHostName] {
-      if { $host eq "localhost" } { set host {} }
-      set cookie_args [list -name $field \
-        -value $value \
-        -domain $host \
-        -path [my cget virtual]]
-      if {[string is integer expire]} {
-        lappend cookie_args -expires [clock format [expr [clock seconds] + [set expire]] -format "%Y-%m-%d"]
-      }
-      ::Cookie_Set {*}$cookie_args
-    }
-  }
-  
-  method httpdHostName {} {
-    my variable env
-    return [lindex [split [get env(HTTP_HOST)] :] 0]
-  }
-  
+    
   method httpdSessionSave sock {
     # Save any return cookies which have been set.
     # This works with the Doc_SetCookie procedure that populates
@@ -372,6 +368,127 @@ insert into acl_grants (acl_name,userid,grant,right) VALUES ('default',NULL,1,'v
       }
       my <db> eval "COMMIT"
     }
+  }
+  
+  method pageHeader {} {
+    return {
+<HTML>
+<HEAD>
+    <TITLE>@TITLE@</TITLE>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+</HEAD>
+<BODY>
+    }
+  }
+  
+  method pageFooter {} {
+    return {
+<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/bootstrap/js/jquery.min.js"></script>
+</BODY></HTML>
+    }
+  }
+
+  method /html/logout {} {
+    my variable result
+    set sesid $result(sessionid)
+    my <db> eval {
+update session set userid='local.anonymous' where sesid=:sesid;
+delete from session_property where sesid=:sesid;
+}
+    dict set result(session) username anonymous
+    dict set result(session) userid local.anonymous
+    set result(message) {You have been logged out}
+    my /html/login
+  }
+  
+  method /html/login {} {
+    my variable result
+    
+    my reset
+    my puts <html>
+    my puts {
+  <head>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/bootstrap/js/jquery.min.js"></script>
+    <TITLE>Log In</TITLE>
+    <script type="text/javascript" src="/jshash/sha1-min.js"></script>
+    <script type="text/javascript">  
+function login() {
+  
+    var p = hex_sha1(document.getElementById('key').value+document.getElementById('pass').value);  
+    var k = document.getElementById('sesid').value;  
+
+    var h = hex_sha1(k+p);  
+    var hash = document.getElementById('hash');  
+    hash.value = h;
+    var f = document.getElementById('finalform');  
+    f.submit();  
+}  
+    </script>
+  </head>
+    }    
+    my puts {
+  <body>
+    }
+    set msg [get result(message)]
+    if { $msg ne {} } {
+      my puts "<pre><font color=ÓredÓ face=Ósans-serifÓ size=Ó1Ó>$msg</font></pre><hr>"
+    }
+    my puts {
+<table>
+<form action="authenticate" method="post" id="finalform">
+<tr><th>Username:</th><td><input name="uid" id="uid" /></td></tr>
+<input type="hidden" name="hash" id="hash" />  
+</form>
+    }
+    my puts {<form action="javascript:login()" method="post" >}
+    my puts "<input type=\"hidden\" id=\"key\" value=\"[my cget community-id]\" />"  
+    my puts "<input type=\"hidden\" id=\"sesid\" value=\"$result(sessionid)\" />"  
+    my puts {
+<tr><th>Password:</th><td><input type="password" id="pass" /></td></tr>
+<tr><th>&nbsp</th></th><td><input type="submit" value="Log In" /></td></tr>
+</table>
+    </form>  
+
+  </body>
+    }
+    my puts </html>
+  }
+
+  method /html/authenticate {} {
+    my variable result
+    foreach {field value} $result(query) {
+      if {$field eq "uid"} {
+        set username $value
+        foreach {field value} $result(query) {
+          if {$field eq "hash"} {
+            set passhash [my <db> one {select password from users where username=:username}]
+            set realhash [::sha1::sha1 -hex "$result(sessionid)$passhash"]
+            if { $realhash eq $value } {
+              set userid [my <db> one {select username from users where username=:username}]
+              my <db> eval {update session set userid=:userid where sesid=:result(sessionid)}
+              dict set result(session) username $username
+              dict set result(session) userid $userid
+
+              set root [my cget virtual]
+              my puts "<HTML><HEAD><META HTTP-EQUIV=\"Refresh\" CONTENT=\"1; URL=$root\"></HEAD>"
+              my puts {
+<BODY>
+You are now being logged in. You will be redirected in a moment.
+<p>
+              }
+              my puts "<A href=\$root\>Home...</a>"
+              my puts </BODY></HTML>
+              return
+            }
+          }
+        }
+      }
+    }
+    set result(message) {Password or Username was incorrect or invalid.}
+    my /html/login
   }
 }
 
