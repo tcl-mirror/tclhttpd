@@ -35,11 +35,6 @@ proc ::tao::load_path {path {ordered_files {}}} {
 ###
 proc ::tao::script_path {} {
   set path [file dirname [file normalize [info script]]]
-  if {$::tcl_platform(platform) eq "windows"} {
-    if {[string index $path 1] eq ":"} {
-      set path [string range $path 2 end]
-    }
-  }
   return $path
 
 }

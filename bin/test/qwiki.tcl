@@ -12,7 +12,7 @@ exec tclsh "$0" ${1+"$@"}
 set home [string trimright [file dirname [info script]] ./]
 set home [file normalize [file join [pwd] $home ..]]
 set Config(lib) [file join $home .. modules]
-set Config(dbfile) [file join $home test qwiki.sqlite]
+set Config(MainDatabaseFile) [file join $home test qwiki.sqlite]
 source $home/test/common.tcl
 
 ###
@@ -26,21 +26,17 @@ tao::class qwikitest {
   ###
   # title: Implement html content at a toplevel
   ###
-  method /html {} {
-    my variable result
-    my reset
-    set result(title) {Welcome to Qwiki!}
+  method /html resultObj {
+    $resultObj configure title {Welcome to Qwiki!}
 
-    my puts [my pageHeader]
-    my puts {
+    $resultObj puts [my pageHeader]
+    $resultObj puts {
 Hello World!
 <p>
     }
-    my puts "Logged in as user: [dict getnull $result(session) username]<br>"
-    if {[info exists result(sessionid)]} {
-      my puts "Logged with session: $result(sessionid)<br>"
-    }
-    my puts {
+    $resultObj puts "Logged in as user: [$resultObj session get username]<br>"
+    $resultObj puts "Logged with session: [$resultObj cget sessionid]<br>"
+    $resultObj puts {
 Try the following links:
 <ul>
     }
@@ -53,58 +49,52 @@ Try the following links:
       login    {Log In}
       logout   {Log Out}
     } {
-      my puts "<li><a href=$prefix/$url>$url</a> - $comment</li>"
+      $resultObj puts "<li><a href=$prefix/$url>$url</a> - $comment</li>"
     }
-    my puts {
-</ul>
-</BODY></HTML>
-}
+    $resultObj puts {</ul>}
+    $resultObj puts [my pageFooter]
   }
 
-  method /html/errorurl {} {
+  method /html/errorurl resultObj {
     error "Die Yuppie Scum!"
   }
 
-  method /html/deadurl {} {
-    my variable result
-    my reset
-    set result(code) 501
-    my puts [my pageHeader]
-    my puts {
+  method /html/deadurl resultObj {
+    $resultObj configure title {Page Error!}
+    $resultObj configure code 501
+    $resultObj puts [my pageHeader]
+    $resultObj puts {
 I threw an error this way
     }
-    my puts [my pageFooter]
+    $resultObj puts [my pageFooter]
   }
 
   ###
   # title: Implement html content at a toplevel
   ###
-  method /html/suburl {} {
-    my variable result
-    my reset
-    my puts [my pageHeader]
-    my puts {
-This is a suburl!
-    }
-    my puts [my pageFooter]
+  method /html/suburl resultObj {
+    $resultObj configure title {Sub Url!}
+    $resultObj puts [my pageHeader]
+    $resultObj puts {Sub Url}
+    $resultObj puts "<p><a href=\"[my cget virtual]\">Back</a>"
+    $resultObj puts [my pageFooter]
   }
 
   ###
   # title: Implement html content at a toplevel
   ###
-  method /html/default {} {
-    my variable result
-    my reset
-    set result(code) 404
-    my puts [my pageHeader]
-    my puts {
-Not Found
-    }
-    my puts [my pageFooter]
+  method /html/default resultObj {
+    $resultObj configure title {Not Found}
+    $resultObj configure code 404
+    $resultObj puts [my pageHeader]
+    $resultObj puts "The page: [$resultObj cgi get REQUEST_URI] coult not be cound"
+    $resultObj puts "<p><a href=\"[my cget virtual]\">Back</a>"
+    $resultObj puts [my pageFooter]
   }
 }
 
-qwikitest create HOME /home [list dbfile [Config dbfile]]
+qwikitest create HOME /home [list filename [Config MainDatabaseFile]]
+HOME task_daily
 
 vwait forever
 if 0 {

@@ -36,7 +36,7 @@ tao::class taodb::connection {
   # topic: 62f531b6d83adc8a10d15b27ec17b675
   ###
   method schema::create_sql {} {
-    set result {}
+    set result [my property schema create_sql]
     foreach {layer obj} [my layers] {
       set table [$obj property schema table]
       append result "-- BEGIN $table" \n
@@ -181,7 +181,79 @@ version
       my Database_Create
     }
   }
+  
+  ###
+  # Perform a daily backup of the database
+  ###
+  method Database_Backup {} {
+    set filename [my cget filename]
+    set now [clock seconds]
+    set today [clock format $now -format "%Y-%m-%d-%H"]
+    set path [file join [file dirname $filename] backups]
+    if {![file exists $path]} {
+      file mkdir $path
+    }
+    set bkuplink [file join $path [file rootname $filename].latest.sqlite]
+    file delete $bkuplink
+    set bkupfile [file join $path [file tail [file rootname $filename]].$today.sqlite]
+    my <db> backup $bkupfile
+    file link $bkuplink $bkupfile
+    
+    ###
+    # Keep:
+    # * one backup per hour for the past day
+    # * one backup per day for the past week
+    # * one per week for the past 2 months
+    # * one per month for the past year
+    # * one every 6 months for years beyond
+    ###
+    set day [expr {3600*24}]
+    set week [expr {$day*7}]
+    set month [expr {$week*4}]
+    set year [expr {$month*12}]
+    set halfyear [expr {$month*6}]    
 
+    
+    foreach file [glob -nocomplain [file join $path *.sqlite]] {
+      set age [expr {$now - [file mtime $file]}]
+      if { $age < $day } continue
+      if { $age < $week } {
+        lappend daily([expr {$age/$day}]) $age $file
+        continue
+      }
+      if { $age < ($month*2) } {
+        lappend weekly([expr {$age/$week}]) $age $file
+        continue
+      }
+      if { $age < ($halfyear*2) } {
+        lappend monthly([expr {$age/$month}]) $age $file
+        continue
+      }
+      lappend halfyearly([expr {$age/$halfyear}]) $age $file
+    }
+
+    foreach {bin backups} [array get daily] {
+      foreach {mtime file} [lrange [lsort -stride 2 -integer $backups] 2 end] {
+        file delete $file
+      }
+    }
+    foreach {bin backups} [array get weekly] {
+      foreach {mtime file} [lrange [lsort -stride 2 -integer $backups] 2 end] {
+        file delete $file
+      }
+    }
+    foreach {bin backups} [array get monthly] {
+      foreach {mtime file} [lrange [lsort -stride 2 -integer $backups] 2 end] {
+        file delete $file
+      }
+    }
+    foreach {bin backups} [array get halfyearly] {
+      foreach {mtime file} [lrange [lsort -stride 2 -integer $backups] 2 end] {
+        file delete $file
+      }
+    }
+  }
+  
   ###
   # topic: 6319133f765170f9949de3e3329bf07f
   # description:
@@ -190,7 +262,7 @@ version
   #    0 to allow Sqlite to wait and try again
   ###
   method Database_Busy {} {
-    update
+    after 1
     return 0
   }
 

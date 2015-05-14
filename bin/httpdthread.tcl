@@ -78,6 +78,32 @@ if {[info exists tk_version]} {
 # provides access to files on the local file systems.
 
 package require httpd::doc
+package require httpd::qwiki
+
+set mainconfig {}
+dict set mainconfig filename $Config(MainDatabaseFile)
+foreach {f v} [array get Config] {
+  dict set mainconfig $f $v
+}
+
+tao::class mainclass {
+  superclass httpd.qwiki
+  
+  option docRoot {}
+  
+  
+  ###
+  # The main page reads from the docroot
+  ###
+  method /html resultObj {
+    ###
+    # By default, act as a conduit to DocRoot
+    ###
+    ::DocDomain [my cget virtual] [my cget docRoot] [$resultObj sock] [$resultObj cget suffix]
+  }
+}
+
+mainclass create MAIN / $mainconfig
 
 # Doc_Root defines the top-level directory, or folder, for
 # your web-visible file structure.
@@ -174,10 +200,6 @@ if {[catch {
     catch {puts "No .htaccess support: $err"}
 }
 
-# This is currently broken
-if {0} {
-    package require httpd::safetcl	;# External process running safetcl shells
-}
 
 #######################################
 # Load Custom Code

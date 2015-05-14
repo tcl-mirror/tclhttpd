@@ -26,82 +26,63 @@ oo::class create ootest {
   ###
   # title: Implement html content at a toplevel
   ###
-  method /html {} {
-    my variable result
-    array set result {
-      code 200
-      type text/html
-    }
-    set body {
-<HTML><BODY>
+  method /html resultObj {
+    $resultObj configure title {Welcome!}
+    $resultObj puts [my pageHeader]
+    $resultObj puts {
 Hello World!
 <p>
 Try the following links:
 <ul>
     }
-    set prefix [my cget virtual]
+    set prefix [$resultObj cget url_prefix]
     foreach {url comment} {
       errorurl {Throw an internal error from Tcl}
       deadurl  {Page that generates a 505 error}
       suburl   {Valid Suburl}
       missing  {Non-existent url}
     } {
-      append body "<li><a href=$prefix/$url>$url</a> - $comment</li>"
+      $resultObj puts "<li><a href=$prefix/$url>$url</a> - $comment</li>"
     }
-    append body {
-</ul>
-</BODY></HTML>
-}
-    set result(body) $body
+    $resultObj puts {</ul>}
+    $resultObj puts [my pageFooter]
   }
 
-  method /html/errorurl {} {
+  method /html/errorurl resultObj {
     error "Die Yuppie Scum!"
   }
 
-  method /html/deadurl {} {
-    my variable result
-    array set result {
-      code 501
-      body {
-<HTML><BODY>
+  method /html/deadurl resultObj {
+    $resultObj configure title {Page Error!}
+    $resultObj configure code 501
+    $resultObj puts [my pageHeader]
+    $resultObj puts {
 I threw an error this way
-</BODY></HTML>
-}
-      content-type text/html
     }
+    $resultObj puts [my pageFooter]
   }
 
   ###
   # title: Implement html content at a toplevel
   ###
-  method /html/suburl {} {
-    my variable result
-    array set result {
-      code 200
-      body {
-<HTML><BODY>
-Sub Url
-</BODY></HTML>
-}
-      type text/html
-    }
+  method /html/suburl resultObj {
+    $resultObj configure title {Sub Url!}
+    $resultObj puts [my pageHeader]
+    $resultObj puts {Sub Url}
+    $resultObj puts "<p><a href=\"[my cget virtual]\">Back</a>"
+    $resultObj puts [my pageFooter]
   }
 
   ###
   # title: Implement html content at a toplevel
   ###
-  method /html/default {} {
-    my variable result
-    array set result {
-      code 404
-      body {
-<HTML><BODY>
-Not Found
-</BODY></HTML>
-}
-      type text/html
-    }
+  method /html/default resultObj {
+    $resultObj configure title {Not Found}
+    $resultObj configure code 404
+    $resultObj puts [my pageHeader]
+    $resultObj puts "The page: [$resultObj cgi get REQUEST_URI] coult not be cound}
+    $resultObj puts "<p><a href=\"[my cget virtual]\">Back</a>"
+    $resultObj puts [my pageFooter]
   }
 }
 ootest create OOTEST /ootest {}

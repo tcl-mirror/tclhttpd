@@ -10,7 +10,7 @@ tao::class taodb::yggdrasil {
   aliases tao.yggdrasil
   superclass taodb::module.sqlite
   
-  property create_sql {
+  property schema create_sql {
     CREATE TABLE if not exists config(
       name TEXT PRIMARY KEY,
       value ANY

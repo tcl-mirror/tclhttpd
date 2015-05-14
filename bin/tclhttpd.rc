@@ -225,3 +225,6 @@ Config SSL_CIPHERS	{}
 
 # Default mail servers - the smtp servers to use when sending mail
 Config MailServer {}
+
+# Default master index file location
+Config MainDatabaseFile [file join [Config home] httpd.sqlite]

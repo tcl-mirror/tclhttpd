@@ -9,8 +9,6 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
 
-package provide httpd::compat 3.3
-
 foreach {oldname newname} {
     Doc_Cookie	        Cookie_Get
     Doc_GetCookie	Cookie_Get

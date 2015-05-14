@@ -23,7 +23,7 @@ Community uses the following internal packages:
 
 ## Options
 
-* dbfile - Path to a file which stores the sqlite database for the community (default in-memory)
+* filename - Path to a file which stores the sqlite database for the community (default in-memory)
 * virtual - Root Url of this object.
 
 ## Attached Objects

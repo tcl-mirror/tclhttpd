@@ -11,25 +11,211 @@ package provide httpd::directoo 0.1
 
 package require httpd	;# Httpd_Redirect Httpd_ReturnData
 package require httpd::cgi	;# Cgi_SetEnv
-package require httpd::cookie	;# Cookie_Save
 package require httpd::doc_error	;# Doc_NotFound
 package require httpd::url	;# Url_PrefixInstall Url_PrefixRemove Url_QuerySetup
 package require httpd::utils	;# file iscommand
 package require TclOO
+package require tao
 
 ###
-# Seperate out the working bits so that Tao and TclOO can share
-# the same core functions
+# Class that represents a web page in
+# progress
 ###
-oo::class create httpd.meta {
+tao::class httpd.result {
+  superclass
   
-  destructor {
-    catch {::Url_PrefixRemove [my cget virtual]}
+  variable sock
+  variable data
+  variable state
+  variable body
+  variable cookie
+  variable query
+  variable session_data
+  
+  option cache-until {type unixtime default 0}
+  option url_prefix {}
+  option url_suffix {}
+  option code {
+    default 200
+  }
+  option content-type {
+    default text/html
+  }
+  option title {}
+  option redirect {}
+  
+  constructor {newsock prefix suffix} {
+    my variable sock cgienv
+    set sock $newsock
+    my configurelist [list url_prefix $prefix url_suffix $suffix]
+
+    # Set up the environment a-la CGI.
+    ::Cgi_SetEnv $sock $prefix$suffix [my varname cgienv]
+
+    # Prepare an argument data from the query data.
+    my variable query
+    ::Url_QuerySetup $sock
+    set query [ncgi::nvlist]
   }
   
-  method initialize {} {}
+  destructor {
+    
+  }
   
-  method httpdCookieSet {field value {expire {}}} {
+  method sock {} {
+    my variable sock
+    return $sock
+  }
+  
+  method data_get {field} {
+    my variable sock
+    upvar #0 Httpd$sock data
+    if {![info exists data($field)]} {
+      return {}
+    }
+    return $data(field)
+  }
+  
+  method cgi {method args} {
+    my variable cgienv
+    switch $method {
+      dump {
+        return [array get cgienv]
+      }
+      get {
+        set field [lindex $args 0]
+        if {[info exists cgienv($field)]} {
+          return $cgienv($field)
+        }
+        return {}
+      }
+      varname {
+        return [my varname cgienv]
+      }
+      default {
+        error "Valid: dump,get,varname"
+      }
+    }
+  }
+
+  method httpdHostName {} {
+    my variable cgienv
+    return [lindex [split [get cgienv(HTTP_HOST)] :] 0]
+  }
+  
+  ###
+  # Return a dict with:
+  # * body
+  # * content-type
+  # * code (200,404,etc)
+  # * cache-until (Unix datestamp when cache of this data expires, or 0)
+  ###
+  method httpReply {} {
+    my variable body session_data
+    set result {}
+    dict set result content-type [my cget content-type]
+    dict set result code         [my cget code]
+    dict set result cache-until  [my cget cache-until]
+    dict set result redirect     [my cget redirect]
+    dict set result sessionid    [my cget sessionid]
+    dict set result session       $session_data
+    dict set result body $body
+
+    return $result
+  }
+  
+  method body {} {
+    my variable body
+    set title [my cget title]
+    return [string map [list @TITLE@ $title] $body]
+  }
+  
+  method query {} {
+    my variable query
+    return $query
+  }
+  
+  method reset {} {
+    my variable body
+    set body {}
+  }
+  
+  method puts args {
+    my variable body
+    append body {*}$args \n
+  }
+  
+  #
+  #@c	Return a *list* of cookie values, if present, else ""
+  #@c	It is possible for multiple cookies with the same key
+  #@c	to be present, so we return a list.
+  #@c     This always gets the cookie state associated with the specified
+  #@c     socket, unlike Cookie_Get that looks at the environment.
+  #
+  # Arguments:
+  #@a	cookie	The name of the cookie (the key)
+  #@a	sock	A handle on the socket connection
+  # Returns:
+  #@r	a list of cookie values matching argument
+  method cookie_get {cookie} {
+    my variable sock
+    upvar #0 Httpd$sock data
+    set result ""
+    set rawcookie ""
+    if {[info exist data(mime,cookie)]} {
+        set rawcookie $data(mime,cookie)
+    }
+    foreach pair [split $rawcookie \;] {
+        lassign [split [string trim $pair] =] key value
+        if {[string compare $cookie $key] == 0} {
+            lappend result $value
+        }
+    }
+    return $result
+  }
+    
+  #$c	make a cookie from name value pairs
+  #
+  # Arguments:
+  #	args	Name value pairs, where the names are:
+  #@a		-name	Cookie name
+  #@a		-value	Cookie value
+  #@a		-path	Path restriction
+  #@a		-domain	domain restriction
+  #@a		-expires	Time restriction
+  #@a		-secure Append "secure" to cookie attributes
+  #@r	a formatted cookie
+  
+  method cookie_make {args} {
+    array set opt $args
+    set line "$opt(-name)=$opt(-value) ;"
+    foreach extra {path domain} {
+        if {[info exist opt(-$extra)]} {
+            append line " $extra=$opt(-$extra) ;"
+        }
+    }
+    if {[info exist opt(-expires)]} {
+        switch -glob -- $opt(-expires) {
+            *GMT {
+                set expires $opt(-expires)
+            }
+            default {
+                set expires [clock format [clock scan $opt(-expires)] \
+                        -format "%A, %d-%b-%Y %H:%M:%S GMT" -gmt 1]
+            }
+        }
+        append line " expires=$expires ;"
+    }
+    if {[info exist opt(-secure)]} {
+        append line " secure "
+    }
+    return $line
+  }
+  
+  method cookie_set {field value {expire {}}} {
+    my variable sock
+    upvar #0 Httpd$sock data
+    
     foreach host [my httpdHostName] {
       if { $host eq "localhost" } { set host {} }
       set cookie_args [list -name $field \
@@ -39,14 +225,84 @@ oo::class create httpd.meta {
       if {[string is integer expire]} {
         lappend cookie_args -expires [clock format [expr [clock seconds] + [set expire]] -format "%Y-%m-%d"]
       }
-      ::Cookie_Set {*}$cookie_args
+      # Appending to the data(set-cookie) elimates the entire
+      # kangaroo code that normally goes on with httpd
+      lappend data(set-cookie) [my cookie_make {*}$cookie_args]
     }
   }
-
-  method httpdHostName {} {
-    my variable env
-    return [lindex [split [get env(HTTP_HOST)] :] 0]
+  
+  method session {method args} {
+    my variable session_data
+    switch $method {
+      anonymous {
+        if {[dict getnull $session_data username] in {{} nobody anonymous}} {
+          return 1
+        }
+        return 0
+      }
+      build {
+        set session_data [::tao::args_to_options {*}$args]
+      }
+      dump {
+        return $session_data
+      }
+      get {
+        return [dict getnull $session_data [lindex $args 0]]
+      }
+      userid {
+        set userid [dict getnull $session_data userid]
+        if { $userid eq {} } {
+          return local.anonymous
+        }
+        return $userid
+      }
+      set {
+        #dict set session_data {*}args
+        foreach {key value} [::tao::args_to_options {*}$args] {
+          dict set session_data $key $value
+        }
+      }
+      unset {
+        dict unset session_data {*}args
+      }
+      varname {
+        return [my varname session_data]
+      }
+      default {
+        error "Valid: build.dump,get,set,unset,varname"
+      }
+    }
   }
+}
+
+###
+# Create a standalone class suitable for using in a pure tcloo
+# environment
+###
+tao::class httpd.url {
+  superclass 
+  aliases httpd.meta httpd.taourl
+  
+  property options_strict 0
+  option virtual {}
+  option threadargs {}
+  
+  #method Option_set::virtual newvalue {
+  #  
+  #}
+  
+  constructor {virtual {localopts {}} args} {
+    my configurelist [list virtual $virtual threadargs $args {*}$localopts]
+    ::Url_PrefixInstall $virtual [namespace code {my httpdDirect}] {*}$args
+    my initialize
+  }
+  
+
+  destructor {
+    catch {::Url_PrefixRemove [my cget virtual]}
+  }
+  
+  method initialize {} {}
   
   # This calls out to the Tcl procedure named "$prefix$suffix",
   # with arguments taken from the form parameters.
@@ -84,75 +340,50 @@ oo::class create httpd.meta {
 
 
   method httpdDirect {sock suffix} {
-    global env
-    upvar #0 Httpd$sock data
-    my variable result
     set prefix [my cget virtual]
-    my httpdSessionLoad $sock $prefix $suffix
-    set cmd [my httpdMarshalArguments $sock $suffix]
+    set resultObj [httpd.result new $sock $prefix $suffix]
+    my httpdSessionLoad $resultObj $prefix $suffix
+    set cmd [my httpdMarshalArguments $resultObj]
     # Eval the command.  Errors can be used to trigger redirects.
 
     if [catch $cmd] {
-      set result(code) 505
-      set result(body) "<HTML><BODY>Error: <PRE><VERBATIM>$::errorInfo</VERBATIM></PRE></BODY></HTML>"
-      set result(content-type) text/html 
+      ::Httpd_ReturnData $sock text/html "<HTML><BODY>Error: <PRE><VERBATIM>$::errorInfo</VERBATIM></PRE></BODY></HTML>" 505
+      $resultObj destroy
+      return
     }
-    if {[string index $result(code) 0] in {0 2}} {
+    set result [$resultObj httpReply]
+    set code [dict get $result code]
+    if {[string index $code 0] in {0 2}} {
       # Normal reply
-      my httpdSessionSave $sock
+      my httpdSessionSave $result
     }
-    switch $result(code) {
+    
+    switch $code {
       401 {
-        ::Httpd_ReturnData $sock text/html $::HttpdAuthorizationFormat $result(code)
-        return
+        ::Httpd_ReturnData $sock text/html $::HttpdAuthorizationFormat $code
       }
       404 {
         ::Doc_NotFound $sock
-        return
       }
       302 {
         # Redirect.
-        ::Httpd_Redirect $result(redirect) $sock
-        return
+        ::Httpd_Redirect [dict get $result redirect] $sock
       }
       default {
-        set body [string map [list @TITLE@ $result(title)] $result(body)]
-        if {$result(date)} {
-          ::Httpd_ReturnCacheableData $sock $result(content-type) $body $result(date) $result(code)
+        if {[dict get $result cache-until] > 0} {
+          ::Httpd_ReturnCacheableData $sock [dict get $result content-type] [dict get $result body] [dict get $result cache-until] [dict get $result code]
         } else {
-          ::Httpd_ReturnData $sock $result(content-type) $body $result(code)
+          ::Httpd_ReturnData $sock [dict get $result content-type] [dict get $result body] [dict get $result code]
         }
-        return
       }
     }
-  }
-  
-  method httpdSessionLoad {sock prefix suffix} {
-    my variable result
-    array set result {
-      code 200
-      date  0
-      title {}
-      body {}
-      redirect {}
-      content-type text/html
-    }
-    set result(sock) $sock
-    set result(datavar) ::Httpd$sock 
+    $resultObj destroy
 
-    # Set up the environment a-la CGI.
-    ::Cgi_SetEnv $sock $prefix$suffix [my varname env]
-    # Prepare an argument data from the query data.
-    ::Url_QuerySetup $sock
-    set result(query) [ncgi::nvlist]
   }
   
-  method httpdSessionSave sock {
-    # Save any return cookies which have been set.
-    # This works with the Doc_SetCookie procedure that populates
-    # the global cookie array.
-    ::Cookie_Save $sock 
-  }
+  method httpdSessionLoad {resultObj prefix suffix} {}
+  
+  method httpdSessionSave result {}
   
   #
   #	Use the url prefix, suffix, and cgi values (set with the
@@ -167,90 +398,51 @@ oo::class create httpd.meta {
   # Side effects:
   #	If the suffix (and query args) do not map to a Tcl procedure,
   #	returns empty string.
-  method httpdMarshalArguments {sock suffix} {
-    my variable result
-    set prefix [my cget virtual]
+  method httpdMarshalArguments resultObj {
+    set prefix [$resultObj cget url_prefix]
+    set suffix [$resultObj cget url_suffix]
 
     if { $suffix in {/ {}} } {
       set method /html
     } else {
       set method /html$suffix
     }
-    foreach {name value} $result(query) {
+    foreach {name value} [$resultObj query] {
       if { $name eq "method" } {
         set method /html/$value
         break
       }
     }
-    return [list my $method]
-  }
-  
-  method reset {} {
-    my variable result
-    set result(body) {}
-  }
-  
-  method puts args {
-    my variable result
-    append result(body) {*}$args \n
+    return [list my $method $resultObj]
   }
   
   method unknown {args} {
-    if {[string range [lindex $args 0] 0 4] ne "/html"} {
-      next {*}$args
+    if {[string range [lindex $args 0] 0 4] eq "/html"} {
+      my HtmlNotFound {*}$args
+      return
     }
-    my variable result
-    set result(code) 404
-  }
-}
-
-
-###
-# Create a standalone class suitable for using in a pure tcloo
-# environment
-###
-oo::class create httpd.url {
-  superclass httpd.meta
-  
-  variable virtual
-  variable config
-  
-  constructor {virtual {localopts {}} args} {
-    my configurelist [list virtual $virtual {*}$localopts]
-    ::Url_PrefixInstall $virtual [namespace code {my httpdDirect}] {*}$args
-    my initialize
-  }
-  
-  method configurelist localopts {
-    my variable config
-    foreach {field value} $localopts {
-      dict set config $field $value
-    }
-  }
-  
-  method cget field {
-    my variable config
-    if {[dict exists $config $field]} {
-      return [dict get $config $field]
-    }
-    return {}
+    next {*}$args
   }
   
   ###
   # title: Implement html content at a toplevel
   ###
-  method /html {} {
-    my variable result
-    set result(title) {Welcome!}
-    my reset
-    my puts [my pageHeader]
-    my puts {
+  method /html resultObj {
+    $resultObj reset
+    $resultObj configure title {Welcome!}
+    $resultObj puts [my pageHeader]
+    $resultObj puts {
 Hello World
     }
-    my puts [my pageFooter]
+    $resultObj puts [my pageFooter]
   }
   
-
+  method HtmlNotFound args {
+    set resultObj [lindex $args 0]
+    $resultObj configure code 404
+    $resultObj configure title {Page Not Found}
+  }
+  
   method pageHeader {} {
     return {
 <HTML>

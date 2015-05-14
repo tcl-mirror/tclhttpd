@@ -2334,6 +2334,4 @@ proc Httpd_Webmaster {{email {}}} {
     }
 }
 
-# this is too much of a compatibility hassle, so we alias
-catch {interp alias {} Doc_Webmaster {} Httpd_Webmaster}
-catch {interp alias {} Httpd_RedirectDir {} Redirect_Dir}
+

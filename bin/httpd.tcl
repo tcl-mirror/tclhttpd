@@ -209,7 +209,11 @@ if {$Config(debug)} {
 }
 
 if {$Config(compat)} {
-    if {[catch {package require httpd::compat}]} {
+    if {[catch {
+    package require httpd::compat
+    httpd::compat_level $Config(compat)
+
+    }]} {
 	puts stderr "tclhttpd$Config(compat) compatibility mode failed."
     } else {
 	# Messages here just confuse people

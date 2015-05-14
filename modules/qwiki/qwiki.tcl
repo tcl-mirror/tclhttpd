@@ -4,142 +4,75 @@
 
 package require httpd::community
 
+tao::class qwiki.layer.wiki {
+  superclass community.layer
+
+  property module user
+  property schema version 1.0  
+  property schema table qwiki
+  property schema primary_key entryid
+  
+  property schema create_sql {
+    create table if not exists qwiki (
+      qwikid uuid default (uuid_generate()),
+      indexed integer default 0,
+      parent uuid references qwiki (qwikid) ON UPDATE CASCADE ON DELETE SET NULL,
+      acl_name  string references acl (acl_name) ON UPDATE CASCADE ON DELETE SET NULL,
+      class string,
+      format string,
+      title string,
+      body text,
+      ctime unixtime default now(),
+      mtime unixtime default now(),
+      primary key (qwikid)
+    );
+
+    create table if not exists qwiki_property (
+      qwikid    string references qwiki (qwikid) ON UPDATE CASCADE ON DELETE CASCADE,
+      field      string,
+      value      string,
+      primary key (qwikid,field)
+    );
+
+    create table if not exists qwiki_link (
+      linktype string,
+      qwiki integer references qwiki (qwikid) ON UPDATE CASCADE ON DELETE CASCADE,
+      refqwiki integer references qwiki (qwikid)  ON UPDATE CASCADE ON DELETE CASCADE
+    );
+    
+    -- Generate initial content
+    insert into qwiki(qwikid,title,class,format,page) VALUES (local.homepage,'Home','page','markdown','Welcome to Qwiki!');
+    -- Generate a FTS
+    CREATE VIRTUAL TABLE qwiki_search USING fts4(title, body);
+  }
+
+  
+}
+
 tao::class httpd.qwiki {
   superclass httpd.community
-  
-  #
-  #	Use the url prefix, suffix, and cgi values (set with the
-  #	ncgi package) to create a Tcl command line to invoke.
-  #
-  # Arguments:
-  #	suffix		The part of the url after the domain prefix.
-  #
-  # Results:
-  #	Returns a Tcl command line.
-  #
-  # Side effects:
-  #	If the suffix (and query args) do not map to a Tcl procedure,
-  #	returns empty string.
-  method httpdMarshalArguments {sock suffix} {
-    my variable result
-    set prefix [my cget virtual]
 
+  constructor {virtual {localopts {}} args} {
+    my configurelist [list virtual $virtual threadargs $args {*}$localopts]
+    ::Url_PrefixInstall $virtual [namespace code {my httpdDirect}] {*}$args
+    my initialize
+  }
 
-    set realm /html
-    if { $suffix in {/ {}} } {
-      set method /html
-    } else {
-      set parts [split [string trim $suffix /] /]
-      set node [lindex $parts 0]
-      if {[my <db> exists {select entryid from entry where entryid like :node}]} {
-        return [list my /wiki $parts]
-      }
-      if {[my <db> exists {select userid from users where userid like :node}]} {
-        return [list my /user $parts]
-      }
-      if {[my <db> exists {select groupid from groups where groupid like :node}]} {
-        return [list my /group $parts]
-      }
-      set method /html$suffix
-    }
-    set qmethod {}
-    set quuid {}
-    foreach {name value} $result(query) {
-      if { $name eq "uuid" } {
-        if {[my <db> exists {select entryid from entry where entryid like :node}} {
-          set real /wiki
-          set quuiid $value
-        }
-        if {[my <db> exists {select userid from users where userid like :node}} {
-          set real /user
-          set quuiid $value
-        }
-        if {[my <db> exists {select groupid from groups where groupid like :node}} {
-          set real /group
-          set quuiid $value
-        }
-      }
-      if { $name eq "method" } {
-        set qmethod $value
-        break
-      }
-    }
-    if {$quuid != {}} {
-      return [list my $realm [list $quuid $qmethod]]
-    } else {
-      if {$qmethod != {}} {
-        return [list my /html/$qmethod]
-      } else {
-        return [list my $method]
-      }
+  method active_layers {} {
+    return {
+      user    {prefix uid class community.layer.user}
+      group   {prefix gid class community.layer.group}
+      session {prefix sesid class community.layer.session}
+      acl     {prefix acl class community.layer.acl}
+      wiki    {prefix wiki class qwiki.layer.wiki}
     }
   }
   
-  method /user parts {
-    my variable result env
-    
-    set uuid [lindex $parts 0]
-    set method [lindex $parts 1]
-    
-    set props [my <db> eval {select field,value from user_property where userid=:uuid}]
-    my <db> eval {select * from users where userid=:uuid} record break
-    my reset
-    my puts {
-<html><head><title>User $record(username)</title></head><body>
-    }
-    my puts "<TABLE>"
-    foreach {field value} [array get record] {
-      my puts "<TR><TH>$field</TH><TD>$value</TD></TR>"
-    }    
-    foreach {field value} $props {
-      my puts "<TR><TH>$field</TH><TD>$value</TD></TR>"
-    }
-    my <db> eval {select distinct acl_name from acl} {
-      my puts "<TR><TH>Rights $acl_name</TH><Td>[my aclRights $acl_name $record(userid)]</TD></TR>"
-    }
-    my puts "</TABLE>"
-    my puts <hr>
-    my puts "<TABLE>"
-    foreach {field value} [array get result] {
-      if { $field in {body session session_delta} } continue
-      my puts "<TR><TH>$field</TH><TD>$value</TD></TR>"
-    }
-    my puts "</TABLE>"
-    my puts "<hr>Session<p>"
-    my puts "<TABLE>"
-    foreach {field value} [get result(session)] {
-      my puts "<TR><TH>$field</TH><TD>$value</TD></TR>"
-    }
-    my puts "</TABLE>"
-    my puts "<hr>ENV<p>"
-    my puts "<TABLE>"
-    foreach {field value} [array get env] {
-      my puts "<TR><TH>$field</TH><TD>$value</TD></TR>"
-    }
-    my puts "</TABLE>"
-    my puts "</BODY></HTML>"
+  method /html args {
+    my layer wiki /html local.homepage
   }
-  
 
-  method /html/env args {
-    my variable env
-    
-    set uuid [lindex $parts 0]
-    set method [lindex $parts 1]
-    
-    set props [my <db> eval {select field,value from user_property where userid=:uuid}]
-    my <db> eval {select * from users where userid=:uuid} record break
-    my reset
-    my puts "
-<html><head><title>User $record(username)</title></head><body>
-    "
-    my puts "<TABLE>"
-    foreach {field value} [array get env] {
-      my puts "<TR><TH>$field</TH><TD>$value</TD></TR>"
-    }    
-    my puts "</TABLE>"
-    my puts "</BODY></HTML>"
-  }
+
 }
 
 package provide httpd::qwiki 0.1

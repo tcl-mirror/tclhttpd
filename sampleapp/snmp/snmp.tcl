@@ -429,18 +429,6 @@ proc Snmp_mibTable {session args} {
     append result </table>\n
 }
 
-# Get an item as a form element
-
-proc Snmp_lassign {varList value} {
-    if {[string length $value] == 0} {
-	foreach var $varList {
-	    uplevel [list set $var {}]
-	}
-    } else {
-	uplevel [list foreach $varList $value { break }]
-    }
-}
-
 proc Snmp_setMib {session mib} {
     upvar #0 Session:$session state
 
@@ -449,7 +437,7 @@ proc Snmp_setMib {session mib} {
     if {[llength $names] >1} {
     	append result "<select name=\"[mib name $mib]\">\n"
     	foreach name $names {
-	    Snmp_lassign {choice index} $name
+	    lassign $name choice index
 	    set s [expr {("$value" == "$choice") ? "SELECTED" : ""}]
 	    append result "  <option value=$index$s>$choice\n"
 	}

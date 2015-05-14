@@ -9,4 +9,3 @@
 # full path name of this file's directory.
 
 package ifneeded httpd::directoo 0.1 [list source [file join $dir directoo.tcl]]
-package ifneeded httpd::taourl 0.1 [list source [file join $dir taourl.tcl]]

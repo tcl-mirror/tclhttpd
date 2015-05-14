@@ -27,7 +27,7 @@ tao::class taodb::module.sqlite {
   # topic: 6292ac0c78dbb91c7aaa629f48a301a3
   ###
   method Database_Create {} {
-    my <db> eval [my property create_sql]
+    my <db> eval [my property schema create_sql]
   }
 
   ###
